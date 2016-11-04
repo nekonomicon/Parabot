@@ -1,0 +1,4 @@
+[submodule "hlsdk"]
+	path = hlsdk
+	url = https://github.com/FWGS/hlsdk-xash3d
+	branch = master
