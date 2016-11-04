@@ -1,6 +1,6 @@
 #pragma warning( disable : 4786 )	// disable 29 graph warnings
 
-#include "PB_MapGraph.h"
+#include "pb_mapgraph.h"
 #include "dynpq.h"
 #include "pb_global.h"
 #include "pb_needs.h"

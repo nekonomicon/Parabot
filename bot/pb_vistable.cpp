@@ -8,7 +8,7 @@
 
 #include <assert.h>
 #include <malloc.h>
-#include "PB_VisTable.h"
+#include "pb_vistable.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction

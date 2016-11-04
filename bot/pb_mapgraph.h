@@ -8,7 +8,7 @@
 #include <stack>
 #include "checkvec.h"
 #include "pbt_dynarray.cpp"
-#include "PB_Journey.h"
+#include "pb_journey.h"
 class PB_Needs;
 
 

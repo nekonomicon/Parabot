@@ -12,7 +12,7 @@
 
 #include <assert.h>
 #include <malloc.h>
-#include "PBT_DynArray.h"
+#include "pbt_dynarray.h"
 
 
 
