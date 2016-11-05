@@ -10,6 +10,7 @@ CFLAGS +=	-O2 -pipe -m32 -DNDEBUG \
 
 DEFINES =	-Dstricmp=strcasecmp -D_stricmp=strcasecmp \
 		-Dstrnicmp=strncasecmp -D_snprintf=snprintf \
+		-D_strnicmp=strncasecmp \
 		-Wno-write-strings -Wno-invalid-offsetof
 
 INCLUDES =	-I$(PREFIX)/include \

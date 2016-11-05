@@ -87,7 +87,7 @@ int dbgCnt;
 	}
 
 
-int PB_MapCells::getCellId( Vector &pos, float maxDist )
+int PB_MapCells::getCellId( Vector pos, float maxDist )
 {
 	float dist, closestDist = maxDist;	// max dist that found WP can have to pos
 	int closestId = NO_CELL_FOUND;			// is returned when no cell is found

@@ -253,8 +253,11 @@ void errorMsg( const char *str1, const char *str2, const char *str3, const char 
 			if (str4) strcat( buffer, str4 );
 		}
 	}
-	//ALERT( at_error, buffer );
+#ifdef _WIN32
 	MessageBox( NULL, buffer, "Parabot", MB_OK );
+#else
+	ALERT( at_error, buffer );
+#endif
 	//PostQuitMessage(0);	
 }
 

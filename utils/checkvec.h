@@ -16,29 +16,26 @@ class checkedVector : public vector<T>   // inherit from std::vector<T>
       checkedVector()
       {}
 
-      checkedVector(size_type n, const T& value = T())
+      checkedVector(typename checkedVector::size_type n, const T& value = T())
       : vector<T>(n, value)
       {}
 
-      checkedVector(iterator i, iterator j)
+      checkedVector(typename checkedVector::iterator i, typename checkedVector::iterator j)
       : vector<T>(i, j)
       {}
 
-	  reference operator[](difference_type index)
+	typename checkedVector::reference operator[](typename checkedVector::difference_type index)
       {
          assert(index >=0 
-             && index < static_cast<difference_type>(size()));
+             && index < static_cast<typename checkedVector::difference_type>(size()));
          return vector<T>::operator[](index);
       }
 
-      const_reference operator[](difference_type index) const
+	typename checkedVector::const_reference operator[](typename checkedVector::difference_type index) const
       {
          assert(index >=0 
-             && index < static_cast<difference_type>(size()));
+             && index < static_cast<typename checkedVector::difference_type>(size()));
          return vector<T>::operator[](index);
       }
 };
-
-
 #endif
-

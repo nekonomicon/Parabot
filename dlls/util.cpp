@@ -43,7 +43,7 @@ int gmsgShowMenu = 0;
 //
 ///////////////////////////////////////////////////////////////////////////////////////
 
-edict_t * EHANDLE::Get( void ) const
+edict_t * EHANDLE::Get( void )
 { 
 	if (m_pent)
 	{

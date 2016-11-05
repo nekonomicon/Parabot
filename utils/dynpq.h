@@ -55,7 +55,7 @@ class  dynamic_priority_queue
 template <class key_type>
 dynamic_priority_queue<key_type>::dynamic_priority_queue(
      vector<key_type>& v)
-: Indices(v.size()), c(v.size()), first(v.begin()),
+: Indices(v.size()), c(v.size()), first(&(*v.begin())),
   csize(v.size())
 {
     index_type i;

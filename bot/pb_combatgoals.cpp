@@ -436,7 +436,8 @@ void goalShootAtEnemy( CParabot *pb, PB_Percept*item )
 		}
 		else {
 			if (item->isTrackable()) {
-				pb->action.setAimDir( item->predictedAppearance( pb->botPos() ) );
+				Vector botPos = pb->botPos();
+				pb->action.setAimDir( item->predictedAppearance( botPos ) );
 				pb->setGoalViewDescr( "ShootAtEnemy (Disappeared:PredictiveAiming)" );
 			}
 			else {
@@ -528,8 +529,9 @@ void goalArmBestWeapon( CParabot *pb, PB_Percept*item )
 		else {
 			botFlags |= WF_SINGLE_SHOT_KILL;	// so that enemy gets no chance to see us
 		}
-		if ( item->predictedAppearance(pb->botPos()).z > (pb->botPos().z+20) ) botFlags |= WF_ENEMY_ABOVE;
-		else if ( item->predictedAppearance(pb->botPos()).z < (pb->botPos().z-80) ) botFlags |= WF_ENEMY_ABOVE;
+		Vector botPos = pb->botPos();
+		if ( item->predictedAppearance(botPos).z > (botPos.z+20) ) botFlags |= WF_ENEMY_ABOVE;
+		else if ( item->predictedAppearance(botPos).z < (botPos.z-80) ) botFlags |= WF_ENEMY_ABOVE;
 		pb->combat.nextWeaponCheck = worldTime() + CHECK_WEAPON_COMBAT;
 	}
 	else {

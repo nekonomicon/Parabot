@@ -402,7 +402,8 @@ void CParabot::approachRoamingTarget()
 			roamingTarget = 0;
 		}
 		else {
-			pathfinder.checkWay( roamingTarget->pos( ent ) );
+			Vector rtPos = roamingTarget->pos( ent );
+			pathfinder.checkWay( rtPos );
 			action.setViewLikeMove();
 			if ( action.gotStuck() || pathfinder.targetNotReachable() ) {
 				roamingTarget->doNotVisitBefore( ent, worldTime()+10.0 );
@@ -641,7 +642,8 @@ void CParabot::followActualPath()
 			else return;	// don't do anything else...
 		}
 		if (waypoint.reached( ent )) {
-			action.add( actualPath->getNextAction(), &(waypoint.pos( ent )) );	// if there's something to do...
+			Vector wpos = waypoint.pos( ent );
+			action.add( actualPath->getNextAction(), &wpos );	// if there's something to do...
 			actualPath->reportWaypointReached();		// confirm waypoint
 			Vector oldWP = waypoint.pos( ent );
 			waypoint = actualPath->getNextWaypoint();	// get next one

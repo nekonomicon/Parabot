@@ -241,7 +241,7 @@ void PB_Combat::closeCombatMovement( PB_Percept &perceipt )
 				closeUp = true;
 		}
 	}
-	Vector evadeMove (0,0,0);
+	Vector evadeMove (0,0,0), tDir;
 	// if enemy tries to shoot at bot
 	int closeDistanceWeapon = 0;
 	switch (mod_id) {
@@ -258,14 +258,16 @@ void PB_Combat::closeCombatMovement( PB_Percept &perceipt )
 		 (botWeapon!=closeDistanceWeapon) )	// don't evade with this
 		evadeMove = evade( perceipt );
 	if (gainDistance) {	// bigger distance better
-		Vector tDir = botEnt->v.origin - (enemy->v.origin - botEnt->v.origin);
-		pathfinder->checkWay( tDir + evadeMove);
+		tDir = botEnt->v.origin - (enemy->v.origin - botEnt->v.origin) + evadeMove;
+		pathfinder->checkWay( tDir );
 	}
 	else if (closeUp) {	// closer distance better
-		pathfinder->checkWay( enemy->v.origin + evadeMove );
+		tDir = enemy->v.origin + evadeMove;
+		pathfinder->checkWay( tDir );
 	}
 	else if (evadeMove.Length() > 0) {	// just evade
-		pathfinder->checkWay( botEnt->v.origin + evadeMove );
+		tDir = botEnt->v.origin + evadeMove;
+		pathfinder->checkWay( tDir );
 	}
 	else {	// no move -> duck
 		action->add( BOT_DUCK );

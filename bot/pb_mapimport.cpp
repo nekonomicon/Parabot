@@ -288,7 +288,8 @@ bool loadLevelData()
 		// import specials
 		if (mod_id==VALVE_DLL && strcmp( STRING(gpGlobals->mapname), "crossfire" )==0) {
 			PB_Navpoint n;
-			n.init( Vector( 0,-2236,-1852 ), NAV_S_AIRSTRIKE_BUTTON, 0 );
+			Vector v( 0,-2236,-1852 );
+			n.init( v, NAV_S_AIRSTRIKE_BUTTON, 0 );
 			mapGraph.addNavpoint( n );
 		}
 	}

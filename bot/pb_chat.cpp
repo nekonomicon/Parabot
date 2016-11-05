@@ -3,13 +3,21 @@
 #include "bot.h"
 #include "pb_weapon.h"
 
-
-
 extern PB_Configuration pbConfig;	// from configfiles.cpp
 extern bot_t bots[32];   // from bot.cpp
 extern int clientWeapon[32];	// from combat.cpp
 extern int gmsgSayText;
 
+#ifndef _WIN32
+static inline void _strupr(char* s)
+{
+	while(*s)
+	{
+		*s = toupper(*s);
+		s++;
+	}
+}
+#endif
 
 /*
 // speech start
@@ -378,12 +386,12 @@ void PB_Chat::parseMessage( edict_t *speaker, char *msg )
 
 	// replace special characters
 	int len = strlen( parseBuffer );
-	int pos;
+	int pos, i;
 	while ( (pos=strcspn( parseBuffer, ",;-'()/.!?" )) < len ) parseBuffer[pos]=' ';
 
 	// find keyword
 	char *wordFound = 0;
-	for (int i=0; i<chatReplies.size(); i++) {
+	for (i=0; i<chatReplies.size(); i++) {
 		wordFound = strstr( parseBuffer, chatReplies[i]->code );
 		if (wordFound) break;
 	}

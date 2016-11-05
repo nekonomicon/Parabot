@@ -49,7 +49,7 @@ void initSineTable()
 
 
 
-
+#ifdef _WIN32
 // Required DLL entry point
 BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved )
 {
@@ -75,63 +75,68 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved )
 	
 	return TRUE;
 }
+#endif
 
 
-
-void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, globalvars_t *pGlobals )
+extern "C" void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, globalvars_t *pGlobals )
 {
 	char game_dir[256];
 	char mod_name[32];
+	int pos = 0;
 
-	
 	// get the engine functions from the engine...
 	memcpy( &g_engfuncs, pengfuncsFromEngine, sizeof(enginefuncs_t) );
 	gpGlobals = pGlobals;
 	
 	// find the directory name of the currently running MOD...
 	(*g_engfuncs.pfnGetGameDir)( game_dir );
-	
-	int pos = strlen( game_dir ) - 1;
-	
-	// scan backwards till first directory separator...
-	while ((pos > 0) && (game_dir[pos] != '/')) pos--;
-	if (pos == 0) errorMsg( "Error determining MOD directory name!" );
-	
-	pos++;
+
+	if(strstr(game_dir,"/"))
+	{
+		pos = strlen( game_dir ) - 1;
+
+		// scan backwards till first directory separator...
+		while ((pos > 0) && (game_dir[pos] != '/'))
+			pos--;
+		if (pos == 0)
+			errorMsg( "Error determining MOD directory name!" );
+
+		pos++;
+	}
 	strcpy( mod_name, &game_dir[pos] );
 	
 	if (stricmp(mod_name, "valve") == 0)
 	{
 		mod_id = VALVE_DLL;
-		h_Library = LoadLibrary( "valve/dlls/hl.dll" );
+		h_Library = LoadLibrary( "valve/dlls/hl."OS_LIB_EXT );
 		pbConfig.initConfiguration( "parabot/valve/parabot.cfg" );
 		pbConfig.initPersonalities( "parabot/valve/characters.cfg" );
 	}
 	else if (stricmp(mod_name, "hldm") == 0)
 	{
 		mod_id = VALVE_DLL;
-		h_Library = LoadLibrary( "hldm/dlls/hl.dll" );
+		h_Library = LoadLibrary( "hldm/dlls/hl."OS_LIB_EXT );
 		pbConfig.initConfiguration( "parabot/valve/parabot.cfg" );
 		pbConfig.initPersonalities( "parabot/valve/characters.cfg" );
 	}
 	else if (stricmp(mod_name, "holywars") == 0)
 	{
 		mod_id = HOLYWARS_DLL;
-		h_Library = LoadLibrary( "holywars/dlls/holywars.dll" );
+		h_Library = LoadLibrary( "holywars/dlls/holywars."OS_LIB_EXT );
 		pbConfig.initConfiguration( "parabot/holywars/parabot.cfg" );
 		pbConfig.initPersonalities( "parabot/holywars/characters.cfg" );
 	}
 	else if (stricmp(mod_name, "dmc") == 0)
 	{
 		mod_id = DMC_DLL;
-		h_Library = LoadLibrary( "dmc/dlls/dmc.dll" );
+		h_Library = LoadLibrary( "dmc/dlls/dmc."OS_LIB_EXT );
 		pbConfig.initConfiguration( "parabot/dmc/parabot.cfg" );
 		pbConfig.initPersonalities( "parabot/dmc/characters.cfg" );
 	}
 	else if (stricmp(mod_name, "gearbox") == 0)
 	{
 		mod_id = GEARBOX_DLL;
-		h_Library = LoadLibrary( "gearbox/dlls/opfor.dll" );
+		h_Library = LoadLibrary( "gearbox/dlls/opfor."OS_LIB_EXT );
 		pbConfig.initConfiguration( "parabot/gearbox/parabot.cfg" );
 		pbConfig.initPersonalities( "parabot/gearbox/characters.cfg" );
 	}
@@ -148,10 +153,10 @@ void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, globalvars_t
 		debugFile( "Library = 0\n" );
 	}
 	
-
+#ifdef _WIN32
 	h_global_argv = GlobalAlloc( GMEM_SHARE, 1024 );
 	g_argv = (char*)GlobalLock( h_global_argv );
-	
+#endif
 	other_GetEntityAPI = (GETENTITYAPI)GetProcAddress( h_Library, "GetEntityAPI" );
 	if (other_GetEntityAPI == NULL)	errorMsg( "Can't get MOD's GetEntityAPI!\n" );
 	

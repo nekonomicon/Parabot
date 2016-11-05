@@ -9,21 +9,30 @@
 #ifndef BOT_H
 #define BOT_H
 
+#include "exportdef.h"
+#ifdef _WIN32
+#define OS_LIB_EXT "dll"
+#else
+#ifdef __APPLE__
+#define OS_LIB_EXT "dylib"
+#else
+#define OS_LIB_EXT "so"
+#endif
+#include <dlfcn.h>
+#include <unistd.h>
+#define GetProcAddress dlsym
+#define LoadLibrary(x) dlopen(x, RTLD_NOW)
+#define Sleep(x) usleep(x * 1000)
+typedef void* HINSTANCE;
+typedef void* HGLOBAL;
+#define FAR
+#endif
 
 typedef int (FAR *GETENTITYAPI)(DLL_FUNCTIONS *, int);
 typedef int (FAR *GETNEWDLLFUNCTIONS)(NEW_DLL_FUNCTIONS *, int *); 
 
 typedef void (DLLEXPORT *GIVEFNPTRSTODLL)(enginefuncs_t *, globalvars_t *);
 typedef void (FAR *LINK_ENTITY_FUNC)(entvars_t *);
-
-#ifdef _MSC_VER
-#define EXPORT _declspec( dllexport )
-#else
-#define EXPORT __declspec( dllexport )
-#endif
-
-
-
 
 // define some function prototypes...
 BOOL ClientConnect( edict_t *pEntity, const char *pszName,

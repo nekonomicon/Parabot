@@ -146,8 +146,8 @@ float PB_Needs::wishForSniping( bool weaponCheck )
 
 void PB_Needs::valveWishList()
 {
-
-	for (int i=0; i<MAX_NAV_TYPES; i++) wish[i] = 0;
+	int i;
+	for (i=0; i<MAX_NAV_TYPES; i++) wish[i] = 0;
 
 	if (headToBunker) {
 		wish[NAV_S_AIRSTRIKE_COVER] = 20;
@@ -156,7 +156,8 @@ void PB_Needs::valveWishList()
 			newItemPriorities = true;
 			airstrikeKnown = true;
 		}
-		if (mapGraph.getNearestNavpoint( Vector(0,0,0), NAV_S_AIRSTRIKE_COVER ))
+		Vector v(0,0,0);
+		if (mapGraph.getNearestNavpoint( v, NAV_S_AIRSTRIKE_COVER ))
 			return;	// only head for bunker if cover exists!
 	}
 	else if (airstrikeKnown) {
@@ -241,8 +242,8 @@ void PB_Needs::valveWishList()
 
 void PB_Needs::hwWishList()
 {
-
-	for (int i=0; i<MAX_NAV_TYPES; i++) wish[i] = 0;
+	int i;
+	for (i=0; i<MAX_NAV_TYPES; i++) wish[i] = 0;
 
 	if ( haloOnBase ) {
 		wish[NAV_HW_HALOBASE] = 20;
@@ -290,8 +291,8 @@ void PB_Needs::hwWishList()
 void PB_Needs::dmcWishList()
 {
 	float need;
-		
-	for (int i=0; i<MAX_NAV_TYPES; i++) wish[i] = 0;
+	int i;
+	for (i=0; i<MAX_NAV_TYPES; i++) wish[i] = 0;
 
 	wish[NAV_DMCI_HEALTH_NORM]  = needForHealth();
 	wish[NAV_DMCI_HEALTH_SMALL] = wish[NAV_DMCI_HEALTH_NORM]*0.6;
@@ -345,7 +346,8 @@ void PB_Needs::dmcWishList()
 
 void PB_Needs::gearboxWishList()
 {
-	for (int i=0; i<MAX_NAV_TYPES; i++) wish[i] = 0;
+	int i;
+	for (i=0; i<MAX_NAV_TYPES; i++) wish[i] = 0;
 
 	wish[NAV_I_HEALTHKIT]     = needForHealth();
 	wish[NAV_F_HEALTHCHARGER] = needForHealth();

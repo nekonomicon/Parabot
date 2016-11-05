@@ -39,7 +39,8 @@ void goalReactToUnidentified( CParabot *pb, PB_Percept*item )
 	assert( item != 0 );
 	//debugMsg( "ReactToUnidentified\n" );
 	if (item->isTrackable()) {
-		pb->action.setViewDir( item->predictedAppearance( pb->botPos() ), 1 );
+		Vector botPos = pb->botPos();
+		pb->action.setViewDir( item->predictedAppearance( botPos ), 1 );
 		pb->setGoalViewDescr( "ReactToUnidentified (Trackable)" );
 	}
 	else {
@@ -300,7 +301,8 @@ void goalGetAway( CParabot *pb, PB_Percept*item )
 	assert( item != 0 );
 	item->update = worldTime();
 
-	Vector tDir = pb->botPos() - (item->predictedPosition( pb->botPos() ) - pb->botPos());
+	Vector botPos = pb->botPos();
+	Vector tDir = botPos - (item->predictedPosition( botPos ) - botPos);
 	pb->pathfinder.checkWay( tDir );
 	switch( item->pClass ) {
 	case PI_LASERDOT:	pb->setGoalMoveDescr( "GetAway (Laserdot)" );		break;
@@ -486,7 +488,8 @@ void goalUseTank( CParabot *pb, PB_Percept*item )
 				pb->setGoalMoveDescr( "UseTank (Shoot)" );
 			}
 			else {
-				pb->action.setAimDir( item->predictedAppearance( pb->botPos() ) );
+				Vector botPos = pb->botPos();
+				pb->action.setAimDir( item->predictedAppearance( botPos ) );
 				pb->setGoalMoveDescr( "UseTank (Tracking)" );
 			}
 		}
@@ -578,7 +581,8 @@ void goalFollow( CParabot *pb, PB_Percept*item )
 		PB_Path_Waypoint wp = observer.getNextWaypoint( pb->slot );
 		if (wp.reached( pb->ent )) {
 			//debugMsg( "WP reached, act=%i\n", wp.action() );
-			pb->action.add( wp.action(), &(wp.pos()) );	// if there's something to do...
+			Vector wpPos = wp.pos();
+			pb->action.add( wp.action(), &wpPos );	// if there's something to do...
 			observer.reportWaypointReached( pb->slot );		// confirm waypoint
 		}
 		
