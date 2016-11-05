@@ -1,11 +1,6 @@
 // PB_VisTable.cpp: implementation of the PB_VisTable class.
 //
 //////////////////////////////////////////////////////////////////////
-
-#if !defined( _DEBUG )
-#define NDEBUG			// no assert!
-#endif
-
 #include <assert.h>
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>

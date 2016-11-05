@@ -4,10 +4,6 @@
 #if !defined( PB_GLOBAL_H )
 #define PB_GLOBAL_H
 
-#if !defined( _DEBUG )
-#define NDEBUG			// no assert!
-#endif
-
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
