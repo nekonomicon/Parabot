@@ -191,7 +191,7 @@ int PB_MapCells::initNeighbours( int cellIndex, int firstNb )
 
 	float dist, closestDist = maxDist;	// required for macro...
 	int closestId = NO_CELL_FOUND;
-	short cellId;
+	short cellId = 0;
 	Vector nbPos;
 	
 	

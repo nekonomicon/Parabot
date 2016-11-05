@@ -477,7 +477,7 @@ float weightShootAtEnemy( CParabot *pb, PB_Percept*item )
 
 float weightShootAtSnark( CParabot *pb, PB_Percept*item )
 {
-	float weight;
+	float weight = 0.0f;
 	if ( item->isVisible() ) weight = (500/item->distance);
 	if (weight>3) weight = 3;
 	return weight;
