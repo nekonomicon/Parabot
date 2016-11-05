@@ -96,9 +96,9 @@ float PB_Needs::wishForCombat()
 		break;
 	}
 	// wish
-	float wish = health*armor*weapon*10 + 0.5*bot->aggression;
-	if (wish > 10.0) wish = 10;
-	return wish;
+	float wish_c = health*armor*weapon*10 + 0.5*bot->aggression;
+	if (wish_c > 10.0f ) wish_c = 10.0f;
+	return wish_c;
 }
 
 
@@ -127,7 +127,7 @@ float PB_Needs::wishForSniping( bool weaponCheck )
 	else weapon = 1.5;	// turrets
 			  
 	// wish
-	float wish = health*weapon*5 + (5-bot->aggression);
+	float wish_s = health*weapon*5 + (5-bot->aggression);
 	
 	const float outTime = 40;// time after which camping gives 0 points
 	float x = outTime + (worldTime() - bot->lastCamp) - bot->campTime;
@@ -139,7 +139,7 @@ float PB_Needs::wishForSniping( bool weaponCheck )
 	float timeFactor = x/outTime;
 //	if (timeFactor > 0) timeFactor = 1;	// not linear!
 
-	return (timeFactor*wish);
+	return (timeFactor*wish_s);
 }
 
 
