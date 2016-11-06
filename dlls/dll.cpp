@@ -32,7 +32,7 @@ extern PB_Configuration pbConfig;
 extern PB_Chat chat;
 extern GETENTITYAPI other_GetEntityAPI;
 extern GETNEWDLLFUNCTIONS other_GetNewDLLFunctions; 
-extern char *g_argv;
+static char g_argv[256];
 
 //#include "hl_game.h"
 //extern HL_Game game;
@@ -626,7 +626,7 @@ void FakeClientCommand(edict_t *pBot, char *arg1, char *arg2, char *arg3)
    int length;
 
    isFakeClientCommand = 1;
-   memset( &g_argv[0], 0, 256 );	// bugfix?
+   memset( g_argv, 0, sizeof(g_argv) );
 
    if ((arg1 == NULL) || (*arg1 == 0)) return;
 

@@ -24,7 +24,6 @@
 #define LoadLibrary(x) dlopen(x, RTLD_NOW)
 #define Sleep(x) usleep(x * 1000)
 typedef void* HINSTANCE;
-typedef void* HGLOBAL;
 #define FAR
 #endif
 

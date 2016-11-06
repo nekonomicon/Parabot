@@ -22,7 +22,6 @@ PB_Chat chat;
 
 
 HINSTANCE h_Library = NULL;
-HGLOBAL h_global_argv = NULL;
 
 enginefuncs_t g_engfuncs;
 globalvars_t  *gpGlobals;
@@ -58,10 +57,6 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved )
 	}
 	else if (fdwReason == DLL_PROCESS_DETACH)
 	{
-		if (h_global_argv) {
-			GlobalUnlock( h_global_argv );
-			GlobalFree( h_global_argv );
-		}
 		if (h_Library) FreeLibrary( h_Library );
 		
 		chat.free();
@@ -153,10 +148,6 @@ extern "C" void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, g
 		debugFile( "Library = 0\n" );
 	}
 	
-#ifdef _WIN32
-	h_global_argv = GlobalAlloc( GMEM_SHARE, 1024 );
-	g_argv = (char*)GlobalLock( h_global_argv );
-#endif
 	other_GetEntityAPI = (GETENTITYAPI)GetProcAddress( h_Library, "GetEntityAPI" );
 	if (other_GetEntityAPI == NULL)	errorMsg( "Can't get MOD's GetEntityAPI!\n" );
 	

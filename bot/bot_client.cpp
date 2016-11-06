@@ -122,6 +122,8 @@ void BotClient_Valve_WeaponList(void *p, int bot_index)
    {
       state++;
       bot_weapon.iAmmo1 = *(int *)p;  // ammo index 1
+	if( bot_weapon.iAmmo1 < 0 )
+		bot_weapon.iAmmo1 = 0;
    }
    else if (state == 2)
    {
@@ -132,6 +134,8 @@ void BotClient_Valve_WeaponList(void *p, int bot_index)
    {
       state++;
       bot_weapon.iAmmo2 = *(int *)p;  // ammo index 2
+	if( bot_weapon.iAmmo2 < 0 )
+                bot_weapon.iAmmo2 = 0;
    }
    else if (state == 4)
    {
