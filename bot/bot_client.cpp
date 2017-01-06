@@ -286,7 +286,7 @@ void BotClient_DMC_CurrentWeapon(void *p, int bot_index)
 	}
 	else if (state==2)
 	{
-		if (iState==1 && iId>0) {
+		if (iState==1 && iId>0 && iId <= 128 ) {
 			iClip = *(int *)p;  // ammo currently in the clip for this weapon
 			
 			int siId = iId;	// shifted ID
@@ -407,7 +407,8 @@ void HumanClient_CurrentWeapon( void *p, int clientIndex )
 			if (mod_id==DMC_DLL) {
 				int siId = iId;	// shifted ID
 				iId = 0;
-				while (siId!=1) {  siId>>=1;  iId++;  }	// get real ID
+				if( siId > 0 && siId <= 128 )
+					while (siId!=1) {  siId>>=1;  iId++;  }	// get real ID
 			}
 			clientWeapon[clientIndex] = iId;
 			//debugMsg( "Armed weapon %i\n", iId );
