@@ -244,6 +244,12 @@ bool PB_Observer::shouldObservePlayer( int oId )
 			return false;
 		}
 	}
+	else
+	{
+		// player disconnected
+		obs[oId].active = false;
+		return false;
+	}
 
 	if (obs[oId].active) {	// check if observation has to stop...
 		assert (obs[oId].player != 0 );
