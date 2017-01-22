@@ -1,0 +1,516 @@
+
+           ########################################################
+           #                                                      #
+           #              CHATFILE FOR PARABOT                    #
+           #                                                      #
+           #                   - SWEDISH -                        #
+           #      translated by qiReX` (qirex@eudoramail.com)     #
+           #                                                      #
+           ########################################################
+
+
+
+@GOT_KILLED
+
+Jag tar dig nasta gang, %s!
+Helvete!
+Hur fan kunde det handa!?
+Var det PODbot 2.0?
+Det dar maste ha varit en av dom dar javla botarna!
+Finns det nagra botar pa den har servern?
+Mitt sikte buggar fortfarande...
+Jag skulle precis byta vapen!
+Nyborjartur %s...
+%s anvander aimbot!
+Aj!
+Det dar var bara tur, %s!
+Jag kan inte tro det...
+Vad at du till frukost, %s?
+Till och med %s fraggar mig idag - det ar hopplost!
+Jag ar battre pa Quake III, helt klart
+Sorry, min lillebrorsa tog over - men nu ar jag tillbaka!
+Jag ar sa trott, klockan ar 04:00 har
+Se upp, %s!
+Varför använder du alltid %w, %s?
+Vad skulle du ha gjort utan %w, %s?
+Alltid med %w - sa lamt!
+Komigen, %s: lagg ner %w va?
+jg ror ag hr ftt viurs, mtt tngbrd fnkr ine rkigt!
+Jag har aldrig forstatt hur %s gjorde det dar...
+Den dar stackars newbien %s skot precis ner mig!
+Forr eller senare tar jag dig, %s!
+Jag hatar verkligen att ladda om...
+Varfor tar det sa lang tid att ladda om %w !?
+%s lirar Camper-Strike...
+Ar du saker pa att %s inte fuskar???
+Jag borde hoja min brightness - Jag ser ingenting!
+Varfor ar min skarm svart? Ar jag dod?
+%w igen!? %s? Har du provat nagot annat vapen nangang?
+Jag hoppas att %s tyckte att det var kul att doda mig. Nu ar det min tur!
+Fan ocksa! Dod igen! GE MIG SAFT!
+Jag horde nat askande ljud och sedan sa...
+Du borde vara mer forsiktig med %w nasta gang, %s...
+Fyfan vad det laggar!
+Oh camper, camper, jag ar dod pa grund av dig, %s...
+At helvete med %w, forfan!
+Varfan var du??
+Oooj!
+Camper!!! >:(
+Nasta gang ar det jag som fraggar dig, %s!
+Wazzzzzzzuuuup???
+Nyborjar tur! Sakert!
+Varfor hatar du mig, %s?
+Snalla doda nan annan, %s
+%s fuskar!
+Sluta doda mig, %s.
+Vanta bara, %s - Jag ska fa min hamd!
+Vem var det??
+Vad i helvete!?
+Att fragga med %w ar verkligen enkelt!
+Varfor dodade du mig med %w igen, %s?
+Vart hittade du %w, %s?
+
+
+
+@KILLED_PLAYER
+
+Det dar ser riktigt daligt ut, %s!
+Antligen fick jag %s!
+Hehe...
+Hej da %s!
+Dalig evasion kod, %s ;)
+Jag onskar att en BRA spelare kunde joina den har servern...
+Det dar var min hamd for forra gangen, %s!
+Var det nan som sag det?
+Hasta la vista, %s!
+Du skulle ha sprungit ivag medans du hade chansen, %s!
+En gang till :)
+Det dar borde lara dig, %s!
+Snyggt fluget, %s ;)
+Vad ar fraglimiten pa den har servern?
+Har jag fler frags an dig nu, %s?
+Och vem sa att jag inte kunde gora det!?
+Det kan bara finnas en, %s!
+Ma kraften vara med dig, %s!
+Newbie, va?
+Oroa dig inte %s: Du kommer over det...
+%w ar min favorit!
+Ta det lugnt, %s: Det ar bara ett spel!
+Jag rockar hardast pa %w!!!
+Ingen hanterar en %w som jag gör, %s!
+Jag älskar %w!
+Sadar gar det om man snackar for mycket, %s!
+Jag slar vad om att %s pissade pa sig nar han horde ljudet av min %w!
+Visste du att din hjarna ser ut som Bacon & Agg, %s?
+Du borjar se ut som en rostbiff, %s...
+OK %s, nasta gang anvander jag inte %w, jag lovar!
+Nasta gang anvader jag kofoten %s - Det har ar for enkelt!
+Din klan bestar bara av massa losers, %s...
+Vem tror du vill plocka upp dina likdelar, %s? Jag??
+Aaaah, nyslaktat kott!
+Don't worry, be happy, %s...
+Att doda dig ar bara for javla kul, %s :D
+Jag ar radd for att ingen kan stoppa din blodning, %s...
+Sorry, jag siktade inte pa dig, %s...
+Min klan skulle ha varit stolt over mig!
+Det gjorde ont va?
+Gjorde jag det alldeles sjalv!? COOLT!!
+%w rockar!!
+LOL!
+I'll be back %s!
+Burn baby!
+Hamden ar ljuv..
+Boom! :)
+Varfor dodar du inte mig ocksa, %s?
+Du kan skjuta fast du borde egentligen fly, %s!
+Jag tror jag ar stark nog att radda hela varlden sjalv :)
+Jag foddes med en %w - Du hade ingen chans %s! ;)
+Oh my God: They killed Kenny!
+Oh my God: They killed %s!
+
+
+
+@GOT_WEAPON
+
+Vanta tills jag far tag i er med en %w!
+Nu ska jag sparka rumpor!
+Med den har kanonen kan jag t.o.m fragga JoeBot!
+Du kan aldrig ana vad jag har hittat nu...
+WOW! Jag visste inte ens att det har vapnet fanns!
+Jag vet var %w finns :)
+Jag har hittat en %w!
+Plockar upp en %w...
+Nar jag antligen har fatt %w sa ar ingen i sikte...
+Antligen! %w!
+Jag undrar vem av er som lamnade en %w har - Den kan bli anvandbar...
+Jag ska visa dig hur man hanterar en %w.
+Vill du vara med i ett experiment med en %w?
+Det ar dags for en lektion med %w...
+Kanner alla till %w?
+Jag ska doda dig med en %w!
+Tror ni inte att jag kan hantera en %w? Kom hit sa ska ni fa se!
+Nan som har ammo for %w?
+Jag behover krut!
+At helvete med %w - Jag foredrar en AK47!
+Jag hittade en %w! Kan nan beratta hur man anvander den?
+Nu behover jag bara ammo!
+Vad ar det?
+Vem vill ha en %w?
+En %w ar manniskans basta vann :)
+
+
+
+###############################################################################
+
+
+@REPLY_UNKNOWN
+Bla bla bla...
+Vad sa du, %s?
+Koncentrera dig pa spelet, %s!
+Att prata med dig %s ar verkligen roligt!
+allt det har chattandet gor mig tokig!
+Sluta spamma, %s!
+Hur hinner du skriva all skit??
+Ja, %s. Du har ratt!
+Inte en chans, %s...
+Det dar brukade min mormor alltid saga till mig, %s
+Var kommer du ifran, %s?
+Jag fattar inte hur du kan spela och skriva samtidigt, %s!
+Ar du saker, %s?
+Jag forstar, %s!
+Varfor pratar ni alltid om samma saker??
+Vadfan snackar du om, %s?
+Horru %s, vi fattar inte ett dugg av det du sager
+Vad var det for sprak?
+Hall kaften och spela istallet, %s!
+Sa du nat, %s?
+Vem sa det?
+Verkligen?
+Valdigt rolig, %s..
+Jag ar bast i min klan!
+Jag hatar dom har dumma kommentarerna, %s!
+Nan som vet hur man Gauss-jumpar?
+ZZZzzzZZZzzzZZZzzz...
+o--]===>
+8===D ~~ ~
+Kamikaze!!!
+Wazzzzuuuuuuup?
+Jag ar sa uttrakad... 
+Vad ar bast: AMD eller INTEL?
+Har du ICQ, %s?
+Vilken ar den basta boten?
+
+
+
+###############################################################################
+
+
+@REPLY " IGEN "
+Saker upprepar sig alltid, eller hur?
+Och jag ar saker pa att det inte var sista gangen..
+Har du hort talas om atervinningscirkeln, %s?
+Det ar sa det gar till..
+
+@REPLY " AK47 "
+Jag har aldrig sett AK47 i det har spelet...
+
+@REPLY " ALLTID "
+Inte alltid, %s!
+Precis som det ska vara :)
+Ah lagg av %s, det dar var bara andra gangen!
+15 ganger i rad, hehe...
+
+@REPLY " INTEL "
+INTEL saklart, %s!
+INTEL. Jag lirar med en P4 1.7GHz...
+Latt fraga, INTEL utan tvekan
+INTEL!!
+Vem bryr sig?
+
+@REPLY " AMD "
+AMD!!
+AMD saklart, %s!
+AMD utan tvekan
+AMD krossar INTEL latt
+Vem bryr sig?
+
+@REPLY " ROV ", " RUMPA ", " BAKDEL "
+Oh ja, min rov...
+Min rov har faktiskt ingen betydelse har, %s!
+
+@REPLY " TJECKOSLOVAKIEN "
+Tjeckoslovakien blev separerat 1993...
+Nu heter det Tjeckien och Slovakien, dumma %s!
+Tjeckoslovakien ar historia...
+
+@REPLY " TJECKIEN "
+Tjeckien - Jag kanner bara till Tjeckoslovakien
+Ja, tjecker: de ar bra pa is-hockey eller hur?
+Tjeckien? Ge mig en karta!
+Tjeckien ar forst i varlden med ol och is-hockey.
+Kanner du till Jagr eller Dominik Hasek - de ar tjecker...
+
+@REPLY " OL ", " SPRIT "
+Budweisser ar inte lika god som forr...
+Jag kommer ihag att du var full som fan forra gangen du spelade, %s.
+Jag tycker att den basta olen kommer fran Tjeckien.
+Jag tycker att den basta olen kommer fran Tyskland.
+Jag tycker att den basta olen kommer fran Holland.
+Jag tycker att den basta olen kommer fran Mexico.
+# Alla skriver sitt favorit ol-land nu :)
+
+@REPLY " BLOD ", " BLODA ", " BLOOD "
+Blood(2) var ett underhallande spel...
+Jag gillar inte den roda fargen!
+Behover du bandage, %s?
+
+@REPLY " BOTMAN "
+Vem ar den dar Botman alla snackar om??
+Besok hans hemsida pa www.planethalflife.com/botman
+Botman ar toppen, Botman ar cool.
+Jag gillar den har boten.
+Utan hans kallkod skulle manga botar inte funnits!
+
+@REPLY " PARABOT "
+Parabot? Aldrig hort talas om det...
+Har du hort talas om ParaBots nya chatt-system?
+Parabot? Jag borde nog surfa pa natet lite oftare...
+Parabot? Vilket spel ar det for?
+Parabot, Parabot.. hmmm vanta lite, ska kolla i en uppslagsbok.
+Besok www.botepidemic.com/parabot
+
+@REPLY " INHUMANTURNS "
+Vad?? INHUMANTURNS? Maste kolla upp det...
+Jag har aldrig hort talas om INHUMANTURNS - ar det ett fusk eller?
+Jepp, PODs med INHUMANTRUNS pa ar verkligen INHUMAN - speciellt i de_prodigy!
+
+@REPLY " POD ", " PODBOT "
+PODbot finns bara for CS din dumme javel!
+Jo, en av dom dar PODbotarna skulle verkligen gora det har spelet roligare...
+Faaaaan vad jag alskar PODbotar med INHUMANTURNS ON...
+
+@REPLY " SWATBOT "
+Ar det sant att SWATbot kraver mycket av processorn?
+Daligt att det ar sa fa waypoints for SWATbot pa internet!
+
+@REPLY " JOEBOT "
+Visste du att JOEbot inte stoder den har mod:en...
+JOEBot navigation ar grym!
+Joebots nick ar "fastbot"! Visste du det?
+Joebot stoder massor med banor!
+
+@REPLY "BOT "
+Varfor snackar du alltid om bots?
+Vill du ha botar borde du ga till www.botepidemic.com
+Det finns inga botar pa den har servern %s!
+Botar ar feta!!
+Vilken ar din favorit bot, %s?
+Vill du programmera din egen bot, fraga botman!
+Vill du snacka om botar, besok nuclearbox.com
+Botar, bara botar - Du borde verkligen borja spela mot manniskor.
+Vet du nat om SWATBot?
+Dom flesta botarna ar valdigt korkade!
+
+@REPLY " FRUKOST "
+Jag har bara druckit lite kaffe..
+Jag ater musli!
+Jag kakar aldrig frukost!
+
+@REPLY " CAMPER ", " KAMPARE ", " CAMPA ", " KAMPA "
+Jag hatar verkligen campers!
+Camping suger!
+Nar man har lite HP kan det vara bra att campa..
+Att campa ar ibland det enda sattet att vinna..
+
+@REPLY " KAN ", " INTE "
+Det ar ditt problem, %s
+Lat det vara da, %s ;-)
+Jag tanker inte hjalpa dig, %s
+Varfor inte?
+
+@REPLY "FUSK FUSKAR"
+Dom dar javla fuskarna forstor hela spelet!
+Jag hatar folk som fuskar!
+Fusk suger!
+Varfor ar det sa manga som fuskar?
+PunkBuster skulle hjalpa...
+Men spela mot botar da, dom kan inte fuska!
+
+@REPLY " CLAN ", " KLAN "
+Vad menas egentligen med klaner?
+Jag var i en klan en gang.. det sog
+Vilken klan ar du med i, %s?
+Vill du vara med i en klan, %s?
+Finns det nagra klaner for det har spelet?
+Om du snackar om klaner igen sa ar du dod, %s!!
+
+@REPLY " DOD ", " DODA ", " DODADE "
+Nan borde grava en grav for dig...
+Finns det nan gravplats i narheten?
+No pain, no gain! Eller hur %s?
+Jag tror jag sag ett spoke!
+
+@REPLY " ENGINE ", " MOTOR "
+Om VALVE hade arbetat mer pa HL-motorn skulle manga av fusken inte finnas!!
+Jag tycker att Unreal Warfare-motorn ar den basta just nu!
+
+@REPLY " ANTLIGEN "
+Du har vantat lange pa det dar %s, eller hur?
+Varfor har du blivit sa fixerad pa det, %s?
+
+@REPLY " HITTA ", " HITTADE "
+Du borde hitta en aimbot istallet, lol!
+Grattis, %s
+Det hander inte varje dag, %s!
+
+@REPLY " FRAGS "
+Jag brukar vara den basta pa servern!
+Du borde komma ihag att det har spelet inte bara handlar om frags!
+
+@REPLY " FUCK ", " HELVETE ", " PISS ", " BOG ", " ROV ", " JAVLA "
+Svar inte, %s!
+Fy pa dig %s!
+Vart har du lart dig dom orden, %s?
+Ja du har ratt, %s. sa HALL KAFTEN NU!
+%s, sag inte det igen, det ar oartigt!
+
+@REPLY " KUL ", " HEHE ", " HAHA "
+Jag ar glad for att du atminstone har kul, %s...
+Roa dig medans du fortfarnade kan, %s!
+Valdigt lustigt, %s...
+
+@REPLY " SPEL ", " SPELA "
+Det har ar ett bra spel, eller hur?
+Jag tycker om att spela det har med er ocksa...
+Har du provat nat annat spel, %s?
+Du borde prova basket eller nat sant...
+Bara kul, inget mer!
+Mina favoritspel ar Half-Life och Unreal Tournament
+Har du nansin sett NBC: GigaGames? Coolt tv program!
+
+@REPLY " FARMOR "
+Jag skulle vilja traffa din farmor, %s!
+LOL, %s
+Du ar konstig, %s!
+
+@REPLY " HALFLIFE ", " HALF LIFE "
+Det ar ett av dom basta spelen nagonsin!
+Jag tycker att det ar ratt kul.
+
+@REPLY " JAG TYCKER "
+Du tycker for mycket, %s ;)
+Och jag tycker att du borde halla kaft och spela!
+Tycker du verkligen det, %s?
+Vad far dig att tycka det?
+Vi kan val traffas pa IRC och snacka om saken, %s?
+
+@REPLY " KNIV ", " KNIV FIGHT "
+Kniv fight! Det har kommer att bli kul!
+Kanner du till Jack the Ripper? Det avr jag i mitt forra liv.
+Jaaaa! Jag vill ha mer narstrid..
+Kniv i det har spelet.. det har jag aldrig hort talas om.
+
+@REPLY " DODA "
+Du borde skammas din ackliga mordare!
+Ge mig en kniv sa ska jag visa vad som menas med att doda...
+Latt..
+
+@REPLY " THEY KILLED KENNY "
+For mycket South Park va?
+LOL, %s!
+
+@REPLY " LAM ", " LAMT ", " LAMA "
+Grat inte, %s!
+Jag vet ;)
+
+@REPLY " LEKTION ", " LAXA "
+Jag behover inga lektioner, %s. Jag ar tillrackligt bra for att doda dig!
+Satt er ner barn. Herr %s har borjat lektionen.
+Jag har fatt nog av laxor, lat oss spela istallet!
+
+@REPLY " LUCK", " TUR "
+Tur finns inte, bara skicklighet!
+Jepp, Fru Fortuna ar pa daligt humor idag ;)
+Aven gudarna ar emot dig, %s. Ge upp...
+Inga undanflykter, %s
+Tur? Vem vill ha lite tur?
+Om du sager tur en gang till votar jag pa dig, %s
+
+@REPLY " MASTER ", " MASTARE "
+Du ar mastaren av katastrofer %s ;)
+Och jag ar din mastare..
+
+@REPLY " KOTT ", " ROSTBIFF ", " BIFF "
+JA! Jag ar hungrig
+Ge mig en bit ocksa, %s.
+Jag har inte atit nat pa aratal...
+
+@REPLY " MUSIC ", " BAND ", " MUSIK "
+Mitt favorit band ar Limp Bizkit, vilket ar ditt?
+The Stones rockar!
+Sjalv gillar jag dodsmetall..
+Assa typ jag ba' alskar Britney Spears! *loser*
+
+@REPLY " INGEN "
+Vem ar ingen? ;)
+Nandag kommer det att vara nan %s, det ar jag saker pa!
+
+@REPLY " PUNKBUSTER "
+Don't be a PUNK! (support www.punkbuster.com)
+Det buggar lite, fast det uppdateras ofta
+Punkbuster teamet ar en grupp hangivna personer!!
+
+@REPLY " Q3 ", " QUAKE ", " KVEJK ", " QIII "
+QIII ar lamt.
+Half-Life rockar, %s!
+Har du hort talas om DeathMatch Classic, %s? :)
+
+@REPLY " RELOAD", " LADDA OM ", " OMLADDA ", " RELOADA "
+Spela med kniven sa slipper du ladda om...
+Japp! Att ladda om suger!
+Du borde skaffa ett superspeed-fusk, %s.
+
+@REPLY " HAMD ", " HAMNAS "
+Varfor kan vi inte bara glomma detta, %s?
+Fred, %s!
+
+@REPLY " SPRINGA ", " SPRING "
+Springer du ivag vinner du sakert!
+Haha, spring ivag losers!
+Spring vart du vill, jag tar dig i nasta rond...
+
+@REPLY " SHIT ", " BAJS "
+Shit happens, haha!
+Stackars %s...
+Jag haller med dig, %s: Det har ar verkligen skitigt!
+Jasa? Redan?
+Du borde nog skita i toan istallet, %s
+Haha...
+%s, du ar en loser!!
+
+@REPLY " SORRY ", " LEDSEN ", " FORLAT "
+Visst, alla ber om ursakt efterat!
+Din ursakt hjalper knappast nu, %s!
+Nasta gang borde du tanka innan du gor nat, %s!
+Jag ar ocksa ledsen!
+Du vet inte hur ledsen du kommer att vara for det...
+
+@REPLY " TROTT ", " ORKA "
+Ga och lagg dig, %s
+Ga och vila lite, %s...
+
+@REPLY ": VAD ", ": VARFOR ", ": VAR ", ": WEM ", ": NAR ", ": HUR "
+Det kommer du aldrig att fa reda pa, %s!
+Jo, det var verkligen markligt, %s...
+The answer is out there, %s ;)
+Ingen aning, %s
+Vad tycker du %s?
+Det tanker jag inte tala om for dig, %s!
+Ta reda pa det sjalv, %s!
+Bra fraga, %s!
+Min mormor fragade samma sak varje dag...
+
+@REPLY " VINNA"
+Du kommer aldrig att klara det, %s!
+Jag tror inte att det ar mojligt...
+Du behöver lara dig att sikta battre forst, %s!

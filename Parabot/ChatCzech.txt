@@ -1,0 +1,516 @@
+
+           ########################################################
+           #                                                      #
+           #              CHATFILE FOR PARABOT                    #
+           #                                                      #
+           #                   - CZECH -                          #
+           #               translated by turms                    #
+           #                                                      #
+           ########################################################
+
+
+
+@GOT_KILLED
+
+Priste te dostanu, %s!
+Do prdele!
+Jak se to mohlo stat?!?
+To byl POD 2.0?
+To musel byt jeden z tech zatracenych botu!
+Jsou na tomhle servru nejaci boti?
+V mymi miridly musi byt neco v neporadku...
+Zrovna sem si prepinal zbran!
+Mas stesti %s - parchante...
+%s pouziva aimbota!
+Auvajz!
+Nevim, co se dneska stalo...
+Tak ted to bylo stesti, %s!
+Tomu neverim...
+Cos jedl k snidani, %s?
+Dneska me zabiji i %s - to uz je fakt spatne!
+Sem rozhodne lepsi v Q3.
+Sorry, muj maly bratr me otravoval, ale uz sem zpatky!
+Sem unavenej jak kocka - tady jsou 4 rano...
+Hej! Davej pozor %s!
+Proc stale dokola pouzivas jenom %w, %s?
+Co bys delal bez %w, %s?
+Vzdycky jenom s %w, to je tak zatracene lamersky!
+Ale no tak, %s : nech laskave tu %w napokoji, jo?!
+Myslim, ze mam nejakej virus - sere se mi klavesnice!
+Muze nekdo sebrat %s tu jeho %w?
+Nikdy nepochopim, jak to %s udelal...
+Ten chudak %s me prave sundal!
+Drive nebo pozdeji te stejne dostanu, %s!
+Fakt nesnasim prebijeni...
+Proc ta blba %w prebiji tak pomalu?!?
+%s hraje Camper-strike...
+Ste si jisti, ze %s necheatuje???
+Asi bych mel trochu zesvetlit monitor - vidim akorat velky howno!
+Proc mi ztmavnul monitor? Jsem tuhej?
+Uz zase %w, %s? Zkousel si vubec negdy jine zbrane?
+Doufam, ze %s je spokojen s mou smrti. Ted sem na rade ja!
+A do prdele, zase sem mrtvy. DEJTE MI PIVO!
+Slysel sem neco jako zahrmeni a pak...
+Priste bud s tou %w vice opatrny, %s...
+Lag, lag, lag a pak KURWA!
+Kvuli tobe, ty zasranej kempre %s, sem zase mrtvej...
+Vyser se na tu %w!
+Kde byl ten kokot?
+Jejda!
+Kempr!!! :-(
+Priste ti nakopu prdel, %s!
+Co jeeeeeeeeee???
+Lamersky stesti! Nic vic...
+Proc me nemas rad, %s?
+Zabij prosimte nekoho jinyho, %s
+%s cheatuje!
+Prestan me zabijet, %s.
+Jen pockej, %s - Ja se pomstim!!!
+Kdo to byl???
+Co to kurwa?!
+Zabijet s %w je strasne lehke...
+Proc si me zase zabil s tou %w, %s?
+Kdes nasel tu %w, %s?
+
+
+
+@KILLED_PLAYER
+
+To vypadalo fakt blbe, %s!
+Konecne sem toho %s dostal!
+Hehe...
+Sbohem, %s!
+No jo, %s ;-)
+Doufam, ze se sem pripoji nekdo dobry...
+To byla pomsta za to cos mi minule udelal, %s!
+Videli ste to?
+Hasta la vista, %s!
+Mel si utect, dokud si mel prilezitost, %s!
+A zase :-)
+To te nauci, %s!
+Stastny let, %s ;-)
+Kolik fragu potrebuju k vyhre tydle mapy?
+Uz mam vic fragu nez ty, %s?
+Tak mlicnak, jo?
+Neboj %s, to nejak zvladnes...
+%w rozhodne neni moje oblibena!
+Klid %s - je to jen hra.
+Jsem mistr %w!
+Nikdo neumi s %w zachazet tak dobre jako ja, %s!
+Miluju %w!
+Tahle %w je fakt bozi!
+To se stava, kdyz si moc povidas, %s!
+Vsadim se, ze si %s pochcal trencle, kdyz slysel zvuk z %w!
+Vis, ze tvuj mozek vypada jak omeleta, %s?
+Zacinas vypadat jako sekana, %s...
+Tak dobre %s, prestanu pouzivat %w, slibuju!
+Zacnu pouzivat nuz %s - zacina to byt prilis jednoduche!
+Vas klan musi byt banda chudaku, %s...
+Kdo si myslis, ze ted po tobe bude uklizet ten bordel, %s?
+Aaaaa - cerstve masicko!
+Bud v pohode, %s...
+Mozna bychom mohli v tvym pristim zivote zajit na pivko, %s...
+Je to velice zabavne vas takhle vsechny zabijet :-)))
+Tak ted uz to tve krvaceni nikdo nezastavi, %s...
+Sorry, fakt sem na tebe nemiril, %s...
+Muj klan by na me byl hrdy!
+To bolelo, vid?
+Pozdrav krale MCIV, sracko!
+A to sem zvladnul sam?!? Bozi!!!
+%w je skvela!!!
+LOL
+Ja se vratim, %s!
+Smaz se, sracko!
+Pomsta byla sladka...
+BUM :)
+Proc me taky nezabijes, %s?
+Muzes sice strilet, ale radsi utikej, %s!
+Myslim ze sem dost silny nato, abych sam spasil svet :)
+Ja se s %w narodil - opravdu jsi nemel nejmensi sanci, %s ;)
+Proboha: Zabili Kennyho!
+Proboha: Zabili %s!
+
+
+
+@GOT_WEAPON
+
+Pockejte az vas potkam s touhle kraskou, chlapci...
+A ted vam nakopu prdel!
+S timhle kanooonem natru i JoeBotovi!
+To byste neuhodli co sem prave nasel...
+Juuu! To sem ani nevedel, ze tahle zbran tu je!
+Vim kde je %w :-)
+Taaak %w je moje - hra muze zacit :-P
+Nasel sem %w!
+Zvedam %w...
+Zrovna kdyz mam %w tak nikdo v dohledu...
+Jo! Konecne %w!
+Hmmm, kterejpak z vas tu nechal %w - proc toho nevyuzit, ze jo...
+A ted vam ukazu skvelou praci s %w.
+Chcete se zucastnit mych experimentu s %w?
+Je cas pro lekci s %w...
+Znate se vsichni s %w?
+Jdu po vas s %w!
+Vy si myslite, ze s %w neumim zachazet? Tak se prijdte presvedcit!
+Nema nahodou nekdo naboje pro %w?
+Potreboval bych trochu strelneho prachu!
+Nasrat na %w - radsi bych mel AK47!
+Hej! Nasel sem %w! Nemoh by mi nekdo rict, jak se s tim zachazi?
+A ted vam nakopu prdel!
+Mam pro vas spatne zpravy - prijdte si je poslechnout ):)
+A ted potrebuju uz jenom nejake strelivo...
+Co to je?
+Chce negdo %w?
+K cemu je to tlacitko na %w?
+%w je moje oblibena zbran.
+%w - nejlepsi hracuv pritel :)
+
+
+
+###############################################################################
+
+
+@REPLY_UNKNOWN
+Bla bla bla...
+Cos to rikal, %s?
+Soustred se laskave na hru, %s!
+No jo - povidani si s tebou %s je fakt skvely!
+Tyhle zasrany povidacky me fakt dokazi nasrat!
+Nespamuj, %s!
+Kde beres tolik casu na kecani takovych blbosti???
+Jo %s. To mas teda pravdu!
+Ani nahodou, %s...
+%s neni clovek, %s je buh!!!
+Jo - to mi babka tvrdila v jednom kuse, %s.
+Z kama ze to ses, %s?
+Nemuzu uverit, ze hrajes a pises zaroven, %s!
+Ses si jistej, %s?
+Jo jasne, %s!
+Proc vsichni rikaji uplne to samy???
+O cem to sakra mluvis, %s?
+Vis, nemam dneska zrovna nejlepsi naladu...
+Hej %s, my ale fakt Cinsky nerozumime!
+To bylo Japonsky, nebo co?!
+Drz hubu a hraj, %s!
+Rikals neco, %s?
+Kdo to rekl?
+Vazne?
+Strasne ftipny, %s!
+Jsem v tom nejlepsim klanu v CR!
+Nesnasim tydle dementni kecy, %s!
+Vi nekdo jak se dela Gauss-jump?
+ZZZZZZZzzzzzz
+o---]===>
+Kamikazeeee!!!
+Svetlo, kamera, AKCE!!!
+Mate stesti, ze tu neni turms!
+Co je lepsi: AMD nebo INTEL?
+Mas ICQ, %s?
+Kerej je nejlepsi Bot?
+
+
+
+###############################################################################
+
+
+@REPLY " ZASE ", " ZAS ", " OPET ", " ZNOVA "
+Veci se stale opakuji, ze ano?
+A sem si jist, ze to nebylo naposled...
+Uz si slysel o reinkarnaci, %s?
+Tak uz to holt na svete chodi...
+
+@REPLY " AK47 "
+Zadnou zasranou AK47 sem v tydle hre nevidel...
+
+@REPLY " PORAD ", " STALE ", " FURT ", " VZDYCKY "
+To neni porad, %s!
+Ja to proste miluju :-)
+Ale prosimte %s, dyt to bylo teprve po druhe!
+15x v rade, hehe...
+
+@REPLY " AMD "
+Porid si Athalon, %s!
+Ja ted hraju na K6-2...
+AMD rulezzzz
+
+@REPLY "PRDEL"
+Jojo - moji prdel...
+Moje prdel vam muze byt u prdele...
+Myslim, ze ma prdel je tu uplne zbytecna, %s!
+
+@REPLY "CESKOSLOVENSK"
+Ceskoslovensko bylo rozdeleno v 93...
+Ted uz je jen Ceska a Slovenska republika, ty demente!
+Ceskoslovensko patri do historie...
+
+@REPLY "CESK", " CECH"
+Ceska republika - znam jenom Ceskoslovensko
+Jooo - Cechove - ti sou dobri v hokeji, ze jo...
+Ceska republika? Podejte mi mapu!
+Ceska republika je prvni na svete v hokeji a piti piva.
+Cechove rulezzzz!
+
+@REPLY " PIVO "
+Americky Budweisser uz neni tak dobry, jak byval...
+Vzpominam si, zes byl posledne pekne nality, %s.
+Myslim, ze nejlepsi pivo vari Ceska republika.
+Myslim, ze nejlepsi pivo vari Nemecko.
+Myslim, ze nejlepsi pivo vari Holandsko/Nizozemsko.
+Myslim, ze nejlepsi pivo vari Mexico.
+
+@REPLY " KREV ", " KRVACENI "
+Blood(2) byla fakt masivni hra...
+Nemam rad cervenou!
+Potrebujes nejake obvazy, %s?
+
+@REPLY "BOTMAN"
+Kdo je to ten Botman, co o nem vsichni mluvi???
+Navstivte www.planethalflife.com/botman
+Botman rulezzzzzz
+Miluju jeho bota.
+Bez jeho pomoci by spousta botu neexistovala...
+
+@REPLY " PARABOT "
+Parabot? O tom sem v zivote neslysel...
+Slyseli jste o novem chat-systemu k Parabotovi?
+Parabot? Mel bych asi vic serfovat po netu...
+Parabot? K jaky ze je to hre?
+Parabot, Parabot, moment - vemu si slovnik...
+Navstivte www.botepidemic.com/parabot
+
+@REPLY " INHUMANTURNS "
+Coze??? INHUMANTURNS? To musim vyzkouset...
+O INHUMANTURNS sem v zivote neslysel - to je nejaky cheat nebo co?
+Jojo, PODBoti s INHUMANTURNS sou fakt nelidsti - hlavne v de_prodigy!
+
+@REPLY " POD ", " PODBOT "
+POD je jenom pro CS, to je nepicu!
+No - nejaky z techhle POD Botu by prinesl trochu zivota do tohohle umirani...
+Saaaakra - u PODBota miluju zapnuty INHUMANTURS...
+
+@REPLY "SWATBOT", " SWAT "
+Je to pravda, ze SWAT je strasne narocnej na CPU?
+Skoda, ze je na netu tak malo waypointu pro SWATA...
+
+@REPLY " JOEBOT ", " JOEBOTA "
+Nojo, jenze JoeBot tenhle MOD nehraje...
+Ja sem nejak nikdy neporozumel tomu uceni Joebotu... vy jo?
+JoeBoti maji sqvelou navigaci!
+JoeBot si rika "Rychlik"! Vite o tom?
+Joebot si zahrajete snad na vsech mapach!
+
+@REPLY "BOT"
+Proc furt mluvite o tech dementnich botech?
+Jestli chcete boty kuknete na www.botepidemic.com
+Tady nejsou zadni boti %s!
+Boti sou sqeli!!!
+Kerej je tvuj oblibeny bot, %s?
+Jestli si chces udelat vlastniho, porad se s Botmanem!
+V CR se o botech poradne nikde nepobavis...
+Boti, furt sami boti - zacnete konecne hrat taky s lidma.
+Vite neco o novym SWATBotovi?
+Vetsina botu je stale pekne dementni
+
+@REPLY "SNIDA"
+Mel sem jenom kavu...
+Jim muesli!
+Ja nesnidam!
+
+@REPLY "KEMP", " CAMPER "
+Kempry nesnasim!
+Camping sux!
+Kdyz mas malo zivota, je lepsi kempovat!
+Kempovani je casto jedina cesta k vitezstvi...
+
+@REPLY "NEMUZ"
+Tak to je problem, %s
+Tak se na to vyser, %s :-)
+Ja ti nepomuzu, %s
+A proc ne?
+
+@REPLY "CHEAT"
+Tidle zasrani cheateri kazi celou hru!
+Nesnasim cheatery!
+Cheatovani suxxx!
+Proc cheatuje tolik lidi?
+Poridte si PunkBuster...
+Hrajte s boty - ti necheatuji...
+
+@REPLY "KLAN"
+K cemu sou vlastne klany?
+Kdysi sem v klanu byl, ale je to na hovno.
+Z ktereho klanu jsi, %s?
+Nechces k nam do klanu, %s?
+Existuji k tyhle hre vubec nejake klany?
+Jeste slovo o klanech a ses mrtvej, %s!!!
+
+@REPLY " SMRT ", "MRTV", " TUHY ", " TUHEJ "
+Nekdo by mel vykopat hrob...
+Je tu nekde pobliz hrbitov?
+Bez prace nejsou kolace, ze jo %s...
+Myslim, ze sem zahlid ducha!
+
+@REPLY "ENGIN"
+Kdyby VALVE zamakalo vic na enginu hry tak by vetsina cheatu nebyla!!!
+Myslim, ze ted je nejlepsi engine Unreal Warfare-Engine!
+
+@REPLY "KONECN"
+Musels cekat hodne dlouho, vid?
+Coze ti na tom tak zalezi, %s?
+
+@REPLY " NASEL "
+Lepsi najit aimbota, lol!
+Gratuluju, %s
+To se nestava kazdy den, %s!
+
+@REPLY "FRAG"
+Obycejne byvam nejlepsi na servru!
+Meli byste mit napameti, ze tahle hra neni jenom o fragu!
+
+@REPLY "KURV", "KURW", " KUA ", " DEVKA ", " DEFKA ", "PRDEL", "POCHC", "NASR", "SRAT", "DEMENT", " SAKRA ", "KOKOT"
+Ale no tak, %s!
+To bylo osklivy, %s!
+Kdes to kdy slysel, %s?
+Jo, mas pravdu, %s. Ale ted DRZ HUBU!
+Davej si bacha na hubu, %s!
+Todle uz fakt nerikej, %s - je to neslusne!
+
+@REPLY " SRANDA ", "ZABAV", " HEHE ", " HAHA ", " LOL "
+Sem rad, ze se aspon bavis, %s...
+Jen se pobav, dokud muzes, %s!
+Jo je to strasna sranda, %s...
+
+@REPLY " BABKA ", " BABICKA "
+Rad bych znal tvou babku, %s!
+LOL, %s
+Ty ses hnusnej, %s!
+
+@REPLY " HALFLIFE ", " HALF LIFE "
+Je to jedna z nejlepsich her vubec!
+Jo je to skqela parba.
+
+@REPLY " MYSLIM "
+Moc myslis, %s!
+A ja myslim, ze bys mel zavrit hubu a zacit hrat!
+A taky tomu doopravdy veris, %s?
+A proc si to myslis?
+Nekdy se sejdem na IRC a popovidame si o tom, %s...
+
+@REPLY " NUZ ", " NOZEM ", " NOZE "
+Jo - jasne - jenom noze, chlapi! Bude prdel!
+Znate Jacka Rozparovace? To sem byl ja ve svym minulym zivote.
+Zig zag - vzpominate na Lo-Wanga ze Shadow-Warriora?
+Jooo - trochu vic rezniciny...
+Nuz v tyhle hre? Pche - tak to mi muselo neco uniknout!
+
+@REPLY "ZABIT", "ZABIJ", " ZABIL "
+Mel byses stydet, ty nechutny rezniku!
+Dejte mi nuz a ja vam ukazu co je to zabijeni!
+Pohodovka...
+
+@REPLY " ZABILI KENNYHO "
+Ty ses zas hodne dival na televizi, co?
+LOL, %s!
+
+@REPLY " LAMA ", " LAMIT ", " LAMO ", " LAMERSKY ", " LAMERSKE "
+Nebrec, %s!
+Jo, ja vim ;-)
+
+@REPLY " LEKCE ", " UCIT ", " LEKCI "
+Na to, abych te zabil, nepotrebuju zadnou lekci, %s!
+Tak do lavic, deti. Pan ucitel %s je ve tride.
+Mam dost pitomych lekci - pojdme hrat!
+
+@REPLY " STESTI ", " STASTNE ", " STASTNY "
+Neni zadne stesti - jen skill!
+Jojo, pani Stestena ma dneska kramy ;-)
+I bohove jsou proti tobe, %s. Vzdej to...
+Nevymlouvej se, %s
+Stesti? Nasrat a rozmazat!
+Este jedno slovo o stesti a vyvotujem te, %s
+
+@REPLY "MISTR"
+Jsi mistr mezi srackami, %s ;-)
+Jo jasne - a ja sem papez, ty chudaku...
+
+@REPLY " MASO ", " SEKANA ", " MASICKO "
+Jasne - mam hlad jak swina!
+Hele, nech mi taky neco, %s.
+Uz sem pekne dlouho nic nejed...
+
+@REPLY " HUDBA ", " KAPELA "
+Moje oblibena kapela jest Lunetic - a co vy?
+The Stones rulezzz, vole!
+
+@REPLY " NIKDO "
+Kdo je nikdo? ;-)
+Jednou nekdo bude, %s, to si pis!
+
+@REPLY " PUNKBUSTER "
+Nebudte hajzlove! (podporte www.punkbuster.com)
+Ma to sice par chybicek, ale zas je to casto updatovany.
+Na servry bez Punkbusteru ani nepachnu...
+
+@REPLY " Q3 ", " QUAKE "
+Q3 je pro lamy
+Half-Life rulezzzz, %s!
+Slysels o DMC, %s? ;-)
+
+@REPLY " PREBIJET ", " PREBIJENI "
+Vem si nuz a nebudes uz nikdy muset prebijet...
+Jo! Prebijeni suxxx!
+Mels pouzivat speedcheat, %s.
+
+@REPLY " POMSTA ", " POMSTIM "
+Proc na to proste nezapomeneme, %s?
+Vyser se na to, %s!
+
+@REPLY " UTIKEJ ", " UTIKAT ", " ZDRHAT "
+Kdo utece, ten vyhraje!
+Jooo - zdrhejte srabi!
+Utikej jak chces - v dalsim kole te dostanu...
+
+@REPLY " VYSER ", " VYSRAT ", " VYSERTE ", " NASRAT ", " NASRANY "
+Nasrat a rozmazat, buhehe...
+Nasrat na kazdyho na tomdle servru!
+
+@REPLY " PRDEL ", " HOVNO ", " HOWNO "
+Nasrat! haha...
+% ses chudak...
+Jo souhlasim s tebou, %s : Tohle JE na howno!
+Az tak?!
+Radsi di srat na hajzl, %s
+Haha...
+%s ses nula!!!
+Howno? Co to je?
+
+@REPLY " PROMIN ", " OMLOUVAM ", " SORRY ", " MRZI ", " MRZET "
+Jo jasne - POTOM se vzdycky kazdej omlouva!
+Omluva mi je ted jaksi prd platna, %s!
+Priste radsi dvakrat mer a jednou rez!
+Jo ja se taky omlouvam!
+Ani nevis jak te to bude mrzet...
+
+@REPLY " PREPNOUT ", " PREPINAC ", " CUDLIK ", " PREPINAT ", " TLACITKO "
+Radsi strilej, %s ;-)
+Tak uz se ksakru rozhodni, %s!
+
+@REPLY "UNAV"
+Bez do postele, %s
+Odpocin si, %s...
+
+@REPLY ": CO", ": PROC", ": KDE", ": KDO", ": KDY", ": JAK"
+To nikdy nezjistis, %s!
+Jo to bylo fakt divny %s...
+Pravda je tam venku, %s ;-)
+Fakt newym, %s
+Co si myslis ty, %s?
+To ti nereknu, %s!
+To si zjisti sam, %s!
+Dobra otazka, %s!
+Moje babka se na to ptala kazdej den...
+
+@REPLY "VYHRA"
+TO se ti nikdy nepodari, %s!
+Obavam se, ze to je nemozne...
+Napred bys mel vylepsit svuj aim, %s!
