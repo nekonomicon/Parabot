@@ -284,21 +284,46 @@ int UTIL_GetTeam(edict_t *pEntity)
 	case GEARBOX_DLL:
 		infobuffer = (*g_engfuncs.pfnGetInfoKeyBuffer)( pEntity );
 		strcpy( teamName, (g_engfuncs.pfnInfoKeyValue( infobuffer, "team" )) );
-
+#if 0 //GEARBOX_CTF		
+		if(gearbox_ctf)
+		{
+			if ((strcmp(model_name, "ctf_barney") == 0) ||
+				(strcmp(model_name, "cl_suit") == 0) ||
+				(strcmp(model_name, "ctf_gina") == 0) ||
+				(strcmp(model_name, "ctf_gordon") == 0) ||
+				(strcmp(model_name, "otis") == 0) ||
+				(strcmp(model_name, "ctf_scientist") == 0))
+			{
+				return 0;
+			}
+			else if ((strcmp(model_name, "beret") == 0) ||
+				(strcmp(model_name, "drill") == 0) ||
+				(strcmp(model_name, "grunt") == 0) ||
+				(strcmp(model_name, "recruit") == 0) ||
+				(strcmp(model_name, "shephard") == 0) ||
+				(strcmp(model_name, "tower") == 0))
+			{
+				return 1;
+			}
+		}
+		else
+#endif //GEARBOX_CTF
 		for (i=0; i<valveTeamNumber; i++) 
 			if (stricmp( teamName, valveTeamList[i] ) == 0) return i;
 		debugMsg( "ERROR: Team not found!\n" );
 		return 0;
-
+	//case AG_DLL:
+	//case FRONTLINE_DLL:
 	case TFC_DLL:
-		return pEntity->v.team - 1;  // TFC teams are 1-4 based
+		return pEntity->v.team - 1;  // teams are 1-4 based
 	
 	case CSTRIKE_DLL:
 		infobuffer = (*g_engfuncs.pfnGetInfoKeyBuffer)( pEntity );
 		strcpy(modelName, (g_engfuncs.pfnInfoKeyValue(infobuffer, "model")));
 		
 		if ((strcmp( modelName, "terror"   ) == 0) ||  // Phoenix Connektion
-			(strcmp( modelName, "arab"     ) == 0) ||    // L337 Krew
+			(strcmp( modelName, "arab"     ) == 0) ||    // Old L337 Krew
+			(strcmp( model_name, "leet") == 0) ||    // L337 Krew
 			(strcmp( modelName, "arctic"   ) == 0) ||  // Artic Avenger
 			(strcmp( modelName, "guerilla" ) == 0))  // Gorilla Warfare
 		{
