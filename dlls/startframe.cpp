@@ -5,9 +5,12 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "extdll.h"
-//#include "util.h"
+#ifdef METAMOD
+#include "dllapi.h"
+#include "h_export.h"
+#include "meta_api.h"
+#endif
 #include "entity_state.h"
-//#include "cbase.h"
 
 #include "bot.h"
 #include "bot_func.h"
@@ -124,8 +127,11 @@ void updateBotClients()
 		for (int i=0; i < 32; i++) {
             if (bots[i].is_used) {
 				memset(&cd, 0, sizeof(cd));					// assumed by UpdateClientData
+#ifndef METAMOD
 				UpdateClientData( bots[i].pEdict, 1, &cd );
-				
+#else
+				MDLL_UpdateClientData( bots[i].pEdict, 1, &cd );
+#endif
 				// see if a weapon was dropped...
 				if (bots[i].bot_weapons != cd.weapons) bots[i].bot_weapons = cd.weapons;
             }
@@ -201,7 +207,7 @@ void checkForMapChange()
 	}
 }
 
-static unsigned short FixedUnsigned16( float value, float scale )
+unsigned short FixedUnsigned16( float value, float scale )
 {
 	int output;
 
@@ -214,7 +220,7 @@ static unsigned short FixedUnsigned16( float value, float scale )
 	return (unsigned short)output;
 }
 
-static short FixedSigned16( float value, float scale )
+short FixedSigned16( float value, float scale )
 {
 	int output;
 
@@ -691,6 +697,9 @@ void StartFrame( void )
 			glMarker.drawMarkers();
 		}
 	}
-	
+#ifndef METAMOD
 	(*other_gFunctionTable.pfnStartFrame)();
+#else
+	RETURN_META(MRES_IGNORED);
+#endif
 }

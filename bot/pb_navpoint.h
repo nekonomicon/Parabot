@@ -178,7 +178,7 @@ public:
 
 	static char* classname( int code );
 	
-	void init( Vector &pos, int type, int special );
+	void init( const Vector &pos, int type, int special );
 	void setId( int id ) { data.privateId = id; }
 	void initEntityPtr();
 	// gets a pointer to the corresponding t_edict if possible and stores it

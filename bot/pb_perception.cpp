@@ -99,7 +99,7 @@ PB_Percept::PB_Percept( float botSens, edict_t *ent, short state, short realClas
 }
 
 
-Vector PB_Percept::predictedPosition( Vector &botPos )
+Vector PB_Percept::predictedPosition( const Vector &botPos )
 // returns a predicted position for an enemy that is not perceived anymore
 {
 	// not implemented yet!
@@ -107,7 +107,7 @@ Vector PB_Percept::predictedPosition( Vector &botPos )
 }
 
 
-Vector PB_Percept::predictedAppearance( Vector &botPos )
+Vector PB_Percept::predictedAppearance( const Vector &botPos )
 // returns the position where a not visible enemy is most likely to get into line-of-sight
 {
 	if (isVisible() || entity==0 ) return lastPos;

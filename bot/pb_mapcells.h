@@ -35,7 +35,7 @@ public:
 	
 	PB_Cell& cell( int index ) {  return cellArray[index];  }
 
-	int getCellId( Vector pos, float maxDist=CELL_SIZE );
+	int getCellId( const Vector &pos, float maxDist=CELL_SIZE );
 	int getCellId( edict_t *pEdict ) {  return getCellId( PB_Cell::makePos( pEdict ) );  }
 	
 	// returns index of newCell:
@@ -77,8 +77,8 @@ private:
 
 	PB_VisTable vis;
 
-	int getHashcode( Vector &pos );
-	Vector getAllignedPos( Vector pos );
+	int getHashcode( const Vector &pos );
+	Vector getAllignedPos( const Vector &pos );
 
 };
 

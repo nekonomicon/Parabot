@@ -215,7 +215,7 @@ static char navpointClasses[MAX_NAV_TYPES][32] = { "unknown",
 
 
 
-void PB_Navpoint::init( Vector &pos, int type, int special )
+void PB_Navpoint::init( const Vector &pos, int type, int special )
 {
 	data.pos = pos;
 	data.type = type;

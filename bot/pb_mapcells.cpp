@@ -51,7 +51,7 @@ int PB_MapCells::lastVisUpdate()
 }
 
 
-int PB_MapCells::getHashcode( Vector &pos )
+int PB_MapCells::getHashcode( const Vector &pos )
 {
 	int ix = (((int)pos.x + 4096) & 0x007F80) >> 7;
 	int iy = (((int)pos.y + 4096) & 0x007F80) >> 1;
@@ -62,7 +62,7 @@ int PB_MapCells::getHashcode( Vector &pos )
 }
 
 
-Vector PB_MapCells::getAllignedPos( Vector pos )
+Vector PB_MapCells::getAllignedPos( const Vector &pos )
 {
 	int ix = (((int)pos.x + 4096) & 0x007F80) + 64;
 	int iy = (((int)pos.y + 4096) & 0x007F80) + 64;
@@ -87,7 +87,7 @@ int dbgCnt;
 	}
 
 
-int PB_MapCells::getCellId( Vector pos, float maxDist )
+int PB_MapCells::getCellId( const Vector &pos, float maxDist )
 {
 	float dist, closestDist = maxDist;	// max dist that found WP can have to pos
 	int closestId = NO_CELL_FOUND;			// is returned when no cell is found

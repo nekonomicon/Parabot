@@ -15,15 +15,15 @@ struct PtrGreater
 
 template <class key_type>
 class  dynamic_priority_queue
-{
-	
-  public:
-    // public type definitions
+{	
+public:
+	// constructor
+	dynamic_priority_queue( vector<key_type>& v)
+
+	// public type definitions
 	  typedef typename std::vector<key_type>::size_type size_type;
 	  typedef typename std::vector<key_type>::difference_type index_type;
 
-    // constructor
-    dynamic_priority_queue( vector<key_type>& v);
 
     // change a value at position 'at'
     void changeKeyAt(index_type at, key_type k);

@@ -122,10 +122,10 @@ AdjPtr PB_MapGraph::findLinkedPath( int dataId, int startId, bool &found )
 }
 
 
-PB_Navpoint* PB_MapGraph::getNearestNavpoint( Vector &pos )
+PB_Navpoint* PB_MapGraph::getNearestNavpoint( const Vector &pos )
 // returns the nearest navpoint to pos existing in the graph, NULL if graph is empty
 {
-	float dx, dy, dz, dist, minDist = 1000000000000;
+	float dx, dy, dz, dist, minDist = 999999;
 	int   minId = -1;
 
 	for (int i=0; i<numberOfNavpoints(); i++) {
@@ -143,11 +143,11 @@ PB_Navpoint* PB_MapGraph::getNearestNavpoint( Vector &pos )
 }
 
 
-PB_Navpoint* PB_MapGraph::getNearestNavpoint( Vector &pos, int type )
+PB_Navpoint* PB_MapGraph::getNearestNavpoint( const Vector &pos, int type )
 // returns the nearest navpoint with given type to pos existing in the graph, 
 // NULL if graph doesn't contain navpoints of the given type
 {
-	float dx, dy, dz, dist, minDist = 1000000000000;
+	float dx, dy, dz, dist, minDist = 999999;
 	int   minId = -1;
 
 	for (int i=0; i<numberOfNavpoints(); i++) if (graph[i].first.type()==type) {
@@ -186,7 +186,7 @@ PB_Navpoint* PB_MapGraph::getNearestRoamingNavpoint( edict_t *traveller, PB_Navp
 // that are z-reachable, nextVisit-Time is required to be reached
 // should never return zero
 {
-	float dx, dy, dz, dist, minDist = 1000000000000, minDistR = 1000000000000;
+	float dx, dy, dz, dist, minDist = 999999, minDistR = 999999;
 	int   minId = -1, minIdR = -1;
 	int	  ignoreId = -1;
 	Vector &pos = traveller->v.origin;

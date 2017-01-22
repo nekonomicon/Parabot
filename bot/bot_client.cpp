@@ -8,9 +8,10 @@
 //
 
 #include "extdll.h"
-//#include "util.h"
-//#include "cbase.h"
-
+#ifndef METAMOD
+#include "dllapi.h"
+#include "meta_api.h"
+#endif
 #include "bot.h"
 #include "bot_func.h"
 #include "bot_client.h"

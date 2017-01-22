@@ -5,7 +5,14 @@
 #define PB_GLOBAL_H
 
 #include "extdll.h"
+#ifndef METAMOD
 #include "util.h"
+#else
+#include "dllapi.h"
+#include "h_export.h"
+#include "meta_api.h"
+#include "entity_state.h"
+#endif
 #include "cbase.h"
 #include "hl_classes.h"
 #include "pb_path.h"

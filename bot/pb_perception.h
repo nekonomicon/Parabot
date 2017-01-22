@@ -90,10 +90,10 @@ public:
 	float getReactionTime( edict_t *ent, short state, short realClass, float dist );
 	// returns the time needed to react to the item (time to enter goal-queue)
 
-	Vector predictedPosition( Vector &botPos );
+	Vector predictedPosition( const Vector &botPos );
 	// returns a predicted position for an enemy that is not perceived anymore
 
-	Vector predictedAppearance( Vector &botPos );
+	Vector predictedAppearance( const Vector &botPos );
 	// returns the position where a not visible enemy is most likely to get into line-of-sight
 
 	bool hasBeenVisible()		{ return (pState & PI_PREDICTED); }

@@ -26,7 +26,7 @@ public:
 
 	void init( edict_t *botEnt, PB_Action *act );
 	void reset( Vector newTarget );
-	void checkWay( Vector &targetPos );
+	void checkWay( const Vector &targetPos );
 	bool targetNotReachable();
 
 

@@ -8,10 +8,18 @@
 //
 
 #include "extdll.h"
+#ifndef METAMOD
 #include "enginecallback.h"
-
+#else
+#include "dllapi.h"
+#include "h_export.h"
+#include "meta_api.h"
+#include "entity_state.h"
+#endif
 #include "bot.h"
+#ifndef METAMOD
 #include "engine.h"
+#endif
 #include "pb_global.h"
 #include "pb_configuration.h"
 #include "pb_chat.h"
@@ -19,20 +27,16 @@
 extern int mod_id;
 PB_Configuration pbConfig;
 PB_Chat chat;
-
-
+#ifndef METAMOD
 HINSTANCE h_Library = NULL;
-
+#endif
 enginefuncs_t g_engfuncs;
 globalvars_t  *gpGlobals;
-char *g_argv;
-
+#ifndef METAMOD
 GETENTITYAPI other_GetEntityAPI;
 GIVEFNPTRSTODLL other_GiveFnptrsToDll;
 GETNEWDLLFUNCTIONS other_GetNewDLLFunctions; 
-
-
-
+#endif
 
 float sineTable[256];					// sine table for e.g. look-arounds
 
@@ -57,8 +61,9 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved )
 	}
 	else if (fdwReason == DLL_PROCESS_DETACH)
 	{
+#ifndef METAMOD
 		if (h_Library) FreeLibrary( h_Library );
-		
+#endif
 		chat.free();
 /*
 		// try to close ole
@@ -103,35 +108,45 @@ extern "C" void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, g
 	if (stricmp(mod_name, "valve") == 0)
 	{
 		mod_id = VALVE_DLL;
+#ifndef METAMOD
 		h_Library = LoadLibrary( "valve/dlls/hl."OS_LIB_EXT );
+#endif
 		pbConfig.initConfiguration( "parabot/valve/parabot.cfg" );
 		pbConfig.initPersonalities( "parabot/valve/characters.cfg" );
 	}
 	else if (stricmp(mod_name, "hldm") == 0)
 	{
 		mod_id = VALVE_DLL;
+#ifndef METAMOD
 		h_Library = LoadLibrary( "hldm/dlls/hl."OS_LIB_EXT );
+#endif
 		pbConfig.initConfiguration( "parabot/valve/parabot.cfg" );
 		pbConfig.initPersonalities( "parabot/valve/characters.cfg" );
 	}
 	else if (stricmp(mod_name, "holywars") == 0)
 	{
 		mod_id = HOLYWARS_DLL;
+#ifndef METAMOD
 		h_Library = LoadLibrary( "holywars/dlls/holywars."OS_LIB_EXT );
+#endif
 		pbConfig.initConfiguration( "parabot/holywars/parabot.cfg" );
 		pbConfig.initPersonalities( "parabot/holywars/characters.cfg" );
 	}
 	else if (stricmp(mod_name, "dmc") == 0)
 	{
 		mod_id = DMC_DLL;
+#ifndef METAMOD
 		h_Library = LoadLibrary( "dmc/dlls/dmc."OS_LIB_EXT );
+#endif
 		pbConfig.initConfiguration( "parabot/dmc/parabot.cfg" );
 		pbConfig.initPersonalities( "parabot/dmc/characters.cfg" );
 	}
 	else if (stricmp(mod_name, "gearbox") == 0)
 	{
 		mod_id = GEARBOX_DLL;
+#ifndef METAMOD
 		h_Library = LoadLibrary( "gearbox/dlls/opfor."OS_LIB_EXT );
+#endif
 		pbConfig.initConfiguration( "parabot/gearbox/parabot.cfg" );
 		pbConfig.initPersonalities( "parabot/gearbox/characters.cfg" );
 	}
@@ -142,7 +157,7 @@ extern "C" void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, g
 	strcat( chatFile, pbConfig.chatFile() );
 	chat.load( chatFile );
 	
-	
+#ifndef METAMOD	
 	if (h_Library == NULL) {	// Directory error or Unsupported MOD!
 		errorMsg( "MOD Dll not found (or unsupported MOD)!" );
 		debugFile( "Library = 0\n" );
@@ -158,9 +173,9 @@ extern "C" void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, g
 	
 	other_GiveFnptrsToDll = (GIVEFNPTRSTODLL)GetProcAddress(h_Library, "GiveFnptrsToDll"); 
 	if (other_GiveFnptrsToDll == NULL) errorMsg( "Can't get MOD's GiveFnptrsToDll!\n" );
-	
+#endif
 	initSineTable();
-
+#ifndef METAMOD
 	pengfuncsFromEngine->pfnCmd_Args = Cmd_Args;
 	pengfuncsFromEngine->pfnCmd_Argv = Cmd_Argv;
 	pengfuncsFromEngine->pfnCmd_Argc = Cmd_Argc;
@@ -309,6 +324,5 @@ extern "C" void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, g
 	
 	// give the engine functions to the other DLL...
 	(*other_GiveFnptrsToDll)(pengfuncsFromEngine, pGlobals);
-	
+#endif	
 }
-

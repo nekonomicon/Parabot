@@ -6,7 +6,7 @@
 //
 // linkfunc.cpp
 //
-
+#ifndef METAMOD
 #include "extdll.h"
 #include "bot.h"
 
@@ -558,3 +558,4 @@ LINK_ENTITY_TO_FUNC( weapon_shockrifle, "weapon_shockrifle" );
 LINK_ENTITY_TO_FUNC( weapon_shockroach, "weapon_shockroach" );
 LINK_ENTITY_TO_FUNC( weapon_sniperrifle, "weapon_sniperrifle" );
 LINK_ENTITY_TO_FUNC( weapon_sporelauncher, "weapon_sporelauncher" );
+#endif

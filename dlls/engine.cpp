@@ -8,14 +8,20 @@
 //
 
 #include "extdll.h"
-//#include "util.h"
+#ifdef METAMOD
+#include "dllapi.h"
+#include "h_export.h"
+#include "meta_api.h"
+#include "entity_state.h"
+#endif
 #include "pb_global.h"
 #include "sounds.h"
 
 #include "bot.h"
 #include "bot_client.h"
+#ifndef METAMOD
 #include "engine.h"
-
+#endif
 // HolyWars: gets modified in writeString
 bool haloOnBase = true;
 
@@ -74,8 +80,11 @@ void pfnChangeLevel(char* s1, char* s2)
          SERVER_COMMAND(cmd);  // kick the bot using (kick "name")
       }
    }
-
-   (*g_engfuncs.pfnChangeLevel)(s1, s2);
+#ifndef METAMOD
+	(*g_engfuncs.pfnChangeLevel)(s1, s2);
+#else
+	RETURN_META(MRES_IGNORED);
+#endif
 }
 
 
@@ -241,8 +250,11 @@ void pfnMessageBegin(int msg_dest, int msg_type, const float *pOrigin, edict_t *
 		 }
       }
    }
-
-   (*g_engfuncs.pfnMessageBegin)(msg_dest, msg_type, pOrigin, ed);
+#ifndef METAMOD
+	(*g_engfuncs.pfnMessageBegin)(msg_dest, msg_type, pOrigin, ed);
+#else
+	RETURN_META(MRES_IGNORED);
+#endif
 }
 
 
@@ -270,8 +282,11 @@ int pfnRegUserMsg(const char *pszName, int iSize)
 		else if (strcmp(pszName, "ShowMenu"		) == 0) message_ShowMenu = msg;
 		else if (strcmp(pszName, "Money"		) == 0) message_Money = msg;         		
 	}
-	
+#ifndef METAMOD
 	return msg;
+#else
+	RETURN_META_VALUE(MRES_SUPERCEDE, msg);
+#endif
 }
 
 
@@ -284,19 +299,19 @@ void pfnMessageEnd(void)
       // clear out the bot message function pointer...
       botMsgFunction = NULL;
    }
-
-   (*g_engfuncs.pfnMessageEnd)();
+#ifndef METAMOD
+	(*g_engfuncs.pfnMessageEnd)();
+#else
+	RETURN_META(MRES_IGNORED);
+#endif
 }
 
-
-
+#ifndef METAMOD
 ///////////////////////////////////////////////////////////////////////////////////
 //
 //  FORWARD ENGINE FUNCTIONS...
 //
 ///////////////////////////////////////////////////////////////////////////////////
-
-
 int pfnPrecacheModel(char* s)
 {
    if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnPrecacheModel: %s\n",s); fclose(fp); }
@@ -374,6 +389,7 @@ void pfnChangePitch(edict_t* ent)
 //   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnChangePitch:\n"); fclose(fp); }
    (*g_engfuncs.pfnChangePitch)(ent);
 }
+#endif
 
 edict_t* pfnFindEntityByString(edict_t *pEdictStartSearchAfter, const char *pszField, const char *pszValue)
 {
@@ -384,9 +400,14 @@ edict_t* pfnFindEntityByString(edict_t *pEdictStartSearchAfter, const char *pszF
 		//debugMsg( "NEW CS-ROUND!\n" );
 		roundStartTime = worldTime() + CVAR_GET_FLOAT("mp_freezetime");	// 5 seconds until round starts
 	}
+#ifndef METAMOD
 	return (*g_engfuncs.pfnFindEntityByString)(pEdictStartSearchAfter, pszField, pszValue);
+#else
+	RETURN_META_VALUE(MRES_IGNORED, 0);
+#endif
 }
 
+#ifndef METAMOD
 int pfnGetEntityIllum(edict_t* pEnt)
 {
    if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnGetEntityIllum:\n"); fclose(fp); }
@@ -481,21 +502,31 @@ void pfnSetOrigin(edict_t *e, const float *rgflOrigin)
    if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnSetOrigin:\n"); fclose(fp); }
    (*g_engfuncs.pfnSetOrigin)(e, rgflOrigin);
 }
+#endif
 
 void pfnEmitSound(edict_t *entity, int channel, const char *sample, /*int*/float volume, float attenuation, int fFlags, int pitch)
 {
 	playerSounds.parseSound( entity, sample, volume );
-   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnEmitSound:\n"); fclose(fp); }
-   (*g_engfuncs.pfnEmitSound)(entity, channel, sample, volume, attenuation, fFlags, pitch);
+	if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnEmitSound:\n"); fclose(fp); }
+#ifndef METAMOD
+	(*g_engfuncs.pfnEmitSound)(entity, channel, sample, volume, attenuation, fFlags, pitch);
+#else
+	RETURN_META(MRES_IGNORED);
+#endif
 }
 
 void pfnEmitAmbientSound(edict_t *entity, float *pos, const char *samp, float vol, float attenuation, int fFlags, int pitch)
 {
 	playerSounds.parseAmbientSound( entity, samp, vol );
 	if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnEmitAmbientSound:\n"); fclose(fp); }
+#ifndef METAMOD
 	(*g_engfuncs.pfnEmitAmbientSound)(entity, pos, samp, vol, attenuation, fFlags, pitch);
+#else
+	RETURN_META(MRES_IGNORED);
+#endif
 }
 
+#ifndef METAMOD
 void pfnTraceLine(const float *v1, const float *v2, int fNoMonsters, edict_t *pentToSkip, TraceResult *ptr)
 {
 //   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnTraceLine:\n"); fclose(fp); }
@@ -545,6 +576,7 @@ void pfnGetAimVector(edict_t* ent, float speed, float *rgflReturn)
 }
 
 //void BotCreate( edict_t *pPlayer, const char *botTeam, const char *botClass, const char *arg3, const char *arg4 );
+#endif
 
 void pfnServerCommand(char* str)
 {
@@ -554,30 +586,42 @@ void pfnServerCommand(char* str)
 		BotCreate();
 		return;
 	}*/
-    (*g_engfuncs.pfnServerCommand)(str);
+#ifndef METAMOD
+	(*g_engfuncs.pfnServerCommand)(str);
+#else
+	RETURN_META(MRES_IGNORED);
+#endif
 }
 
+#ifndef METAMOD
 void pfnServerExecute(void)
 {
    if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnServerExecute:\n"); fclose(fp); }
    (*g_engfuncs.pfnServerExecute)();
 }
+#endif
 
 void pfnClientCommand(edict_t* pEdict, char* szFmt, ...)
 {
-   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnClientCommand=%s\n",szFmt); fclose(fp); }
-   if (!(pEdict->v.flags & FL_FAKECLIENT))
-   {
-      char tempFmt[256];
-      va_list argp;
-      va_start(argp, szFmt);
-      vsprintf(tempFmt, szFmt, argp);
-      (*g_engfuncs.pfnClientCommand)(pEdict, tempFmt);
-      va_end(argp);
-   }
-   return;
+	if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnClientCommand=%s\n",szFmt); fclose(fp); }
+	if (!(pEdict->v.flags & FL_FAKECLIENT))
+#ifndef METAMOD
+	{
+		char tempFmt[256];
+		va_list argp;
+		va_start(argp, szFmt);
+		vsprintf(tempFmt, szFmt, argp);
+		(*g_engfuncs.pfnClientCommand)(pEdict, tempFmt);
+		va_end(argp);
+	}
+	return;
+#else
+		RETURN_META(MRES_IGNORED);
+	RETURN_META(MRES_SUPERCEDE);
+#endif
 }
 
+#ifndef METAMOD
 void pfnParticleEffect(const float *org, const float *dir, float color, float count)
 {
 //   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnParticleEffect:\n"); fclose(fp); }
@@ -601,6 +645,7 @@ int pfnPointContents(const float *rgflVector)
 //   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnPointContents:\n"); fclose(fp); }
    return (*g_engfuncs.pfnPointContents)(rgflVector);
 }
+#endif
 
 void pfnWriteByte(int iValue)
 {
@@ -612,8 +657,11 @@ void pfnWriteByte(int iValue)
       if (botMsgFunction)
          (*botMsgFunction)((void *)&iValue, botMsgIndex);
    }
-
-   (*g_engfuncs.pfnWriteByte)(iValue);
+#ifndef METAMOD
+	(*g_engfuncs.pfnWriteByte)(iValue);
+#else
+	RETURN_META(MRES_IGNORED);
+#endif
 }
 
 void pfnWriteChar(int iValue)
@@ -626,8 +674,11 @@ void pfnWriteChar(int iValue)
       if (botMsgFunction)
          (*botMsgFunction)((void *)&iValue, botMsgIndex);
    }
-
-   (*g_engfuncs.pfnWriteChar)(iValue);
+#ifndef METAMOD
+	(*g_engfuncs.pfnWriteChar)(iValue);
+#else
+	RETURN_META(MRES_IGNORED);
+#endif
 }
 
 void pfnWriteShort(int iValue)
@@ -640,8 +691,11 @@ void pfnWriteShort(int iValue)
       if (botMsgFunction)
          (*botMsgFunction)((void *)&iValue, botMsgIndex);
    }
-
-   (*g_engfuncs.pfnWriteShort)(iValue);
+#ifndef METAMOD
+	(*g_engfuncs.pfnWriteShort)(iValue);
+#else
+	RETURN_META(MRES_IGNORED);
+#endif
 }
 
 void pfnWriteLong(int iValue)
@@ -654,8 +708,11 @@ void pfnWriteLong(int iValue)
       if (botMsgFunction)
          (*botMsgFunction)((void *)&iValue, botMsgIndex);
    }
-
-   (*g_engfuncs.pfnWriteLong)(iValue);
+#ifndef METAMOD
+	(*g_engfuncs.pfnWriteLong)(iValue);
+#else
+	RETURN_META(MRES_IGNORED);
+#endif
 }
 
 void pfnWriteAngle(float flValue)
@@ -668,8 +725,11 @@ void pfnWriteAngle(float flValue)
       if (botMsgFunction)
          (*botMsgFunction)((void *)&flValue, botMsgIndex);
    }
-
-   (*g_engfuncs.pfnWriteAngle)(flValue);
+#ifndef METAMOD
+	(*g_engfuncs.pfnWriteAngle)(flValue);
+#else
+	RETURN_META(MRES_IGNORED);
+#endif
 }
 
 void pfnWriteCoord(float flValue)
@@ -682,8 +742,11 @@ void pfnWriteCoord(float flValue)
       if (botMsgFunction)
          (*botMsgFunction)((void *)&flValue, botMsgIndex);
    }
-
-   (*g_engfuncs.pfnWriteCoord)(flValue);
+#ifndef METAMOD
+	(*g_engfuncs.pfnWriteCoord)(flValue);
+#else
+	RETURN_META(MRES_IGNORED);
+#endif
 }
 
 void pfnWriteString(const char *sz)
@@ -707,8 +770,11 @@ void pfnWriteString(const char *sz)
       if (botMsgFunction)
          (*botMsgFunction)((void *)sz, botMsgIndex);
    }
-
-   (*g_engfuncs.pfnWriteString)(sz);
+#ifndef METAMOD
+	(*g_engfuncs.pfnWriteString)(sz);
+#else
+        RETURN_META(MRES_IGNORED);
+#endif
 }
 
 void pfnWriteEntity(int iValue)
@@ -721,10 +787,14 @@ void pfnWriteEntity(int iValue)
       if (botMsgFunction)
          (*botMsgFunction)((void *)&iValue, botMsgIndex);
    }
-
-   (*g_engfuncs.pfnWriteEntity)(iValue);
+#ifndef METAMOD
+	(*g_engfuncs.pfnWriteEntity)(iValue);
+#else
+	RETURN_META(MRES_IGNORED);
+#endif
 }
 
+#ifndef METAMOD
 void pfnCVarRegister(cvar_t *pCvar)
 {
    if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnCVarRegister:\n"); fclose(fp); }
@@ -1006,7 +1076,7 @@ void pfnSetKeyValue(char *infobuffer, char *key, char *value)
    if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnSetKeyValue: %s %s\n",key,value); fclose(fp); }
    (*g_engfuncs.pfnSetKeyValue)(infobuffer, key, value);
 }
-
+#endif
 
 void pfnSetClientKeyValue( int clientIndex, char *infobuffer, char *key, char *value )
 {
@@ -1026,10 +1096,14 @@ void pfnSetClientKeyValue( int clientIndex, char *infobuffer, char *key, char *v
 		}
 	}
 	if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnSetClientKeyValue: %s %s\n",key,value); fclose(fp); }
+#ifndef METAMOD
 	(*g_engfuncs.pfnSetClientKeyValue)(clientIndex, infobuffer, key, value);
+#else
+	RETURN_META(MRES_IGNORED);
+#endif
 }
 
-
+#ifndef METAMOD
 int pfnIsMapValid(char *filename)
 {
    if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnIsMapValid:\n"); fclose(fp); }
@@ -1235,3 +1309,32 @@ void pfnAddServerCommand( char *cmd_name, void (*function) (void) )
    if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnAddServerCommand:\n"); fclose(fp); }
    (*g_engfuncs.pfnAddServerCommand)( cmd_name, function );
 }
+#else
+extern "C" int EXPORT GetEngineFunctions(enginefuncs_t *pengfuncsFromEngine, int *interfaceVersion)
+{
+	pengfuncsFromEngine->pfnCmd_Argc = Cmd_Argc;
+	pengfuncsFromEngine->pfnCmd_Argv = Cmd_Argv;
+	pengfuncsFromEngine->pfnCmd_Args = Cmd_Args;
+	pengfuncsFromEngine->pfnChangeLevel = pfnChangeLevel;
+	pengfuncsFromEngine->pfnMessageBegin = pfnMessageBegin;
+	pengfuncsFromEngine->pfnRegUserMsg = pfnRegUserMsg;
+	pengfuncsFromEngine->pfnMessageEnd = pfnMessageEnd;
+	pengfuncsFromEngine->pfnFindEntityByString = pfnFindEntityByString;
+	pengfuncsFromEngine->pfnEmitSound = pfnEmitSound;
+	pengfuncsFromEngine->pfnEmitAmbientSound = pfnEmitAmbientSound;
+	pengfuncsFromEngine->pfnServerCommand = pfnServerCommand;
+	pengfuncsFromEngine->pfnClientCommand = pfnClientCommand;
+	pengfuncsFromEngine->pfnWriteByte = pfnWriteByte;
+	pengfuncsFromEngine->pfnWriteChar = pfnWriteChar;
+	pengfuncsFromEngine->pfnWriteShort = pfnWriteShort;
+	pengfuncsFromEngine->pfnWriteLong = pfnWriteLong;
+	pengfuncsFromEngine->pfnWriteAngle = pfnWriteAngle;
+	pengfuncsFromEngine->pfnWriteCoord = pfnWriteCoord;
+	pengfuncsFromEngine->pfnWriteString = pfnWriteString;
+	pengfuncsFromEngine->pfnWriteEntity = pfnWriteEntity;
+	pengfuncsFromEngine->pfnSetClientKeyValue = pfnSetClientKeyValue;
+
+	return TRUE;
+}
+#endif
+

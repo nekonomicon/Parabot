@@ -395,7 +395,7 @@ float   TRACE_DEPTH = 20 + MAX_SPEED/5;
 
 
 
-void PB_Roaming::checkWay ( Vector &targetPos ) 
+void PB_Roaming::checkWay( const Vector &targetPos ) 
 {
 	checkWayRes left, right, side;
 

@@ -204,8 +204,13 @@ void PB_WeaponHandling::switchToWeapon( int wId )
 		cmd.buttons = 0;					// Attack buttons
 		cmd.impulse = 0;					// Impulse command issued.
 		cmd.weaponselect = wId+1;			// Current weapon id ( WEAPON SLOT! )
+#ifndef METAMOD
 		CmdStart( botEnt, &cmd, 0 );
 		CmdEnd( botEnt );
+#else
+		MDLL_CmdStart( botEnt, &cmd, 0 );
+		MDLL_CmdEnd( botEnt );
+#endif
 	}
 	else { 
 		UTIL_SelectItem( bots[botSlot].pEdict, weapon.name() );

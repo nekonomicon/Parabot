@@ -7,6 +7,10 @@
 //
 
 #include "extdll.h"
+#ifndef METAMOD
+#include "dllapi.h"
+#include "meta_api.h"
+#endif
 #include "parabot.h"
 #include "pb_global.h"
 
@@ -17,8 +21,9 @@
 #include "pb_chat.h"
 #include "pb_configuration.h"
 
-
+#ifndef METAMOD
 extern HINSTANCE h_Library;
+#endif
 extern int mod_id;
 extern float roundStartTime;
 extern PB_Configuration pbConfig;
@@ -59,7 +64,7 @@ inline void SET_CLIENT_KEY_VALUE( int clientIndex, char *infobuffer,
    (*g_engfuncs.pfnSetClientKeyValue)( clientIndex, infobuffer, key, value );
 }
 
-
+#ifndef METAMOD
 // this is the LINK_ENTITY_TO_CLASS function that creates a player (bot)
 void player( entvars_t *pev )
 {
@@ -76,7 +81,7 @@ void player( entvars_t *pev )
 		exit(0);
 	}
 }
-
+#endif
 
 // init variables for spawning here!
 void BotSpawnInit( bot_t *pBot )
@@ -172,13 +177,20 @@ void BotCreate( int fixedPersNr )
 	int clientIndex;
 
 	// Fix from Lean Hartwig at Topica
-    //FREE_PRIVATE( botEnt );
+	if (botEnt->pvPrivateData != NULL)
+		FREE_PRIVATE (botEnt);
+	botEnt->pvPrivateData = NULL;
+	botEnt->v.frags = 0;
                  
 	// create the player entity by calling MOD's player function
 	// (from LINK_ENTITY_TO_CLASS for player object)
+#ifndef METAMOD
 	player( VARS(botEnt) );
-
 	infobuffer = GET_INFOBUFFER( botEnt );
+#else
+	CALL_GAME_ENTITY (PLID, "player", &botEnt->v);
+	infobuffer = GET_INFOKEYBUFFER( botEnt );
+#endif
 	clientIndex = ENTINDEX( botEnt );
 		
 	SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "model", pbConfig.personality( persNr ).model );
@@ -199,16 +211,23 @@ void BotCreate( int fixedPersNr )
 		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "dm", "0");
 		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "ah", "1");
 	}
-	
-	if (!ClientConnect( botEnt, pbConfig.personality( persNr ).name, "127.0.0.1", ptr )) {
+#ifndef METAMOD	
+	if (!ClientConnect( botEnt, pbConfig.personality( persNr ).name, "127.0.0.1", ptr ))
+#else
+	if (!MDLL_ClientConnect( botEnt, pbConfig.personality( persNr ).name, "127.0.0.1", ptr ))
+#endif
+	{
 		FILE *dfp=fopen( "parabot/crashlog.txt", "a" ); 
 		fprintf( dfp, "BotCreate: ClientConnect() returned false!\n" ); 
 		fclose( dfp );
 	}
 	
 	// Pieter van Dijk - use instead of DispatchSpawn() - Hip Hip Hurray!
+#ifndef METAMOD
 	ClientPutInServer( botEnt );
-
+#else
+	MDLL_ClientPutInServer( botEnt );
+#endif
 	assert( botEnt != 0 );
 	botEnt->v.flags |= FL_FAKECLIENT;
 	

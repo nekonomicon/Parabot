@@ -9,7 +9,13 @@
 
 
 #include "extdll.h"
+#ifndef METAMOD
 #include "enginecallback.h"
+#else
+#include "dllapi.h"
+#include "h_export.h"
+#include "meta_api.h"
+#endif
 #include "entity_state.h"
 #include "pm_defs.h"
 
@@ -30,8 +36,10 @@ extern bool speechSynthesis;
 extern bot_t bots[32];
 extern PB_Configuration pbConfig;
 extern PB_Chat chat;
+#ifndef METAMOD
 extern GETENTITYAPI other_GetEntityAPI;
 extern GETNEWDLLFUNCTIONS other_GetNewDLLFunctions; 
+#endif
 static char g_argv[256];
 
 //#include "hl_game.h"
@@ -80,8 +88,11 @@ void GameDLLInit( void )
    
    // initialize the bots array of structures...
    memset(bots, 0, sizeof(bots));
-
-   (*other_gFunctionTable.pfnGameInit)();
+#ifndef METAMOD
+	(*other_gFunctionTable.pfnGameInit)();
+#else
+	RETURN_META(MRES_IGNORED);
+#endif
 }
 
 int DispatchSpawn( edict_t *pent )
@@ -131,10 +142,14 @@ int DispatchSpawn( edict_t *pent )
 //	  else if (strcmp(pClassname, "env_shake") == 0) debugMsg( "DISPATCH env_shake\n" );
 //	  else if (strcmp(pClassname, "env_explosion") == 0) debugMsg( "DISPATCH env_explosion\n" );
    }
-
-   return (*other_gFunctionTable.pfnSpawn)(pent);
+#ifndef METAMOD
+	return (*other_gFunctionTable.pfnSpawn)(pent);
+#else
+	RETURN_META_VALUE(MRES_IGNORED, 0);
+#endif
 }
 
+#ifndef METAMOD
 void DispatchThink( edict_t *pent )
 {
    (*other_gFunctionTable.pfnThink)(pent);
@@ -199,15 +214,12 @@ void ResetGlobalState( void )
 {
    (*other_gFunctionTable.pfnResetGlobalState)();
 }
-
-
+#endif
 ///////////////////////////////////////////////////////////////////////////////////
 //
 //  CLIENT HANDLING
 //
 ///////////////////////////////////////////////////////////////////////////////////
-
-
 BOOL ClientConnect( edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[ 128 ]  )
 { 
 	char buffer[256];
@@ -230,11 +242,17 @@ BOOL ClientConnect( edict_t *pEntity, const char *pszName, const char *pszAddres
 			if (bot_check_time < gpGlobals->time + 10.0) bot_check_time = gpGlobals->time + 10.0;
 		}
 	}
-	
+#ifndef METAMOD
 	bool connected = (*other_gFunctionTable.pfnClientConnect)(pEntity, pszName, pszAddress, szRejectReason);
-	
+#else
+	bool connected = MDLL_ClientConnect(pEntity, pszName, pszAddress, szRejectReason);
+#endif
 	debugFile( "  OK\n" );
+#ifndef METAMOD
 	return connected;
+#else
+	RETURN_META_VALUE(MRES_SUPERCEDE, connected);
+#endif
 }
 
 
@@ -268,19 +286,25 @@ void ClientDisconnect( edict_t *pEntity )
 	}
 	debugFile( buffer );
 	numberOfClients--;
+#ifndef METAMOD
 	(*other_gFunctionTable.pfnClientDisconnect)(pEntity);
-
+#else
+	MDLL_ClientDisconnect(pEntity);
+#endif
 	//if (index != -1) FREE_PRIVATE( pEntity );	// fakeclient fix by Leon Hartwig
 	debugFile( "  OK\n" );
+#ifdef METAMOD
+	RETURN_META(MRES_SUPERCEDE);
+#endif
 }
 
-
+#ifndef METAMOD
 void ClientKill( edict_t *pEntity )
 {
    if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ClientKill: %x\n",pEntity); fclose(fp); }
    (*other_gFunctionTable.pfnClientKill)(pEntity);
 }
-
+#endif
 
 void ClientPutInServer( edict_t *pEntity )
 {
@@ -305,10 +329,14 @@ void ClientPutInServer( edict_t *pEntity )
 	//HL_World *hlw = (HL_World*)game.world();
 	//hlw->addPlayer( np );
 	numberOfClients++;
+#ifndef METAMOD
 	(*other_gFunctionTable.pfnClientPutInServer)(pEntity);
+#else
+	RETURN_META(MRES_IGNORED);
+#endif
 }
 
-
+#ifndef METAMOD
 void ClientUserInfoChanged( edict_t *pEntity, char *infobuffer )
 {
    if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ClientUserInfoChanged: pEntity=%x infobuffer=%s\n", pEntity, infobuffer); fclose(fp); }
@@ -321,17 +349,21 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 {
    (*other_gFunctionTable.pfnServerActivate)(pEdictList, edictCount, clientMax);
 }
-
+#endif
 
 void ServerDeactivate( void )
 {
 	if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ServerDeactivate\n"); fclose(fp); }
-
-   (*other_gFunctionTable.pfnServerDeactivate)();
-   saveLevelData();		// save last level's data
+#ifndef METAMOD
+	(*other_gFunctionTable.pfnServerDeactivate)();
+#endif
+	saveLevelData();		// save last level's data
+#ifdef METAMOD
+	RETURN_META(MRES_IGNORED);
+#endif
 }
 
-
+#ifndef METAMOD
 void PlayerPreThink( edict_t *pEntity )
 {
    (*other_gFunctionTable.pfnPlayerPreThink)(pEntity);
@@ -393,18 +425,21 @@ void Sys_Error( const char *error_string )
 	if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "Sys_Error: %s\n", error_string); fclose(fp); }
 	(*other_gFunctionTable.pfnSys_Error)(error_string);
 }
-
+#endif
 
 void PM_Move ( struct playermove_s *ppmove, int server )
 {
 	assert( ppmove != 0 );
 	ptrPhysents = &(ppmove->visents[0]);
 	numPhysents = ppmove->numvisent;
-	
-   (*other_gFunctionTable.pfnPM_Move)(ppmove, server);
+#ifndef METAMOD	
+	(*other_gFunctionTable.pfnPM_Move)(ppmove, server);
+#else
+	RETURN_META(MRES_IGNORED);
+#endif
 }
 
-
+#ifndef METAMOD
 void PM_Init ( struct playermove_s *ppmove )
 {
    (*other_gFunctionTable.pfnPM_Init)(ppmove);
@@ -586,12 +621,12 @@ DLL_FUNCTIONS gFunctionTable =
    InconsistentFile,          //pfnInconsistentFile
    AllowLagCompensation,      //pfnAllowLagCompensation
 };
-
+#endif
 
 extern "C" EXPORT int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interfaceVersion )
 {
+#ifndef METAMOD
    // check if engine's pointer is valid and version is correct...
-
    if ( !pFunctionTable || interfaceVersion != INTERFACE_VERSION )
       return FALSE;
 
@@ -603,11 +638,22 @@ extern "C" EXPORT int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interface
    {
       return FALSE;  // error initializing function table!!!
    }
-
+#else
+	memset(pFunctionTable, 0, sizeof(DLL_FUNCTIONS));
+	pFunctionTable->pfnGameInit = GameDLLInit;
+	pFunctionTable->pfnSpawn = DispatchSpawn;
+	pFunctionTable->pfnClientConnect = ClientConnect;
+	pFunctionTable->pfnClientDisconnect = ClientDisconnect;
+	pFunctionTable->pfnClientPutInServer = ClientPutInServer;
+	pFunctionTable->pfnServerDeactivate = ServerDeactivate;
+	pFunctionTable->pfnPM_Move = PM_Move;
+	pFunctionTable->pfnStartFrame = StartFrame;
+	pFunctionTable->pfnClientCommand = ClientCommand;
+#endif
    return TRUE;
 }
 
-
+#ifndef METAMOD
 extern "C" EXPORT int GetNewDLLFunctions( NEW_DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion ) 
 { 
 	// pass other DLLs engine callbacks to function table... 
@@ -616,10 +662,10 @@ extern "C" EXPORT int GetNewDLLFunctions( NEW_DLL_FUNCTIONS *pFunctionTable, int
 	{ 
 		return FALSE;  // error initializing function table!!! 
 	} 
-	
+
 	return TRUE; 
 } 
-
+#endif
 
 void FakeClientCommand(edict_t *pBot, char *arg1, char *arg2, char *arg3)
 {
@@ -656,9 +702,12 @@ void FakeClientCommand(edict_t *pBot, char *arg1, char *arg2, char *arg3)
    if (arg3)
       strcpy(&g_argv[192], arg3);
 
-   // allow the MOD DLL to execute the ClientCommand...
-   ClientCommand(pBot);
-
+	// allow the MOD DLL to execute the ClientCommand...
+#ifndef METAMOD
+	ClientCommand(pBot);
+#else
+	MDLL_ClientCommand(pBot);
+#endif
    isFakeClientCommand = 0;
 }
 
@@ -667,11 +716,19 @@ const char *Cmd_Args( void )
 {
    if (isFakeClientCommand)
    {
-      return &g_argv[0];
+#ifndef METAMOD
+	return &g_argv[0];
+#else
+	RETURN_META_VALUE(MRES_SUPERCEDE, &g_argv[0]);
+#endif
    }
    else
    {
-      return (*g_engfuncs.pfnCmd_Args)();
+#ifndef METAMOD
+	return (*g_engfuncs.pfnCmd_Args)();
+#else
+	RETURN_META_VALUE(MRES_IGNORED, 0);
+#endif
    }
 }
 
@@ -682,24 +739,44 @@ const char *Cmd_Argv( int argc )
    {
       if (argc == 0)
       {
-         return &g_argv[64];
+#ifndef METAMOD
+	return &g_argv[64];
+#else
+	RETURN_META_VALUE(MRES_SUPERCEDE, &g_argv[64]);
+#endif
       }
       else if (argc == 1)
       {
-         return &g_argv[128];
+#ifndef METAMOD
+	return &g_argv[128];
+#else
+	RETURN_META_VALUE(MRES_SUPERCEDE, &g_argv[128]);
+#endif
       }
       else if (argc == 2)
       {
-         return &g_argv[192];
+#ifndef METAMOD
+	return &g_argv[192];
+#else
+	RETURN_META_VALUE(MRES_SUPERCEDE, &g_argv[192]);
+#endif
       }
       else
       {
-         return "???";
+#ifndef METAMOD
+	return "???";
+#else
+	RETURN_META_VALUE(MRES_SUPERCEDE, "???");
+#endif
       }
    }
    else
    {
-      return (*g_engfuncs.pfnCmd_Argv)(argc);
+#ifndef METAMOD
+	return (*g_engfuncs.pfnCmd_Argv)(argc);
+#else
+	RETURN_META_VALUE(MRES_IGNORED, 0);
+#endif
    }
 }
 
@@ -708,11 +785,19 @@ int Cmd_Argc( void )
 {
    if (isFakeClientCommand)
    {
-      return fake_arg_count;
+#ifndef METAMOD
+	return fake_arg_count;
+#else
+	RETURN_META_VALUE(MRES_SUPERCEDE, fake_arg_count);
+#endif
    }
    else
    {
-      return (*g_engfuncs.pfnCmd_Argc)();
+#ifndef METAMOD
+	return (*g_engfuncs.pfnCmd_Argc)();
+#else
+	RETURN_META_VALUE(MRES_IGNORED, 0);
+#endif
    }
 }
 
