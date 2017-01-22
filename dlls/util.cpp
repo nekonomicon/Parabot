@@ -287,21 +287,21 @@ int UTIL_GetTeam(edict_t *pEntity)
 #if 0 //GEARBOX_CTF		
 		if(gearbox_ctf)
 		{
-			if ((strcmp(model_name, "ctf_barney") == 0) ||
-				(strcmp(model_name, "cl_suit") == 0) ||
-				(strcmp(model_name, "ctf_gina") == 0) ||
-				(strcmp(model_name, "ctf_gordon") == 0) ||
-				(strcmp(model_name, "otis") == 0) ||
-				(strcmp(model_name, "ctf_scientist") == 0))
+			if ((strcmp(modelName, "ctf_barney") == 0) ||
+				(strcmp(modelName, "cl_suit") == 0) ||
+				(strcmp(modelName, "ctf_gina") == 0) ||
+				(strcmp(modelName, "ctf_gordon") == 0) ||
+				(strcmp(modelName, "otis") == 0) ||
+				(strcmp(modelName, "ctf_scientist") == 0))
 			{
 				return 0;
 			}
-			else if ((strcmp(model_name, "beret") == 0) ||
-				(strcmp(model_name, "drill") == 0) ||
-				(strcmp(model_name, "grunt") == 0) ||
-				(strcmp(model_name, "recruit") == 0) ||
-				(strcmp(model_name, "shephard") == 0) ||
-				(strcmp(model_name, "tower") == 0))
+			else if ((strcmp(modelName, "beret") == 0) ||
+				(strcmp(modelName, "drill") == 0) ||
+				(strcmp(modelName, "grunt") == 0) ||
+				(strcmp(modelName, "recruit") == 0) ||
+				(strcmp(modelName, "shephard") == 0) ||
+				(strcmp(modelName, "tower") == 0))
 			{
 				return 1;
 			}
@@ -323,7 +323,7 @@ int UTIL_GetTeam(edict_t *pEntity)
 		
 		if ((strcmp( modelName, "terror"   ) == 0) ||  // Phoenix Connektion
 			(strcmp( modelName, "arab"     ) == 0) ||    // Old L337 Krew
-			(strcmp( model_name, "leet") == 0) ||    // L337 Krew
+			(strcmp( modelName, "leet") == 0) ||    // L337 Krew
 			(strcmp( modelName, "arctic"   ) == 0) ||  // Artic Avenger
 			(strcmp( modelName, "guerilla" ) == 0))  // Gorilla Warfare
 		{
