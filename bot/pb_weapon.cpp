@@ -156,6 +156,7 @@ static tWeaponRec gearboxWeapon[MAX_GEARBOX_WEAPONS] = {
 const char* getWeaponName( int wId )
 {
 	switch (mod_id)	{
+	case AG_DLL:
 	case VALVE_DLL:		if (wId>=MIN_VALVE_WEAPONS && wId<MAX_VALVE_WEAPONS) return valveWeapon[wId].shortName;
 						else return "weapon";						
 	case HOLYWARS_DLL:	if (wId>=MIN_HW_WEAPONS && wId<MAX_HW_WEAPONS) return holywarsWeapon[wId].shortName;
@@ -183,6 +184,7 @@ void PB_Weapon::initMOD()
 {
 	modWeapon = 0;
 	switch (mod_id)	{
+	case AG_DLL:
 	case VALVE_DLL:		modWeapon = &valveWeapon[0];
 						minModWeapon = MIN_VALVE_WEAPONS;
 						maxModWeapon = MAX_VALVE_WEAPONS;
@@ -1046,7 +1048,7 @@ float PB_Weapon::getScore( float distance, float hitProb, int flags, bool checkA
 // returns max. 10 pts
 {
 	switch (mod_id)	{
-
+	case AG_DLL:
 	case VALVE_DLL:		return valveWeaponScore( distance, hitProb, flags, checkAmmo );
 	case HOLYWARS_DLL:	return hwWeaponScore( distance, hitProb, flags, checkAmmo );
 	case DMC_DLL:		return dmcWeaponScore( distance, hitProb, flags, checkAmmo );
@@ -1140,7 +1142,7 @@ bool PB_Weapon::attack( Vector target, float accuracy, Vector relVel )
 	else {
 				
 		// load special weapons:
-		if ( mod_id == VALVE_DLL || mod_id == GEARBOX_DLL ) {	
+		if ( mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == GEARBOX_DLL ) {	
 			if ( currentWeapon==VALVE_WEAPON_GAUSS && bestMode[currentWeapon]==2 ) {
 				if (!loadingGauss) {
 					loadingGauss = true;
@@ -1169,7 +1171,7 @@ bool PB_Weapon::attack( Vector target, float accuracy, Vector relVel )
 			lastAttackTime = worldTime();
 			if ( bestMode[currentWeapon] == 1 ) {	
 				// primary fire:
-				if (mod_id==VALVE_DLL || mod_id==GEARBOX_DLL) {
+				if (mod_id==VALVE_DLL || mod_id == AG_DLL || mod_id==GEARBOX_DLL) {
 					if (currentWeapon==VALVE_WEAPON_HANDGRENADE) fired = attackValveHandgrenade( target );
 					else if (currentWeapon==VALVE_WEAPON_SATCHEL) fired = attackValveSatchel( target );
 					else {  botAction->add( BOT_FIRE_PRIM );  fired = true;  }
@@ -1178,7 +1180,7 @@ bool PB_Weapon::attack( Vector target, float accuracy, Vector relVel )
 			}
 			else {	
 				// secondary fire:
-				if (mod_id==VALVE_DLL || mod_id==GEARBOX_DLL) {
+				if (mod_id==VALVE_DLL || mod_id == AG_DLL || mod_id==GEARBOX_DLL) {
 					if (currentWeapon==VALVE_WEAPON_GAUSS) {
 						botAction->add( BOT_RELEASE_SEC );
 						loadingGauss = false;
@@ -1210,7 +1212,7 @@ bool PB_Weapon::attack( Vector target, float accuracy, Vector relVel )
 void PB_Weapon::finishAttack()
 {
 	//debugMsg( "Forced to finish attack!\n" );
-	if (mod_id == VALVE_DLL || mod_id == GEARBOX_DLL) {
+	if (mod_id == VALVE_DLL || mod_id == AG_DLL ||mod_id == GEARBOX_DLL) {
 		if (currentWeapon==VALVE_WEAPON_HANDGRENADE) {
 			botAction->setViewDir( grenadeTarget, 5 );
 			attackValveHandgrenade( grenadeTarget );

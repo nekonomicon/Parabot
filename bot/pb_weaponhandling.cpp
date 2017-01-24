@@ -17,6 +17,7 @@ extern PB_Configuration pbConfig;	// from configfiles.cpp
 PB_WeaponHandling::PB_WeaponHandling()
 {
 	switch (mod_id)	{
+	case AG_DLL:
 	case VALVE_DLL:		minModWeapon = MIN_VALVE_WEAPONS;
 						maxModWeapon = MAX_VALVE_WEAPONS;
 						defaultWeapon = VALVE_WEAPON_GLOCK;
@@ -110,7 +111,7 @@ bool PB_WeaponHandling::available( int wId )
 	if (pbConfig.onRestrictedWeaponMode()) {
 		// exclude powerful weapons
 		switch (mod_id) {
-
+		case AG_DLL:
 		case VALVE_DLL:	
 			if ( wId == VALVE_WEAPON_MP5		||
 				 wId == VALVE_WEAPON_CROSSBOW	||
@@ -251,7 +252,7 @@ bool PB_WeaponHandling::armBestWeapon( float distance, float hitProb, int flags 
 
 	int bestMode = weapon.bestAttackMode();
 	
-	if (mod_id==VALVE_DLL || mod_id==GEARBOX_DLL) {	// switch to correct weapon-mode
+	if (mod_id==VALVE_DLL || mod_id==AG_DLL || mod_id==GEARBOX_DLL) {	// switch to correct weapon-mode
 		if ( bestWeapon==VALVE_WEAPON_CROSSBOW || bestWeapon==VALVE_WEAPON_PYTHON ) {	
 			if ( bestMode==1 && botEnt->v.fov!=90 && 
 				 (lastModeSwitch+0.5)<worldTime() ) {

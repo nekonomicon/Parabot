@@ -262,7 +262,7 @@ void startBotCam( edict_t *pEntity )
 {
 	assert( pEntity != 0 );
 
-	if (mod_id==VALVE_DLL || mod_id==GEARBOX_DLL) {
+	if (mod_id==VALVE_DLL || mod_id==AG_DLL ||  mod_id==GEARBOX_DLL) {
 		int clientIndex = ENTINDEX( pEntity ) - 1;
 		assert( clientIndex >= 0 );
 		assert( clientIndex < 32 );

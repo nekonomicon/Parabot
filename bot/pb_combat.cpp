@@ -108,6 +108,7 @@ bool PB_Combat::shootAtEnemy( Vector enemyOrigin, float accuracy )
 		firePos = firePos + Vector( 0,0,28);	// aim at head
 	}
 	switch( mod_id ) {
+	case AG_DLL:
 	case VALVE_DLL:
 	case GEARBOX_DLL:
 		if (weapon.currentWeapon()==VALVE_WEAPON_RPG) {		
@@ -149,6 +150,7 @@ bool PB_Combat::shootAtEnemy( edict_t *enemy, float accuracy )
 	}
 	
 	switch( mod_id ) {
+	case AG_DLL:
 	case VALVE_DLL:
 	case GEARBOX_DLL:
 		if (weapon.currentWeapon()==VALVE_WEAPON_RPG) {		
@@ -245,6 +247,7 @@ void PB_Combat::closeCombatMovement( PB_Percept &perceipt )
 	// if enemy tries to shoot at bot
 	int closeDistanceWeapon = 0;
 	switch (mod_id) {
+		case AG_DLL:
 		case VALVE_DLL:		closeDistanceWeapon = VALVE_WEAPON_CROWBAR;
 							break;
 		case HOLYWARS_DLL:	closeDistanceWeapon = HW_WEAPON_JACKHAMMER;

@@ -112,7 +112,8 @@ void pfnMessageBegin(int msg_dest, int msg_type, const float *pOrigin, edict_t *
             botMsgIndex = index;    // index of bot receiving message
 
             switch( mod_id ) {
-			case VALVE_DLL:
+		case AG_DLL:
+		case VALVE_DLL:
 				if (msg_type == message_WeaponList)
 					botMsgFunction = BotClient_Valve_WeaponList;
 				else if (msg_type == message_CurWeapon)

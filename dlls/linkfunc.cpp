@@ -587,4 +587,17 @@ LINK_ENTITY_TO_FUNC(weapon_nailgun);
 LINK_ENTITY_TO_FUNC(weapon_quakegun);
 LINK_ENTITY_TO_FUNC(weapon_supernailgun);
 LINK_ENTITY_TO_FUNC(weapon_supershotgun);
+
+// entitites for AG mod (v6.0)
+LINK_ENTITY_TO_FUNC(carried_flag_team1);
+LINK_ENTITY_TO_FUNC(carried_flag_team2);
+LINK_ENTITY_TO_FUNC(ctf_blueflag);
+LINK_ENTITY_TO_FUNC(ctf_redflag);
+LINK_ENTITY_TO_FUNC(ctf_bluespawn);
+LINK_ENTITY_TO_FUNC(ctf_redspawn);
+LINK_ENTITY_TO_FUNC(info_hmctfdetect);
+LINK_ENTITY_TO_FUNC(info_player_team1);
+LINK_ENTITY_TO_FUNC(info_player_team2);
+LINK_ENTITY_TO_FUNC(item_flag_team1);
+LINK_ENTITY_TO_FUNC(item_flag_team2);
 #endif

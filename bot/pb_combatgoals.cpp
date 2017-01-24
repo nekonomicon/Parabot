@@ -279,6 +279,7 @@ void goalSilentAttack( CParabot *pb, PB_Percept*item )
 	}
 	else {
 		switch (mod_id) {
+			case AG_DLL:
 			case VALVE_DLL:		pb->combat.weapon.setPreferredWeapon( VALVE_WEAPON_SHOTGUN, 2 );	
 								break;
 			case HOLYWARS_DLL:	pb->combat.weapon.setPreferredWeapon( HW_WEAPON_DOUBLESHOTGUN, 1 );	
@@ -403,7 +404,7 @@ void goalShootAtEnemy( CParabot *pb, PB_Percept*item )
 					item->flags &= ~PI_BEST_ARMED;
 					item->flags |= PI_PREEMPTIVE;
 					pb->preemptiveWeapon = bestWeapon;
-					if ((mod_id==VALVE_DLL || mod_id==GEARBOX_DLL) && bestWeapon==VALVE_WEAPON_RPG) 
+					if ((mod_id==VALVE_DLL || mod_id == AG_DLL || mod_id==GEARBOX_DLL) && bestWeapon==VALVE_WEAPON_RPG) 
 						pb->preemptiveMode = 2;		// switch off RPG laserdot
 					else 
 						pb->preemptiveMode = 1;

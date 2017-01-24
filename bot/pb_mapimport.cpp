@@ -276,6 +276,7 @@ bool loadLevelData()
 
 		// import MOD-specifics
 		switch( mod_id ) {
+		case AG_DLL:
 		case VALVE_DLL:		importHL_Specifics();		break;
 		case CSTRIKE_DLL:	importCS_Specifics();		break;
 		case TFC_DLL:		importTFC_Specifics();		break;
@@ -286,7 +287,7 @@ bool loadLevelData()
 		}
 		
 		// import specials
-		if (mod_id==VALVE_DLL && strcmp( STRING(gpGlobals->mapname), "crossfire" )==0) {
+		if ((mod_id==VALVE_DLL || mod_id==AG_DLL) && strcmp( STRING(gpGlobals->mapname), "crossfire" )==0) {
 			Vector v( 0,-2236,-1852 );
 			n.init( v, NAV_S_AIRSTRIKE_BUTTON, 0 );
 			mapGraph.addNavpoint( n );

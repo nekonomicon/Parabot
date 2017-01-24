@@ -541,7 +541,7 @@ void PB_Observer::checkForCamping( int oId, Vector &pos )
 void PB_Observer::checkForTripmines( int oId, Vector &pos )
 // check for setting up tripmine
 {
-	if (mod_id==VALVE_DLL || mod_id==GEARBOX_DLL) {
+	if (mod_id==VALVE_DLL || mod_id==AG_DLL || mod_id==GEARBOX_DLL) {
 		// find weapon the player is handling:
 		int clientIndex = ENTINDEX( ENT(obs[oId].player->pev) ) - 1;
 		assert( (clientIndex >= 0) && (clientIndex < 32) );

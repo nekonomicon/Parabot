@@ -456,6 +456,7 @@ void PB_Navpoint::reportVisit( edict_t *player, float time )
 	lastVisitor = player;
 	lastVisitedAt = time;
 	switch( mod_id ) {
+	case AG_DLL:
 	case VALVE_DLL:	// weapons and ammo:
 					if (type() < NAV_F_BUTTON)	
 						nextVisitAt = (lastVisitedAt+20);	

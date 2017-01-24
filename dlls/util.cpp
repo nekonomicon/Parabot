@@ -312,7 +312,7 @@ int UTIL_GetTeam(edict_t *pEntity)
 			if (stricmp( teamName, valveTeamList[i] ) == 0) return i;
 		debugMsg( "ERROR: Team not found!\n" );
 		return 0;
-	//case AG_DLL:
+	case AG_DLL:
 	//case FRONTLINE_DLL:
 	case TFC_DLL:
 		return pEntity->v.team - 1;  // teams are 1-4 based

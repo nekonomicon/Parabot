@@ -67,6 +67,7 @@ float PB_Needs::wishForCombat()
 	float weapon = 0.1;
 
 	switch (mod_id) {
+	case AG_DLL:
 	case VALVE_DLL:
 			 if ( bot->combat.hasWeapon( VALVE_WEAPON_EGON      ) || 
 				  bot->combat.hasWeapon( VALVE_WEAPON_GAUSS     )    )  weapon = 1;
@@ -113,6 +114,7 @@ float PB_Needs::wishForSniping( bool weaponCheck )
 	float weapon = 0;
 	if (weaponCheck) {
 		switch (mod_id) {
+			case AG_DLL:
 			case VALVE_DLL:		if ( bot->combat.hasWeapon( VALVE_WEAPON_CROSSBOW ) ) weapon = 1;
 								if ( bot->combat.hasWeapon( VALVE_WEAPON_PYTHON   ) ) weapon = 0.5; 
 								break;
@@ -446,6 +448,7 @@ void PB_Needs::gearboxWishList()
 void PB_Needs::getWishList()
 {
 	switch (mod_id) {
+		case AG_DLL:
 		case VALVE_DLL:		valveWishList();	break;
 		case HOLYWARS_DLL:	hwWishList();		break;
 		case DMC_DLL:		dmcWishList();		break;

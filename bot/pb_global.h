@@ -20,15 +20,15 @@
 #include "utilityfuncs.h"
 
 
-
 // define constants used to identify the MOD we are playing...
-#define VALVE_DLL		1
-#define TFC_DLL			2
-#define CSTRIKE_DLL		3
-#define HOLYWARS_DLL	4
-#define DMC_DLL			5
-#define GEARBOX_DLL		6
-
+#define VALVE_DLL      1
+#define TFC_DLL        2
+#define CSTRIKE_DLL    3
+#define GEARBOX_DLL    4
+#define FRONTLINE_DLL  5
+#define HOLYWARS_DLL   6
+#define DMC_DLL        7
+#define AG_DLL         8
 
 // bot-actions
 #define BOT_JUMP			1	

@@ -105,6 +105,15 @@ extern "C" void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, g
 	}
 	strcpy( mod_name, &game_dir[pos] );
 	
+	if (stricmp(mod_name, "aghl") == 0)
+	{
+		mod_id = AG_DLL;
+#ifndef METAMOD
+		h_Library = LoadLibrary( "aghl/dlls/ag."OS_LIB_EXT );
+#endif
+		pbConfig.initConfiguration( "parabot/aghl/parabot.cfg" );
+                pbConfig.initPersonalities( "parabot/aghl/characters.cfg" );
+	}
 	if (stricmp(mod_name, "valve") == 0)
 	{
 		mod_id = VALVE_DLL;
@@ -162,7 +171,7 @@ extern "C" void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, g
 		errorMsg( "MOD Dll not found (or unsupported MOD)!" );
 		debugFile( "Library = 0\n" );
 	}
-	
+
 	other_GetEntityAPI = (GETENTITYAPI)GetProcAddress( h_Library, "GetEntityAPI" );
 	if (other_GetEntityAPI == NULL)	errorMsg( "Can't get MOD's GetEntityAPI!\n" );
 	
