@@ -92,6 +92,7 @@ float PB_Needs::wishForCombat()
 		else if ( bot->combat.hasWeapon( DMC_WEAPON_SUPERSHOTGUN   ) || 
 				  bot->combat.hasWeapon( DMC_WEAPON_GRENLAUNCHER   )    )  weapon = 0.6;
 		break;
+	case HUNGER_DLL:
 	case GEARBOX_DLL:
 		weapon = 0.8;
 		break;
@@ -123,6 +124,8 @@ float PB_Needs::wishForSniping( bool weaponCheck )
 			case DMC_DLL:		if ( bot->combat.hasWeapon( DMC_WEAPON_LIGHTNING ) ) weapon = 1;
 								break;
 			case GEARBOX_DLL:	if ( bot->combat.hasWeapon( VALVE_WEAPON_CROSSBOW ) ) weapon = 1;
+								break;
+			case HUNGER_DLL:	if ( bot->combat.hasWeapon( VALVE_WEAPON_CROSSBOW || HUNGER_WEAPON_EINAR1 || HUNGER_WEAPON_SNIPER ) ) weapon = 1;
 								break;
 		}
 	}
@@ -449,6 +452,7 @@ void PB_Needs::getWishList()
 {
 	switch (mod_id) {
 		case AG_DLL:
+		case HUNGER_DLL:
 		case VALVE_DLL:		valveWishList();	break;
 		case HOLYWARS_DLL:	hwWishList();		break;
 		case DMC_DLL:		dmcWishList();		break;

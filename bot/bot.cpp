@@ -195,7 +195,7 @@ void BotCreate( int fixedPersNr )
 		
 	SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "model", pbConfig.personality( persNr ).model );
 	
-	if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == DMC_DLL || mod_id == GEARBOX_DLL) {	// set colors
+	if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == DMC_DLL || mod_id == GEARBOX_DLL) {	// set colors
 		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "topcolor", pbConfig.getColor( persNr, 371 ) );
 		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "bottomcolor", pbConfig.getColor( persNr, 97 ) );
 	}
@@ -269,7 +269,7 @@ void BotCreate( int fixedPersNr )
 		GOAL_UNCONDITIONAL, goalLoadHealthOrArmor, weightLoadHealthOrArmor );
 	//pBot->parabot->goalFinder.addGoal( G_MOVE,
 	//	GOAL_UNCONDITIONAL, goalPause, weightPause );
-	if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == GEARBOX_DLL) {
+	if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) {
 		pBot->parabot->goalFinder.addGoal( G_MOVE | G_VIEW,
 			GOAL_UNCONDITIONAL, goalLayTripmine, weightLayTripmine );
 	}
@@ -323,7 +323,7 @@ void BotCreate( int fixedPersNr )
 		PI_FOE, goalTakeCover, weightTakeCover );
 
 	
-	if (mod_id == VALVE_DLL || mod_id == AG_DLL ||mod_id == GEARBOX_DLL) {
+	if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) {
 		pBot->parabot->goalFinder.addGoal( G_VIEW,
 			PI_LASERDOT, goalLookAround, weightLookAroundLaserdot );
 		pBot->parabot->goalFinder.addGoal( G_MOVE,

@@ -221,7 +221,7 @@ void pfnMessageBegin(int msg_dest, int msg_type, const float *pOrigin, edict_t *
 				else if (msg_type == message_Money)
 					botMsgFunction = BotClient_CS_Money;
 				break;
-			case GEARBOX_DLL:
+		case GEARBOX_DLL:
 				if (msg_type == message_WeaponList)
 					botMsgFunction = BotClient_Gearbox_WeaponList;
 				else if (msg_type == message_CurWeapon)
@@ -240,6 +240,26 @@ void pfnMessageBegin(int msg_dest, int msg_type, const float *pOrigin, edict_t *
 					botMsgFunction = BotClient_Gearbox_Battery;
 				else if (msg_type == message_Damage)
 					botMsgFunction = BotClient_Gearbox_Damage;
+				break;
+		case HUNGER_DLL:
+				if (msg_type == message_WeaponList)
+					botMsgFunction = BotClient_Hunger_WeaponList;
+				else if (msg_type == message_CurWeapon)
+					botMsgFunction = BotClient_Hunger_CurrentWeapon;
+				else if (msg_type == message_AmmoX)
+					botMsgFunction = BotClient_Hunger_AmmoX;
+				else if (msg_type == message_AmmoPickup)
+					botMsgFunction = BotClient_Hunger_AmmoPickup;
+				else if (msg_type == message_WeapPickup)
+					botMsgFunction = BotClient_Hunger_WeaponPickup;
+				else if (msg_type == message_ItemPickup)
+					botMsgFunction = BotClient_Hunger_ItemPickup;
+				else if (msg_type == message_Health)
+					botMsgFunction = BotClient_Hunger_Health;
+				else if (msg_type == message_Battery)
+					botMsgFunction = BotClient_Hunger_Battery;
+				else if (msg_type == message_Damage)
+					botMsgFunction = BotClient_Hunger_Damage;
 				break;
 			}
          }

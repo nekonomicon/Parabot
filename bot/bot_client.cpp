@@ -213,7 +213,11 @@ void BotClient_Gearbox_WeaponList(void *p, int bot_index)
    BotClient_Valve_WeaponList(p, bot_index);
 }
 
-
+void BotClient_Hunger_WeaponList(void *p, int bot_index)
+{
+   // this is just like the Valve Weapon List message
+   BotClient_Valve_WeaponList(p, bot_index);
+}
 // This message is sent when a weapon is selected (either by the bot chosing
 // a weapon or by the server auto assigning the bot a weapon).
 void BotClient_Valve_CurrentWeapon(void *p, int bot_index)
@@ -336,6 +340,11 @@ void BotClient_Gearbox_CurrentWeapon(void *p, int bot_index)
    BotClient_Valve_CurrentWeapon(p, bot_index);
 }
 
+void BotClient_Hunger_CurrentWeapon(void *p, int bot_index)
+{
+   // this is just like the Valve Current Weapon message
+   BotClient_Valve_CurrentWeapon(p, bot_index);
+}
 
 // This message gets sent when the bot picks up a weapon.
 void BotClient_Valve_WeaponPickup(void *p, int bot_index)
@@ -384,6 +393,11 @@ void BotClient_Gearbox_WeaponPickup(void *p, int bot_index)
    BotClient_Valve_WeaponPickup(p, bot_index);
 }
 
+void BotClient_Hunger_WeaponPickup(void *p, int bot_index)
+{
+   // this is just like the Valve Weapon Pickup message
+   BotClient_Valve_WeaponPickup(p, bot_index);
+}
 
 void HumanClient_CurrentWeapon( void *p, int clientIndex )
 {
@@ -494,6 +508,11 @@ void BotClient_Gearbox_AmmoX(void *p, int bot_index)
    BotClient_Valve_AmmoX(p, bot_index);
 }
 
+void BotClient_Hunger_AmmoX(void *p, int bot_index)
+{
+   // this is just like the Valve AmmoX message
+   BotClient_Valve_AmmoX(p, bot_index);
+}
 
 // This message is sent when the bot picks up some ammo (AmmoX messages are
 // also sent so this message is probably not really necessary except it
@@ -564,7 +583,11 @@ void BotClient_Gearbox_AmmoPickup(void *p, int bot_index)
    BotClient_Valve_AmmoPickup(p, bot_index);
 }
 
-
+void BotClient_Hunger_AmmoPickup(void *p, int bot_index)
+{
+   // this is just like the Valve Ammo Pickup message
+   BotClient_Valve_AmmoPickup(p, bot_index);
+}
 
 ///////////////////////////////////////////////////////////////////////////////////
 //
@@ -614,7 +637,11 @@ void BotClient_Gearbox_ItemPickup(void *p, int bot_index)
    BotClient_Valve_ItemPickup(p, bot_index);
 }
 
-
+void BotClient_Hunger_ItemPickup(void *p, int bot_index)
+{
+   // this is just like the Valve Item Pickup message
+   BotClient_Valve_ItemPickup(p, bot_index);
+}
 
 ///////////////////////////////////////////////////////////////////////////////////
 //
@@ -703,6 +730,11 @@ void BotClient_Gearbox_Health(void *p, int bot_index)
    BotClient_Valve_Health(p, bot_index);
 }
 
+void BotClient_Hunger_Health(void *p, int bot_index)
+{
+   // this is just like the Valve Health message
+   BotClient_Valve_Health(p, bot_index);
+}
 
 // This message gets sent when the bots armor changes.
 void BotClient_Valve_Battery(void *p, int bot_index)
@@ -745,6 +777,11 @@ void BotClient_Gearbox_Battery(void *p, int bot_index)
    BotClient_Valve_Battery(p, bot_index);
 }
 
+void BotClient_Hunger_Battery(void *p, int bot_index)
+{
+   // this is just like the Valve Battery message
+   BotClient_Valve_Battery(p, bot_index);
+}
 
 extern bool pb_pause;
 
@@ -839,7 +876,11 @@ void BotClient_Gearbox_Damage(void *p, int bot_index)
    BotClient_Valve_Damage(p, bot_index);
 }
 
-
+void BotClient_Hunger_Damage(void *p, int bot_index)
+{
+   // this is just like the Valve Battery message
+   BotClient_Valve_Damage(p, bot_index);
+}
 
 ///////////////////////////////////////////////////////////////////////////////////
 //

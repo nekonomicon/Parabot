@@ -277,6 +277,7 @@ bool loadLevelData()
 		// import MOD-specifics
 		switch( mod_id ) {
 		case AG_DLL:
+		case HUNGER_DLL:
 		case VALVE_DLL:		importHL_Specifics();		break;
 		case CSTRIKE_DLL:	importCS_Specifics();		break;
 		case TFC_DLL:		importTFC_Specifics();		break;

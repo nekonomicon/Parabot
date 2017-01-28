@@ -114,7 +114,7 @@ extern "C" void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, g
 		pbConfig.initConfiguration( "parabot/aghl/parabot.cfg" );
                 pbConfig.initPersonalities( "parabot/aghl/characters.cfg" );
 	}
-	if (stricmp(mod_name, "valve") == 0)
+	else if (stricmp(mod_name, "valve") == 0)
 	{
 		mod_id = VALVE_DLL;
 #ifndef METAMOD
@@ -122,6 +122,15 @@ extern "C" void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, g
 #endif
 		pbConfig.initConfiguration( "parabot/valve/parabot.cfg" );
 		pbConfig.initPersonalities( "parabot/valve/characters.cfg" );
+	}
+	else if (stricmp(mod_name, "Hunger") == 0)
+	{
+		mod_id = HUNGER_DLL;
+#ifndef METAMOD
+		h_Library = LoadLibrary( "Hunger/dlls/einar."OS_LIB_EXT );
+#endif
+		pbConfig.initConfiguration( "parabot/Hunger/parabot.cfg" );
+		pbConfig.initPersonalities( "parabot/Hunger/characters.cfg" );
 	}
 	else if (stricmp(mod_name, "hldm") == 0)
 	{

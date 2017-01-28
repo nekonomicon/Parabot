@@ -239,7 +239,7 @@ bool PB_Perception::classify( PB_Percept &perc )
 		return true;
 	}
 
-	if ((mod_id==VALVE_DLL || mod_id==AG_DLL || mod_id==GEARBOX_DLL || mod_id==DMC_DLL) && !valveTeamPlayMode) {
+	if ((mod_id==VALVE_DLL || mod_id==AG_DLL || mod_id==HUNGER_DLL || mod_id==GEARBOX_DLL || mod_id==DMC_DLL) && !valveTeamPlayMode) {
 		perc.pClass = PI_FOE;	// no friends in deathmatch...
 		return true;
 	}

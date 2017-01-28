@@ -172,6 +172,34 @@ typedef struct {
 
 #define MAX_GEARBOX_WEAPONS				27
 
+// weapon ID values for They Hunger Trilogy
+#define MIN_HUNGER_WEAPONS                1
+/*
+#define VALVE_WEAPON_CROWBAR       1
+#define VALVE_WEAPON_GLOCK         2
+#define VALVE_WEAPON_PYTHON        3
+#define VALVE_WEAPON_MP5           4
+#define VALVE_WEAPON_CHAINGUN      5
+#define VALVE_WEAPON_CROSSBOW      6
+#define VALVE_WEAPON_SHOTGUN       7
+#define VALVE_WEAPON_RPG           8
+#define VALVE_WEAPON_GAUSS         9
+#define VALVE_WEAPON_EGON         10
+#define VALVE_WEAPON_HORNETGUN    11
+#define VALVE_WEAPON_HANDGRENADE  12
+#define VALVE_WEAPON_TRIPMINE     13
+#define VALVE_WEAPON_SATCHEL      14
+#define VALVE_WEAPON_SNARK        15
+*/
+#define HUNGER_WEAPON_SHOVEL	16
+#define HUNGER_WEAPON_SPANNER	17
+#define HUNGER_WEAPON_AP9	18
+#define HUNGER_WEAPON_TAURUS	19
+#define HUNGER_WEAPON_EINAR1	20
+#define HUNGER_WEAPON_SNIPER    21
+#define HUNGER_WEAPON_MEDKIT 	22
+
+#define MAX_HUNGER_WEAPONS	23
 
 // weapon flags
 #define WF_UNDERWATER			(1<<0)
@@ -298,7 +326,8 @@ private:
 	float csWeaponScore( float distance, float hitProb, int flags, bool checkAmmo );
 	float tfcWeaponScore( float distance, float hitProb, int flags, bool checkAmmo );
 	float gearboxWeaponScore( float distance, float hitProb, int flags, bool checkAmmo );
-	
+	float hungerWeaponScore( float distance, float hitProb, int flags, bool checkAmmo );	
+
 	bool attackValveHandgrenade( Vector &target );
 	bool attackValveSatchel( Vector &target );
 };

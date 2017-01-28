@@ -151,7 +151,33 @@ static tWeaponRec gearboxWeapon[MAX_GEARBOX_WEAPONS] = {
 	{ "weapon_penguin",	   400,		0.342,	0.3,		false,	WV_QUIET,	WV_QUIET,	WF_NONE,	WF_NONE,	0.0,	"penguin"		}
 };
 
-
+// Hunger Weaponlist
+static tWeaponRec hungerWeapon[MAX_HUNGER_WEAPONS] = {
+        // name                         bestDist        cone    highAimProb     secAmmo volAttack1      volAttack2      visAttack1      visAttack2      fireDelay       shortName
+        { "",                                    0,             0.1,    0.0,            false,  WV_NONE,        WV_NONE,        WF_NONE,        WF_NONE,        0.0,    "" },
+        { "weapon_crowbar",             10,             0.866,  0.0,            false,  WV_SWING,       WV_SWING,       WF_NONE,        WF_NONE,        0.0,    "umbrella"               },
+        { "weapon_9mmhandgun", 200,             0.052,  0.5,            false,  WV_NORMAL,      WV_NORMAL,      WF_NORMAL,      WF_NORMAL,      0.0,    "beretta"                 },      // = glock
+        { "weapon_357",            600,         0.017,  0.5,            false,  WV_LOUD,        WV_NONE,        WF_NORMAL,      WF_NONE,        0.0,    "python"                },      // = python
+        { "weapon_9mmAR",          200,         0.104,  0.4,            true,   WV_NORMAL,      WV_NORMAL,      WF_NORMAL,      WF_BRIGHT,      0.0,    "Thompson"                   },      // = mp5
+	{ "weapon_th_chaingun", 50,             0.173,  0.5,            false,  WV_NORMAL,      WV_NORMAL,      WF_NORMAL,      WF_NORMAL,      0.0,    "chaingun"                 },
+        { "weapon_crossbow",   600,             0.017,  0.5,            false,  WV_QUIET,       WV_NONE,        WF_NONE,        WF_NONE,        0.0,    "crossbow"              },
+        { "weapon_shotgun",             50,             0.173,  0.5,            false,  WV_LOUD,        WV_LOUD,        WF_NORMAL,      WF_NORMAL,      0.0,    "shotgun"               },
+        { "weapon_rpg",            400,         0.173,  0.1,            false,  WV_LOUD,        WV_NONE,        WF_BRIGHT,      WF_NONE,        0.0,    "rocketlauncher"	},
+        { "weapon_gauss",          300,         0.017,  0.5,            false,  WV_FLASH,       WV_LOAD,        WF_NORMAL,      WF_NONE,        0.0,    "gauss"                 },
+        { "weapon_egon",           50,         0.017,  0.5,            false,  WV_FLASH,       WV_FLASH,       WF_BRIGHT,      WF_BRIGHT,      0.0,    "flamethrower"                  },
+        { "",  					0,             0.1,  0.0,            false,  WV_NONE,       WV_NONE,      WF_NONE,      WF_NONE,      0.0,    ""             },
+        { "weapon_handgrenade",400,             0.342,  0.3,            false,  WV_NONE,        WV_NONE,        WF_NONE,        WF_NONE,        0.0,    "TNT"   },
+        { "weapon_tripmine",     0,             0.1,    0.0,            false,  WV_QUIET,       WV_NONE,        WF_NONE,        WF_NONE,        0.0,    "tripmine"              },
+        { "weapon_satchel",    400,             0.342,  0.3,            false,  WV_QUIET,       WV_QUIET,       WF_NONE,        WF_NONE,        0.0,    "satchel"               },
+        { "weapon_snark",          400,         0.173,  0.1,            false,  WV_QUIET,       WV_QUIET,       WF_NONE,        WF_NONE,        0.0,    "snark"                 },
+	{ "weapon_th_shovel",            10,             0.866,  0.0,            false,  WV_SWING,       WV_SWING,       WF_NONE,        WF_NONE,        0.0,    "shovel"               },
+	{ "weapon_th_spanner",            10,             0.866,  0.0,            false,  WV_SWING,       WV_SWING,       WF_NONE,        WF_NONE,        0.0,    "spanner"               },
+	{ "weapon_th_ap9",	200,             0.104,  0.5,            false,  WV_NORMAL,      WV_NORMAL,      WF_NORMAL,      WF_NORMAL,      0.0,    "AP9"               },
+	{ "weapon_th_taurus", 200,             0.052,  0.5,            false,  WV_NORMAL,      WV_NORMAL,      WF_NORMAL,      WF_NORMAL,      0.0,    "taurus"                 },
+	{ "weapon_einar1",   600,             0.017,  0.5,            false,  WV_QUIET,       WV_NONE,        WF_NONE,        WF_NONE,        0.0,    "einar1"              },
+	{ "weapon_th_sniper",   600,             0.017,  0.5,            false,  WV_QUIET,       WV_NONE,        WF_NONE,        WF_NONE,        0.0,    "HK G36"              },
+	{ "weapon_th_medkit", 0,             0.1,    0.0,            false,  WV_NONE,       WV_NONE,        WF_NONE,        WF_NONE,        0.0,    "medkit" },
+};
 
 const char* getWeaponName( int wId )
 {
@@ -164,6 +190,8 @@ const char* getWeaponName( int wId )
 	case TFC_DLL:		if (wId>=MIN_TFC_WEAPONS && wId<MAX_TFC_WEAPONS) return tfcWeapon[wId].shortName;
 						else return "weapon";
 	case DMC_DLL:		if (wId>=MIN_DMC_WEAPONS && wId<MAX_DMC_WEAPONS) return dmcWeapon[wId].shortName;
+						else return "weapon";
+	case HUNGER_DLL:	if (wId>=MIN_HUNGER_WEAPONS && wId<MAX_HUNGER_WEAPONS) return hungerWeapon[wId].shortName;
 						else return "weapon";
 	case GEARBOX_DLL:	if (wId>=MIN_GEARBOX_WEAPONS && wId<MAX_GEARBOX_WEAPONS) return gearboxWeapon[wId].shortName;
 						else return "weapon";
@@ -200,6 +228,10 @@ void PB_Weapon::initMOD()
 	case DMC_DLL:		modWeapon = &dmcWeapon[0];
 						minModWeapon = MIN_DMC_WEAPONS;
 						maxModWeapon = MAX_DMC_WEAPONS;
+						break;
+	case HUNGER_DLL:	modWeapon = &hungerWeapon[0];
+						minModWeapon = MIN_HUNGER_WEAPONS;
+						maxModWeapon = MAX_HUNGER_WEAPONS;
 						break;
 	case GEARBOX_DLL:	modWeapon = &gearboxWeapon[0];
 						minModWeapon = MIN_GEARBOX_WEAPONS;
@@ -1043,6 +1075,239 @@ float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, b
 	return score;
 }
 
+float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bool checkAmmo )
+// returns max. 10 pts
+{
+	float score = 0;
+	float score2 = 0;
+	bool notSuitable = false;
+
+	switch (currentWeapon) {
+
+	case VALVE_WEAPON_CROWBAR:
+	case HUNGER_WEAPON_SPANNER:
+	case HUNGER_WEAPON_SHOVEL:
+		if ( flags & WF_NEED_GRENADE ) break;
+		
+		if (distance < 55) score = 9;
+		else if (distance < 100) score = (100-distance) / 5;
+
+		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
+		break;
+
+	case VALVE_WEAPON_GLOCK:
+	case HUNGER_WEAPON_TAURUS:
+		if ( flags & WF_NEED_GRENADE ) break;
+					
+		score = 1.5 - (2*distance/6400);
+		if (score<0.1) score = 0.1;
+
+		if (checkAmmo) {
+			if (ammo1() == 0) score = 0;
+			else if (ammo1() <= 5) score /= 2;
+		}
+
+		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
+		break;
+
+	case VALVE_WEAPON_PYTHON:
+		if ( flags & (WF_UNDERWATER | WF_NEED_GRENADE) ) break;
+		
+		score = 4 - (4*distance/6400);
+		if (score<0.3) score = 0.3;
+
+		if (checkAmmo) {
+			if (ammo1() == 0) score = 0;
+			else if (ammo1() <= 3) score /= 2;
+		}
+		if ( hitProb < 0.5) score *= (hitProb + 0.5);	// punish slow reload
+		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
+		break;
+
+	case VALVE_WEAPON_MP5:
+		if ( flags & WF_UNDERWATER ) break;
+
+		if (checkAmmo && (ammo2()>0) && (distance>250)) {	// if not sure assume that
+			  if (distance<400) score2 = (distance-250) / 15;	// player doesn't have grens
+			  else if (distance<550) score2 = (550-distance) / 15;
+			  bestMode[currentWeapon] = 2;
+		}
+		if ( flags & WF_NEED_GRENADE ) break;
+				
+		score = 7 - (7*distance/1600);
+		if (score<0.2) score = 0.2;
+		
+		if (checkAmmo) {
+			if (ammo1() == 0) score = 0;
+			else if (ammo1() <= 10) score /= 2;
+		}
+		if ( flags & WF_SINGLE_SHOT_KILL ) {
+			notSuitable = true;
+			if  ((score/10) > score2) bestMode[currentWeapon] = 1;
+		}
+		else if (score > score2) bestMode[currentWeapon] = 1;
+		break;
+
+	case VALVE_WEAPON_CROSSBOW:
+		if (checkAmmo && ammo1() == 0) break;
+
+		if (distance<600) {
+			score = (distance-200) / 100;
+			if (score<2) score = 2;		// in any case better than glock!
+		}
+		else score = 4;
+
+		if (hitProb>0.5) bestMode[currentWeapon] = 2;	// use sniper mode when possible
+		else {
+			bestMode[currentWeapon] = 1;
+			if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
+		}
+		break;
+
+	case VALVE_WEAPON_CHAINGUN:
+	case VALVE_WEAPON_EGON:
+                if ( flags & (WF_UNDERWATER | WF_NEED_GRENADE) ) break;
+
+                score = 6 - (6*distance/1200);
+                if (score<0.2) score = 0.2;
+
+                if (checkAmmo) {
+                        if (ammo1() == 0) score = 0;
+                        else if (ammo1() <= 10) score /= 2;
+                }
+                if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
+                break;
+
+	case VALVE_WEAPON_SHOTGUN:
+		if ( flags & (WF_UNDERWATER | WF_NEED_GRENADE) ) break;
+				
+		score = 8 - (8*distance/1600);
+		if (score<0.2) score = 0.2;
+
+		if (checkAmmo) {
+			if (ammo1() == 0) score = 0;
+			else if (ammo1() <= 4) score /= 2;
+		}
+		if ( hitProb < 0.5) score *= (hitProb + 0.5);	// punish slow reload
+		
+		if (hitProb>0.5 && distance<200 && ammo1()>1) {
+			bestMode[currentWeapon] = 2;	// use double mode when possible
+			score = 10;			// to win against crowbar
+		}
+		else {
+			bestMode[currentWeapon] = 1;
+			if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
+		}
+		break;
+
+	case VALVE_WEAPON_RPG:
+		if (checkAmmo && ammo1() == 0) break;
+
+		if (distance < 400) {
+			bestMode[currentWeapon] = 1;
+			score = (distance-250) / 18.75;
+			if (score<1.5) score = 1.5;	// don't use glock!
+		}
+		else {
+			bestMode[currentWeapon] = 2;
+			score = 8 - 8*(distance-400)/1600; 
+			if ( flags & WF_ENEMY_ABOVE ) score -= 1;
+			if (score<1) score = 1;
+		}
+		break;
+
+	case VALVE_WEAPON_GAUSS:
+		if ( flags & (WF_UNDERWATER | WF_NEED_GRENADE) ) break;
+				
+		score = 6;
+		
+		if (checkAmmo) {
+			if (ammo1() <= 1) score = 0;
+			else if (ammo1() <= 10) score /= 2;
+		}
+		bestMode[currentWeapon] = 2;
+		break;
+
+	case VALVE_WEAPON_HANDGRENADE:
+		if ( flags & WF_UNDERWATER ) break;
+		// explosion at 450
+		if (300<=distance && distance<=600) score = 1;
+		break;
+
+	case VALVE_WEAPON_TRIPMINE:
+	case HUNGER_WEAPON_MEDKIT:
+		return 0;		// never arm for combat
+
+	case VALVE_WEAPON_SATCHEL:
+		if ( flags & (WF_UNDERWATER | WF_ENEMY_ABOVE)) break;
+		if (250<=distance && distance<=400) 
+			score = 3;
+		break;
+
+	case VALVE_WEAPON_SNARK:
+		if ( flags & (WF_UNDERWATER | WF_ENEMY_ABOVE)) break;
+		if (200<=distance && distance<=1000) {
+			score = 0.75;	// must be less than glock (to use glock against snarks)
+			if ( flags & WF_ENEMY_BELOW ) score += 2;
+		}
+		break;
+
+	case HUNGER_WEAPON_SNIPER:
+	case HUNGER_WEAPON_EINAR1:
+                if ( flags & (WF_UNDERWATER | WF_NEED_GRENADE) ) break;
+                if (checkAmmo && ammo1() == 0) break;
+
+                if (distance<600) {
+                        score = (distance-100) / 100;
+                        if (score<3) score = 3;         // in any case better than glock!
+                }
+                else score = 5;
+                break;
+	case HUNGER_WEAPON_AP9:
+                if ( flags & WF_NEED_GRENADE ) break;
+
+                score = 7 - (7*distance/1600);
+                if (score<0.2) score = 0.2;
+
+                if (checkAmmo) {
+                        if (ammo1() == 0) score = 0;
+                        else if (ammo1() <= 10) score /= 2;
+                }
+
+                if ( flags & WF_SINGLE_SHOT_KILL ) {
+                        notSuitable = true;
+                }
+
+		if (hitProb > 0.3) bestMode[currentWeapon] = 2;
+                else bestMode[currentWeapon] = 1;
+
+                break;
+	default:
+		debugMsg( "HungerWeaponScore: Unknown ID %i !\n", currentWeapon );
+	
+	}
+
+	// switch-time handicaps
+	if ( armedWeapon != currentWeapon ) {
+		if (flags & WF_IMMEDIATE_ATTACK) {
+			if ( score > 4.1 ) score -= 4.0;
+			else if (score > 0) score = 0.1;	// it has to remain better than 0
+		}
+		else if (flags & WF_FAST_ATTACK) {
+			if ( score > 2.1 ) score -= 2.0;
+			else if (score > 0) score = 0.1;	// it has to remain better than 0
+		}
+		else {
+			if ( score > 0.6 ) score -= 0.5;
+			else if (score > 0) score = 0.1;	// it has to remain better than 0
+		}
+	}
+	
+	if (notSuitable) score /= 10;
+
+	//debugMsg( "wscore=%.2f\n", score );
+	return score;
+}
 
 float PB_Weapon::getScore( float distance, float hitProb, int flags, bool checkAmmo )
 // returns max. 10 pts
@@ -1054,6 +1319,7 @@ float PB_Weapon::getScore( float distance, float hitProb, int flags, bool checkA
 	case DMC_DLL:		return dmcWeaponScore( distance, hitProb, flags, checkAmmo );
 	case CSTRIKE_DLL:	return csWeaponScore( distance, hitProb, flags, checkAmmo );
 	case TFC_DLL:		return tfcWeaponScore( distance, hitProb, flags, checkAmmo );
+	case HUNGER_DLL:	return hungerWeaponScore( distance, hitProb, flags, checkAmmo );
 	case GEARBOX_DLL:	return gearboxWeaponScore( distance, hitProb, flags, checkAmmo );
 	
 	}
@@ -1142,7 +1408,7 @@ bool PB_Weapon::attack( Vector target, float accuracy, Vector relVel )
 	else {
 				
 		// load special weapons:
-		if ( mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == GEARBOX_DLL ) {	
+		if ( mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL ) {	
 			if ( currentWeapon==VALVE_WEAPON_GAUSS && bestMode[currentWeapon]==2 ) {
 				if (!loadingGauss) {
 					loadingGauss = true;
@@ -1171,7 +1437,7 @@ bool PB_Weapon::attack( Vector target, float accuracy, Vector relVel )
 			lastAttackTime = worldTime();
 			if ( bestMode[currentWeapon] == 1 ) {	
 				// primary fire:
-				if (mod_id==VALVE_DLL || mod_id == AG_DLL || mod_id==GEARBOX_DLL) {
+				if (mod_id==VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id==GEARBOX_DLL) {
 					if (currentWeapon==VALVE_WEAPON_HANDGRENADE) fired = attackValveHandgrenade( target );
 					else if (currentWeapon==VALVE_WEAPON_SATCHEL) fired = attackValveSatchel( target );
 					else {  botAction->add( BOT_FIRE_PRIM );  fired = true;  }
@@ -1180,7 +1446,7 @@ bool PB_Weapon::attack( Vector target, float accuracy, Vector relVel )
 			}
 			else {	
 				// secondary fire:
-				if (mod_id==VALVE_DLL || mod_id == AG_DLL || mod_id==GEARBOX_DLL) {
+				if (mod_id==VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id==GEARBOX_DLL) {
 					if (currentWeapon==VALVE_WEAPON_GAUSS) {
 						botAction->add( BOT_RELEASE_SEC );
 						loadingGauss = false;
@@ -1212,7 +1478,7 @@ bool PB_Weapon::attack( Vector target, float accuracy, Vector relVel )
 void PB_Weapon::finishAttack()
 {
 	//debugMsg( "Forced to finish attack!\n" );
-	if (mod_id == VALVE_DLL || mod_id == AG_DLL ||mod_id == GEARBOX_DLL) {
+	if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) {
 		if (currentWeapon==VALVE_WEAPON_HANDGRENADE) {
 			botAction->setViewDir( grenadeTarget, 5 );
 			attackValveHandgrenade( grenadeTarget );

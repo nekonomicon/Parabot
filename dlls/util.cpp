@@ -281,6 +281,7 @@ int UTIL_GetTeam(edict_t *pEntity)
 	switch( mod_id ) 
 	{
 	case VALVE_DLL:
+	case HUNGER_DLL:
 	case GEARBOX_DLL:
 		infobuffer = (*g_engfuncs.pfnGetInfoKeyBuffer)( pEntity );
 		strcpy( teamName, (g_engfuncs.pfnInfoKeyValue( infobuffer, "team" )) );

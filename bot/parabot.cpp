@@ -259,7 +259,7 @@ const char *pfnGetPhysicsKeyValue(const edict_t *pClient, const char *key);
 
 bool CParabot::hasLongJump()
 {
-	if ( !(mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == GEARBOX_DLL) ) return false;
+	if ( !(mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) ) return false;
 	const char *value = pfnGetPhysicsKeyValue( ent, "slj");
 	if (strcmp( value, "1" )==0) return true;
 	else return false;
@@ -295,7 +295,7 @@ bool CParabot::getJourneyTarget()
 	fleeingFrom = 0;
 
 	int pathMask = PATH_NORMAL;
-	if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == GEARBOX_DLL) {
+	if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) {
 		if (hasLongJump()) pathMask |= PATH_NEED_LONGJUMP;
 		if (combat.hasWeapon( VALVE_WEAPON_GAUSS )) pathMask |= PATH_NEED_GAUSSJUMP;
 	}
@@ -625,13 +625,13 @@ void CParabot::followActualPath()
 		if (mustShootObject) {
 			switch (mod_id) {
 				case AG_DLL:
+				case HUNGER_DLL:
+				case GEARBOX_DLL:
 				case VALVE_DLL:		combat.weapon.setPreferredWeapon( VALVE_WEAPON_GLOCK, 1 );		
 									break;
 				case HOLYWARS_DLL:	combat.weapon.setPreferredWeapon( HW_WEAPON_DOUBLESHOTGUN, 1 );	
 									break;
 				case DMC_DLL:		combat.weapon.setPreferredWeapon( DMC_WEAPON_QUAKEGUN, 1 );		
-									break;
-				case GEARBOX_DLL:	combat.weapon.setPreferredWeapon( VALVE_WEAPON_GLOCK, 1 );		
 									break;
 			}
 			// arm preferred weapon, params don't really matter...
@@ -667,7 +667,7 @@ void CParabot::followActualPath()
 		}
 		else action.setMaxSpeed();
 		pathCheckWay();
-		if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == GEARBOX_DLL) checkForTripmines();
+		if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) checkForTripmines();
 		if (!actualPath) return;	// maybe tripmine canceled path
 
 		if (actualPath->cannotBeContinued( ent )) {

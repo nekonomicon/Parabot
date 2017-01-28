@@ -38,6 +38,10 @@ PB_WeaponHandling::PB_WeaponHandling()
 						maxModWeapon = MAX_TFC_WEAPONS;
 						defaultWeapon = minModWeapon;
 						break;
+	case HUNGER_DLL:	minModWeapon = MIN_HUNGER_WEAPONS;
+						maxModWeapon = MAX_HUNGER_WEAPONS;
+						defaultWeapon = VALVE_WEAPON_GLOCK;
+						break;
 	case GEARBOX_DLL:	minModWeapon = MIN_GEARBOX_WEAPONS;
 						maxModWeapon = MAX_GEARBOX_WEAPONS;
 						defaultWeapon = VALVE_WEAPON_GLOCK;
@@ -132,7 +136,19 @@ bool PB_WeaponHandling::available( int wId )
 				 wId == DMC_WEAPON_ROCKETLAUNCHER	||
 				 wId == DMC_WEAPON_LIGHTNING		   ) return false;
 			break;
-
+		case HUNGER_DLL:
+                        if ( wId == VALVE_WEAPON_MP5            ||
+				wId == VALVE_WEAPON_CHAINGUN	||
+				wId == VALVE_WEAPON_CROSSBOW	||
+				wId == VALVE_WEAPON_SHOTGUN	||
+				wId == VALVE_WEAPON_RPG		||
+				wId == VALVE_WEAPON_GAUSS	||
+				wId == VALVE_WEAPON_EGON	||
+				wId == HUNGER_WEAPON_AP9	||
+				wId == HUNGER_WEAPON_EINAR1	||
+				wId == HUNGER_WEAPON_SNIPER
+				) return false;
+                        break;
 		case GEARBOX_DLL:
 			if ( wId == VALVE_WEAPON_MP5		||
 				 wId == VALVE_WEAPON_CROSSBOW	||
@@ -252,7 +268,7 @@ bool PB_WeaponHandling::armBestWeapon( float distance, float hitProb, int flags 
 
 	int bestMode = weapon.bestAttackMode();
 	
-	if (mod_id==VALVE_DLL || mod_id==AG_DLL || mod_id==GEARBOX_DLL) {	// switch to correct weapon-mode
+	if (mod_id==VALVE_DLL || mod_id==AG_DLL || mod_id==HUNGER_DLL || mod_id==GEARBOX_DLL) {	// switch to correct weapon-mode
 		if ( bestWeapon==VALVE_WEAPON_CROSSBOW || bestWeapon==VALVE_WEAPON_PYTHON ) {	
 			if ( bestMode==1 && botEnt->v.fov!=90 && 
 				 (lastModeSwitch+0.5)<worldTime() ) {

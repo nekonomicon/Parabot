@@ -451,6 +451,7 @@ void Sounds::parseSound( edict_t *ent, const char *sample, float vol )
 
 	switch( mod_id ) {
 	case AG_DLL:
+	case HUNGER_DLL:
 	case VALVE_DLL:
 	case GEARBOX_DLL:
 	case HOLYWARS_DLL:
@@ -464,7 +465,7 @@ void Sounds::parseSound( edict_t *ent, const char *sample, float vol )
 			//assert( nearest != 0 );
 			if (!nearest) return;	// listen server before map is loaded
 			const char *wpnName = nearest->classname();
-			if (mod_id==VALVE_DLL || mod_id==AG_DLL || mod_id==GEARBOX_DLL) {
+			if (mod_id==VALVE_DLL || mod_id==AG_DLL || mod_id==VALVE_DLL || mod_id==GEARBOX_DLL) {
 				if ( strcmp( wpnName, "weapon_rpg"      ) == 0 ||
 					 strcmp( wpnName, "weapon_gauss"    ) == 0 ||
 					 strcmp( wpnName, "weapon_egon"     ) == 0 ||
