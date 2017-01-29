@@ -222,7 +222,7 @@ void debugFile( char *msg )
 
 void debugMsg( const char *str1, const char *str2, const char *str3, const char *str4 )
 {
-//#ifdef _DEBUG
+#ifdef _DEBUG
 	if (botNr != activeBot) return;
 	char buffer[256];
 	
@@ -234,9 +234,9 @@ void debugMsg( const char *str1, const char *str2, const char *str3, const char 
 			if (str4) strcat( buffer, str4 );
 		}
 	}
-	if (IS_DEDICATED_SERVER()) printf( buffer );
+	if (IS_DEDICATED_SERVER()) printf( "%s", buffer );
 	else ALERT( at_console, buffer );
-//#endif
+#endif
 }
 
 
@@ -274,7 +274,7 @@ void infoMsg( const char *str1, const char *str2, const char *str3, const char *
 			if (str4) strcat( buffer, str4 );
 		}
 	}
-	if (IS_DEDICATED_SERVER()) printf( buffer );
+	if (IS_DEDICATED_SERVER()) printf( "%s", buffer );
 	else ALERT( at_console, buffer );
 }
 

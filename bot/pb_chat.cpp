@@ -367,9 +367,9 @@ void PB_Chat::parseMessage( edict_t *speaker, char *msg )
 	if (pbConfig.onChatLog()) {
 		FILE *fp=fopen( "parabot/chatlog.txt", "a" ); 
 		if (!FBitSet( speaker->v.flags, FL_FAKECLIENT)) fprintf( fp, "[HUMAN]" );
-		fprintf( fp, STRING( speaker->v.netname ) ); 
+		fprintf( fp, "%s", STRING( speaker->v.netname ) ); 
 		fprintf( fp, ": " );
-		fprintf( fp, msg ); 
+		fprintf( fp, "%s", msg ); 
 		fprintf( fp, "\n" );
 		fclose( fp );
 	}
