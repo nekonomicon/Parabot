@@ -6,11 +6,8 @@
 #include "h_export.h"
 #include "meta_api.h"
 #endif //METAMOD
-#include "entity_state.h"
 #include "marker.h"
 #include <queue>
-#include "com_model.h"
-#include "pm_defs.h"
 #include "bot.h"
 #include "bot_func.h"
 #include "pb_global.h"
