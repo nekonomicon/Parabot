@@ -17,16 +17,15 @@ INCLUDES =	-I$(PREFIX)/include \
 		-I. \
 		-I../bot \
 		-I../utils \
-		-I../hlsdk/common \
-		-I../hlsdk/dlls \
-		-I../hlsdk/engine \
-		-I../hlsdk/public \
-		-I../hlsdk/pm_shared \
-		-I../hlsdk/game_shared \
+		-I../common \
+		-I../dlls \
+		-I../engine \
+		-I../pm_shared \
 		-I../metamod
 
 SRC =		../bot/bot.cpp \
 		../bot/bot_client.cpp \
+		animation.cpp \
 		commands.cpp \
 		dll.cpp \
 		engine.cpp \
@@ -65,7 +64,6 @@ SRC =		../bot/bot.cpp \
 		../bot/pbt_priorityqueue.cpp \
 		../bot/sounds.cpp \
 		../bot/utilityfuncs.cpp \
-		../hlsdk/dlls/animation.cpp \
 		../metamod/meta_api.cpp
 
 LDFLAGS +=	-shared -Wl,--no-undefined
