@@ -1185,6 +1185,7 @@ void pfnInfo_RemoveKey(char *s, const char *key)
    if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnInfo_RemoveKey:\n"); fclose(fp); }
    (*g_engfuncs.pfnInfo_RemoveKey)(s, key);
 }
+#endif
 
 const char *pfnGetPhysicsKeyValue(const edict_t *pClient, const char *key)
 {
@@ -1199,6 +1200,7 @@ const char *pfnGetPhysicsKeyValue(const edict_t *pClient, const char *key)
 	return res;
 }
 
+#ifndef METAMOD
 void pfnSetPhysicsKeyValue(const edict_t *pClient, const char *key, const char *value)
 {
    if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnSetPhysicsKeyValue:\n"); fclose(fp); }
