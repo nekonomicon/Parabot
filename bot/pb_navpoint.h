@@ -3,18 +3,8 @@
 
 
 #include "extdll.h"
-#ifdef max
 #undef max
-#endif
-#ifndef max
-#define max( a, b )			(((a) > (b)) ? (a) : (b))
-#endif
-#ifdef min
 #undef min
-#endif
-#ifndef min
-#define min( a, b )			(((a) < (b)) ? (a) : (b))
-#endif
 
 #define NAV_W_CROSSBOW			1	
 #define NAV_W_CROWBAR			2
