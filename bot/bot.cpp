@@ -7,7 +7,7 @@
 //
 
 #include "extdll.h"
-#ifndef METAMOD
+#ifdef METAMOD
 #include "dllapi.h"
 #include "meta_api.h"
 #endif

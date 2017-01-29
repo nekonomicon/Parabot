@@ -109,7 +109,7 @@ edict_t* laserdotOwner( edict_t *laser )
 		if (!isAlive( ENT(pPlayer->pev) )) continue;	// skip player if not alive
 		if (pPlayer->pev->solid == SOLID_NOT) continue;	
 		int wId = clientWeapon[i-1];
-		if (wId != VALVE_WEAPON_RPG && (modId != GEARBOX_DLL && wId != GEARBOX_WEAPON_EAGLE)) continue;
+		if (wId != VALVE_WEAPON_RPG && (mod_id != GEARBOX_DLL && wId != GEARBOX_WEAPON_EAGLE)) continue;
 	
 		edict_t *ent = pPlayer->edict();
 		UTIL_MakeVectors( ent->v.v_angle );

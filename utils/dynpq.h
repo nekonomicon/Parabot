@@ -18,7 +18,7 @@ class  dynamic_priority_queue
 {	
 public:
 	// constructor
-	dynamic_priority_queue( vector<key_type>& v)
+	dynamic_priority_queue( vector<key_type>& v);
 
 	// public type definitions
 	  typedef typename std::vector<key_type>::size_type size_type;
