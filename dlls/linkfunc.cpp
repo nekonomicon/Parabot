@@ -626,5 +626,4 @@ LINK_ENTITY_TO_FUNC(weapon_th_medkit);
 LINK_ENTITY_TO_FUNC(weapon_th_shovel);
 LINK_ENTITY_TO_FUNC(weapon_th_spanner);
 LINK_ENTITY_TO_FUNC(weapon_th_taurus);
-LINK_ENTITY_TO_FUNC(weapon_th_ap9);
 #endif
