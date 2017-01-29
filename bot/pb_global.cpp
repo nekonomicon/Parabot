@@ -234,7 +234,7 @@ void debugMsg( const char *str1, const char *str2, const char *str3, const char 
 			if (str4) strcat( buffer, str4 );
 		}
 	}
-	if (IS_DEDICATED_SERVER()) printf( buffer );
+	if (IS_DEDICATED_SERVER()) printf( "%s", buffer );
 	else ALERT( at_console, buffer );
 //#endif
 }
@@ -274,7 +274,7 @@ void infoMsg( const char *str1, const char *str2, const char *str3, const char *
 			if (str4) strcat( buffer, str4 );
 		}
 	}
-	if (IS_DEDICATED_SERVER()) printf( buffer );
+	if (IS_DEDICATED_SERVER()) printf( "%s", buffer );
 	else ALERT( at_console, buffer );
 }
 
