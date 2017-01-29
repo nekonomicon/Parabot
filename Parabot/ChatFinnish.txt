@@ -1,0 +1,530 @@
+
+           ########################################################
+           #                                                      #
+           #              CHATFILE FOR PARABOT                    #
+           #                                                      #
+           #                   - FINNISH -                        #
+           #        translated by ntz (ntz_2002@yahoo.com)        #
+           #                                                      #
+           ########################################################
+
+
+
+@GOT_KILLED
+
+Ensi kerralla kuolet, %s!
+Paskat!
+Mitenkas se nyt noin?!?
+Oliko tuo POD 2.0?
+Taas niita peijoonin botteja!
+Onko talla servulla botteja?
+Hmm.. tahtaysjarjestelmassani taitaa olla taas vikaa...
+Olin juuri vaihtamassa asetta!
+Tuurihaukka %s...
+%s kayttaa aimbottia!!
+Auts!
+En tieda mita tanaan tapahtuu...
+Tuo oli kylla tuuria, %s!
+En voi uskoa silmiani...
+Mita soit aamupalaksi, %s?
+Jopa %s tappaa minua tanaan - toivotonta!
+Olen parempi Q3:ssa, ja se on varma
+Pikkuveli pelasi asken - mutta nyt oon taas takas!
+Hitto etta vasyttaa - kello on nelja aamulla taalla
+Hei, Varoppas vahan %s!
+Miksi sinulla on aina %w, %s?
+%w - Kuinka parjaisitkaan ilman sita, %s?
+Aina riehut, aseenasi %w - aika laama..!
+Noniin, %s: jatappas %w sivuun, vai pitaako auttaa?
+Ts o joku vrus mun napps ei toim knnolla!11
+%s - Jata jo tuo %w rauhaan!
+En tule koskaan tajuamaan miten %s teki tuon...
+Tuo surkea newbie %s ampui minut.. haha!
+Ennemmin tai myohemmin saan sinut, %s!
+Vihaan tosiaan lataamista...
+Miksi %w on niin hidas ladata?!?
+%s pelaa nakojaan camperstrikea...
+Oletteko varmoja, etta %s ei cheattaa???
+Pitais laittaa ruutua kirkkaammalle - en nahny koko tyyppia!
+Miksi ruutu on nain pimea? kuolinko mina?
+%w taas , %s? Ootko koskaan koittanut muita aseita..?!
+Toivottavasti %s on tyytyvainen kun sai tapettua. Nyt on minun vuoroni!
+Voi paska! Taas kuolin! OLUTTA ja heti!
+Kuului semmoinen jyrahdys niinku ukkonen ja sitten... 
+Parempi olisi olla varovaisempi tuon %w-romun kanssa ensi kerralla, 
+%s...
+Lagas ihan perkeleesti ja sitten.. HITTO
+Voihan nena, kampperi, sun takiasi kuolin taas %s...
+Vittuun koko %w, perkele!
+Missa tuo jatka oli???
+Oho...!
+Campperi!!! :(
+Ensi kerralla kuritan kunnolla, %s!
+Wazzzzzzzuuuup???
+Aloittelijan tuuria! Olen varma!
+Miksi ihmeessa vihaat minua, %s?
+Tapa joku muu, kiitos, %s
+%s huijaa!
+Lopeta nyt se minun tappaminen, %s.
+Odotas vaan, %s - Kosto elaa!
+Kukas tuo oli???
+Mita hittoa?!?
+Kai kun sinulla on %w, niin tappaminen on todella helppoa!
+Miksi tapoit minut taas aseenasi %w, %s?
+Mista tuo %w loytyi, %s?
+
+
+
+@KILLED_PLAYER
+
+Tuo naytti todella kehnolta, %s!
+Viimeinkin sain sinut, %s!
+Haha...
+Nakemiin %s!
+Kiertelykoodisi bugaa, %s ;-)
+Toivottavasti joku hyva liittyisi serverille...
+Tuo oli viimeinen kosto, %s!
+Naitteko tuon?
+Hasta la vista, %s!
+Olisit juossut kun viela oli mahdollisuus, %s!
+Ja taas :-)
+Otappas opiksesi, %s!
+Hieno lento, %s ;-)
+Montako fragia tarvitsee etta voittaa taman kentan?
+Onkos minulla nyt enemman frageja kun sulla, %s?
+Kuka muka sanoi ettei noin voi tehda..?!?
+Voi olla vain yksi... %s!
+Olkoon voima kanssasi, %s!
+Newbie, uh?
+Ala huoli %s: Paaset siita yli aikanaan...
+%w on minun suosikkiaseeni!
+Ota iisisti, %s: Tamahan on vain pelia!
+Olen %w-herra!!!
+Kukaan ei osaa kasitella %w niinkuin mina, %s!
+%w - rakastan tata asetta! :)
+Tama %w tuntuu mahtavalta!
+Noin tapahtuu kun kirjottelet liikaa, %s!
+%s kasteli varmasti housunsa kun kuuli minun %w-aania!
+Tiesitko etta aivosi nayttavat lihalta ja kananmunilta, %s?
+Alat nayttaa paahtopaistilta %s...
+OKEI %s, ensi kerralla en  kayta %w enaa - lupaan!
+Ensi kerralla kaytan puukkoa, %s - alkaa olla liian helppoa!
+Sun klaanis on vaan luuserisakki, %s...
+Kenen luulet siivoavan sotkun, %s? Minun?!??
+Aah.. tuoretta lihaa!
+Don't worry, be happy, %s...
+Ehka voidaan menna kaljalle seuraavassa elamassa, %s...
+Sinun tappamisesi on huvittavaa, %s :-)))
+Pelkaampa etta kukaan ei voi lopettaa sun verenvuotoas, %s...
+Anteeksi, en todellakaan tahdannyt sinua, %s...
+Klaanini olisi ylpea minusta!
+Sattuiko, hmm?
+Huutoja kuninkaalle, Beibi!
+Sainko mina taman aikaan?!? Viileeta!!!
+Tuo %w roxors!!!
+LOL!
+Mina palaan viela %s!
+PALA SAASTA!
+Kostoni oli paha, hmm?
+Booom :)
+Mikset sina tapa minua, %s?
+Voit toki ampua, mutta juokseminen olisi kannattavampaa sinulle, %s!
+Luulen etta olen tarpeeksi voimakas pelastamaan maailman itsekseni :)
+Synnyin %w kourassa - Sinulla ei ollut mitaan mahdollisuuksia, %s!
+Voi hitto: Ne tappoivat Kennyn!
+Voi hitto: Ne tappoivat %sn!
+
+
+
+@GOT_WEAPON
+
+Odottakaapas kun tulen taman vehkeen kanssa!
+Noniin - nyt alkaa totaalinen omistus!
+Talla kanuunalla jopa JoeBot saisi kyytia!
+Ette muuten arvaa mita loysin...
+Vautsi! En tiennyt etta tassa pelissa on tammoinenkin ase!
+En tieda missa %w on :-)
+%w on minun - peli alkakoon :P
+Noniin loysin aseen nimelta %w!
+Poimin juuri %w...
+Kunhan saan %w ja ketaan ei ole nakyvissa...
+Jiihaa! Vihdoinkin %w!
+Hmm.. Tanne on jatetty %w - Siita voi olla hyotya...
+Noniin nyt naette mihin %w on tarkoitettu...
+Haluatteko osallistua %w-kokeiluihini..?
+%w-oppitunti.
+%w - Sen kaikki tuntee?
+Noniin nyt lahden peraasi, ja minulla on %w!
+Luuletteko jatkat etta en tieda miten %w toimii? Tulkaa ja katsokaa!
+Loytyisko keneltakaan kuteja jotka kay aseeseen nimelta %w? ;)
+Nyt tarvittaisi hieman ruutia!
+Vittuun koko %w - pidan enemman AK47:sta!
+Hei! Taalla on %w -  Voisitteko kertoa miten sita kaytetaan?
+Noniin, nyt omistetaan!
+Huonoja uutisia teille! Tulkaa tanne kuulemaan :)
+Tarvitsen vain hieman ammuksia!
+Mika ihme tuo on?
+Kuka tahtoo - taalla olisi %w?
+Minulla olisi %w - Mutta mika nappi tuo tuossa on?
+Jees! %w on suosikkiaseeni
+%w, pelaajan paras kaveri :)
+
+
+
+###############################################################################
+
+
+@REPLY_UNKNOWN
+blah blah blah...
+Mita sanoitkaan, %s?
+Keskity peliin, %s!
+Sinun kanssasi jutteleminen. %s, on eri hienoa!
+Nama hiton chat-viestit alkaa kayda hermoilleni!
+Ala spammaa, %s!
+Miten ihmeessa te ehditte kirjoittaa tallaista sontaa???
+Niin, %s. Olet aivan oikeassa!
+Ala edes uneksi, %s...
+Cool tyyppi %s, olet cool tyyppi...
+Mummonikin sanoi aina samaa, %s
+Mista olet kotoisin, %s?
+En voi uskoa, miten pystyt pelaamaan ja kirjoittamaan samaan aikaan, 
+%s!
+Oletko varma, %s?
+Vai niin, %s!
+Miksi kaikki toistaa samoja asioita???
+Mista hitosta oikein puhut, %s?
+Tiedattehan, en ole hyvalla tuulella tanaan...
+Hei %s, me emme rehellisesti puhuen ymmarra kiinaa!
+Tuo oli Japania tai jotain?
+Turpa kiinni ja pelaa, %s!
+Sanoitko jotakin, %s?
+Kuka sanoi tuon?
+Ai, todellako?
+Todella hullunkurista, %s!
+Olen maani parhaassa klaanissa!
+Vihaan naita typeria kommentteja, %s!
+Tiedatteko miten GAUSS-jump tehdaan?
+zzZZzzZZzzzZZzzZZZ
+o--]===>
+Kamikaze!!!
+Valot, Kamera, KAY!
+Wazzzzuuuuuuup?
+On niin tylsaa....... 
+Kumpi on parempi: AMD vai INTEL?
+Onko sulla ICQ, %s?
+Mika on paras botti?
+
+
+
+###############################################################################
+
+
+@REPLY " TAAS "
+Asiat toistuvat, vai mita?
+Ja ei vissiin ollut viimeinen kerta...
+Oletko kuullut sielunvaelluksesta, %s? ;)
+Niin se vain on, kuule...
+
+@REPLY " AK47"
+En ole koskaan nahnyt mitaan hiton AK47:aa tassa pelissa...
+
+@REPLY " AINA "
+Ei ihan aina, %s!
+Mina vain pidan siita :-)
+Kuules %s, se oli vasta toinen kerta!
+15 kertaa perakkain, haha...
+
+@REPLY " AMD "
+Pysyttele vain Athlonissa, %s!
+Minun koneessani on K6-2...
+
+@REPLY " OMISTUS", " OMISTETAAN"
+Omistaminen on tarkea osa tata pelia.
+Miten omistaminen liittyy tahan peliin, %s?
+
+@REPLY " TSEKKOSLOVAKIA"
+Tsekkoslovakiahan hajosi kahtia 1993...
+Nykyaan on vain Tsekki ja Slovakia, typera %s!
+Tsekkoslovakia on historiaa...
+
+@REPLY " TSEKKI"
+Tsekki - Tiedan vain Tsekkoslovakian..?
+Niinpa, Tsekit: Hyvia jaakiekossa, vai mita? ;)
+Tsekki? Antakaapas kartta!
+Tsekit ovat maailman parhaita oluenjuonnissa ja jaakiekossa
+Tiedatko Jaromir Jagrin tai Dominik Hasekin - Ne on Tsekkilaisia
+
+@REPLY " OLUT ", " OLUTTA "
+Budweisser ei ole nykyaan niin hyvaa kun tapasi olla...
+Olit kannissa kuin kala viimeksi kun pelasit, %s.
+Tsekkilainen olut rulettaa
+Kylla saksalainen olut on parasta.
+Hollannissa osataan tehda hyvaa olutta
+Paras olut on Meksikosta
+Suomalainen olut on kaikkein parasta
+
+@REPLY " VERENVUOTO", " VERI "
+Blood(2) oli huvittava peli...
+En pida punaisesta varista!
+Tarvitsetko siteita, %s?
+
+@REPLY " BOTMAN"
+Kuka on se botman josta kaikki puhuu???
+Kaykaa botmanin sivuilla: www.planethalflife.com/botman
+Botman on mahtava, Botman on cool.
+Pidan botmanin botista.
+Ilman hanen koodiaan, ei olisi nain monta bottia.
+
+@REPLY " PARABOT "
+Parabot? Enpa ole koskaan kuullut...
+Oletteko kuulleet Parabotin upouudesta chatjarjestelmasta?
+Parabot? minun pitaisi surffailla netissa useammin...
+Parabot? Mihin peliin se kuuluu?
+Parabot, Parabot, odotas vahan, katson tietosanakirjasta...
+Kaykaapas www.botepidemic.com/parabot
+
+@REPLY " INHUMANTURNS "
+Mitah??? INHUMANTURNS? Pitaapa tarkistaa...
+En oo koskaan kuuluut INHUMANTURNSista - onx se joku cheat tms?
+Niinpa, PODit INHUMANTRUNSien kanssa on tosiaan epainhimillisia
+
+@REPLY " POD ", " PODBOT "
+POD on vain CS:lle, tyhmaa!
+Yeah, jokunen POD Bot voisi tuoda eloa tahan peliin...
+Hittovie rakastan PODBotteja INHUMANTURNS paalla...
+
+@REPLY " SWATBOT"
+Onko totta etta SWAT kuluttaa paljon prossutehoa?
+Saali etta SWATille on niin vahan waypointteja netissa!
+
+@REPLY " JOEBOT "
+Tiesitko etta JoeBot ei pelaa tata modia...
+Kuuleppas, en ole koskaan alynnyt JOEBotin opetusta... sina?
+JOEBotin navigaatio on mahtava!
+Joebotin nicki on "fastbot"! Tiesitko sen?
+Joebot tukee monia mappeja!
+
+@REPLY " BOTTIEN ", " BOTTIA", " BOTISTA", " BOTTI ", " BOTTEJA"
+Miksi te puhutte aina typerista boteista?
+Jos haluatte botteja niin kaykaa www.botepidemic.com
+Talla serverilla ei ole botteja %s, Usko pois!
+Botit on siisteja!!!
+Mika on suosikkibottisi, %s?
+Jos haluat tehda oman botin, kysy Botmanilta!
+Jos boteista keskustelu kiinnostaa niin kaykaa NUKEBOXissa...
+Botteja, aina vaan botteja - alkakaa pelata ihmisten kanssa
+Onko mitaan uutisia SWATBOTista?
+Suurin osa boteista on vielakin tyhmia!
+
+@REPLY " AAMUPALAKSI"
+Join vain hieman kahvia...
+Syon muslia!
+En koskaan syo aamiaista!
+
+@REPLY "KAMP", "CAMP"
+Inhoan todella noita camppereita!
+Kamppaaminen on perseesta!
+Kun on vain vahan energiaa jaljella, kannattaa kamppia!
+Kamppaaminen on usein ainoa vaihtoehto jos haluaa voittaa...
+
+@REPLY " ETTEI ", "EN VOI"
+Se on ongelma, %s
+No jata se, %s ;-)
+En auta sinua, %s
+Miksei?
+
+@REPLY "CHEAT", "CHIIT", "XIIT"
+Nuo hiton huijarit pilaavat koko pelin!
+Vihaan cheattereja!
+Huijaaminen on perseesta!
+Miksi niin monet cheattaavat?
+Punkbusterista voisi olla apua...
+Pelatkaa bottien kanssa - ne eivat cheattaa!
+
+@REPLY " KLAANIS ", "KLAANINI ", " KLAANISSA"
+Mista ihmeesta klaaneissa on oikein kysymys?
+Olin kerran klaanissa, mutta se kusi.
+Missa klaanissa olet, %s?
+Haluatko liittya klaaniimme, %s?
+Onko tahan peliin mitaan klaaneja?
+Viela sanakin klaaneista ja olet kuollut, %s!!!
+
+@REPLY " KUOLEMA ", " KUOLIN ", " KUOLLUT", " KUOLET"
+Jonkun pitaisi kaivaa hauta...
+Onko lahettyvilla hautausmaata?
+Ei voittoa ilman tuskaa. Vai mita %s?
+Luulen etta nain haamun!
+
+@REPLY " ENGINE ", " MOOTTORI "
+Jos VALVE kehittaisi enginea enemman, ei olis nain paljon cheattei! 
+Mun mielesta Unreal Warfaren Engine on paras talla hetkella!
+
+@REPLY " VIIMEINKIN ", " VIHDOINKIN "
+Pitkaan odotitkin %s, vai mita?
+Miksi olet ollut niin muuttumaton, %s?
+
+@REPLY " LOYSIN", " LOYTYI"
+Parempi olisi loytaa aimbotti, lol!
+Onnitteluni, %s
+Tallaista ei tapahdu joka paiva, %s!
+
+@REPLY " FRAGIA ", " FRAGEJA "
+Yleensa olen serverin paras!
+Teidan pitaisi muistaa etta tassa ei ole kyse vain frageista!
+
+@REPLY " PERKELE", " HITTO", " SAATANA ", " HELVETTI ", " VITTU "
+Ela kiroile, %s!
+Ilkea %s!
+Mista opit nama sanat, %s?
+Kylla, olet oikeassa, %s. Nyt TURPA UMPEEN!
+Varoppas kielenkayttoasi, %s!
+%s, ala kauta tuota sanaa enaa - se on epakohteliasta!
+
+@REPLY " KIVA", " HAUSKA", " HEHE ", " HAHA"
+No hyva etta jollakin on sentaan hauskaa, %s...
+Nauti kun viela voit, %s!
+Tosiaankin, todella hauskaa, %s...
+
+@REPLY " PELI", " PELATKAA ", " PELAA", " PELATA", " PELAS "
+Tama on mahtava peli, vai mita?
+Kiva pelata tata teidan kanssa, jatkat...
+Oletko koskaan pelannut mitaan muuta pelia, %s?
+Sinun pitaisi kokeilla pesapalloa tai jotain...
+Huvittava, ei sen enempaa!
+Mun suosikkipelit on Half-Life ja Unreal Tournament
+Hei, oletteko koskaan kattonu NBC:GigaGames:ia? viilee TV-show!
+
+@REPLY " MUMMONI ", " MUMMONIKIN "
+Haluaisin nahda mummosi, %s!
+LOL, %s
+Oot omituinen, %s!
+
+@REPLY " HALFLIFE ", " HALF LIFE "
+Yksi parkaista peleista koskaan!
+Mun mielesta sen pelaaminen on aika hauskaa.
+
+@REPLY " LUULEN ", " MIELESTA "
+Ajattelet liikaa, %s ;-)
+Ja mina taas luulen etta sinun pitaisi olla hiljaa ja pelata!
+And you really do believe that, %s?
+Miksi niin ajattelet?
+Eikohan tavata IRCissa ja keskustella siita, %s?
+
+@REPLY " PUUKKO "
+Jees, pelkilla puukoilla! Tasta tulee hauskaa!
+Tiedatteko Viiltaja-Jackin? Se olin mina edellisessa elamassani.
+Zig 'n Zag - muistatteko Lo-Wangin Shadow-Warriorista?
+Yeeaah...enemman lahitaisteluita vaan!
+Puukko tassa pelissa? Mitas.. - en ole koskaan kuullutkaan!
+
+@REPLY " TAPPAA ", " TAPPAMINEN", " TAPPAMISESI "
+Parempi olisi olla pahoillaan senkin inhottava tappaja!
+Antakaas puukko niin naytan mita tappaminen on...
+Helppoa kuin mika...
+
+@REPLY " NE TAPPOIVAT KENNYN "
+Liikaa South Parkia, vai?
+LOL, %s!
+
+@REPLY " LAAMA"
+Ala itke, %s!
+Tiedan.. ;-)
+
+@REPLY "OPPITUNTI", " OPETUS"
+En tarvitse oppituntia, %s. Olen tarpeeksi hyva tappamaan sinut!
+Pulpetteihin, lapset. Herra.%s astui luokkaan.
+Tarpeeksi jo opetuksista, nyt pelataan!
+
+@REPLY " TUURI"
+Ei ole tuuria, vain taitoa!
+Jep, Fortuna on pahalla tuulella tanaan ;-)
+Jopa Jumalat ovat sinua vastaan, %s. Luovuta jo...
+Ela selita, %s
+Tuuria? Kuka haluaa lisaa, uh?
+Viela sananenkin tuurista ja rupean voteamaan sinua, %s
+
+@REPLY "HERRA"
+Olet katastrofien herra %s ;-)
+Ja mina olen Greyskullin herra!
+
+@REPLY " LIHAA", " LIHALTA", " PAAHTOPAISTILTA "
+Yeeh - Olen nalkainen!
+Leikkaapas viipale minullekin, %s.
+En ole syonyt mitaan ikuisuuksiin...
+
+@REPLY " MUSIIKKI ", "YHTYE ", "MUSA"
+Minun suosikkibandi on Limp Bizkit, entas teidan?
+Stones rulettaa, man!
+
+@REPLY " KUKAAN ", " KETAAN "
+Kuka on ei kukaan? ;-)
+Jonain paivana tulee olemaan joku, %s, olen varma!
+
+@REPLY " PUNKBUSTER "
+Ala ole PUNKKARI! (tue www.punkbuster.com)
+Se on hieman buginen, mutta sita paivitetaan usein
+Punkbuster Team on tyolleen omistautunut joukkio!!!
+
+@REPLY " Q3", " QUAKE"
+Q3 on laama
+Half-Life rulettaa, %s!
+Oletko kuullut DMCsta, %s? ;-)
+
+@REPLY " LATAAMISTA", " LATAUSAIKA"
+Hanki puukko niin ei tarvitse ladata enaa...
+Yup! Lataaminen on suolesta!
+Olisit kayttanyt speedcheattia, %s.
+
+@REPLY " KOSTO"
+Eikohan unohdeta kostamiset, %s?
+Rauhaa, %s!
+
+@REPLY " JUOKSEMINEN ", " JUOSSUT ", " JUOSTA "
+Jos juokset, voitat varmasti!
+Yep! - Juoskaa luuserit!
+Juokse miten haluat - saan sinut ensi erassa...
+
+@REPLY " VITTUUN "
+Mene ite!
+j00! Vittuun kaikki taalta serverilta!!
+
+@REPLY " PASKA "
+Shit happens, haha!
+Voi raukkaa, %s...
+Olen samaa mielta, %s: Tama ON paskamaista!
+Tosiaanko, nain pian?
+Parempi menna pontolle paskalle, %s
+Haha...
+%s, olet luuseri!!!
+Paska? Mita se on?
+
+@REPLY " ANTEEKSI ", " PAHOILLAAN", " PAHOILLASI ", " SORI "
+Niin, kaikki sanovat jalkeenpain etta ovat pahoillaan!
+Tuo puolustelu ei auta minua nyt, %s!
+Ensi kerralla olisi parempi ajatella ennen kuin teet mitaan, %s!
+Minakin olen pahoillani!
+Et tieda kuinka pahoillasi oletkaan kun teit tuon...
+
+@REPLY " VAIHTAMASSA "
+Parempi ampua aseesi, %s ;-)
+Sinun taytyy paattaa jotain, %s!
+
+@REPLY " VASYTTAA "
+Mene nukkumaan, %s
+Lepaa vahan, %s...
+
+@REPLY ": MITA", ": MIKSI", ": MISSA", ": KUKA", ": MILLOIN", ": MITEN", ": MISTA"
+Et saa sita koskaan selville, %s!
+Niin, todella outoa %s...
+Vastaus on tuolla jossain, %s ;-)
+Ei aavistustakaan, %s
+Mita luulet %s?
+En kerro sinulle, %s!
+Ota itse selvaa, %s!
+Hyva kysymys, %s!
+Mummoni kysyi samaa minulta joka paiva...
+
+@REPLY " VOITTAA", " VOITTOA "
+Et pysty siihen koskaan, %s!
+Pelkaampa, etta se on mahdotonta...
+Ensiksi sinun pitaa parantaa tahtaystaitojasi, %s!

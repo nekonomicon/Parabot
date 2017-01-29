@@ -1,0 +1,530 @@
+
+           ########################################################
+           #                                                      #
+           #              CHATFILE FOR PARABOT                    #
+           #                                                      #
+           #                   - ROMANIAN -                       #
+           #         translated by Ares (ares@mymail.ro)          #
+           #                                                      #
+           ########################################################
+
+
+           
+@GOT_KILLED
+
+Data viitoare te omor eu, %s!
+La dracu'!
+Cum s-a putut intampla acest lucru?!?
+A fost ala POD 2.0 ?
+Ala trebuie sa fi fost unul din boti aia! 
+Sunt cumva boti pe acest server ?
+Inca mai sunt bug-uri in sistemul meu de ochire...
+Si eu imi schimbam arma!
+Noroc %s...
+%s foloseste un aimbot!
+Ouch!
+Nu stiu ce se intampla azi...
+Ala a fost pur noroc, %s!
+Nu pot sa cred...
+Ce ai mancat la micul dejun, %s?
+Chiar si %s ma omora azi - e fara speranta!
+Sunt mai bun la Q3 asta e sigur
+Imi pare rau, fratele meu mai mic a controlat meciul - acum m-am intors!
+Sunt atat de obosit, e ora 4am aici
+Hei, ai grija %s!
+De ce te folosesti tot timpul de %w , %s?
+Ce te-ai face fara %w, %s?
+Tot timpul cu  %w  - lame!
+Hai , %s: fara %w , ce zici?
+Cred ca am un virus, tastatura nu functioneaza bine!
+Poate careva sa-l lase pe  %s fara %w, va rog frumos?
+Nu o sa inteleg niciodata cum %s a facut asta...
+Acel incepator %s de abia ce m-a omorat!
+Mai devreme sau mai tarziu o sa-ti vin de hac, %s!
+Nu imi place deloc sa incarc arma...
+De ce un %w se incarca asa de greu?!?
+%s joca Camper-Strike...
+Sunteti siguri ca  %s nu triseaza???
+Ar trebui sa maresc brightness-ul - Nu am vazut chiar nimic!
+De ce este monitorul intunecat? Sunt mort?
+%w iara, %s? Ai incercat vreodata alte arme?
+Sper ca %s e satisfacut ca m-a omorat. Acum e randul meu!
+La dracu'! Mort iara! VREAU O BERE!
+Am auzit un sunet asemanator tunetului apoi...
+Data viitoare sa fii mai atent la %w , %s...
+Lag, lag, lag si apoi FUCK!
+Oh camper, camper, motivul pentru care sunt mort esti tu, %s...
+Da-l naibii  de %w , omule!
+Unde e tipu' ala ????
+Ooops!
+Camper!!! :(
+Data viitoare te omor, fii sigur, %s!
+Wazzzzzzzuuuup???
+Norocul incepatorului ! Sunt sigur!
+De ce ma urasti, %s?
+Omoara si pe altii, %s
+%s triseaza!
+Nu ma mai omori, %s.
+Asteapta, %s - O sa ma razbun!
+Care a fost???
+WTF?!?
+Sa omori pe cineva cu un %w e foarte usor!
+De ce m-ai omorat cu %w iara, %s?
+Unde ai gasit %w , %s?           
+
+
+
+@KILLED_PLAYER
+
+Aia a aratat rau, %s!
+In sfarsit l-am omorat pe %s!
+Hehe...
+Pa Pa %s!
+Cod de evaziune prost, %s ;-)
+As vrea ca cineva cu adevarat bun sa intre pe server...
+Asta a fost razbunare, %s!
+A vazut cineva asta?
+Hasta la vista, %s!
+Trebuia sa fugi cand ai putut, %s!
+Iarasi :-)
+Asta trebui sa-ti fie invatatura de minte, %s!
+Pretty fly, %s ;-)
+Cate fraguri trebuie sa fac pentru a castiga harta?
+Acum am mai multe fraguri decat tine, %s?
+Si cine spunea ca nu pot sa o fac?!?
+Nu poate fi decat unul, %s!
+Forta sa fie cu tine, %s!
+Incepator, huh?
+Nu te ingrijora %s: O sa-ti treaca...
+%w ,arma mea favorita!
+Usor, %s: nu e decat un joc!
+Sunt maestru cu %w!!!
+Nimeni nu se pricepe la %w ca mine, %s!
+Imi place de %w !
+Acest %w este nemaipomenit!
+Asta se intampla cand vorbesti prea mult, %s!
+Pun pariu ca %s a facut pe el cand a auzit sunetul de %w!
+Stiai ca creierul seamana cu oua si sunca, %s?
+Ai inceput sa te arzi, %s...
+OK %s, data viitoare nu mai ma folosesc de %w - promit!
+Data viitoare o sa folosesc cutitul %s - devine prea usor!
+Clanul tau nu e decat o adunatura de ratati, %s...
+Cine crezi ca o sa faca curatenie, %s? Eu???
+Aaaah, carnea proaspata!
+Nu te ingrijora, fii fericit, %s...
+Poate mergem la o bere data viitoare, %s...
+Sa te omor ma amuza, %s :-)))
+Mi-e teama ca nimeni nu o sa-ti opreasca sangerarea, %s...
+Imi pare rau, tinta mea nu era pe tine, %s...
+Clanul meu ar fi mandru de mine!
+Te-a durut, hmm?
+Pleaca-te in fata regelui, %s!
+Am facut asta singur?!? COOL!!!
+Acest %w e tare de tot!!!
+LOL!
+O sa ma intorc %s!
+Burn baby!
+Razbunarea nu a fost asa de rea, hmm?
+Boom :)
+De ce nu ma omori si tu, %s?
+Poti sa tragi, dar fuga e mai buna pentru tine, %s!
+Cred ca sunt destul de puternic pentru a salva lumea de unul singur :)
+Am fost nascut cu %w in mana - nu aveai nici o sansa, %s! ;)
+Doamne : l-au omorat pe Kenny!
+Doamne : l-au omorat pe  %s!
+
+
+
+@GOT_WEAPON
+
+Asteptati pana faceti cunsotinta cu mine!
+Acum o sa omor pe cineva!
+Cu aceasta arma as putea sa-l omor si pe JoeBot!
+Nu o sa credeti ce am gasit..
+WOW!Nici nu stiam ca arma asta exista...
+Stiu unde gasesc un %w :-)
+%w este al meu - jocul poate sa inceapa :-P
+Am gasit %w !
+Iau  %w...
+Odata ce am luat %w  nu mai am pe nimeni in fata...
+Yeah! In sfarsit %w !
+Ma intreb care a lasat %w  aici - O sa ma servesc de el...
+O sa va arat capodopera mea cu %w.
+Vreti sa luati parte la experimentele mele cu %w?
+Este timpul pentru lectia de %w...
+Cunoaste careva %w?
+O sa te urmaresc cu %w!
+Credeti ca nu sunt capabil sa folosesc %w? Veniti sa vedeti!
+Are cineva munitie pentru %w ?
+Am nevoie de praf de pusca!
+La dracu cu %w  - Prefer AK47!
+Hey! Am gasit %w! Poate cineva sa-mi spuna cum sa o folosesc?
+Acum sa mergem sa facem niste fraguri! 
+Am vesti proaste pentru voi! Veniti sa le auziti :)
+Acum nu-mi mai trebuie decat munitie!
+Ce arma e asta?
+Cine vrea  %w?
+Ce e cu butonul de pe %w?
+Hey %w  este arma mea favorita!
+%w, cel mai bun prieten al unui jucator :)
+
+
+
+###############################################################################
+
+
+@REPLY_UNKNOWN
+Bla bla bla...
+Ce ai spus, %s?
+Concetreaza-te la joc, %s!
+Sa vorbesc cu tine %s e minunat!
+Aceste mesaje imi dau fiori!
+Nu spam-a, %s!
+Unde gasesti atata timp pentru a scrie toate prostiile astea???
+Da, %s. Ai dreptate!
+Niciodata, %s...
+Tare tip %s, esti un tip tare...
+Asta imi spunea si bunica tot timpul, %s
+De unde esti, %s?
+Nu pot sa cred ca joci si scrii in acelasi timp, %s!
+Esti sigur, %s?
+Inteleg, %s!
+De ce spuneti tot timpul aceleasi lucruri???
+Despre ce dracu' vorbesti, %s?
+Stii ce? Azi sunt intr-o pasa buna...
+Hey %s, sincer nu intelegem chineza!
+Aia a fost in japoneza sau ce?
+Taci din gura si joaca, %s!
+Ai spus ceva, %s?
+Cine a spus asta?
+Oh, pe bune?
+Foarte distractiv, %s!
+Sunt in cel mai bun clan din tara mea!
+Ma oftica comentariile stupide, %s!
+Stie careva cum sa fac Gauss-jump?
+ZZZZZZZzzzzzz
+o--]===>
+Kamikaze!!!
+Lumini, Camera, MOTOR!
+Wazzzzuuuuuuup?
+Sunt atat de plictisittttttttttttt
+Care e mai bun: AMD sau INTEL?
+Ai ICQ, %s?
+Care e cel mai bun bot?
+
+
+
+###############################################################################
+
+
+@REPLY " IARA ", " DIN NOU ", "IARASI "
+Lucrurile se repeta, nu-i asa?
+Sunt sigur ca nu a fost pentru ultima oara...
+Ai auzit si tu de cercul reincarnarilor, %s?
+Asa merg lucrurile, hey...
+
+@REPLY " AK47 "
+Nu am vazut arma asta in joc...
+
+@REPLY " INTOTDEAUNA "
+Asta nu se intampla tot timpul, %s!
+Imi place :-)
+Hai %s, n-a fost decat a doua-a oara!
+De 15 ori la rand, hehe...
+
+@REPLY " AMD "
+Foloseste Athlon, %s!
+Joc acest meci pe un K6-2..
+
+@REPLY " CUR ", " FUND "
+A da - fundul meu...
+Fundul meu este foarte relevant.
+Cred ca fundul meu nu are nici o legatura cu asta, %s!
+
+@REPLY " CEHOSLOVACIA "
+Cehoslovacia s-a separat in 1993...
+Acum doar republicile Cehe and Slovace exista, prost %s!
+Cehoslovacia are legatura cu istoria...
+
+@REPLY " CEH"
+Republica Ceha - Nu stiu decat de  Cecholovacia
+Da, Cehi: sunt buni la hochei parca?
+Republica ceha ? Vreau o harta!
+Republica ceha este pe primul loc in lume la baut bere si jucat hochei.
+Ii stiti pe Jaromir Jagr sau Dominik Hasek - astia sunt cehi...
+
+@REPLY " BERE "
+Parca Budweisser nu mai este la fel de bun...
+Parca erai beat ultima oara cand ai jucat, %s.
+Cred ca cea mai buna bere vine de Republica Ceha.
+Cred ca cea mai buna bere e din Germania.
+Cred ca cea mai buna bere e din Olanda.
+Cred ca cea mai buna bere e din Mexic.
+Cred ca cea mai buna bere e din Romania.
+# Puneti aici berea voastra favorita :-)
+
+@REPLY " SANGE ", " SANGERARE "
+Blood(2) a fost un joc amuzant...
+Nu-mi place culoarea rosie!
+Ai nevoie de pansamente, %s?
+
+@REPLY " BOTMAN "
+Cine e botman ala de care vorbesc toti???
+Mergeti la  www.planethalflife.com/botman
+Botman e tare, botman e cool.
+Imi place bot-ul lui.
+Fara codul sursa al sau multi boti n-ar exista!
+
+@REPLY " PARABOT "
+Parabot? N-am auzit de el...
+Ati aflat de sistemul de comunicare nou al Parabot-ului?
+Parabot? Ar trebui sa merg pe net mai des...
+Parabot? Pentru care e facut?
+Parabot, Parabot, hmmm stati putin, ma uit in enciclopedie...
+Mergeti la www.botepidemic.com/parabot
+
+@REPLY " INHUMANTURNS "
+Ce??? INHUMANTURNS? Trebuie sa incerc si eu asta...
+N-am auzit niciodata de INHUMANTURNS e un cheat sau ce ?
+Da POD cu INHUMANTURNS sunt de-a dreptul INUMANI - mai ales pe  de_prodigy!
+
+@REPLY " POD ", " PODBOT "
+POD e doar pentru CS, prostule!
+Da, unul din POD Bots ar insufla ceva viata acestui joc...
+Ce mult imi place PODBots cu INHUMANTURNS ON...
+
+@REPLY " SWATBOT "
+Este adevarat ca SWATBOT consuma foarte mult din CPU?
+Ce pacat ca sunt atat de putine way-point-uri pentru SWATBOT pe internet!
+
+@REPLY " JOEBOT "
+Stii doar ca JOEBOT nu joaca acest mod...
+Nu am inteles niciodata ca JOEBot te invata... Voi?
+Navigarea la JOEBot e fantastica!
+Stiati ca porecla lui joebot e "fastbot"?
+Joebot suporta o multime de harti!
+
+@REPLY " BOT "
+De ce vorbiti tot timpul de boti aia prosti?
+Daca vreti boti mergeti la  www.botepidemic.com
+Nu sunt boti pe acest server %s, sa fi sigur!
+Boti-i sunt cool!!!
+Care e botul tau favorit, %s?
+Daca vrei sa faci si tu unul, cere-i lui  botman codul sursa!
+Daca vreti sa vorbiti despre boti mergeti la  NUKEBOX...
+Boti tot timpul, ar trebui sa mai joci si cu oameni!
+Stiti ceva despre SWATBot?
+Majoritatea botilor sunt foarte prosti!
+
+@REPLY " MICUL DEJUN ", " DEJUN "
+N-am baut decat cafea...
+Mananc muesli!
+Nu manac nimic de dimineata!
+
+@REPLY " CAMPER "
+Urasc camperii!!!!!
+Camping-ul e nashpa!
+Cand nu mai ai prea multa viata mai bine campezi!
+Camping-ul este uneori singura optiune pentru a castiga...
+
+@REPLY " NU POT "
+Asta e o problema, %s
+Atunci lasa-o balta, %s ;-)
+Nu o sa te ajut, %s
+De ce?
+
+@REPLY " CHEAT ", " TRISAT "
+Cei care triseaza strica jocul.
+Urasc trisorii!
+Cheatingul e nashpa!
+De ce triseaza atat de multa lume?
+Punkbuster ar putea ajuta...
+Jucati cu boti - nu triseaza!
+
+@REPLY " CLAN "
+Ce e cu clan-urile astea?
+Am fost intr-un clan da nu erau buni de nimic.
+Din ce clan esti, %s?
+Vrei sa vii in clan-ul nostru, %s?
+Sunt clan-uri pentru acest joc?
+Inca un cuvant despre clan-uri si esti mort, %s!!!
+
+@REPLY " MOARTE ", " MORT "
+Cineva sa sape o groapa...
+E vreun cimitir prin apropiere?
+Fara durere nici un castig. Asa-i %s?
+Cred ca am vazut o stafie!
+
+@REPLY " ENGINE "
+Daca VALVE lucra la engine mai mult timp multe cheat-uri nici nu existau!!!
+Cred ca Unreal-Warfare este cel mai bun engine in acest moment!
+
+@REPLY " FINAL "
+A trebui sa astepti mult %s, nu-i asa?
+De ce ai ramas marcat de acel lucru, %s?
+
+@REPLY " GASIT "
+Mai bine gasesc un aimbot, lol!
+Felicitari, %s
+Asta nu se intampla in fiecare zi, %s!
+
+@REPLY " FRAG "
+In mod normal sunt cel mai bun de server!
+Trebui sa stiti ca jocul nu se bazeaza doar pe frag-uri!
+
+@REPLY " DRACU ", " NAIBA ", " MA-TA "
+Nu injura, %s!
+Urat %s!
+De unde stii cuvintele astea, %s?
+Da, ai dreptate, %s. Acum TACI!
+Vorbeste frumos, %s!
+%s, nu mai folosi acest cuvant - nu e politicos!
+
+@REPLY " DISTRACTIE ", " HEHE ", " HAHA "
+Imi pare bine ca macar tu te distrezi, %s...
+Bucura-te cat mai poti, %s!
+Foarte disctractiv intr-adevar, %s...
+
+@REPLY " JOC ", " JOACA ", " JOCI "
+Asta e un joc minunat, nu-i asa?
+Si mie imi place sa ma joc voi, baieti...
+Ai incercat vreodata alt joc, %s?
+Ar trebui sa incerci baseball sau ceva asemanator...
+Doar amuzant, nimic mai mult!
+Jocul meu favorit e Half-Life si Unreal Tournament
+Hei, v-ati uitat vreodata pe NBC:GigaGames? Program cool!
+
+@REPLY " BUNICA "
+As vrea sa-ti cunosc bunica, %s!
+LOL, %s
+Esti ciudat, %s!
+
+@REPLY " HALFLIFE ", " HALF LIFE "
+E unul din cele mai bune jocuri facute vreodata!
+Cred ca e distractiv sa-l joci.
+
+@REPLY " EU CRED "
+Tu gandesti prea mult, %s ;-)
+Si cred ca ar fi mai bine sa taci din gura si sa joci!
+Si tu chiar crezi asta, %s?
+Ce te face sa crezi acest lucru?
+De ce nu ne intalnim pe IRC sa discutam, %s?
+
+@REPLY " CUTIT "
+Da! doar cutite! Ce o sa distram!
+Il sti pe Jack the Ripper? Eram eu intr-o viata anterioara.
+Zig 'n Zag - va aduceti aminte de Lo-Wang de la Shadow-Warrior?
+Daaa... Vreau mai multa lupta de aproape!
+Cutit in jocu' asta. N-am auzit de asta!
+
+@REPLY " OMOR "
+Ar fi bine sa-ti para rau, distins criminal!
+Da-mi un cutit si o sa-ti arat...
+Floare la ureche...
+
+@REPLY " L AU OMORAT PE KENNY!"
+Prea mult South Park, uh?
+LOL, %s!
+
+@REPLY " LAME "
+Nu plange, %s!
+Stiu ;-)
+
+@REPLY " LECTIE ", " INVATA "
+Nu am nevoie de lectii, %s. Sunt destul de bun ca sa te omor!
+In banci, copii. Domnul %s a intrat in clasa.
+Am luat destule lectii, hai sa jucam!
+
+@REPLY " NOROC"
+Ala nu e noroc e doar pricepere!
+Da, Fortuna nu se simte bine azi ;-)
+Chiar si zeii sunt impotriva ta, %s. Preda-te...
+Fara scuze , %s
+Noroc? Cine vrea, uh?
+Inca o vorba despre noroc si votez impotriva ta, %s
+
+@REPLY " MAESTRU "
+Esti maestru dezastrului %s ;-)
+Si eu sunt maestrul craniului!
+
+@REPLY " CARNE ", " FRIPTURA "
+Da - mi-e foame!
+Sa-mi tai si mie o bucata, %s.
+Nu am mancat nimic de foarte mult timp...
+
+@REPLY " MUZICA ", " FORMATIE "
+Formatia mea favorita e  Limp Bizkit, a voastra care e?
+Rolling Stones sunt cei mai buni, omule!
+
+@REPLY " NIMENI "
+Cine-i nimeni? ;-)
+Intr-o zi o sa fi cineva %s, sunt sigur!
+
+@REPLY " PUNKBUSTER "
+NU TRISA! (mergi la www.punkbuster.com)
+Are destule bug-uri, dar este updatat destul de des.
+Cei din echipa Punkbuster sunt foarte seriosi in munca lor!!!
+
+@REPLY " Q3 ", " QUAKE"
+Q3 este lame
+Half-Life e cel mai bun, %s!
+Ai auzit de DMC, %s? ;-)
+
+@REPLY " INCARACA"
+Ia un cutit si nu o sa mai fie nevoie sa-ti incarci arma...
+Ihi! Incarcatul e nashpa!
+Ar trebui sa folosesti un cheat de viteza, %s.
+
+@REPLY " RAZBUNARE "
+Ce-ar fi sa uitam asta, %s?
+Pace, %s!
+
+@REPLY " FUGA"
+Cand fugi sigur castigi!
+Daa - fugiti ratatilor!
+Fugi cat vrei - O sa te omor data viitoare...
+
+@REPLY " NAIBA "
+Sa infiletezi doar cu o surubelnita, buheheh...
+La naiba cu toti de pe acest server!
+
+@REPLY " RAHAT "
+Lucruri rele se intampla, haha!
+Saracu' %s...
+Sunt de partea ta, %s: Asta *E* de rahat!
+O, asa de devreme ?
+Ai face mai bine sa mergi la toaleta, %s
+Haha...
+%s, nu poti sa castigi!!!
+Rahat? Ce-i ala ?
+
+@REPLY " SCUZE ", " IMI PARE RAU "
+Da pana la urma tuturor le pare rau!
+Scuza ta nu ma ajuta acum, %s!
+Data viitoare sa te gandesti inainte sa face ceva, %s!
+Si mie imi pare rau!
+Nu stii cat de rau o sa-ti para pentru ca ai facut asta...
+
+@REPLY " BUTON "
+Mai bine ti-ai folosi arma, %s ;-)
+Trebuie sa te decizi, %s!
+
+@REPLY " OBOSIT "
+Du-te sa te culci, %s
+Odihneste-te , %s...
+
+@REPLY ": CE ", ": DE CE ", ": UNDE ", ": CINE ", ": CAND ", ": CUM "
+Nu o sa afli asta niciodata , %s!
+Da, asta e ciudat %s...
+Adevarul este dincolo de noi, %s ;-)
+N-am nici o idee, %s
+Tu ce crezi %s?
+Nu o sa-ti spun, %s!
+Afla si singur, %s!
+Buna intrebare, %s!
+Si bunica mea ma intreba acelasi lucru in fiecare zi...
+
+@REPLY " VICTORIE ", "CASTIGA "
+Nu o sa reusesti niciodata, %s!
+Imi pare rau sa-ti spun ca e imposibil...
+Mai intai va trebui sa tintesti mai bine, %s!

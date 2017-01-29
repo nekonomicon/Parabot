@@ -1,0 +1,552 @@
+
+           ########################################################
+           #                                                      #
+           #              CHATFILE FOR PARABOT                    #
+           #                                                      #
+           #                   - ENGLISH -                        #
+           #                                                      #
+           #                                                      #
+           ########################################################
+
+
+
+@GOT_KILLED
+
+Next time I'll get you, %s!
+Oh shit!
+How could that happen?!?
+Was that POD 2.0?
+That must have been one of those damn bots!
+Are there any bots on this server?
+There must still be a bug in my aiming system...
+And I was just switching my weapon!
+Lucky bastard %s...
+%s is using an aimbot!
+Ouch!
+I don't know what happens today...
+Now that was luck, %s!
+I can't believe that...
+What did you eat for breakfast, %s?
+Even %s frags me today - it's hopeless!
+I'm better at Q3, that's for sure
+Sorry, my little brother took over for me - but now I'm back!
+Im so tired its already 4am here
+Hey, look out %s!
+Why do you always use the %w, %s?
+What would you do without the %w, %s?
+Always with the %w - that's so lame!
+Come on, %s: leave the %w aside, will you?
+i thnk iv got a virus my keybrd dosnt work prperly!
+Can anybody quit %s his %w, please?
+I'll never understand how %s did that...
+That poor newbie %s has just shot me down!
+Sooner or later I'll get you, %s!
+I really hate reloading...
+Why does that %w reload so slowly?!?
+%s is playing Camper-Strike...
+Are you sure that %s doesn't cheat???
+I should increase the brightness level - I didn't see a damn thing!
+Why is my monitor so dark? Am I dead?
+%w again, %s? Have you ever tried other weapons?
+Well I hope %s is satisfied with killing me. Now it's my turn!
+Oh shit! Dead again! GIMME A BEER!
+I heard a sound like thunder and then...
+You'd better be careful with that %w next time, %s...
+Lag, lag, lag and then FUCK!
+Oh camper, camper, the reason I'm dead is you, %s...
+Screw this %w, man!
+Where was that guy???
+Ooops!
+Camper!!! :(
+Next time I´ll kick your ass, %s!
+Wazzzzzzzuuuup???
+Beginner luck! I´m sure!
+Why do you hate me, %s?
+Kill someone else please, %s
+%s is cheating!
+Stop killing me, %s.
+Just wait, %s - I will have my revenge!
+Who was that???
+WTF?!?
+Killing somebody with the %w is really easy!
+Why did you kill me with that %w again, %s?
+Where did you find that %w, %s?
+
+
+
+@KILLED_PLAYER
+
+That looked really bad, %s!
+Finally I got %s!
+Hehe...
+Bye bye %s!
+Bad evasion code, %s ;-)
+I wished someone good would join this server...
+That one was revenge for the last time, %s!
+Did anybody see that?
+Hasta la vista, %s!
+You should have run while you had the chance, %s!
+Once again :-)
+That will teach you, %s!
+Pretty fly, %s ;-)
+How many frags do I need to win this map?
+Do I have more frags than you now, %s?
+And who said that I can't do it?!?
+There can only be one, %s!
+May the force be with you, %s!
+Newbie, huh?
+Don't worry %s: You'll get over it...
+The %w is my favourite!
+Take it easy, %s: it's just a game!
+I'm the master of the %w!!!
+Nobody handles the %w as I do, %s!
+I love this %w!
+This %w is feeling awesome!
+That happens when you're chatting too much, %s!
+I bet %s pissed his pants when he heard the sound of my %w!
+Do you know your brain looks like ham'n'eggs, %s?
+You're starting to look like roastbeef, %s...
+OK %s, next time I won't use the %w anymore - promise!
+Next time I'll use the knife %s - it's getting too easy!
+Your clan must be just a bunch of loosers, %s...
+Who do you think will clean up your mess, %s? Me???
+Aaaah, fresh meat!
+Don't worry, be happy, %s...
+Maybe we can go for a beer in your next life, %s...
+Killing you is just amusing, %s :-)))
+I'm afraid noone is able to stop your bleeding, %s...
+Sorry, I wasn't really aiming at you, %s...
+My clan would be proud of me!
+That hurt, hmm?
+Hail to the king, baby!
+Have I done this by my own?!? COOL!!!
+That %w rocks!!!
+LOL!
+I'll be back %s!
+Burn baby!
+My revenge was bad, hmm?
+Boom :)
+Why don't u kill me too, %s?
+You can shoot, but running is better for you, %s!
+I think I´m strong enough to save the world all by myself :)
+I was born with the %w - you didn't really have a chance, %s! ;)
+Oh my God: They killed Kenny!
+Oh my God: They killed %s!
+
+
+
+@GOT_WEAPON
+
+Wait guys til I meet you with this baby!
+Now I'll kick some ass!
+With this cannon I could even frag JoeBot!
+You won't guess what I found right now...
+WOW! I didn't even know that this weapon existed!
+I know where the %w is :-)
+The %w is mine - the game can start :-P
+I've found the %w!
+Picking up the %w...
+Once I've got the %w and nobody is in sight...
+Yeah! Finally the %w!
+I wonder which of you left the %w here - I'll find it useful...
+I'm gonna show you my excelent work with the %w.
+Do you want to take part in my new experiments with the %w?
+It's time for the %w lesson...
+Everybody knows the %w?
+I'm going right after you with the %w!
+You guys think I'm not able to use the %w? Come and see for yourself!
+Someone got ammo for the %w?
+I need some gun-powder!
+Screw the %w - I'd rather prefer the AK47!
+Hey! I found the %w! Can anybody tell me how to use it?
+Now let's kick some asses! 
+I've got bad news for ya! Come and hear them ):)
+Now I just need some ammo!
+What´s that?
+Who wants a %w?
+What´s that for a button on the %w?
+Hey the %w is my favourite weapon
+The %w, the best friend of a player :)
+
+
+
+@JOINED_SERVER
+
+Hi guys!
+Hello
+Hi
+I will kill you all!
+Hi all!
+
+
+
+###############################################################################
+
+
+@REPLY_UNKNOWN
+Bla bla bla...
+What did you say, %s?
+Concentrate on the game, %s!
+Chatting with you %s is so great!
+These damn chat-messages are freaking me out!
+Don't spam, %s!
+How do you find the time to type all this crap???
+Yeah, %s. You're right!
+No way, %s...
+Cool dude %s, you're a cool dude...
+That's what my grandma used to tell me all the time, %s
+Where are you from, %s?
+I can't believe how you can play and type at the same time, %s!
+Are you sure, %s?
+I see, %s!
+Why is everybody always saying the same things???
+What the heck are you talkin' about, %s?
+You know, I'm not in a good mood today...
+Hey %s, we honestly don't understand Chinese!
+That was Japanese or somethin'?
+Hey, shut up and play, %s!
+You said somethin', %s?
+Who said that?
+Oh, really?
+Very funny, %s!
+I'm in the best clan of my country!
+I hate these stupid comments, %s!
+Does anybody know how to do the Gauss-jump?
+ZZZZZZZzzzzzz
+o--]===>
+Kamikaze!!!
+Light, Camera, ACTION!
+Wazzzzuuuuuuup?
+I´m so booooored... 
+What´s better: AMD or INTEL?
+Have you got ICQ, %s?
+What's the best bot around?
+
+
+
+###############################################################################
+
+
+@REPLY " HI ", " HELLO "
+Hi %s
+Welcome %s!
+Hello %s!
+You will soon be dead, %s ;-)
+Hey guys, we've got a new victim: %s!
+Show your skills, %s!
+Nice to see you again, %s
+Glad you joined us, %s!
+Wicked name, %s!
+How are you doing, %s?
+Up for some decent fragging, %s?
+Welcome to the club, %s!
+
+@REPLY " AK47 "
+I've never seen a fuckin' AK47 in this game...
+
+@REPLY " ALWAYS "
+That's not always, %s!
+I just like it :-)
+Come on %s, that was only the second time!
+15 times in a row, hehe...
+
+@REPLY " AMD "
+Stick with the Athlon, %s!
+I play this game on a K6-2...
+
+@REPLY " ASS "
+Oh yes - my ass...
+My ass is almost assuredly relevant.
+I think my ass is completely irrelevant here, %s!
+
+@REPLY " CZECHOSLOVAKIA "
+Czechoslovakia was separated in 1993...
+Now only Czech and Slovak republics exist, stupid %s!
+Czechoslovakia is history...
+
+@REPLY " CZECH "
+Czech Republic - I know only about Czechoslovakia
+Yeah, Czechs: they're good in ice-hockey, aren't they?
+Czech Republic? Gimme a map!
+Czech Republic is first in t world at beer-drinking and ice-hockey playing.
+You know Jaromir Jagr or Dominik Hasek - they are Czechs...
+
+@REPLY " BEER "
+You know Budweisser is not that good nowadays as it used to be...
+I remember you were drunk as a fish last time you played, %s.
+I think the best beer comes from the Czech Republic.
+I think the best beer comes from Germany.
+I think the best beer comes from Holland.
+I think the best beer comes from Mexico.
+# Everybody please type in his favourite beer-country here :-)
+
+@REPLY " BLOOD ", " BLEED"
+Blood(2) was an amusing game...
+I don't like the red color!
+Need some bandages, %s?
+
+@REPLY " BOTMAN "
+Who is this botman everybody is talking about???
+Visit his website at www.planethalflife.com/botman
+Botman's great, botman's cool.
+I like his bot.
+Whithout his sourcecode many bots wouldn't exist!
+
+@REPLY " PARABOT "
+Parabot? Never heard of that one...
+Did you hear about Parabot's brand new chat-system?
+Parabot? I should surf the internet more often...
+Parabot? Which game does it belong to?
+Parabot, Parabot, hmmm wait a minute, I'll take an encyclopedia...
+Visit www.botepidemic.com/parabot
+
+@REPLY " INHUMANTURNS "
+What??? INHUMANTURNS? I'll have to check it out...
+I've never heard about INHUMANTURNS - is that a kind of cheat or somethin'?
+Yeah, PODs with INHUMANTRUNS are really INHUMAN - especially in de_prodigy!
+
+@REPLY " POD ", " PODBOT "
+POD is CS only, stupid!
+Yeah, one of those POD Bots would bring some life into this game...
+Daaaaamn I love PODBots with INHUMANTURNS turned ON...
+
+@REPLY " SWATBOT "
+Is it true that SWAT consumes so much CPU?
+A shame that there are so few waypoints for SWAT on the net!
+
+@REPLY " JOEBOT "
+You know that JoeBot doesn't play this MOD...
+You know I have never understood that JOEBot teaching... Did you?
+JOEBot navigation's great!
+Joebot's nick is "fastbot"! Did you know that?
+Joebot supports a lot of maps!
+
+@REPLY "BOT "
+Why are you always talking about these stupid bots?
+If you want bots have a look at www.botepidemic.com
+There are no bots on this server %s, I tell you!
+Bots are cool!!!
+What's your favourite bot, %s?
+If you want to program your own, ask botman!
+If ya wanna talk about bots, visit NUKEBOX...
+Bots, all the time bots - you should start playing with humans.
+Do you know anythin' new about SWATBot?
+Most bots are still very stupid!
+
+@REPLY " BREAKFAST "
+I only had some coffee...
+I am eating muesli!
+I never have breakfast!
+
+@REPLY " CAMPER "
+I really hate those campers!
+Camping sucks!
+When you've got low health you'd better camp!
+Camping's often the only option to win...
+
+@REPLY " CAN'T ", " CANNOT "
+That's a problem, %s
+Then leave it, %s ;-)
+I won't help you, %s
+Why not?
+
+@REPLY "CHEAT"
+Those damn cheaters are ruining the entire game!
+I hate cheaters!
+Cheating sucks!
+Why are so many people cheating?
+Punkbuster could help...
+Play with bots - they don't cheat!
+
+@REPLY " CLAN "
+What are these clans all about?
+I was in a clan once, but it sucked hard.
+What clan are you from, %s?
+Do you want to enter our clan, %s?
+Are there any clans for this game?
+One more word about clans and you're dead, %s!!!
+
+@REPLY " DEATH ", " DEAD "
+Someone should dig a grave...
+Is there a graveyard somewhere near?
+No pain, no gain. Right %s?
+I think I saw a ghost!
+
+@REPLY " ENGINE "
+If VALVE worked more on the engine of the game many cheats couldn't exist!!!
+I think the Unreal Warfare-Engine is the best engine at the moment!
+
+@REPLY " FINALLY "
+You had to wait long %s, didn't you?
+Why have you been so fixed on that, %s?
+
+@REPLY " FOUND "
+Better find an aimbot, lol!
+Congratulations, %s
+That doesn't happen every day, %s!
+
+@REPLY " FRAGS "
+Normally I'm the best on the server!
+You should remember that this game is not only about frags!
+
+@REPLY " FUCK ", " DAMN ", " PISS "
+Don't swear, %s!
+Nasty %s!
+Where did you get these words from, %s?
+Yes, you're right, %s. Now SHUT UP!
+Watch your language, %s!
+%s, don't use this word again - that's impolite!
+
+@REPLY " FUN", " HEHE ", " HAHA "
+I'm glad that at least you have your fun, %s...
+Enjoy yourself while you still can, %s!
+Very funny indeed, %s...
+
+@REPLY " GAME", " PLAY"
+This is a great game, isn't it?
+I like playing this game with you, too, guys...
+Have you ever tried some other game, %s?
+You should try basketball or somethin'...
+Just amusing, nothing more!
+My favorite game is Half-Life and Unreal Tournament
+Hey, have you ever watched NBC:GigaGames? Cool tv show!
+
+@REPLY " GRANDMA "
+I'd like to know your grandma, %s!
+LOL, %s
+You are weird, %s!
+
+@REPLY " HALFLIFE ", " HALF LIFE "
+It's one of the best games ever!
+I think it's pretty much fun to play.
+
+@REPLY " I THINK "
+You think too much, %s ;-)
+And I think you should shut up and play!
+And you really do believe that, %s?
+What makes you think so?
+Why don't we meet on IRC to discuss that, %s?
+
+@REPLY " KNIFE "
+Yeah, Knives only, guys! This is gonna be fun!
+Do you know Jack the Ripper? That was me in my previous life.
+Zig 'n Zag - remember Lo-Wang from Shadow-Warrior?
+Yeaaah - I want more close-combat...
+Knife in this game? Phew - never heard about that!
+
+@REPLY " KILL "
+You'd better feel sorry you disgusting killer!
+Gimme a knife and I'll show ya what kill means...
+Piece of Cake...
+
+@REPLY " THEY KILLED KENNY "
+Too much South Park, uh?
+LOL, %s!
+
+@REPLY " LAME "
+Don't cry, %s!
+I know ;-)
+
+@REPLY " LESSON ", " TEACH "
+I don't need any lesson, %s. I'm good enough to kill ya!
+To your desks, children. Mr.%s has entered the class.
+I've got enough of lessons, let's play!
+
+@REPLY " LUCK"
+There is no luck, only skill!
+Yeah, Fortuna is bad tempered today ;-)
+Even the gods are against you, %s. Just give it up...
+No excuse, %s
+Luck? Who want some, uh?
+One more word about luck and I'll vote against you, %s
+
+@REPLY " MASTER "
+You're the master of desaster %s ;-)
+And I'm the master of Greyskull!
+
+@REPLY " MEAT ", " ROASTBEEF "
+Yeah - I'm hungry!
+Cut a slice for me, too, %s.
+I haven't eaten anything for ages...
+
+@REPLY " MUSIC ", " BAND "
+My favourite band is Limp Bizkit, what about yours?
+The Stones rule, man!
+
+@REPLY " NOBODY "
+Who's nobody? ;-)
+Some day there will be someone %s, I'm sure!
+
+@REPLY " PUNKBUSTER "
+Don't be a PUNK! (support www.punkbuster.com)
+It's a bit buggy, but it is updated very often.
+The Punkbuster team is a very dedicated bunch of people!!!
+
+@REPLY " Q3 ", " QUAKE"
+Q3 is lame
+Half-Life rules, %s!
+Have you heard of DMC, %s? ;-)
+
+@REPLY " RELOAD"
+Get a knife and you won't have to reload anymore...
+Yup! Reloading sucks!
+You should have used a speedcheat, %s.
+
+@REPLY " REVENGE "
+Why don't we just forget about it, %s?
+Peace, %s!
+
+@REPLY " RUN"
+When you run you'll certainly win!
+Yeah - run loosers!
+Run as you like - I'll get you in the next round...
+
+@REPLY " SCREW "
+Screw only with a screw-driver, buheheh...
+Screw with everyone on this server!
+
+@REPLY " SHIT "
+Shit happens, haha!
+Poor %s...
+I am with you, %s: This *IS* shitty!
+Oh really, that soon?
+You'd better go and shit on the toilet, %s
+Haha...
+%s, you are a looser!!!
+Shit? What's that?
+
+@REPLY " SORRY "
+Yeah, afterwards everybody says he's sorry!
+The excuse doesn't help me now, %s!
+Next time you better think before you start doing something, %s!
+I'm sorry, too!
+You don't know how sorry you will be for doing that...
+
+@REPLY " SWITCH"
+Better shoot your weapon, %s ;-)
+You must decide on something, %s!
+
+@REPLY " TIRED "
+Go to bed, %s
+Have some rest, %s...
+
+@REPLY " WIN"
+You'll never make it, %s!
+First you'll have to improve your aim-skill, %s!
+
+@REPLY " AGAIN "
+Things are always repeating, aren't they?
+And I'm sure it wasn't the last time...
+Have you heard about this wheel-of-reincarnation stuff, %s?
+That's the way things go, hey...
+
+@REPLY ": WHAT ", ": WHY ", ": WHERE ", ": WHO ", ": WHEN ", ": HOW "
+You will never find out, %s!
+Yeah, that's really strange %s...
+The answer is out there, %s ;-)
+No idea, %s
+What do you think %s?
+I won't tell you, %s!
+Find out yourself, %s!
+Good question, %s!
+My grandma asked me this same thing every day...

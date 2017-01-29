@@ -1,0 +1,506 @@
+
+           ########################################################
+           #                                                      #
+           #              CHATFILE FOR PARABOT                    #
+           #                                                      #
+           #                  -  DANISH  -                        #
+           #                                                      #
+           #         By Predator - Søren F. Jørgensen             #
+           ########################################################
+
+
+
+@GOT_KILLED
+
+Jeg faar dig naeste gang, %s!
+Argh, lort!
+Hvordan kunne det ske?!?
+Var det POD 2.0?
+Det maa have vaeret en af de skide bots!
+Er der bots paa denne server?
+Der er stadig en fejl i mit sigtesystem...
+Jeg var lige ved at skifte vaaben!
+Heldige satan %s...
+%s bruger aimbot!
+Av!
+Jeg ved ikke hvad der sker i dag...
+Det var lo2, %s!
+Jeg kan ikke tro det...
+Hvad fik du til morgenmad, %s?
+Selv %s fragger mig i dag - det er nytteloest!
+Jeg er bedre til Q3, det er sikkert!
+Undskyld, min lillebror overtog - men nu er jeg tilbage!
+Jeg er saa traet, klokken er allerede 4:00 her
+Hey, pas paa %s!
+Hvorfor bruger du altid %w, %s?
+Hvad ville du goere uden en %w, %s?
+Altid med en %w - Det er saa lamt!
+Kom nu, %s: Lad din %w ligge - vil du ikke nok
+je tror jeg ha fat virus mit keybrd vrker ike!
+Jeg vil aldrig forstaa hvordan %s gjorde det...
+Den stakkels newbie %s har skudt mig!
+Jeg faar dig foer eller senere %s!
+Jeg hader at lade...
+Hvorfor lader man saa langsomt med en %w?!?
+Er du sikker paa at %s ikke snyder???
+Jeg burde skrue op for mit lys, jeg kunne ikke se en skid!
+Hvorfor er min monitor saa moerk, er jeg doed?
+%w igen %s? Har du aldrig proevet andre vaaben?
+Jeg haaber at %s er tilfreds med at draebe mig, nu er det min tur!
+Argh, lort! Ikke igen! Giv mig en oel!
+Jeg hoerte en tordenagtig lyd og saa...
+Du skal passe bedre paa med den %w naeste gang, %s...
+Lag, lag, lag og saa FUCK!
+Drop den %w, mand!
+Hvor var han???
+Ups!
+Camper!!! :(
+Naeste gang faar du roevfuld, %s!
+Hva saa???
+Begynderheld!
+Hvorfor hader du mig, %s?
+Draeb nogle andre, %s. Vil du ikke nok?
+%s snyder!
+Lad vaer med at draebe mig, %s.
+Vent bare, %s - Jeg vil have min haevn!
+Hvem var det???
+Hvad fanden?!?
+Det er let at draebe folk med en %w!
+Hvorfor draebte du mig med en %w igen, %s?
+Hvor kan jeg finde en %w, %s?
+
+
+
+@KILLED_PLAYER
+
+Det saa slemt ud, %s!
+Endelig fik jeg %s!
+Hehe...
+Farvel %s!
+Gid nogle bedre spillere joinede denne server...
+Det var haevn for sidste gang, %s
+Er der nogen der saa det?
+Hasta la vista, %s!
+Du skulle have loebet da du havde chancen %s!
+Endnu en gang.. :-)
+Saa kan du laere det, %s!
+Hvor mange frags skal man have for at vinde?
+Har jeg flere frags end dig, %s?
+Hvem sagde jeg ikke kunne goere det?!?
+Der kan kun vaere en, %s!
+Maa kraften vaere med dig, %s!
+Newbie, var?
+Tag det roligt %s: Du kommer over det...
+%w er mit yndlingsvaaben!
+Tag det roligt, %s: Det er kun et spil!
+Jeg er herskeren over %w!!!
+Ingen kan haandtere en %w som mig, %s!
+Jeg elsker min %w!
+Min %w er totalt sej!
+Det er det der sker naar man chatter for meget, %s!
+Jeg toer vaedde paa at %s tissede i bukserne da han hoerte min %w!
+Du er begyndt at ligne roastbeef, %s...
+OK %s, naeste gang bruger jeg ikke min %w - Det lover jeg
+Naeste gang bruger jeg kniven %s, det her er for nemt!
+Din klan maa vaere en stak tabere, %s...
+Hvem tror du vil rydde op efter det, %s? Mig???
+Aaaah, frisk koed!
+Vaer ikke sur, vaer glad, %s...
+Maaske kan vi faa en oel sammen i dit naeste liv, %s...
+Det er saa morsomt at draebe dig, %s :-)))
+Jeg er bange for at ingen kan stoppe din bloedning, %s...
+Undskyld, Jeg sigtede ikke paa dig %s...
+Min klan ville vaere stolt af mig!
+Det gjorde ondt, hmm?
+Hil kongen, skatter!
+Gjorde jeg det selv?!? SEJT!!!
+Den %w rykker!!!
+LOL!
+Jeg vender tilbage %s!
+Burn baby!
+Min haevn var ond, hmm?
+Boom :)
+Hvorfor kan du ikke draebe mig, %s?
+Du kan skyde, men det ville vaere bedre at loebe, %s!
+Jeg er god nok til at redde hele verdenen selv :)
+Jeg blev foedt med en %w - Du har ingen chance, %s! ;)
+Oh my God: They killed Kenny!
+Oh my God: They killed %s!
+
+
+
+@GOT_WEAPON
+
+Bare vent til jeg moeder jer med den her!
+Nu sparker jeg roev!
+med den her kan jeg draebe selv JoeBot!
+I kan ikke gaette hvad jeg har nu...
+WOW! Jeg troede ikke engang at det her vaaben eksisterede!
+Nu ved jeg hvor jeg kan finde en %w :-)
+Nu har jeg en %w - Saa kan kampen gaa igang  :-P
+Jeg har fundet en %w!
+Er ved at samle en %w op...
+Nu har jeg endelig en %w og saa er der ikke nogen...
+Yeah! Endelig en %w!
+Gad vide hvorfor i lod en %w ligge her - Den kan jeg godt bruge...
+Nu skal jeg vise jeg hvordan man bruger en %w.
+Nogen der vil vaere med i nogle eksperimenter med min %w?
+Nogen der kender en %w?
+Nu kommer jeg efter jer med en %w!
+I tror jeg ikke kan bruge en %w? Kom selv og se at jeg kan!
+Nogen der har noget ammo til en %w?
+Jeg har brug for noget krudt!
+Skide vaere med en %w - Jeg vil hellere have en AK47!
+Hey! Jeg har fundet en %w! Nogen der gider vise mig hvordan man bruger den?
+Nu skal der sparkes roev! 
+Jeg har daarligt nyt til jer! Kom og hoer dem ):)
+Nu mangler jeg bare noget ammo!
+Hvad er det?
+Nogen der vil have en %w?
+Hvad er det for en knap paa den her %w?
+Hey!! En %w er mit yndlings-vaaben
+En %w, en spillers bedste ven :)
+
+
+@JOINED_SERVER
+
+Hejsa gutter!
+Hej
+Goddag
+Jeg slaar jeg alle ihjel!
+Hej alle!
+
+
+
+###############################################################################
+
+@REPLY_UNKNOWN
+Bla bla bla...
+Hvad sagde du, %s?
+Koncentrer dig om spillet, %s!
+Det er saa fedt at snakke med dig %s!
+De forbandede chatbeskeder faar mig til at flippe ud!
+Lad vaer med at spamme, %s!
+Hvordan faar i tid til at skrive alt det forbandede lort???
+Yeah, %s. Du har ret!
+Under ingen omstaendigheder, %s...
+Det sagde min bedstemor ogsaa altid til mig, %s
+Hvor er du fra, %s?
+Jeg forstaar slet ikke hvordan i kan spille og skrive alt det her paa samme 
+tid, %s!
+Er du sikker, %s?
+Det kan jeg se, %s!
+Hvorfor siger alle altid det samme???
+Hvad fanden snakker du om, %s?
+Du ved, jeg er ikke i godt humoer i dag...
+Hey %s, Vi kan altsaa ikke forstaa kinesisk!
+Var det japansk eller saadan noget?
+Hey, hold kaeft og spil, %s!
+Sagde du noget, %s?
+Hvem sagde det?
+a-HA passer det?
+Meget morsomt, %s!
+Jeg er med i landets bedste klan!
+Jeg hader de der dumme kommentarer, %s!
+Nogen der ved hvordan man laver et Gauss-hop?
+ZZZZZZZzzzzzz
+o--]===>
+Kamikaze!!!
+Lys, kamera, ACTION!
+Hvaaaaa' saa?
+Jeg keeeeder mig... 
+Hvad er bedst: AMD eller INTEL?
+Har du ICQ, %s?
+Hvad er den bedste bot?
+
+
+
+###############################################################################
+
+@REPLY " HI ", " HEJ ", " Goddag "
+Hej %s
+Velkommen %s!
+Goddag %s!
+Du er snart doed, %s ;-)
+Hey venner, vi har et nyt offer: %s!
+Vis hvad du kan, %s!
+Rart at se dig igen, %s
+Godt du er kommet, %s!
+Sygt navn, %s!
+Hvordan har du det, %s?
+Er du med paa at fragge lidt, %s?
+Velkommen i klubben, %s!
+
+@REPLY " IGEN "
+Det hele sker igen og igen ikke?
+Og jeg er sikker at det ikke er sidste gang...
+Saadan gaar det altid!
+
+@REPLY " AK47 "
+Jeg har aldrig set en ak47 i det her spil...
+
+@REPLY " ALTID "
+Ikke altid, %s!
+Jeg elsker det bare :-)
+Kom nu %s , det var kun anden gang!
+15 gange i streg, hehe...
+
+@REPLY " AMD "
+Behold din Athlon, %s!
+Jeg spiller det her med en K6-2...
+
+@REPLY " ROEV "
+Aaarh ja - min roev...
+Min roev er sikkert relevant.
+Jeg synes at min roev er meget irrelevant her, %s!
+
+@REPLY " TJEKKOSLOVAKIET "
+Tjekkoslovakiet blev delt i 1993...
+Det er kun Tjekkiet og Slovakiet der eksisterer nu, dumme %s!
+Tjekkoslovakiet er historie...
+
+@REPLY " TJEKK "
+Tjekkiet - Jeg kender ku nTjekkoslovakiet
+Ja, tjekker: Er de ikke gode til ishockey?
+Tjekkiet - Giv mig et kort!
+I kender Jaromir Jagr eller Dominik Hasek - De er tjekker...
+
+@REPLY " Oel "
+Budweisser er ikke saa godt som det plejer at vaere...
+Jeg kan huske at du var skidestiv sidst du spillede, %s.
+Jeg synes at det bedste oel er fra Tjekkiet.
+Jeg synes at det bedste oel er fra Tyskland
+Jeg synes at det bedste oel er fra Holland.
+Jeg synes at det bedste oel er fra Mexico.
+
+@REPLY " BLOD ", " BLOEDE"
+Blood 2 var et godt spil...
+Jeg kan ikke lide den roede farve!
+Har du brug for bandager, %s?
+
+@REPLY " BOTMAN "
+Hvem er den der Botman alle snakker om???
+Besoeg han hjemmeside: www.planethalflife.com/botman
+Botman er god, Botman er sej.
+Jeg kan lide hans bot.
+Uden hans kildekode ville de fleste bots slet ikke eksistere!
+
+@REPLY " PARABOT "
+Parabot? Den har jeg aldrig hoert om...
+Har du hoert om Parabots nye chat-system?
+Parabot? Jeg burde surfe mere paa internettet...
+Parabot? Hvilket spil hoerer det til?
+Parabot, Parabot, hmmm lige et oejeblik, jeg henter en ordbog...
+Besoeg www.parabot.nukebox.com
+
+@REPLY " POD ", " PODBOT "
+POD er kun CS, idiot!
+Yeah, nogle af de PODbots kunne bringe lidt action ind i den her kamp...
+
+@REPLY " SWATBOT "
+Er det rigtigt at SWAT Bruger en masse CPU?
+En skam at der er saa faa SWAT waypoints!
+
+@REPLY " JOEBOT "
+Du ved vel at JoeBot ikke spiller det her mod...
+Jeg forstod aldrig hvad JoeBot forsoegte at laere mig?
+JOEBot navigationssystem er sejt!
+Joebot's nick er "fastbot"! Vidste du det?
+Joebot supports a lot of maps!
+
+@REPLY "BOT "
+Hvorfor snakker i altid om de skide bots?
+Hvis du vil have bots skal du kigge paa www.botepidemic.com
+Der er ingen bots paa denne server %s!
+Bots er seje!!!
+Hvad er din favorit bot, %s?
+Hvis du vil lave dine egne bot skal du snakke med botman!
+Hvis du vil snakke om bots skal du kigge paa NUKEBOX...
+Bots, altid bots - I burde starte med at spille mod mennesker.
+Ved i noget om det nye SWATBOT?
+De fleste bots er stadig meget dumme!
+
+@REPLY " MORGENMAD "
+Jeg fik kun lige kaffe...
+Jeg spiser muesli!
+Jeg spiser aldrig morgenmad!
+
+@REPLY " CAMPER "
+Jeg hader virkeligt de campers!
+Camping stinker!
+Naar du kun har lidt liv er det godt at campe!
+Camping er nogle gange noedvendigt for at vinde...
+
+@REPLY " KAN IKKE "
+Det er da et problem, %s
+Bare glem det, %s ;-)
+Jeg gider ikke hjaelpe dig, %s
+Hvorfor ikke?
+
+@REPLY "SNYD"
+De forbandede snydere oedelaegger spillet!
+Jeg hader snydere!
+Det er lamt at snyde!
+Hvorfor er der saa mange der snyder?
+Punkbuster ville hjaelpe...
+Spil mod bots - de snyder aldrig!
+
+@REPLY " KLAN "
+Hvorfor er det saa mange klaner?
+Jeg var engang med i en klan, men den stank for meget.
+Hvilken klan er du med i, %s?
+Vil du vaere med i vores klan, %s?
+Er der nogle klaner for det her spil?
+Et ord mere om klaner og jeg draeber dig, %s!!!
+
+@REPLY " DOED "
+En eller anden burde give dig en grav...
+Er der en kirkegaard i naerheden?
+Jeg tror at jeg saa et spoegelse!
+
+@REPLY " MOTOR "
+Hvis Valve arbejdede lidt mere paa spil-motoren ville de fleste cheats ikke 
+eksistere!!!
+Jeg syntes at den bedste spilmotor i oejeblikket er Unreal Warfare-motoren!
+
+@REPLY " ENDELIG "
+Du ventede da ikke saa lang tid %s, gjorde du?
+Hvorfor var du saa fikseret paa det, %s?
+
+@REPLY " FANDT "
+Du burde finde en aimbot, lol!
+Tillykke, %s
+Det sker ikke hver dag, %s!
+
+@REPLY " FRAGS "
+Normalt er jeg den bedste paa den her server!
+Husk nu at det ikke kun handler om frags!
+
+@REPLY " FUCK ", " LORT ", " PIS "
+Lad vaer med at bande, %s!
+Grimt %s!
+Hvor har du de ord fra, %s?
+OK, du har ret %s. HOLD NU KAEFT!
+Var din mund, %s!
+%s, Lar vaer med at bruge de ord, det er uhoefligt!
+
+@REPLY " SJOVT ", " HEHE ", " HAHA "
+Det er da godt at du har det sjovt, %s...
+Hyg dig mens du kan, %s!
+Meget sjovt, %s...
+
+@REPLY " SPIL"
+Det er et fedt spil, er det ikke?
+Jeg elsker at spille det her spil med jer gutter...
+Har du nogensinde proevet et andet spil, %s?
+I skulle proeve basket eller noget lignende...
+Bare sjovt, ikke andet!
+Mine yndlingsspil er Half-Life og Unreal Tournament
+Hey, har i nogensinde set NBC:GigaGames? Det er et sejt show!
+
+@REPLY " BEDSTE "
+Jeg kan lide at vide noget om din bedstemor, %s!
+LOL, %s
+Du er syg, %s!
+
+@REPLY " HALFLIFE ", " HALF LIFE "
+Det er et af de bedste spil nogensinde!
+Jeg synes at det er ret sjovt at spille.
+
+@REPLY " JEG SYNES "
+Du taenker for meget, %s ;-)
+Du skal holde kaeft og spille i stedet for %s!
+Og det tror du paa, %s?
+Hvorfor synes du det?
+Skal vi ikke moedes paa IRC og diskutere det, %s?
+
+@REPLY " KNIV "
+Ja kun kniv! Det kunne vaere sjovt!
+Kender i Jack the Ripper? Det var mig i mit tidligere liv!
+Zig 'n Zag - Kan i huske Lo-Wang fra Shadow-Warrior?
+Jaaa - jeg vil have noget mere naerkamp...
+Der er sq da ingen knive i det her spil!
+
+@REPLY " DRAEB "
+Du har bare at vaere ked af det forbandede morder!
+Giv mig en kniv og jeg skal vise dig hvad det vil siges at draebe...
+
+@REPLY " THEY KILLED KENNY "
+For meget South Park?
+LOL, %s!
+
+@REPLY " LAM "
+Lad vaer med at graede, %s!
+Jeg ved det ;-)
+
+@REPLY " HELD "
+Det var ikke held, jeg er god!
+Ja, Fortuna er sur i dag ;-)
+Selv gudererne er imod dig %s. Jeg giver op...
+Ingen undskyldning, %s
+Sig held en gang til og jeg voter dig, %s
+
+@REPLY " HERSKER "
+Du er herskeren over ulykker %s ;-)
+Og jeg er herskeren over Greyskull!
+
+@REPLY " KOED ", " ROASTBEEF "
+Ja - Jeg er sulten!
+Skaer lige et stykke til mig, %s.
+jeg har ikke spist i flere aar...
+
+@REPLY " MUSIK ", " GRUPPE "
+Min yndlinggruppe er Limp Bizkit, hvad er din?
+The Stones rykker!
+
+@REPLY " INGEN "
+Hvem er "ingen"? ;-)
+Der kommer en en dag %s, Det er jeg sikker paa!
+
+@REPLY " Q3 ", " QUAKE"
+Q3 er lamt
+Half-Life rykker, %s!
+Har du nogensinde hoert om DMC, %s? ;-)
+
+@REPLY " LADE "
+Tag en kniv, saa skal du ikke lade laengere...
+Jep! Det stinker at lade!
+Du skal bare bruge speedcheat, %s.
+
+@REPLY " HAEVN "
+Skal vi ikke bare glemme det, %s?
+Fred, %s!
+
+@REPLY " LOEB"
+Naar du loeber vinder du helt sikkert %s!
+JA!! Loeb tabere!
+Loeb hvis du har lyst, jeg vinder naeste gang...
+
+@REPLY " LORT "
+Stakkels %s...
+Jeg holder med dig %s: Det her er noget lort!
+Allerede?
+Saa maa du gaa hjem og lave lort paa toilettet, %s
+Haha...
+%s, du er en taber!!!
+Lort? Hvad er det?
+
+@REPLY " UNDSKYLD "
+Det nytter ikke at undskylde nu, %s!
+Du skal laere at taenke foer du handler, %s!
+
+@REPLY " TRAET "
+Gaa i seng, %s
+Hvil dig lidt, %s...
+
+@REPLY ": HVAD ", ": HVORFOR ", ": HVOR ", ": HVEM ", ": HVORNAAR ", ": HVORDAN 
+"
+Det faar du aldrig at vide, %s!
+Ja, det er maerkeligt %s...
+Svaret er derude, %s ;-)
+Aner det ikke, %s
+Hvad tror du %s?
+Det vil jeg ikke sige dig, %s!
+Find selv ud af det, %s!
+Godt spoergsmaal, %s!
+Det spurgte min bedstemor mig om hver dag...
