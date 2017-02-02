@@ -325,6 +325,7 @@ short path[128];
 
 void ClientCommand( edict_t *pEntity )
 {
+#ifndef METAMOD
 	const char *pcmd = Cmd_Argv(0);
 	const char *arg1 = Cmd_Argv(1);
 	const char *arg2 = Cmd_Argv(2);
@@ -1059,7 +1060,6 @@ void ClientCommand( edict_t *pEntity )
 
 	}
 
-#ifndef METAMOD
 	(*other_gFunctionTable.pfnClientCommand)(pEntity);
 #else
 	RETURN_META(MRES_IGNORED);
