@@ -765,6 +765,8 @@ void PB_Observer::observeAll()
 			nav = getNearestNavpoint( obs[i].player->edict() );
 			assert( nav != 0 );
 
+			if( !nav )
+				continue;
 			if ( nav->reached( obs[i].player->edict() ) ) {
 				// check if reached new navpoint	
 				if ( (nav!=obs[i].lastReachedNav) &&
