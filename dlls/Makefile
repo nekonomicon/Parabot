@@ -68,10 +68,7 @@ SRC =		../bot/bot.cpp \
 
 LDFLAGS +=	-shared -Wl,--no-undefined
 
-SYS = $(shell $(CC) -dumpmachine)
-ifeq (, $(findstring linux, $(SYS)))
-LDFLAGS += -ldl
-endif
+LDFLAGS +=	-ldl
 
 OBJ = $(SRC:%.cpp=%.o)
 
