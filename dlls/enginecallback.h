@@ -69,12 +69,13 @@ extern enginefuncs_t g_engfuncs;
 
 #define GET_INFOKEYBUFFER		(*g_engfuncs.pfnGetInfoKeyBuffer)
 #define INFOKEY_VALUE			(*g_engfuncs.pfnInfoKeyValue)
-#define SET_CLIENT_KEYVALUE		(*g_engfuncs.pfnSetClientKeyValue)
+#define SET_CLIENT_KEY_VALUE		(*g_engfuncs.pfnSetClientKeyValue)
 #define REG_SVR_COMMAND			(*g_engfuncs.pfnAddServerCommand)
 #define SERVER_PRINT			(*g_engfuncs.pfnServerPrint)
-#define SET_SERVER_KEYVALUE		(*g_engfuncs.pfnSetKeyValue)
+#define SET_SERVER_KEY_VALUE		(*g_engfuncs.pfnSetKeyValue)
 #define QUERY_CLIENT_CVAR_VALUE		(*g_engfuncs.pfnQueryClientCvarValue)
 #define QUERY_CLIENT_CVAR_VALUE2	(*g_engfuncs.pfnQueryClientCvarValue2)
+#define CREATE_FAKE_CLIENT		(*g_engfuncs.pfnCreateFakeClient)
 
 inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin = NULL, edict_t *ed = NULL )
 {

@@ -1,4 +1,3 @@
-#ifdef METAMOD
 #include "extdll.h"
 #include "dllapi.h"
 #include "meta_api.h"
@@ -7,6 +6,7 @@ enginefuncs_t meta_engfuncs;
 gamedll_funcs_t *gpGamedllFuncs;
 mutil_funcs_t *gpMetaUtilFuncs;
 meta_globals_t *gpMetaGlobals;
+bool g_meta_init = FALSE;
 
 META_FUNCTIONS gMetaFunctionTable =
 {
@@ -31,6 +31,11 @@ plugin_info_t Plugin_info = {
    PT_CHANGELEVEL, // when loadable
    PT_ANYTIME, // when unloadable
 };
+
+void Meta_Init( void )
+{
+	g_meta_init = TRUE;
+}
 
 extern "C" DLLEXPORT int Meta_Query (char *ifvers, plugin_info_t **pPlugInfo, mutil_funcs_t *pMetaUtilFuncs)
 {
@@ -82,4 +87,3 @@ extern "C" DLLEXPORT int Meta_Detach (PLUG_LOADTIME now, PL_UNLOAD_REASON reason
 
    return (TRUE); // returning TRUE enables metamod to unload this plugin
 }
-#endif

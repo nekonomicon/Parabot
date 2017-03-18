@@ -5,12 +5,12 @@
 #include "pm_defs.h"
 #include "pb_configuration.h"
 #include "parabot.h"
-
+"
 extern bot_t bots[32];
 extern int mod_id;
 extern bot_weapon_t weapon_defs[MAX_WEAPONS];
 extern PB_Configuration pbConfig;	// from configfiles.cpp
-
+extern bool g_meta_init;
 
 
 
@@ -221,13 +221,13 @@ void PB_WeaponHandling::switchToWeapon( int wId )
 		cmd.buttons = 0;					// Attack buttons
 		cmd.impulse = 0;					// Impulse command issued.
 		cmd.weaponselect = wId+1;			// Current weapon id ( WEAPON SLOT! )
-#ifndef METAMOD
-		CmdStart( botEnt, &cmd, 0 );
-		CmdEnd( botEnt );
-#else
-		MDLL_CmdStart( botEnt, &cmd, 0 );
-		MDLL_CmdEnd( botEnt );
-#endif
+
+		if(!g_meta_init)
+			CmdStart( botEnt, &cmd, 0 );
+			CmdEnd( botEnt );
+		else
+			MDLL_CmdStart( botEnt, &cmd, 0 );
+			MDLL_CmdEnd( botEnt );
 	}
 	else { 
 		UTIL_SelectItem( bots[botSlot].pEdict, weapon.name() );

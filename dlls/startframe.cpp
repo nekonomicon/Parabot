@@ -5,10 +5,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "extdll.h"
-#ifdef METAMOD
 #include "dllapi.h"
 #include "meta_api.h"
-#endif
 #include "entity_state.h"
 
 #include "bot.h"
@@ -31,7 +29,7 @@ Sounds playerSounds;
 PB_Observer observer;
 float observerUpdate;
 bool fatalParabotError = false;
-
+extern bool g_meta_init;
 
 
 extern bot_t			bots[32];
@@ -126,11 +124,11 @@ void updateBotClients()
 		for (int i=0; i < 32; i++) {
             if (bots[i].is_used) {
 				memset(&cd, 0, sizeof(cd));					// assumed by UpdateClientData
-#ifndef METAMOD
-				UpdateClientData( bots[i].pEdict, 1, &cd );
-#else
-				MDLL_UpdateClientData( bots[i].pEdict, 1, &cd );
-#endif
+				if( !g_meta_init )
+					UpdateClientData( bots[i].pEdict, 1, &cd );
+				else
+					MDLL_UpdateClientData( bots[i].pEdict, 1, &cd );
+
 				// see if a weapon was dropped...
 				if (bots[i].bot_weapons != cd.weapons) bots[i].bot_weapons = cd.weapons;
             }
@@ -696,9 +694,8 @@ void StartFrame( void )
 			glMarker.drawMarkers();
 		}
 	}
-#ifndef METAMOD
-	(*other_gFunctionTable.pfnStartFrame)();
-#else
-	RETURN_META(MRES_IGNORED);
-#endif
+	if( !g_meta_init )
+		(*other_gFunctionTable.pfnStartFrame)();
+	else
+		RETURN_META(MRES_IGNORED);
 }

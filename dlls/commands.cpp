@@ -1,10 +1,7 @@
 #include "extdll.h"
-#ifndef METAMOD
 #include "enginecallback.h"
-#else //METAMOD
 #include "dllapi.h"
 #include "meta_api.h"
-#endif //METAMOD
 #include "marker.h"
 #include <queue>
 #include "bot.h"
@@ -41,6 +38,7 @@ int botHalt = 0;		// if set >0, breaks for botNr at certain place
 int botTarget = -1;		// target nav id to approach (-1 = nothing)
 bool visualizeCellConnections = false;
 bool oldBotStop = false;
+extern bool g_meta_init;
 
 // BotCam-Variables
 edict_t *camPlayer = 0;	// points to edict of player with camera view
@@ -324,47 +322,38 @@ short path[128];
 
 void ClientCommand( edict_t *pEntity )
 {
-#ifndef METAMOD
-	const char *pcmd = Cmd_Argv(0);
-	const char *arg1 = Cmd_Argv(1);
-	const char *arg2 = Cmd_Argv(2);
-	const char *arg3 = Cmd_Argv(3);
-	const char *arg4 = Cmd_Argv(4);
+	if(!g_meta_init)
+	{
+		const char *pcmd = Cmd_Argv(0);
+		const char *arg1 = Cmd_Argv(1);
+		const char *arg2 = Cmd_Argv(2);
+		const char *arg3 = Cmd_Argv(3);
+		const char *arg4 = Cmd_Argv(4);
 
+		// chat message analysis:
+		if (FStrEq( pcmd, "say" )) {
+			chat.parseMessage( pEntity, (char*)arg1 );	// no return!!!
+		}
 
-	// chat message analysis:
-	if (FStrEq( pcmd, "say" )) {
-		chat.parseMessage( pEntity, (char*)arg1 );	// no return!!!
-	}
+		// these client commands aren't allow in single player mode or
+		// on dedicated servers
+		if ((gpGlobals->deathmatch) && (!IS_DEDICATED_SERVER()))
+		{	
+			CParabot *pb = bots[botNr].parabot;
 
-	// these client commands aren't allow in single player mode or
-	// on dedicated servers
-	
-	if ((gpGlobals->deathmatch) && (!IS_DEDICATED_SERVER()))
-	{	
-		CParabot *pb = bots[botNr].parabot;
-		
-		if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"ClientCommand: %s %s %s\n",pcmd, arg1, arg2); fclose(fp); }
+			if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"ClientCommand: %s %s %s\n",pcmd, arg1, arg2); fclose(fp); }
 
-		// mapchange redefined:
-		if (FStrEq( pcmd, "map" )) {	
-			char *newmap = (char*) arg1;
-			if ( !IS_MAP_VALID(newmap) ) {
-				debugMsg( "Map not valid!\n" );
-#ifndef METAMOD
-				return;
-#else
-				RETURN_META(MRES_SUPERCEDE);
-#endif
+			// mapchange redefined:
+			if (FStrEq( pcmd, "map" )) {	
+				char *newmap = (char*) arg1;
+				if ( !IS_MAP_VALID(newmap) ) {
+					debugMsg( "Map not valid!\n" );
+					return;
 			}
 			debugFile( "Changing map...\n" );
 			FakeClientCommand( pEntity, "hideconsole", 0, 0 );
 			CHANGE_LEVEL( newmap, NULL );
-#ifndef METAMOD
 			return;
-#else
-			RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		// bot commands:
 		else if (FStrEq(pcmd, "botmenu"))
@@ -372,11 +361,7 @@ void ClientCommand( edict_t *pEntity )
 			oldBotStop = pb_pause;
 			pb_pause = true;		// while in menu, bots don't move
 			showMainMenu( pEntity );
-#ifndef METAMOD
 			return;
-#else
-			RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq(pcmd, "menuselect"))
 		{
@@ -499,60 +484,32 @@ void ClientCommand( edict_t *pEntity )
 			default: break;
 
 			}
-#ifndef METAMOD
 			return;
-#else
-			RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq(pcmd, "addbot"))
 		{
 			BotCreate();
-#ifndef METAMOD
 			return;
-#else
-			RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "peacemode" )) {
 			DSpeace();
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "restrictedweapons" )) {
 			DSrestrictedWeapons();
-#ifndef METAMOD
 			return;
-#else
-			RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "hidewelcome" )) {
 			DSsimulate();
-#ifndef METAMOD
 			return;
-#else
-			RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "chatlog" )) {
 			DSlogChat();
-#ifndef METAMOD
 			return;
-#else
-			RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "botstop" )) {
 			pb_pause = true;
-#ifndef METAMOD
 			return;
-#else
-			RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "botgo" )) {
 			pb_pause = false;
@@ -563,11 +520,7 @@ void ClientCommand( edict_t *pEntity )
 					bots[i].parabot->action.resetStuck();
 				}
 			}
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "botcam" )) {
 			if (!camPlayer)	startBotCam( pEntity );
@@ -580,19 +533,11 @@ void ClientCommand( edict_t *pEntity )
 				}
 				while ( !bots[botNr].is_used && count>0 );
 			}
-#ifndef METAMOD
-                        return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
+			return;
 		}
 		else if (FStrEq( pcmd, "camstop" )) {
 			endBotCam();
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 
 // rest only for debugmode!
@@ -601,21 +546,13 @@ void ClientCommand( edict_t *pEntity )
 		{
 			debug_engine = 1;
 			ClientPrint( VARS(pEntity), HUD_PRINTNOTIFY, "debug_engine enabled!\n");
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq(pcmd, "debug_off"))
 		{
 			debug_engine = 0;
 			ClientPrint( VARS(pEntity), HUD_PRINTNOTIFY, "debug_engine disabled!\n");
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "dbgfile" )) {
 			if (FStrEq( arg1, "on" )) {
@@ -624,11 +561,7 @@ void ClientCommand( edict_t *pEntity )
 			else if (FStrEq( arg1, "off" )) {
 				dbgFile = false;
 			}
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq(pcmd, "debugTrace"))
 		{
@@ -640,33 +573,21 @@ void ClientCommand( edict_t *pEntity )
 			Vector pos = pEntity->v.origin + 200*gpGlobals->v_forward;
 			at.setMoveAngle( pEntity->v.v_angle );
 			rt.checkWay( pos );
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq(pcmd, "setstep")) {
 			char *newSample = (char*) arg1;
 			strcpy( stepSample, newSample );
 			sprintf( stepSound, "player/pl_%s%i.wav", stepSample, stepNr );
 			debugMsg( "New stepSound = ", stepSound, "\n" );
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq(pcmd, "setstepnr")) {
 			char *newNr = (char*) arg1;
 			stepNr = atoi( newNr );
 			sprintf( stepSound, "player/pl_%s%i.wav", stepSample, stepNr );
 			debugMsg( "New stepSound = ", stepSound, "\n" );
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq(pcmd, "setvol")) {
 			char *newVol = (char*) arg1;
@@ -674,90 +595,54 @@ void ClientCommand( edict_t *pEntity )
 			stepVol = (float)iVol;	stepVol/=100;
 			if (stepVol > 1.0) stepVol = 1.0;
 			debugMsg( "New stepVolume = %.2f\n", stepVol );
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq(pcmd, "playstep")) {
 			//EMIT_SOUND( pb->ent, CHAN_BODY, stepSound, stepVol, ATTN_NORM);
 			pfnEmitSound( pb->ent, CHAN_BODY, stepSound, stepVol, ATTN_NORM, 0, 100 );
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq(pcmd, "playsound")) {
 			char *sound = (char*) arg1;
 			pfnEmitSound( pEntity, CHAN_BODY, sound, 1.0, ATTN_NORM, 0, 100 );
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq(pcmd, "debugbreak"))
 		{
 			char *reason = (char*) arg1;
 			if ( FStrEq(reason, "weapon") ) botHalt = BREAK_WEAPON;
 			else if ( FStrEq(reason, "goals") ) botHalt = BREAK_GOALS;
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "setbotnr" )) {
 			char *stopstr;
 			botNr = strtol( arg1, &stopstr, 10 );
 			debugMsg( "OK.\n" );
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "botdist" )) {
 			Vector p = pb->ent->v.origin - pEntity->v.origin;
 			debugMsg( "Distance = %.f\n", p.Length() );
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "pathinfo" )) {
 			if (pb->actualPath) {
 				debugMsg( "Actual ");  pb->actualPath->print();  debugMsg( "\n" );
 			}
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "wpinfo" )) {
 			if (pb->actualPath) {
 				Vector p = pb->waypoint.pos();
 				debugMsg( "Heading for waypoint (%.f, %.f, %.f)\n", p.x, p.y, p.z);
 			}
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "ground" )) {
 			assert( pEntity != 0 );
 			if (pEntity->v.groundentity==0) {
 				debugMsg( "No ground entity!\n" );
-#ifndef METAMOD
 	                        return;
-#else
-	                        RETURN_META(MRES_SUPERCEDE);
-#endif
 			}
 			lastGround = pEntity->v.groundentity;
 			assert( lastGround != 0 );
@@ -766,40 +651,24 @@ void ClientCommand( edict_t *pEntity )
 			p = lastGround->v.absmax;
 			ALERT( at_console, "max at(%.f, %.f, %.f), solid=%i\n", p.x, p.y, p.z,
 				lastGround->v.solid );
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "lastground" )) {
 			if (lastGround==0) {
 				debugMsg( "No ground entity!\n" );
-#ifndef METAMOD
 	                        return;
-#else
-	                        RETURN_META(MRES_SUPERCEDE);
-#endif
 			}
 			Vector p = lastGround->v.absmin;
 			ALERT( at_console, "%s, min at(%.f, %.f, %.f), ", STRING(lastGround->v.classname), p.x, p.y, p.z);
 			p = lastGround->v.absmax;
 			ALERT( at_console, "max at(%.f, %.f, %.f), solid=%i\n", p.x, p.y, p.z,
 				lastGround->v.solid );
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "navinfo" ) && (pb->actualNavpoint)) {
 			debugMsg( "Actual navpoint is ");  pb->actualNavpoint->print();  
 			debugMsg( ", Linkage=%i\n", mapGraph.linkedNavpointsFrom( pb->actualNavpoint ) );
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "playernav" )) {
 			PB_Navpoint *nav = mapGraph.getNearestNavpoint( pEntity->v.origin );
@@ -829,11 +698,7 @@ void ClientCommand( edict_t *pEntity )
 				pTarget = FIND_ENTITY_BY_TARGETNAME(pTarget, STRING(nav->entity()->v.target));
 				if (pTarget) debugMsg( "Target4 = ", STRING(pTarget->v.classname), "\n" );
 			}
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "items" )) {
 			Vector pos = pEntity->v.origin;
@@ -858,20 +723,12 @@ void ClientCommand( edict_t *pEntity )
 					//ALERT( at_console, "   TargetPev = %x\n", (*targetPev) );
 				}*/
 			}
-#ifndef METAMOD
-                        return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
+			return;
 		}
 		else if (FStrEq( pcmd, "botpos" )) {
 			Vector p = pb->botPos();
 			debugMsg( "Botpos = (%.f, %.f, %.f)\n", p.x, p.y, p.z);
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "setbotpos" )) {
 			char *stopstr;
@@ -883,11 +740,7 @@ void ClientCommand( edict_t *pEntity )
 			pb->actualNavpoint = &(getNavpoint( id ));
 			pb->actualPath = 0;
 			pb->actualJourney.cancel();
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "bottarget" )) {
 			if (pb->botState==PB_ON_TOUR) {
@@ -896,38 +749,22 @@ void ClientCommand( edict_t *pEntity )
 			else if (pb->botState==PB_ROAMING) {
 				debugMsg( "Roaming-target = ");  pb->roamingTarget->printPos();  debugMsg( "\n" );
 			}
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "setbottarget" )) {
 			char *stopstr;
 			botTarget = strtol( arg1, &stopstr, 10 );
 			debugMsg( "Affirmative\n" );
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "nopartner" )) {
 			pb->partner = 0;
 			pb->botState = PB_NO_TASK;
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}	
 		else if (FStrEq( pcmd, "ptbot" )) {
 			ptBotPos = map.getCellId( pEntity );
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}	
 		else if (FStrEq( pcmd, "ptcover" )) {
 			short plId = map.getCellId( pEntity );
@@ -941,11 +778,7 @@ void ClientCommand( edict_t *pEntity )
 					start = end;
 				}
 			}
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}	
 		else if (FStrEq( pcmd, "ptattack" )) {
 			short plId = map.getCellId( pEntity );
@@ -959,11 +792,7 @@ void ClientCommand( edict_t *pEntity )
 					start = end;
 				}
 			}
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "showcells" )) {
 			if (FStrEq( arg1, "on" )) {
@@ -972,11 +801,7 @@ void ClientCommand( edict_t *pEntity )
 			else if (FStrEq( arg1, "off" )) {
 				visualizeCellConnections = false;
 			}
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "markvis" )) {
 			glMarker.deleteAll();
@@ -988,11 +813,7 @@ void ClientCommand( edict_t *pEntity )
 						else glMarker.newMarker( map.cell(i).pos(), 1 );
 					}
 			}
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}	
 		else if (FStrEq( pcmd, "markfocus" )) {
 			glMarker.deleteAll();
@@ -1008,11 +829,7 @@ void ClientCommand( edict_t *pEntity )
 							glMarker.newMarker( map.cell(i).pos(), 2 );
 					}
 			}
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}	
 		else if (FStrEq( pcmd, "markenv" )) {
 			char *thresh = (char*) arg1;
@@ -1023,44 +840,26 @@ void ClientCommand( edict_t *pEntity )
 					glMarker.newMarker( map.cell(i).pos(), 1 );
 				}
 			}
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}	
 		else if (FStrEq( pcmd, "savemap" )) {
 			saveLevelData();
 			ClientPrint( VARS(pEntity), HUD_PRINTNOTIFY, "Map data saved.\n" );
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 		else if (FStrEq( pcmd, "delmarkers" )) {
 			glMarker.deleteAll();
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}	
 		else if (FStrEq( pcmd, "numclients" )) {
 			debugMsg( "Number of clients = %i\n", numberOfClients );
-#ifndef METAMOD
                         return;
-#else
-                        RETURN_META(MRES_SUPERCEDE);
-#endif
 		}
 // end of debug mode commands...
 #endif
-
+		}
+		(*other_gFunctionTable.pfnClientCommand)(pEntity);
 	}
-
-	(*other_gFunctionTable.pfnClientCommand)(pEntity);
-#else
-	RETURN_META(MRES_IGNORED);
-#endif
+	else
+		RETURN_META(MRES_IGNORED);
 }
