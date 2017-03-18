@@ -3,7 +3,6 @@
 #include "enginecallback.h"
 #else //METAMOD
 #include "dllapi.h"
-#include "h_export.h"
 #include "meta_api.h"
 #endif //METAMOD
 #include "marker.h"

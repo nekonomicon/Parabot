@@ -37,8 +37,6 @@
 #ifndef ENGINE_API_H
 #define ENGINE_API_H
 
-#include "comp_dep.h"
-
 // Plugin's GetEngineFunctions, called by metamod.
 typedef int (*GET_ENGINE_FUNCTIONS_FN) (enginefuncs_t *pengfuncsFromEngine, int *interfaceVersion);
 
@@ -51,9 +49,9 @@ typedef int (*GET_ENGINE_FUNCTIONS_FN) (enginefuncs_t *pengfuncsFromEngine, int 
 // normal enginefuncs_t type for their meta_engfuncs.
 #ifdef __METAMOD_BUILD__
 #  include "meta_eiface.h"    // meta_enginefuncs_t
-extern meta_enginefuncs_t meta_engfuncs DLLHIDDEN;
+extern meta_enginefuncs_t meta_engfuncs;
 #else
-extern enginefuncs_t meta_engfuncs DLLHIDDEN;
+extern enginefuncs_t meta_engfuncs;
 #endif
 
 // Typedefs for the above functions:
@@ -145,8 +143,8 @@ typedef void (*FN_GETBONEPOSITION) (const edict_t *pEdict, int iBone, float *rgf
 typedef unsigned long (*FN_FUNCTIONFROMNAME) ( const char *pName );
 typedef const char * (*FN_NAMEFORFUNCTION) ( unsigned long function );
 #else
-typedef uint (*FN_FUNCTIONFROMNAME) ( const char *pName );
-typedef const char * (*FN_NAMEFORFUNCTION) ( uint function );
+typedef unsigned int (*FN_FUNCTIONFROMNAME) ( const char *pName );
+typedef const char * (*FN_NAMEFORFUNCTION) ( unsigned int function );
 #endif
 typedef void (*FN_CLIENTPRINTF) ( edict_t *pEdict, PRINT_TYPE ptype, const char *szMsg );
 typedef void (*FN_SERVERPRINT) ( const char *szMsg );

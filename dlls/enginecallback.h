@@ -16,8 +16,6 @@
 #define ENGINECALLBACK_H
 #pragma once
 
-//#include "event_flags.h"
-
 // Must be provided by user of this code
 extern enginefuncs_t g_engfuncs;
 
@@ -68,6 +66,15 @@ extern enginefuncs_t g_engfuncs;
 #define RANDOM_LONG		(*g_engfuncs.pfnRandomLong)
 #define RANDOM_FLOAT	(*g_engfuncs.pfnRandomFloat)
 #define GETPLAYERAUTHID	(*g_engfuncs.pfnGetPlayerAuthId)
+
+#define GET_INFOKEYBUFFER		(*g_engfuncs.pfnGetInfoKeyBuffer)
+#define INFOKEY_VALUE			(*g_engfuncs.pfnInfoKeyValue)
+#define SET_CLIENT_KEYVALUE		(*g_engfuncs.pfnSetClientKeyValue)
+#define REG_SVR_COMMAND			(*g_engfuncs.pfnAddServerCommand)
+#define SERVER_PRINT			(*g_engfuncs.pfnServerPrint)
+#define SET_SERVER_KEYVALUE		(*g_engfuncs.pfnSetKeyValue)
+#define QUERY_CLIENT_CVAR_VALUE		(*g_engfuncs.pfnQueryClientCvarValue)
+#define QUERY_CLIENT_CVAR_VALUE2	(*g_engfuncs.pfnQueryClientCvarValue2)
 
 inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin = NULL, edict_t *ed = NULL )
 {

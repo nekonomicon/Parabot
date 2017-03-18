@@ -37,10 +37,7 @@
 #ifndef MUTIL_H
 #define MUTIL_H
 
-#include "comp_dep.h"
 #include "plinfo.h"		// plugin_info_t, etc
-#include "mhook.h"		// game_event_t, etc
-#include "sdk_util.h"	// hudtextparms_t, etc
 
 // max buffer size for printed messages
 #define MAX_LOGMSG_LEN  1024
@@ -83,7 +80,7 @@ typedef struct meta_util_funcs_s {
 	
 	void            (*pfnGetHookTables)             (plid_t plid, enginefuncs_t **peng, DLL_FUNCTIONS **pdll, NEW_DLL_FUNCTIONS **pnewdll);
 } mutil_funcs_t;
-extern mutil_funcs_t MetaUtilFunctions DLLHIDDEN;
+extern mutil_funcs_t MetaUtilFunctions;
 
 // Convenience macros for MetaUtil functions
 #define LOG_CONSOLE			(*gpMetaUtilFuncs->pfnLogConsole)

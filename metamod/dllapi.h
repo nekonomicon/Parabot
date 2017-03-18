@@ -37,8 +37,9 @@
 #ifndef DLLAPI_H
 #define DLLAPI_H
 
-#include "sdk_util.h"	// BOOL
-#include "osdep.h"		// DLLEXPORT, etc
+#include "util.h"	// BOOL
+#include "exportdef.h"
+#include "cbase.h"
 
 // Typedefs for these are provided in SDK engine/eiface.h, but I didn't
 // like the names (APIFUNCTION, APIFUNCTION2, NEW_DLL_FUNCTIONS_FN).
@@ -46,13 +47,9 @@ typedef int (*GETENTITYAPI_FN) (DLL_FUNCTIONS *pFunctionTable, int interfaceVers
 typedef int (*GETENTITYAPI2_FN) (DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion);
 typedef int (*GETNEWDLLFUNCTIONS_FN) (NEW_DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion);
 
-// From SDK dlls/cbase.h:
-C_DLLEXPORT int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interfaceVersion );
-C_DLLEXPORT int GetEntityAPI2( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
-
 // No example in SDK..
 // From Adminmod dll.cpp:
-C_DLLEXPORT int GetNewDLLFunctions( NEW_DLL_FUNCTIONS *pNewFunctionTable, int *interfaceVersion );
+extern "C" EXPORT int GetNewDLLFunctions( NEW_DLL_FUNCTIONS *pNewFunctionTable, int *interfaceVersion );
 
 // Typedefs for the above functions:
 

@@ -7,7 +7,6 @@
 #include "extdll.h"
 #ifdef METAMOD
 #include "dllapi.h"
-#include "h_export.h"
 #include "meta_api.h"
 #endif
 #include "entity_state.h"

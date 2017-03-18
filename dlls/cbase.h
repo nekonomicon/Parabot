@@ -12,6 +12,8 @@
 *   without written permission from Valve LLC.
 *
 ****/
+#ifndef CBASE_H
+#define CBASE_H
 /*
 
 Class Hierachy
@@ -43,7 +45,6 @@ CBaseEntity
 #define		FCAP_FORCE_TRANSITION		0x00000080		// ALWAYS goes across transitions
 
 #include "saverestore.h"
-//#include "schedule.h"
 
 #ifndef MONSTEREVENT_H
 #include "monsterevent.h"
@@ -778,3 +779,4 @@ public:
 	void Precache( void );
 	void KeyValue( KeyValueData *pkvd );
 };
+#endif

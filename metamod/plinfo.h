@@ -37,8 +37,6 @@
 #ifndef PLINFO_H
 #define PLINFO_H
 
-#include "comp_dep.h"
-
 // Flags for plugin to indicate when it can be be loaded/unloaded.
 // NOTE: order is crucial, as greater/less comparisons are made.
 typedef enum {
@@ -76,7 +74,7 @@ typedef struct {
 	PLUG_LOADTIME loadable;		// when loadable
 	PLUG_LOADTIME unloadable;	// when unloadable
 } plugin_info_t;
-extern plugin_info_t Plugin_info DLLHIDDEN;
+extern plugin_info_t Plugin_info;
 
 // Plugin identifier, passed to all Meta Utility Functions.
 typedef plugin_info_t* plid_t;

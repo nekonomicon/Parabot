@@ -9,7 +9,6 @@
 #include "util.h"
 #else
 #include "dllapi.h"
-#include "h_export.h"
 #include "meta_api.h"
 #include "entity_state.h"
 #endif

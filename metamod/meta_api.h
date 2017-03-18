@@ -37,11 +37,9 @@
 #ifndef META_API_H
 #define META_API_H
 
-#include "comp_dep.h"
 #include "dllapi.h"				// GETENTITYAPI_FN, etc
 #include "engine_api.h"			// GET_ENGINE_FUNCTIONS_FN, etc
 #include "plinfo.h"				// plugin_info_t, etc
-#include "osdep.h"				// DLLEXPORT, etc
 #include "mutil.h"
 
 // Version consists of "major:minor", two separate integer numbers.
@@ -84,7 +82,7 @@ typedef struct meta_globals_s {
 	void *override_ret;		// readable; return value from overriding/superceding plugin
 } meta_globals_t;
 
-extern meta_globals_t *gpMetaGlobals DLLHIDDEN;
+extern meta_globals_t *gpMetaGlobals;
 #define SET_META_RESULT(result)			gpMetaGlobals->mres=result
 #define RETURN_META(result) \
 	do { gpMetaGlobals->mres=result; return; } while(0)
@@ -114,20 +112,22 @@ typedef struct {
 } gamedll_funcs_t;
 
 // Declared in plugin; referenced in macros.
-extern gamedll_funcs_t *gpGamedllFuncs DLLHIDDEN;
-extern mutil_funcs_t *gpMetaUtilFuncs DLLHIDDEN;
+extern gamedll_funcs_t *gpGamedllFuncs;
+extern mutil_funcs_t *gpMetaUtilFuncs;
 
 // Tell the dll that we'll be loading it as a metamod plugin, in case it
 // needs to do something special prior to the standard query/attach
 // procedure.  In particular, this will allow for DLL's that can be used as
 // both standalone DLL's and metamod plugins. (optional; not required in
 // plugin)
-C_DLLEXPORT void Meta_Init(void);
+extern "C"
+{
+DLLEXPORT void Meta_Init(void);
 typedef void (*META_INIT_FN) (void);
 
 // Get info about plugin, compare meta_interface versions, provide meta
 // utility callback functions.
-C_DLLEXPORT int Meta_Query(char *interfaceVersion, 
+DLLEXPORT int Meta_Query(char *interfaceVersion, 
 		plugin_info_t **plinfo, 
 		mutil_funcs_t *pMetaUtilFuncs);
 typedef int (*META_QUERY_FN) (char *interfaceVersion, 
@@ -136,7 +136,7 @@ typedef int (*META_QUERY_FN) (char *interfaceVersion,
 
 // Attach the plugin to the API; get the table of getapi functions; give 
 // meta_globals and gamedll_funcs.
-C_DLLEXPORT int Meta_Attach(PLUG_LOADTIME now, 
+DLLEXPORT int Meta_Attach(PLUG_LOADTIME now, 
 		META_FUNCTIONS *pFunctionTable, 
 		meta_globals_t *pMGlobals, 
 		gamedll_funcs_t *pGamedllFuncs);
@@ -146,23 +146,23 @@ typedef int (*META_ATTACH_FN) (PLUG_LOADTIME now,
 		gamedll_funcs_t *pGamedllFuncs);
 
 // Detach the plugin; tell why and when.
-C_DLLEXPORT int Meta_Detach(PLUG_LOADTIME now, PL_UNLOAD_REASON reason);
+DLLEXPORT int Meta_Detach(PLUG_LOADTIME now, PL_UNLOAD_REASON reason);
 typedef int (*META_DETACH_FN) (PLUG_LOADTIME now, PL_UNLOAD_REASON reason);
 
 // Standard HL SDK interface function prototypes.
-C_DLLEXPORT int GetEntityAPI_Post(DLL_FUNCTIONS *pFunctionTable, 
+DLLEXPORT int GetEntityAPI_Post(DLL_FUNCTIONS *pFunctionTable, 
 		int interfaceVersion );
-C_DLLEXPORT int GetEntityAPI2_Post(DLL_FUNCTIONS *pFunctionTable, 
+DLLEXPORT int GetEntityAPI2_Post(DLL_FUNCTIONS *pFunctionTable, 
 		int *interfaceVersion );
 
 // Additional SDK-like interface function prototypes.
-C_DLLEXPORT int GetNewDLLFunctions_Post(NEW_DLL_FUNCTIONS *pNewFunctionTable, 
+DLLEXPORT int GetNewDLLFunctions_Post(NEW_DLL_FUNCTIONS *pNewFunctionTable, 
 		int *interfaceVersion );
-C_DLLEXPORT int GetEngineFunctions(enginefuncs_t *pengfuncsFromEngine, 
+DLLEXPORT int GetEngineFunctions(enginefuncs_t *pengfuncsFromEngine, 
 		int *interfaceVersion);
-C_DLLEXPORT int GetEngineFunctions_Post(enginefuncs_t *pengfuncsFromEngine, 
+DLLEXPORT int GetEngineFunctions_Post(enginefuncs_t *pengfuncsFromEngine, 
 		int *interfaceVersion);
-
+}
 // Convenience macros for accessing GameDLL functions.  Note: these talk
 // _directly_ to the gamedll, and are not multiplexed through Metamod to
 // the other plugins.
