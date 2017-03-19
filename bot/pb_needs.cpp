@@ -125,7 +125,9 @@ float PB_Needs::wishForSniping( bool weaponCheck )
 								break;
 			case GEARBOX_DLL:	if ( bot->combat.hasWeapon( VALVE_WEAPON_CROSSBOW ) ) weapon = 1;
 								break;
-			case HUNGER_DLL:	if ( bot->combat.hasWeapon( VALVE_WEAPON_CROSSBOW || HUNGER_WEAPON_EINAR1 || HUNGER_WEAPON_SNIPER ) ) weapon = 1;
+			case HUNGER_DLL:	if ( bot->combat.hasWeapon( VALVE_WEAPON_CROSSBOW ) ||
+							bot->combat.hasWeapon( HUNGER_WEAPON_EINAR1 ) ||
+							bot->combat.hasWeapon( HUNGER_WEAPON_SNIPER ) ) weapon = 1;
 								break;
 		}
 	}
