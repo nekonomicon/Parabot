@@ -62,6 +62,7 @@ void botChatMessage( edict_t *speaker, char *msg, bool speechSynthesis )
 		strcpy( sayText, STRING(speaker->v.netname) );
 		strcat( sayText, ": " );
 		strcat( sayText, msg );
+		strcat( sayText, "\n" );
 
 		MESSAGE_BEGIN( MSG_ALL, gmsgSayText );
 		WRITE_BYTE( 1 );
