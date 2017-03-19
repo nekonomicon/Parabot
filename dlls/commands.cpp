@@ -342,7 +342,7 @@ void ClientCommand( edict_t *pEntity )
 			CParabot *pb = bots[botNr].parabot;
 #ifdef _DEBUG
 			if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"ClientCommand: %s %s %s\n",pcmd, arg1, arg2); fclose(fp); }
-#engine
+#endif
 			// mapchange redefined:
 			if (FStrEq( pcmd, "map" )) {	
 				char *newmap = (char*) arg1;

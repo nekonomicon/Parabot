@@ -548,7 +548,7 @@ int pfnDropToFloor(edict_t* e)
 {
 #ifdef _DEBUG
    if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnDropToFloor:\n"); fclose(fp); }
-#ifdef _DEBUG
+#endif
    return (*g_engfuncs.pfnDropToFloor)(e);
 }
 
@@ -1036,7 +1036,7 @@ void pfnGetBonePosition(const edict_t* pEdict, int iBone, float *rgflOrigin, flo
 {
 #ifdef _DEBUG
 //   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnGetBonePosition:\n"); fclose(fp); }
-#edif
+#endif
    (*g_engfuncs.pfnGetBonePosition)(pEdict, iBone, rgflOrigin, rgflAngles);
 }
 
