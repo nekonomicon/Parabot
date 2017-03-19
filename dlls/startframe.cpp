@@ -654,7 +654,7 @@ void StartFrame( void )
 			updateBotClients();
 			playerSounds.getAllClientSounds();
 			
-			print3dDebugInfo();
+			//print3dDebugInfo();
 			
 			// call BotThink for each active bot
 			for (int b=0; b < 32; b++) {
