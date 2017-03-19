@@ -30,7 +30,7 @@ typedef void* HINSTANCE;
 typedef int (FAR *GETENTITYAPI)(DLL_FUNCTIONS *, int);
 typedef int (FAR *GETNEWDLLFUNCTIONS)(NEW_DLL_FUNCTIONS *, int *); 
 
-typedef void (DLLEXPORT *GIVEFNPTRSTODLL)(enginefuncs_t *, globalvars_t *);
+typedef void (*GIVEFNPTRSTODLL)(enginefuncs_t *, globalvars_t *);
 typedef void (FAR *LINK_ENTITY_FUNC)(entvars_t *);
 
 // define some function prototypes...
