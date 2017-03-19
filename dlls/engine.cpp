@@ -89,7 +89,7 @@ void pfnMessageBegin(int msg_dest, int msg_type, const float *pOrigin, edict_t *
    {
       int index = -1;
 
-      if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnMessageBegin: edict=%x dest=%d type=%d\n",ed,msg_dest,msg_type); fclose(fp); }
+      if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnMessageBegin: edict=%p dest=%d type=%d\n",ed,msg_dest,msg_type); fclose(fp); }
 
 	  if (msg_type == message_Death) {
 		  botMsgFunction = Client_Valve_DeathMsg;
@@ -337,7 +337,7 @@ int pfnPrecacheSound(char* s)
 
 void pfnSetModel(edict_t *e, const char *m)
 {
-   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnSetModel: edict=%x %s\n",e,m); fclose(fp); }
+   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnSetModel: edict=%p %s\n",e,m); fclose(fp); }
    (*g_engfuncs.pfnSetModel)(e, m);
 }
 
@@ -355,7 +355,7 @@ int pfnModelFrames(int modelIndex)
 
 void pfnSetSize(edict_t *e, const float *rgflMin, const float *rgflMax)
 {
-   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnSetSize: %x\n",e); fclose(fp); }
+   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnSetSize: %p\n",e); fclose(fp); }
    (*g_engfuncs.pfnSetSize)(e, rgflMin, rgflMax);
 }
 
@@ -455,17 +455,17 @@ void pfnAngleVectors(const float *rgflVector, float *forward, float *right, floa
 edict_t* pfnCreateEntity(void)
 {
    edict_t *pent = (*g_engfuncs.pfnCreateEntity)();
-   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnCreateEntity: %x\n",pent); fclose(fp); }
+   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnCreateEntity: %p\n",pent); fclose(fp); }
    return pent;
 }
 
 void pfnRemoveEntity(edict_t* e)
 {
-//   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnRemoveEntity: %x\n",e); fclose(fp); }
+//   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnRemoveEntity: %p\n",e); fclose(fp); }
    if (debug_engine)
    {
       fp=fopen("parabot\\debug.txt", "a");
-      fprintf(fp,"pfnRemoveEntity: %x\n",e);
+      fprintf(fp,"pfnRemoveEntity: %p\n",e);
       if (e->v.model != 0)
          fprintf(fp," model=%s\n", STRING(e->v.model));
       fclose(fp);
@@ -477,7 +477,7 @@ void pfnRemoveEntity(edict_t* e)
 edict_t* pfnCreateNamedEntity(int className)
 {
    edict_t *pent = (*g_engfuncs.pfnCreateNamedEntity)(className);
-   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnCreateNamedEntity: edict=%x name=%s\n",pent,STRING(className)); fclose(fp); }
+   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnCreateNamedEntity: edict=%p name=%s\n",pent,STRING(className)); fclose(fp); }
    return pent;
 }
 
@@ -863,13 +863,13 @@ edict_t* pfnPEntityOfEntOffset(int iEntOffset)
 
 int pfnEntOffsetOfPEntity(const edict_t *pEdict)
 {
-//   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnEntOffsetOfPEntity: %x\n",pEdict); fclose(fp); }
+//   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnEntOffsetOfPEntity: %p\n",pEdict); fclose(fp); }
    return (*g_engfuncs.pfnEntOffsetOfPEntity)(pEdict);
 }
 
 int pfnIndexOfEdict(const edict_t *pEdict)
 {
-//   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnIndexOfEdict: %x\n",pEdict); fclose(fp); }
+//   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnIndexOfEdict: %p\n",pEdict); fclose(fp); }
    return (*g_engfuncs.pfnIndexOfEdict)(pEdict);
 }
 
@@ -887,7 +887,7 @@ edict_t* pfnFindEntityByVars(entvars_t* pvars)
 
 void* pfnGetModelPtr(edict_t* pEdict)
 {
-//   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnGetModelPtr: %x\n",pEdict); fclose(fp); }
+//   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnGetModelPtr: %p\n",pEdict); fclose(fp); }
    return (*g_engfuncs.pfnGetModelPtr)(pEdict);
 }
 
@@ -1031,7 +1031,7 @@ void pfnFadeClientVolume(const edict_t *pEdict, int fadePercent, int fadeOutSeco
 
 void pfnSetClientMaxspeed(const edict_t *pEdict, float fNewMaxspeed)
 {
-   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnSetClientMaxspeed: edict=%x %f\n",pEdict,fNewMaxspeed); fclose(fp); }
+   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnSetClientMaxspeed: edict=%p %f\n",pEdict,fNewMaxspeed); fclose(fp); }
    (*g_engfuncs.pfnSetClientMaxspeed)(pEdict, fNewMaxspeed);
 }
 
@@ -1117,7 +1117,7 @@ int pfnGetPlayerUserId(edict_t *e )
 {
    if (gpGlobals->deathmatch)
    {
-      if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnGetPlayerUserId: %x\n",e); fclose(fp); }
+      if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnGetPlayerUserId: %p\n",e); fclose(fp); }
    }
 
    return (*g_engfuncs.pfnGetPlayerUserId)(e);
@@ -1143,7 +1143,7 @@ cvar_t* pfnCVarGetPointer(const char *szVarName)
 
 unsigned int pfnGetPlayerWONId(edict_t *e)
 {
-   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnGetPlayerWONId: %x\n",e); fclose(fp); }
+   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnGetPlayerWONId: %p\n",e); fclose(fp); }
    return (*g_engfuncs.pfnGetPlayerWONId)(e);
 }
 
@@ -1238,7 +1238,6 @@ int pfnGetCurrentPlayer(void)
 {
    if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"pfnGetCurrentPlayer: "); fclose(fp); }
    return (*g_engfuncs.pfnGetCurrentPlayer)();
-   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"ok\n"); fclose(fp); }
 }
 
 int pfnCanSkipPlayer(const edict_t *player)

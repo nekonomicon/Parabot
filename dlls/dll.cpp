@@ -220,7 +220,7 @@ BOOL ClientConnect( edict_t *pEntity, const char *pszName, const char *pszAddres
 	
 	if (gpGlobals->deathmatch)
 	{
-		if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ClientConnect: pent=%x name=%s\n",pEntity,pszName); fclose(fp); }
+		if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ClientConnect: pent=%p name=%s\n",pEntity,pszName); fclose(fp); }
 		
 		// check if this client is the listen server client
 		if (strcmp(pszAddress, "loopback") == 0)
@@ -253,7 +253,7 @@ void ClientDisconnect( edict_t *pEntity )
 	char buffer[256];
 	sprintf( buffer, "%.f: ClientDisconnect: %s ", worldTime(), STRING(pEntity->v.netname) );
 	if (gpGlobals->deathmatch) {
-		if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ClientDisconnect: %x\n",pEntity); fclose(fp); }
+		if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ClientDisconnect: %p\n",pEntity); fclose(fp); }
 		
 		i = 0;
 		while ((i < 32) && (clients[i] != pEntity))	i++;
@@ -290,13 +290,13 @@ void ClientDisconnect( edict_t *pEntity )
 
 void ClientKill( edict_t *pEntity )
 {
-   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ClientKill: %x\n",pEntity); fclose(fp); }
+   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ClientKill: %p\n",pEntity); fclose(fp); }
    (*other_gFunctionTable.pfnClientKill)(pEntity);
 }
 
 void ClientPutInServer( edict_t *pEntity )
 {
-	if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ClientPutInServer: %x\n",pEntity); fclose(fp); }
+	if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ClientPutInServer: %p\n",pEntity); fclose(fp); }
 	
 	int index = 0;
 	while ((index < 32) && (clients[index] != NULL)) index++;
@@ -325,7 +325,7 @@ void ClientPutInServer( edict_t *pEntity )
 
 void ClientUserInfoChanged( edict_t *pEntity, char *infobuffer )
 {
-   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ClientUserInfoChanged: pEntity=%x infobuffer=%s\n", pEntity, infobuffer); fclose(fp); }
+   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ClientUserInfoChanged: pEntity=%p infobuffer=%s\n", pEntity, infobuffer); fclose(fp); }
 
    (*other_gFunctionTable.pfnClientUserInfoChanged)(pEntity, infobuffer);
 }
@@ -380,7 +380,7 @@ const char *GetGameDescription( void )
 
 void PlayerCustomization( edict_t *pEntity, customization_t *pCust )
 {
-   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "PlayerCustomization: %x\n",pEntity); fclose(fp); }
+   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "PlayerCustomization: %p\n",pEntity); fclose(fp); }
 
    (*other_gFunctionTable.pfnPlayerCustomization)(pEntity, pCust);
 }
@@ -474,7 +474,7 @@ void CmdStart( const edict_t *player, const struct usercmd_s *cmd, unsigned int 
 {
 	/*if (debug_engine) { 
 		fp=fopen("parabot\\debug.txt", "a"); 
-		fprintf(fp, "CmdStart: ed=%x, lms=%i, msec=%i, bts=%i, imp=%i, wps=%i\n",
+		fprintf(fp, "CmdStart: ed=%p, lms=%i, msec=%i, bts=%i, imp=%i, wps=%i\n",
 			player, cmd->lerp_msec, cmd->msec, cmd->buttons, cmd->impulse, cmd->weaponselect ); 
 		fclose(fp); 
 	}*/
@@ -500,7 +500,7 @@ void CmdEnd ( const edict_t *player )
 {
 	/*if (debug_engine) { 
 		fp=fopen("parabot\\debug.txt", "a"); 
-		fprintf(fp, "CmdEnd: ed=%x\n", player ); 
+		fprintf(fp, "CmdEnd: ed=%p\n", player ); 
 		fclose(fp); 
 	}*/
 	//debugMsg( "CmdEnd\n" );
@@ -528,7 +528,7 @@ void CreateInstancedBaselines( void )
 
 int InconsistentFile( const edict_t *player, const char *filename, char *disconnect_message )
 {
-   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "InconsistentFile: %x filename=%s\n",player,filename); fclose(fp); }
+   if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "InconsistentFile: %p filename=%s\n",player,filename); fclose(fp); }
 
    return (*other_gFunctionTable.pfnInconsistentFile)(player, filename, disconnect_message);
 }
