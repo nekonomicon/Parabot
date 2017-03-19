@@ -11,7 +11,6 @@ extern int botNr;
 extern edict_t *camPlayer;
 extern bool haloOnBase;
 
-void debugFile( char *msg );
 void startBotCam( edict_t *pEntity );
 
 extern float sineTable[256];
