@@ -340,9 +340,9 @@ void ClientCommand( edict_t *pEntity )
 		if ((gpGlobals->deathmatch) && (!IS_DEDICATED_SERVER()))
 		{	
 			CParabot *pb = bots[botNr].parabot;
-
+#ifdef _DEBUG
 			if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"ClientCommand: %s %s %s\n",pcmd, arg1, arg2); fclose(fp); }
-
+#engine
 			// mapchange redefined:
 			if (FStrEq( pcmd, "map" )) {	
 				char *newmap = (char*) arg1;

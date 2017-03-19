@@ -93,7 +93,7 @@ int DispatchSpawn( edict_t *pent )
    if (gpGlobals->deathmatch)
    {
       char *pClassname = (char *)STRING(pent->v.classname);
-
+#ifdef _DEBUG
       if (debug_engine) {
          fp=fopen("parabot\\debug.txt", "a");
          fprintf(fp, "%f: DispatchSpawn: %s\n",worldTime(), pClassname );
@@ -101,7 +101,7 @@ int DispatchSpawn( edict_t *pent )
             fprintf(fp, " model=%s\n",STRING(pent->v.model));
          fclose(fp);
       }
-
+#endif
       if (strcmp(pClassname, "worldspawn") == 0)
       {
          // do level initialization stuff here...
@@ -220,8 +220,9 @@ BOOL ClientConnect( edict_t *pEntity, const char *pszName, const char *pszAddres
 	
 	if (gpGlobals->deathmatch)
 	{
+#ifdef _DEBUG
 		if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ClientConnect: pent=%p name=%s\n",pEntity,pszName); fclose(fp); }
-		
+#endif
 		// check if this client is the listen server client
 		if (strcmp(pszAddress, "loopback") == 0)
 		{
@@ -253,8 +254,9 @@ void ClientDisconnect( edict_t *pEntity )
 	char buffer[256];
 	sprintf( buffer, "%.f: ClientDisconnect: %s ", worldTime(), STRING(pEntity->v.netname) );
 	if (gpGlobals->deathmatch) {
+#ifdef _DEBUG
 		if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ClientDisconnect: %p\n",pEntity); fclose(fp); }
-		
+#endif
 		i = 0;
 		while ((i < 32) && (clients[i] != pEntity))	i++;
 		if (i < 32)	clients[i] = NULL;
@@ -290,14 +292,17 @@ void ClientDisconnect( edict_t *pEntity )
 
 void ClientKill( edict_t *pEntity )
 {
+#ifdef _DEBUG
    if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ClientKill: %p\n",pEntity); fclose(fp); }
+#endif
    (*other_gFunctionTable.pfnClientKill)(pEntity);
 }
 
 void ClientPutInServer( edict_t *pEntity )
 {
+#ifdef _DEBUG
 	if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ClientPutInServer: %p\n",pEntity); fclose(fp); }
-	
+#endif
 	int index = 0;
 	while ((index < 32) && (clients[index] != NULL)) index++;
 	if (index < 32) clients[index] = pEntity;
@@ -325,8 +330,9 @@ void ClientPutInServer( edict_t *pEntity )
 
 void ClientUserInfoChanged( edict_t *pEntity, char *infobuffer )
 {
+#ifdef _DEBUG
    if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ClientUserInfoChanged: pEntity=%p infobuffer=%s\n", pEntity, infobuffer); fclose(fp); }
-
+#endif
    (*other_gFunctionTable.pfnClientUserInfoChanged)(pEntity, infobuffer);
 }
 
@@ -338,7 +344,9 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 
 void ServerDeactivate( void )
 {
+#ifdef _DEBUG
 	if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ServerDeactivate\n"); fclose(fp); }
+#endif
 	if(!g_meta_init)
 		(*other_gFunctionTable.pfnServerDeactivate)();
 
@@ -380,8 +388,9 @@ const char *GetGameDescription( void )
 
 void PlayerCustomization( edict_t *pEntity, customization_t *pCust )
 {
+#ifdef _DEBUG
    if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "PlayerCustomization: %p\n",pEntity); fclose(fp); }
-
+#endif
    (*other_gFunctionTable.pfnPlayerCustomization)(pEntity, pCust);
 }
 
@@ -406,7 +415,9 @@ void SpectatorThink( edict_t *pEntity )
 
 void Sys_Error( const char *error_string )
 {
+#ifdef _DEBUG
 	if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "Sys_Error: %s\n", error_string); fclose(fp); }
+#endif
 	(*other_gFunctionTable.pfnSys_Error)(error_string);
 }
 
@@ -472,13 +483,14 @@ int GetWeaponData( struct edict_s *player, struct weapon_data_s *info )
 
 void CmdStart( const edict_t *player, const struct usercmd_s *cmd, unsigned int random_seed )
 {
+#ifdef _DEBUG
 	/*if (debug_engine) { 
 		fp=fopen("parabot\\debug.txt", "a"); 
 		fprintf(fp, "CmdStart: ed=%p, lms=%i, msec=%i, bts=%i, imp=%i, wps=%i\n",
 			player, cmd->lerp_msec, cmd->msec, cmd->buttons, cmd->impulse, cmd->weaponselect ); 
 		fclose(fp); 
 	}*/
-	
+#endif
 /*	short	lerp_msec;      // Interpolation time on client
 	byte	msec;           // Duration in ms of command
 	vec3_t	viewangles;     // Command view angles.
@@ -498,11 +510,13 @@ void CmdStart( const edict_t *player, const struct usercmd_s *cmd, unsigned int 
 
 void CmdEnd ( const edict_t *player )
 {
+#ifdef _DEBUG
 	/*if (debug_engine) { 
 		fp=fopen("parabot\\debug.txt", "a"); 
 		fprintf(fp, "CmdEnd: ed=%p\n", player ); 
 		fclose(fp); 
 	}*/
+#endif
 	//debugMsg( "CmdEnd\n" );
    (*other_gFunctionTable.pfnCmdEnd)(player);
 }
@@ -528,8 +542,9 @@ void CreateInstancedBaselines( void )
 
 int InconsistentFile( const edict_t *player, const char *filename, char *disconnect_message )
 {
+#ifdef _DEBUG
    if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "InconsistentFile: %p filename=%s\n",player,filename); fclose(fp); }
-
+#endif
    return (*other_gFunctionTable.pfnInconsistentFile)(player, filename, disconnect_message);
 }
 
