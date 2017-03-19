@@ -93,17 +93,15 @@ void incTotalAttempts()
 	mapGraph.incPasses();
 }
 
-
+#ifdef _DEBUG
 void checkForBreakpoint( int reason )
 {
-#ifdef _DEBUG
 	if ( (botNr==activeBot) && (botHalt==reason) ) {
 		debugMsg( "Breakpoint reached\n" );
 		botHalt = 0;
 	}
-#endif
 }
-
+#endif
 
 void pb2dMsg( int x, int y, const char *msg )
 {
@@ -151,10 +149,9 @@ void pb3dMsg( Vector pos, const char *msg )
 
 
 extern int wpBeamTexture;
-
+#ifdef _DEBUG
 void debugBeam( Vector start, Vector end, int life, int color )
 {
-#ifdef _DEBUG
 	if (botNr!=activeBot) return;
 
 	edict_t *player = INDEXENT( 1 );
@@ -185,13 +182,10 @@ void debugBeam( Vector start, Vector end, int life, int color )
 	WRITE_BYTE( 255 );   // brightness
 	WRITE_BYTE( 5 );    // speed
 	MESSAGE_END();
-#endif
 }
-
 
 void debugMarker( Vector pos, int life )
 {
-#ifdef _DEBUG
 	if (botNr!=activeBot) return;
 
 	edict_t *player = INDEXENT( 1 );
@@ -205,24 +199,18 @@ void debugMarker( Vector pos, int life )
 	WRITE_BYTE( 16 ); // count
 	WRITE_BYTE( life ); // life in 0.1's
 	MESSAGE_END();
-#endif
 }
-
 
 void debugFile( char *msg )
 {
-#ifdef _DEBUG
 	if (!dbgFile) return;
 	FILE *fp=fopen( "parabot/debug.txt", "a" ); 
 	fprintf( fp, msg ); 
 	fclose( fp );
-#endif
 }
-
 
 void debugMsg( const char *str1, const char *str2, const char *str3, const char *str4 )
 {
-#ifdef _DEBUG
 	if (botNr != activeBot) return;
 	char buffer[256];
 	
@@ -236,9 +224,8 @@ void debugMsg( const char *str1, const char *str2, const char *str3, const char 
 	}
 	if (IS_DEDICATED_SERVER()) printf( "%s", buffer );
 	else ALERT( at_console, buffer );
-#endif
 }
-
+#endif
 
 void errorMsg( const char *str1, const char *str2, const char *str3, const char *str4 )
 {
@@ -278,28 +265,21 @@ void infoMsg( const char *str1, const char *str2, const char *str3, const char *
 	else ALERT( at_console, buffer );
 }
 
-
+#ifdef _DEBUG
 void debugMsg( const char *str1, int data1, int data2, int data3 )
 {
-#ifdef _DEBUG
 	if (botNr != activeBot) return;
 	ALERT ( at_console, (char*)str1, data1, data2, data3 );
-#endif
 }
-
 
 void debugMsg( const char *str1, float data1, float data2, float data3 )
 {
-#ifdef _DEBUG
 	if (botNr != activeBot) return;
 	ALERT ( at_console, (char*)str1, data1, data2, data3 );
-#endif
 }
-
 
 void debugSound( edict_t *recipient, const char *sample )
 {
-#ifdef _DEBUG
 	pfnEmitSound( recipient, CHAN_BODY, sample, 1.0, ATTN_NORM, 0, 100 );
-#endif
 }
+#endif

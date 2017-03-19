@@ -100,8 +100,6 @@ void saveLevelData();
 bool loadLevelData();
 // implemented in pb_mapimport.cpp
 
-void debugFile( char *msg );
-
 float srvMaxSpeed = 270;
 
 
