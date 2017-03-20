@@ -600,6 +600,22 @@ LINK_ENTITY_TO_FUNC(info_player_team2);
 LINK_ENTITY_TO_FUNC(item_flag_team1);
 LINK_ENTITY_TO_FUNC(item_flag_team2);
 
+// entities for Bubblemod
+LINK_ENTITY_TO_FUNC(bmod_squidspit);
+LINK_ENTITY_TO_FUNC(boxmarker);
+LINK_ENTITY_TO_FUNC(campoint);
+LINK_ENTITY_TO_FUNC(flying_crowbar);
+LINK_ENTITY_TO_FUNC(item_357Rune);
+LINK_ENTITY_TO_FUNC(item_BatteryRune);
+LINK_ENTITY_TO_FUNC(item_CrowbarRune);
+LINK_ENTITY_TO_FUNC(item_GrenadeRune);
+LINK_ENTITY_TO_FUNC(item_HealthRune);
+LINK_ENTITY_TO_FUNC(item_ShotgunRune);
+LINK_ENTITY_TO_FUNC(item_rune);
+LINK_ENTITY_TO_FUNC(monster_tripsnark);
+LINK_ENTITY_TO_FUNC(zapbounce);
+LINK_ENTITY_TO_FUNC(zaprift);
+
 // entities for They Hunger Trilogy
 LINK_ENTITY_TO_FUNC(ammo_einar1);
 LINK_ENTITY_TO_FUNC(ammo_th_ap9);
