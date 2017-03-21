@@ -616,6 +616,12 @@ LINK_ENTITY_TO_FUNC(monster_tripsnark);
 LINK_ENTITY_TO_FUNC(zapbounce);
 LINK_ENTITY_TO_FUNC(zaprift);
 
+// entities for Gravgun
+LINK_ENTITY_TO_FUNC(weapon_ar2);
+LINK_ENTITY_TO_FUNC(weapon_bigcock);
+LINK_ENTITY_TO_FUNC(weapon_gateofbabylon);
+LINK_ENTITY_TO_FUNC(weapon_gravgun);
+
 // entities for They Hunger Trilogy
 LINK_ENTITY_TO_FUNC(ammo_einar1);
 LINK_ENTITY_TO_FUNC(ammo_th_ap9);
