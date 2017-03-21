@@ -14,6 +14,11 @@
 #include "assert.h"
 #include "utilityfuncs.h"
 
+// Half-Life: Deathmatch MODs
+#define HLDM	0
+#define SEVS	1	//Severians
+#define BMOD	2	//BubbleMOD
+#define ZXC	3	//ZxC-MOD
 
 // define constants used to identify the MOD we are playing...
 #define VALVE_DLL	1

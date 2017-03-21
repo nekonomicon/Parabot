@@ -53,7 +53,7 @@ int welcome_index = -1;
 int wpSpriteTexture, wpBeamTexture, wpSprite2Texture;
 physent_t *ptrPhysents;
 int numPhysents;
-
+int g_hldm_mod = HLDM;
 
 static FILE *fp;
 
@@ -71,6 +71,14 @@ void DSpeace();
 
 void GameDLLInit( void )
 {
+	if(mod_id==VALVE_DLL)
+	{
+		// from jk_botti
+		if(CVAR_GET_POINTER("bm_ver") )
+			g_hldm_mod = BMOD;
+		else if( CVAR_GET_POINTER("mp_giveweapons") && CVAR_GET_POINTER("mp_giveammo") )
+			g_hldm_mod = SEVS;
+	}
 	(*g_engfuncs.pfnAddServerCommand)("addbot", DSaddbot );
 	(*g_engfuncs.pfnAddServerCommand)("hidewelcome", DSsimulate );
 	(*g_engfuncs.pfnAddServerCommand)("chatlog", DSlogChat );

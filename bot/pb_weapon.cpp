@@ -7,7 +7,7 @@
 extern bot_t bots[32];
 extern int mod_id;
 extern bot_weapon_t weapon_defs[MAX_WEAPONS];
-
+extern int g_hldm_mod
 
 
 
@@ -436,6 +436,13 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 		break;
 
 	case VALVE_WEAPON_EGON:
+		if(g_hldm_mod==BMOD)
+		{
+			if(CVAR_GET_FLOAT("bm_gluon_mod"))
+				return 0;
+		}
+		else if(g_hldm_mod==SEVS)
+			return 0;
 		if ( flags & (WF_UNDERWATER | WF_NEED_GRENADE) ) break;
 				
 		if (distance < 250) {
