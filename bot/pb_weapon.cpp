@@ -432,7 +432,10 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 			if (ammo1() <= 1) score = 0;
 			else if (ammo1() <= 10) score /= 2;
 		}
-		bestMode[currentWeapon] = 2;
+		if(hitProb>0.5)
+			bestMode[currentWeapon] = 2;
+		else
+			bestMode[currentWeapon] = 1;
 		break;
 
 	case VALVE_WEAPON_EGON:
@@ -930,7 +933,10 @@ float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, b
 			if (ammo1() <= 1) score = 0;
 			else if (ammo1() <= 10) score /= 2;
 		}
-		bestMode[currentWeapon] = 2;
+		if(hitProb>0.5)
+			bestMode[currentWeapon] = 2;
+		else
+			bestMode[currentWeapon] = 1;
 		break;
 
 	case VALVE_WEAPON_EGON:
@@ -1232,7 +1238,10 @@ float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bo
 			if (ammo1() <= 1) score = 0;
 			else if (ammo1() <= 10) score /= 2;
 		}
-		bestMode[currentWeapon] = 2;
+		if(hitProb>0.5)
+			bestMode[currentWeapon] = 2;
+		else
+			bestMode[currentWeapon] = 1;
 		break;
 
 	case VALVE_WEAPON_HANDGRENADE:
