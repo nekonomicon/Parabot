@@ -34,6 +34,7 @@ extern PB_Chat chat;
 extern GETENTITYAPI other_GetEntityAPI;
 extern GETNEWDLLFUNCTIONS other_GetNewDLLFunctions; 
 static char g_argv[256];
+extern int mod_id;
 extern bool g_meta_init;
 
 //#include "hl_game.h"

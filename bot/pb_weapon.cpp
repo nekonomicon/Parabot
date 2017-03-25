@@ -7,7 +7,7 @@
 extern bot_t bots[32];
 extern int mod_id;
 extern bot_weapon_t weapon_defs[MAX_WEAPONS];
-extern int g_hldm_mod
+extern int g_hldm_mod;
 
 
 
