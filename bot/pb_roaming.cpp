@@ -92,7 +92,7 @@ void PB_Roaming::checkJump(vec3_t origin, vec3_t dir, checkWayRes *res )
 	int material = UTIL_PointContents( floor + Vector(0,0,1) );
 	// We have: floor and material in front of us
 
-	if ( ( ((floor.z+36+MAX_ZREACH)<target.z) && ((floor.z+36+16)<origin.z) ||		// gap goes deeper than target
+	if( ( ( ( ( floor.z + 36 + MAX_ZREACH ) < target.z ) && ( ( floor.z + 36 + 16 ) < origin.z ) ) ||	// gap goes deeper than target
 			tr.flFraction==1.0 ||													// gap deeper than 512 units
 		    material==CONTENTS_LAVA	|| material==CONTENTS_SLIME   			  ) &&	// dangerous
 			bigGapAt( vFrom+Vector(0,0,-36-4) )										)

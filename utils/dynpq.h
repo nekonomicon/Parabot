@@ -78,17 +78,19 @@ void dynamic_priority_queue<key_type>::changeKeyAt(
    index_type idx = Indices[at];
    assert(idx < csize);   // value still present in the queue?
 
-   if(*c[idx] != k)       // in case of equality, do nothing
-      if(comp(&k, c[idx]))
-      {
-           *c[idx] = k;   // enter heavier value
-           goDown(idx);   // reorganize heap
-      }
-      else
-      {
-           *c[idx] = k;   // enter lighter value
-           goUp(idx);     // reorganize heap
-      }
+	if(*c[idx] != k)       // in case of equality, do nothing
+	{
+		if(comp(&k, c[idx]))
+		{
+			*c[idx] = k;   // enter heavier value
+			goDown(idx);   // reorganize heap
+		}
+		else
+		{
+			*c[idx] = k;   // enter lighter value
+			goUp(idx);     // reorganize heap
+		}
+	}
 }
 
 template <class key_type>

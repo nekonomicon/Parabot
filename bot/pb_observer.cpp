@@ -513,8 +513,8 @@ void PB_Observer::checkForCamping( int oId, Vector &pos )
 				PB_Navpoint *nearestCamp = mapGraph.getNearestNavpoint( pos, NAV_S_CAMPING );
 				PB_Navpoint *nearestTank = mapGraph.getNearestNavpoint( pos, NAV_F_TANKCONTROLS );
 				// check if we know the location:
-				if ( nearestCamp && ((nearestCamp->pos()-pos).Length() < 128) ||
-					 nearestTank && ((nearestTank->pos()-pos).Length() < 128)    ) 
+				if( ( nearestCamp && ( ( nearestCamp->pos()-pos).Length() < 128 ) ) ||
+					( nearestTank && ( ( nearestTank->pos()-pos).Length() < 128 ) ) ) 
 				{	// ...yes -> let bots camp longer here!
 					bot_t *bot = UTIL_GetBotPointer( ENT(obs[oId].player->pev) );
 					if (bot) bot->parabot->campTime = 0;	

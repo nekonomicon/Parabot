@@ -119,7 +119,7 @@ void goalLookAround( CParabot *pb, PB_Percept*item )
 		case PI_EXPLOSIVE:	pb->setGoalViewDescr( "LookAround (ExplosiveSound)" );	break;
 		case PI_FOE:		pb->setGoalViewDescr( "LookAround (PlayerSound)" );		break;
 		case PI_NEWAREA:	pb->setGoalViewDescr( "LookAround (NewArea)" );			break;
-		default:			pb->setGoalViewDescr( "LookAround (???)" );				break;
+		default:			pb->setGoalViewDescr( "LookAround (?)" );				break;
 		}
 	}
 	else pb->setGoalViewDescr( "LookAround" );
@@ -261,7 +261,7 @@ void goalGetItem( CParabot *pb, PB_Percept*item )
 	switch( item->pClass ) {
 	case PI_WEAPONBOX:	pb->setGoalMoveDescr( "GetItem (Weaponbox)" );		break;
 	case PI_HALO:		pb->setGoalMoveDescr( "GetItem (Halo)" );			break;
-	default:			pb->setGoalMoveDescr( "GetItem (???)" );			break;
+	default:			pb->setGoalMoveDescr( "GetItem (?)" );			break;
 	}
 }
 
@@ -307,7 +307,7 @@ void goalGetAway( CParabot *pb, PB_Percept*item )
 	case PI_LASERDOT:	pb->setGoalMoveDescr( "GetAway (Laserdot)" );		break;
 	case PI_EXPLOSIVE:	pb->setGoalMoveDescr( "GetAway (Explosive)" );		break;
 	case PI_FOE:		pb->setGoalMoveDescr( "GetAway (Enemy)" );			break;
-	default:			pb->setGoalMoveDescr( "GetAway (???)" );			break;
+	default:			pb->setGoalMoveDescr( "GetAway (?)" );			break;
 	}
 }
 

@@ -510,7 +510,7 @@ void PB_Perception::collectData()
 	int h=cdet;  cdet=odet;  odet=h;	// switch lists
 	detections[cdet].clear();
 
-	while (ent = UTIL_FindEntityInSphere( ent, botEnt->v.origin, sensitivity*MAX_DIST_VP )) 
+	while( ( ent = UTIL_FindEntityInSphere( ent, botEnt->v.origin, sensitivity * MAX_DIST_VP ) ) ) 
 	{
 		char *pClassname = (char *)STRING(ent->pev->classname);
 		

@@ -131,9 +131,11 @@ void BotCreate( int fixedPersNr )
 	}
 	
 	// try to create entity
-	const char *botName = pbConfig.personality( persNr ).name;
+	char botName[32];
+	strncpy( botName, pbConfig.personality( persNr ).name, 31 );
+	botName[31] = '\0';
 	botEnt = CREATE_FAKE_CLIENT( botName );
-	
+
 	if (FNullEnt( botEnt )) {	// if NULL entity return
 		infoMsg( "Max. Players reached. Can't create bot!\n");
 		return;
