@@ -5,13 +5,16 @@ MODULE =	parabot
 CC ?=		gcc
 CXX ?=		g++
 
-CFLAGS +=	-O2 -pipe -m32 -DNDEBUG \
-		-fsigned-char -fPIC
+CFLAGS +=	-O3 -pipe -m32 -DNDEBUG \
+		-fsigned-char -fPIC \
+		-ffast-math -funroll-loops \
+		-fomit-frame-pointer -ftree-vectorize \
+		-fvisibility=hidden -fno-rtti -fno-exceptions
 
 DEFINES =	-Dstricmp=strcasecmp -D_stricmp=strcasecmp \
 		-Dstrnicmp=strncasecmp -D_snprintf=snprintf \
 		-D_strnicmp=strncasecmp \
-		-Wno-write-strings -Wno-invalid-offsetof
+		-Wno-write-strings
 
 INCLUDES =	-I$(PREFIX)/include \
 		-I. \
