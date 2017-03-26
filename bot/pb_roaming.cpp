@@ -324,6 +324,7 @@ void PB_Roaming::checkSide (int side, float frontOfs, checkWayRes *res)
 			res->onTouch=false; 
 			res->gap=false;
 			res->shouldJump=false;
+			res->wallDistance = 0;
 		}
 	}
 	return;
