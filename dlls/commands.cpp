@@ -329,7 +329,6 @@ void ClientCommand( edict_t *pEntity )
 		const char *arg2 = Cmd_Argv(2);
 		const char *arg3 = Cmd_Argv(3);
 		const char *arg4 = Cmd_Argv(4);
-
 		// chat message analysis:
 		if (FStrEq( pcmd, "say" )) {
 			chat.parseMessage( pEntity, (char*)arg1 );	// no return!!!
@@ -338,9 +337,9 @@ void ClientCommand( edict_t *pEntity )
 		// these client commands aren't allow in single player mode or
 		// on dedicated servers
 		if ((gpGlobals->deathmatch) && (!IS_DEDICATED_SERVER()))
-		{	
-			CParabot *pb = bots[botNr].parabot;
+		{
 #ifdef _DEBUG
+			CParabot *pb = bots[botNr].parabot;
 			if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp,"ClientCommand: %s %s %s\n",pcmd, arg1, arg2); fclose(fp); }
 #endif
 			// mapchange redefined:

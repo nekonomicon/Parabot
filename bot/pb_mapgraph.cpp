@@ -35,7 +35,7 @@ void PB_MapGraph::clear()
 	int numPaths;
 
 	for (int i=0; i<graph.size(); i++) {
-		numPaths = graph[i].second.size();
+		//numPaths = graph[i].second.size();
 		
 		// clear each path that has own data
     	AdjList::iterator adj = graph[i].second.begin();
@@ -225,7 +225,7 @@ bool PB_MapGraph::addNavpoint( PB_Navpoint &navpoint )
 {
 	navpoint.setId( nextId++ );
 	navpoint.initEntityPtr();
-	int gs = graph.size();
+	//int gs = graph.size();
 	Node x = Node(navpoint, AdjList());
     graph.push_back( x );
 	availableItems[navpoint.type()] = true;
@@ -257,11 +257,11 @@ void PB_MapGraph::addIfImprovement( PB_Path &path, bool addReturn )
 // deleting existing (slower) path
 // if path is not used, all path data get deleted!
 {
-	char *cname = path.endNav().classname();
+	//char *cname = path.endNav().classname();
 	bool used = false;
 	std::deque<int> journey;
-	float oldWeight = shortestJourney( path.startId(), path.endId(), path.mode(), journey ) - 0.1;
-
+	//float oldWeight = shortestJourney( path.startId(), path.endId(), path.mode(), journey ) - 0.1;
+	shortestJourney( path.startId(), path.endId(), path.mode(), journey );
 	if (path.weight() < oldWeight) {
 		addPath( path, GRAPH_ONEWAY );
 		used = true;
@@ -279,8 +279,8 @@ void PB_MapGraph::addIfImprovement( PB_Path &path, bool addReturn )
 		PB_Path rp;
 		rp.initReturnOf( path );
 		//journey.clear();	now in function
-		oldWeight = shortestJourney( rp.startId(), rp.endId(), rp.mode(), journey ) - 0.1;
-		
+		//oldWeight = shortestJourney( rp.startId(), rp.endId(), rp.mode(), journey ) - 0.1;
+		shortestJourney( rp.startId(), rp.endId(), rp.mode(), journey )
 		//if (rp.weight() < oldWeight) {		// insert return as well?
 		
 		if (journey.size()==0) {	// only insert return if no alternative path
@@ -493,7 +493,7 @@ void PB_MapGraph::initBackwardPaths()
 	bool ok;
 
 	for (int i=0; i<numberOfNavpoints(); i++) {
-		numPaths = graph[i].second.size();
+		//numPaths = graph[i].second.size();
 		
     	AdjList::iterator adj = graph[i].second.begin();
 		while (adj != graph[i].second.end()) {

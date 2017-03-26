@@ -216,9 +216,11 @@ void CParabot::registerDamage( int amount, Vector origin, int type )
 	if ( pPlayer && strlen( STRING(pPlayer->pev->netname) )>0 ) found = true;
 */
 	if (found) {
+#ifdef _DEBUG
 		char *botName = (char *)STRING(ent->v.netname);
 		char *inflictorName = (char *)STRING(pPlayer->pev->netname);
 		debugMsg( botName, " hurt by ", inflictorName );	debugMsg( "\n" );
+#endif
 		senses.addAttack( pPlayer->edict(), amount );
 	}
 	else {
@@ -648,9 +650,11 @@ void CParabot::followActualPath()
 			actualPath->reportWaypointReached();		// confirm waypoint
 			Vector oldWP = waypoint.pos( ent );
 			waypoint = actualPath->getNextWaypoint();	// get next one
+#ifdef _DEBUG
 			debugBeam( waypoint.pos( ent ), oldWP, 50, 1 );
 			float wpd = (waypoint.pos( ent ) - oldWP).Length();
 			//debugMsg( "Reached new WP after %.f\n", wpd );
+#endif
 		}
 		int prior;
 		Vector proposedViewPos = actualPath->getViewPos( ent, prior );
@@ -815,11 +819,11 @@ void CParabot::executeGoals()
 void CParabot::botThink()
 {
 	assert( ent != 0 );
-	
-	CBaseEntity *wpn = getActiveItem( ent );
+
+	/*CBaseEntity *wpn = getActiveItem( ent );
 	if (wpn) {
 		const char *wpncl = STRING( wpn->pev->classname );
-	}
+	}*/
 
 	activeBot = slot;
 

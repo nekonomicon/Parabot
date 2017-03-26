@@ -296,7 +296,8 @@ void goalSilentAttack( CParabot *pb, PB_Percept*item )
 		else {
 			pb->action.add( BOT_DUCK );
 			if ( item->canBeAttackedBest() ) {	// ...and attack from there
-				bool shot = pb->combat.shootAtEnemy( item->lastSeenPos, pb->combat.weapon.currentHighAimProb() );
+				//bool shot = pb->combat.shootAtEnemy( item->lastSeenPos, pb->combat.weapon.currentHighAimProb() );
+				pb->combat.shootAtEnemy( item->lastSeenPos, pb->combat.weapon.currentHighAimProb() );
 				pb->setGoalMoveDescr( "SilentAttack (ShootClose)" );
 			}
 			else {

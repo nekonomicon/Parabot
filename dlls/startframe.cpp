@@ -520,9 +520,10 @@ void checkForAirStrike()
 		bot_t *bot = UTIL_GetBotPointer( pPlayer->edict() );
 		if ( bot == 0 ) continue;
 		if ( (worldTime() - bot->parabot->lastRespawn) < 1.0 ) continue;
-		
+#ifdef _DEBUG
 		const char *name = STRING(pPlayer->pev->netname);
 		debugMsg( name, " was save at airstrike!\n" );
+#endif
 		Vector pos = pPlayer->pev->origin;
 		PB_Navpoint *nearest = mapGraph.getNearestNavpoint( pos, NAV_S_AIRSTRIKE_COVER );
 		if ( nearest && ((nearest->pos()-pos).Length() < 256) ) {

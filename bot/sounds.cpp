@@ -205,7 +205,7 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 	float trackableDist = 0;
 
 
-	CBasePlayer *pl = (CBasePlayer*) GET_PRIVATE( ent );
+	//CBasePlayer *pl = (CBasePlayer*) GET_PRIVATE( ent );
 
 	if (writeResult) {
 		if ( worldTime() <= timeStepSound[clientIndex] ) {
@@ -235,13 +235,13 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 	// UNDONE: need defined numbers for run, walk, crouch, crouch run velocities!!!!	
 	if (FBitSet(ent->v.flags, FL_DUCKING) || fLadder)
 	{
-		velwalk = 60;		// These constants should be based on cl_movespeedkey * cl_forwardspeed somehow
+		//velwalk = 60;		// These constants should be based on cl_movespeedkey * cl_forwardspeed somehow
 		velrun = 80;		// UNDONE: Move walking to server
 		flduck = 0.1;
 	}
 	else
 	{
-		velwalk = 120;
+		//velwalk = 120;
 		velrun = 210;
 		flduck = 0.0;
 	}
@@ -265,7 +265,7 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 		// find out what we're stepping in or on...
 		if (fLadder)
 		{
-			step = STEP_LADDER;
+			//step = STEP_LADDER;
 			fvol = 0.35;
 			sensableDist = 600;
 			trackableDist = 400;
@@ -273,7 +273,7 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 		}
 		else if ( UTIL_PointContents ( knee ) == CONTENTS_WATER )
 		{
-			step = STEP_WADE;
+			//step = STEP_WADE;
 			fvol = 0.65;
 			sensableDist = 200;
 			trackableDist = 200;
@@ -281,7 +281,7 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 		}
 		else if (UTIL_PointContents ( feet ) == CONTENTS_WATER )
 		{
-			step = STEP_SLOSH;
+			//step = STEP_SLOSH;
 			fvol = fWalking ? 0.2 : 0.5;
 			sensableDist = 200;
 			trackableDist = 200;
@@ -330,7 +330,7 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 			{
 			default:
 			case CHAR_TEX_CONCRETE:
-				step = STEP_CONCRETE;
+				//step = STEP_CONCRETE;
 				fvol = fWalking ? 0.2 : 0.5;
 				sensableDist = 200;
 				trackableDist = 100;
@@ -338,7 +338,7 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 				break;
 
 			case CHAR_TEX_METAL:	
-				step = STEP_METAL;
+				//step = STEP_METAL;
 				fvol = fWalking ? 0.2 : 0.5;
 				sensableDist = 600;
 				trackableDist = 300;
@@ -346,7 +346,7 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 				break;
 
 			case CHAR_TEX_DIRT:	
-				step = STEP_DIRT;
+				//step = STEP_DIRT;
 				fvol = fWalking ? 0.25 : 0.55;
 				sensableDist = 200;
 				trackableDist = 100;
@@ -354,7 +354,7 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 				break;
 
 			case CHAR_TEX_VENT:	
-				step = STEP_VENT;
+				//step = STEP_VENT;
 				fvol = fWalking ? 0.4 : 0.7;
 				sensableDist = 600;
 				trackableDist = 400;
@@ -362,7 +362,7 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 				break;
 
 			case CHAR_TEX_GRATE:
-				step = STEP_GRATE;
+				//step = STEP_GRATE;
 				fvol = fWalking ? 0.2 : 0.5;
 				sensableDist = 600;
 				trackableDist = 400;
@@ -370,7 +370,7 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 				break;
 
 			case CHAR_TEX_TILE:	
-				step = STEP_TILE;
+				//step = STEP_TILE;
 				fvol = fWalking ? 0.2 : 0.5;
 				sensableDist = 200;
 				trackableDist = 100;
@@ -378,7 +378,7 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 				break;
 
 			case CHAR_TEX_SLOSH:
-				step = STEP_SLOSH;
+				//step = STEP_SLOSH;
 				fvol = fWalking ? 0.2 : 0.5;
 				sensableDist = 200;
 				trackableDist = 200;
@@ -390,7 +390,7 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 		if (writeResult) timeStepSound[clientIndex] += flduck; // slower step time if ducking
 	
 		// 35% volume if ducking
-		if ( ent->v.flags & FL_DUCKING ) fvol *= 0.35;
+		//if ( ent->v.flags & FL_DUCKING ) fvol *= 0.35;
 		
 		/*char *name = (char*) STRING( ent->v.netname );
 		debugMsg( "%.1f: ", worldTime() );
@@ -477,7 +477,7 @@ void Sounds::parseSound( edict_t *ent, const char *sample, float vol )
 		}
 		else if ( strcmp( sample, "items/9mmclip1.wav" ) == 0 ) {	// ammo pickup
 			clientIndex = UTIL_GetNearestPlayerIndex( ent->v.origin ) - 1;
-			ent = INDEXENT( clientIndex+1 );
+			//ent = INDEXENT( clientIndex+1 );
 			itemSensableDist[clientIndex] = AMMO_SENS_DIST;
 			itemTrackableDist[clientIndex] = AMMO_TRACK_DIST;
 			timeItemSound[clientIndex] = worldTime() + 0.3;
@@ -487,7 +487,7 @@ void Sounds::parseSound( edict_t *ent, const char *sample, float vol )
 			Vector pos = 0.5 * (ent->v.absmin + ent->v.absmax);  
 			pos.z = ent->v.absmax.z;
 			clientIndex = UTIL_GetNearestPlayerIndex( pos ) - 1;
-			ent = INDEXENT( clientIndex+1 );
+			//ent = INDEXENT( clientIndex+1 );
 			itemSensableDist[clientIndex] = LIFT_SENS_DIST;
 			itemTrackableDist[clientIndex] = LIFT_TRACK_DIST;
 			timeItemSound[clientIndex] = worldTime() + 0.3;
@@ -496,7 +496,7 @@ void Sounds::parseSound( edict_t *ent, const char *sample, float vol )
 		else if ( strcmp( sample, "items/suitcharge1.wav" ) == 0 ) {// battery charger
 			Vector pos = 0.5 * (ent->v.absmin + ent->v.absmax);  
 			clientIndex = UTIL_GetNearestPlayerIndex( pos ) - 1;
-			ent = INDEXENT( clientIndex+1 );
+			//ent = INDEXENT( clientIndex+1 );
 			if (vol > 0) {
 				itemSensableDist[clientIndex] = LOAD_SENS_DIST;
 				itemTrackableDist[clientIndex] = LOAD_TRACK_DIST;
@@ -513,7 +513,7 @@ void Sounds::parseSound( edict_t *ent, const char *sample, float vol )
 		else if ( strcmp( sample, "items/medcharge4.wav" ) == 0 ) {	// med charger
 			Vector pos = 0.5 * (ent->v.absmin + ent->v.absmax);  
 			clientIndex = UTIL_GetNearestPlayerIndex( pos ) - 1;
-			ent = INDEXENT( clientIndex+1 );
+			//ent = INDEXENT( clientIndex+1 );
 			if (vol > 0) {
 				itemSensableDist[clientIndex] = LOAD_SENS_DIST;
 				itemTrackableDist[clientIndex] = LOAD_TRACK_DIST;
@@ -543,7 +543,7 @@ void Sounds::parseSound( edict_t *ent, const char *sample, float vol )
 		}
 		else if ( strcmp( sample, "misc/jumppad.wav" ) == 0 ) {			// HW-jumppad 
 			clientIndex = UTIL_GetNearestPlayerIndex( ent->v.origin ) - 1;
-			ent = INDEXENT( clientIndex+1 );
+			//ent = INDEXENT( clientIndex+1 );
 			itemSensableDist[clientIndex] = LIFT_SENS_DIST;
 			itemTrackableDist[clientIndex] = LIFT_TRACK_DIST;
 			timeItemSound[clientIndex] = worldTime() + 0.3;
@@ -586,7 +586,7 @@ void Sounds::parseSound( edict_t *ent, const char *sample, float vol )
 			Vector pos = 0.5 * (ent->v.absmin + ent->v.absmax);  
 			pos.z = ent->v.absmax.z;
 			clientIndex = UTIL_GetNearestPlayerIndex( pos ) - 1;
-			ent = INDEXENT( clientIndex+1 );
+			//ent = INDEXENT( clientIndex+1 );
 			itemSensableDist[clientIndex] = LIFT_SENS_DIST;
 			itemTrackableDist[clientIndex] = LIFT_TRACK_DIST;
 			timeItemSound[clientIndex] = worldTime() + 0.3;
@@ -594,7 +594,7 @@ void Sounds::parseSound( edict_t *ent, const char *sample, float vol )
 		}
 		else if ( strcmp( sample, "items/button4.wav" ) == 0 ) {	// button usage
 			clientIndex = UTIL_GetNearestPlayerIndex( ent->v.origin ) - 1;
-			ent = INDEXENT( clientIndex+1 );
+			//ent = INDEXENT( clientIndex+1 );
 			itemSensableDist[clientIndex] = LIFT_SENS_DIST;
 			itemTrackableDist[clientIndex] = LIFT_TRACK_DIST;
 			timeItemSound[clientIndex] = worldTime() + 0.3;
@@ -603,7 +603,7 @@ void Sounds::parseSound( edict_t *ent, const char *sample, float vol )
 		else if ( strcmp( sample, "items/health1.wav" ) == 0 ||
 				  strcmp( sample, "items/r_item2.wav" ) == 0    ) {	// medkit or armor pickup
 			clientIndex = UTIL_GetNearestPlayerIndex( ent->v.origin ) - 1;
-			ent = INDEXENT( clientIndex+1 );
+			//ent = INDEXENT( clientIndex+1 );
 			itemSensableDist[clientIndex] = ITEM_SENS_DIST;
 			itemTrackableDist[clientIndex] = ITEM_TRACK_DIST;
 			timeItemSound[clientIndex] = worldTime() + 0.3;
@@ -618,7 +618,7 @@ void Sounds::parseSound( edict_t *ent, const char *sample, float vol )
 		}
 		else if ( strcmp( sample, "items/damage.wav" ) == 0 ) {			// quad-damage
 			clientIndex = UTIL_GetNearestPlayerIndex( ent->v.origin ) - 1;
-			ent = INDEXENT( clientIndex+1 );
+			//ent = INDEXENT( clientIndex+1 );
 			itemSensableDist[clientIndex] = SPEC_ITEM_SENS_DIST;
 			itemTrackableDist[clientIndex] = SPEC_ITEM_TRACK_DIST;
 			timeItemSound[clientIndex] = worldTime() + 2.0;

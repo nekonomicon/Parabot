@@ -1379,7 +1379,7 @@ const char *pfnGetPhysicsKeyValue(const edict_t *pClient, const char *key)
 		fclose(fp); 
 	}
 #endif
-	int ir = (int) res[0];
+	//int ir = (int) res[0];
 	//debugMsg( "PK=%i\n", ir );
 	return res;
 }

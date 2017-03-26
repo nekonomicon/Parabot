@@ -116,9 +116,9 @@ void BotCreate( int fixedPersNr )
 		int count = 0;
 		do {
 			count++;
-			if (count>500) {
+			/*if (count>500) {
 				persNr = 0;
-			}
+			}*/
 			persNr = RANDOM_LONG( 0, maxPers-1 );
 		} while (pbConfig.personality( persNr ).inUse && (numBots<maxPers) && (count<1000));
 		
