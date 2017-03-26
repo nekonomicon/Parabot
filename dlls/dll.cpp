@@ -223,10 +223,11 @@ void ResetGlobalState( void )
 BOOL ClientConnect( edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[ 128 ]  )
 { 
 	bool connected;
+#ifdef _DEBUG
 	char buffer[256];
 	sprintf( buffer, "%.f: ClientConnect: %s (%s)", worldTime(), STRING(pEntity->v.netname), pszName );
 	debugFile( buffer );
-	
+#endif
 	if (gpGlobals->deathmatch)
 	{
 #ifdef _DEBUG
@@ -260,8 +261,10 @@ BOOL ClientConnect( edict_t *pEntity, const char *pszName, const char *pszAddres
 void ClientDisconnect( edict_t *pEntity )
 {
 	int i, index = -1;
+#ifdef _DEBUG
 	char buffer[256];
 	sprintf( buffer, "%.f: ClientDisconnect: %s ", worldTime(), STRING(pEntity->v.netname) );
+#endif
 	if (gpGlobals->deathmatch) {
 #ifdef _DEBUG
 		if (debug_engine) { fp=fopen("parabot\\debug.txt", "a"); fprintf(fp, "ClientDisconnect: %p\n",pEntity); fclose(fp); }
@@ -286,7 +289,9 @@ void ClientDisconnect( edict_t *pEntity )
 			delete (bots[index].parabot);	bots[index].parabot = 0;			
 		}
 	}
+#ifdef _DEBUG
 	debugFile( buffer );
+#endif
 	numberOfClients--;
 	if(!g_meta_init)
 		(*other_gFunctionTable.pfnClientDisconnect)(pEntity);

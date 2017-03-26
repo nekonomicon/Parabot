@@ -140,10 +140,11 @@ void BotCreate( int fixedPersNr )
 		infoMsg( "Max. Players reached. Can't create bot!\n");
 		return;
 	}
-
+#ifdef _DEBUG
 	char dbgBuffer[256];
 	sprintf( dbgBuffer, "%.f: BotCreate() fixedPersNr = %i, persNr = %i, botname = %s\n", worldTime(), fixedPersNr, persNr, botName );
 	debugFile( dbgBuffer );
+#endif
 	pbConfig.personalityJoins( persNr, worldTime() );	// now we know the bot can be created
 
 	char ptr[128];  // allocate space for message from ClientConnect
