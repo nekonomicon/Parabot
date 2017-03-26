@@ -156,6 +156,8 @@ bool PB_Chat::load( char *chatFile )
 			else {
 				fseek( file, -1, SEEK_CUR );	// reset filepointer
 				fscanf( file, "%[^\n]", str);	// read entire line
+				if( !currentCodeBlock )
+                                        continue;
 				if (speechSynthesis) strcat( str, ".wav" );
 				PB_ChatMessage cm;
 				cm.text = new char[strlen(str)+1];  

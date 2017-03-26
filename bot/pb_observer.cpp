@@ -829,7 +829,8 @@ void PB_Observer::addWaypoint( int oId, Vector pos, int action, int col )
 	//debugMsg( "Added WP %i", obs[oId].leadWaypoint );
 	//debugMsg( " at (%.f, %.f)\n", pos.x, pos.y );
 	waypoint[oId][obs[oId].leadWaypoint] = wp;
-	if (wp.isOnPlatform()) {
+	if( wp.isOnPlatform() && plat )
+	{
 		PB_Path_Platform pf( obs[oId].lastPlatId, plat->v.absmin );
 		platInfo[oId][obs[oId].leadWaypoint] = pf;
 	}
