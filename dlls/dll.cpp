@@ -281,8 +281,10 @@ void ClientDisconnect( edict_t *pEntity )
 		}
 		
 		if (index != -1) {	// bot is disconnecting
+#ifdef _DEBUG
 			debugMsg( "BOT DISCONNECT.\n" );
 			strcat( buffer, "...freeing bot" );
+#endif
 			bots[index].is_used = FALSE;  // this slot is now free to use
 			bots[index].pEdict = 0;
 			pbConfig.personalityLeaves( bots[index].personality, worldTime() );
