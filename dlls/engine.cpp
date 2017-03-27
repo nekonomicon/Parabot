@@ -1266,7 +1266,7 @@ void pfnSetKeyValue(char *infobuffer, char *key, char *value)
 
 void pfnSetClientKeyValue( int clientIndex, char *infobuffer, char *key, char *value )
 {
-	if ((mod_id == VALVE_DLL || mod_id == GEARBOX_DLL) && (strcmp( key, "team" ) == 0)) {	// init teamlist
+	if ((mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) && (strcmp( key, "team" ) == 0)) {	// init teamlist
 		valveTeamPlayMode = true;
 
 		bool teamKnown = false;
