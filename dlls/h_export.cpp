@@ -98,13 +98,13 @@ extern "C" void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, g
 	}
 	strcpy( mod_name, &game_dir[pos] );
 	
-	if (stricmp(mod_name, "aghl") == 0)
+	if (stricmp(mod_name, "ag") == 0)
 	{
 		mod_id = AG_DLL;
 		if( !g_meta_init )
-			h_Library = LoadLibrary( "aghl/dlls/ag."OS_LIB_EXT );
-		pbConfig.initConfiguration( "parabot/aghl/parabot.cfg" );
-                pbConfig.initPersonalities( "parabot/aghl/characters.cfg" );
+			h_Library = LoadLibrary( "ag/dlls/ag."OS_LIB_EXT );
+		pbConfig.initConfiguration( "parabot/ag/parabot.cfg" );
+                pbConfig.initPersonalities( "parabot/ag/characters.cfg" );
 	}
 	else if (stricmp(mod_name, "valve") == 0)
 	{
