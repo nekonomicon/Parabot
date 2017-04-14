@@ -59,17 +59,22 @@ void botChatMessage( edict_t *speaker, char *msg, bool speechSynthesis )
 			gmsgSayText = REG_USER_MSG( "SayText", -1 );
 		
 		char sayText[256];
-		strcpy( sayText, STRING(speaker->v.netname) );
+		sayText[0] = 2; // turn on color set 2  (color on,  no sound)
+                sayText[1] = '\0';
+		strcat( sayText, STRING(speaker->v.netname) );
 		strcat( sayText, ": " );
+		j = sizeof( sayText ) - 2 - strlen( sayText );  // -2 for /n and null terminator
+		if( (int)strlen( msg ) > j )
+			msg[j] = '\0';
 		strcat( sayText, msg );
 		strcat( sayText, "\n" );
 
-		MESSAGE_BEGIN( MSG_ALL, gmsgSayText );
-		WRITE_BYTE( 1 );
-		WRITE_STRING( sayText );
+		MESSAGE_BEGIN( MSG_ALL, gmsgSayText, NULL, &speaker->v );
+			WRITE_BYTE( ENTINDEX( speaker ) );
+			WRITE_STRING( sayText );
 		MESSAGE_END();
 
-		if (IS_DEDICATED_SERVER()) printf( "%s\n", sayText );
+		if (IS_DEDICATED_SERVER()) printf( "%s", sayText );
 	}
 	else {
 		debugMsg( "Speaking ", msg, "\n" );
