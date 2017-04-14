@@ -40,6 +40,8 @@ extern edict_t *playerEnt;
 void botChatMessage( edict_t *speaker, char *msg, bool speechSynthesis )
 // prints the message to everybody
 {
+	int j;
+
 	if ( speaker == 0 || msg == 0 ) return;
 
 /*
