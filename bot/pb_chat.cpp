@@ -2,22 +2,11 @@
 #include "pb_configuration.h"
 #include "bot.h"
 #include "pb_weapon.h"
-
+#include "utf8_strfunc.h"
 extern PB_Configuration pbConfig;	// from configfiles.cpp
 extern bot_t bots[32];   // from bot.cpp
 extern int clientWeapon[32];	// from combat.cpp
 extern int gmsgSayText;
-
-#ifndef _WIN32
-static inline void _strupr(char* s)
-{
-	while(*s)
-	{
-		*s = toupper(*s);
-		s++;
-	}
-}
-#endif
 
 /*
 // speech start
@@ -139,7 +128,7 @@ bool PB_Chat::load( char *chatFile )
 				else if ( _stricmp( str, "REPLY"         ) == 0 ) {
 					fscanf( file, " \"%[^\"]\" ", str );
 					str[MAX_CODE_LEN-1] = 0;			// make sure that codeword isn't too long
-					_strupr( str );						// convert to upper case
+					UTF8_strupr( str );						// convert to upper case
 					ReplyList *newReplyList = new ReplyList;
 					strcpy( newReplyList->code, str );
 					newReplyList->reply = new ChatList;
@@ -240,7 +229,7 @@ edict_t* PB_Chat::findNameInMessage( char *msg, bool forceReply )
 	for (int i=0; i<32; i++) if (bots[i].is_used) {
 
 		strcpy( name1, STRING( bots[i].pEdict->v.netname ) );
-		_strupr( name1 );
+		UTF8_strupr( name1 );
 		char *firstName = &name1[0];
 
 		char *clanTagStart = strchr( firstName, '[' );
@@ -392,7 +381,7 @@ void PB_Chat::parseMessage( edict_t *speaker, char *msg )
 	strcpy( parseBuffer, ": " );
 	strcat( parseBuffer, msg );
 	strcat( parseBuffer, " " );
-	_strupr( parseBuffer );	// convert to upper case
+	UTF8_strupr( parseBuffer );	// convert to upper case
 
 	// replace special characters
 	int len = strlen( parseBuffer );
