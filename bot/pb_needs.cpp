@@ -449,12 +449,100 @@ void PB_Needs::gearboxWishList()
 
 }
 
+void PB_Needs::hungerWishList()
+{
+	int i;
+	for (i=0; i<MAX_NAV_TYPES; i++) wish[i] = 0;
+
+	wish[NAV_I_HEALTHKIT]     = needForHealth();
+	wish[NAV_F_HEALTHCHARGER] = needForHealth();
+	if (bot->senses.numEnemies > 0) wish[NAV_F_HEALTHCHARGER] = 0;
+
+	wish[NAV_S_CAMPING] = wishForSniping()-0.5;	
+	wish[NAV_F_TANKCONTROLS] = wishForSniping(false)-0.5;	
+	
+	if (bot->combat.hasWeapon( VALVE_WEAPON_TRIPMINE )) wish[NAV_S_USE_TRIPMINE] = 2;
+	
+	if (!bot->hasLongJump()) wish[NAV_I_LONGJUMP] = 5;
+	
+	if ( !( bot->combat.hasWeapon( VALVE_WEAPON_MP5 )		|| 
+			bot->combat.hasWeapon( VALVE_WEAPON_SHOTGUN )	|| 
+			bot->combat.hasWeapon( VALVE_WEAPON_GAUSS )	|| 
+			bot->combat.hasWeapon( VALVE_WEAPON_EGON )	||
+			bot->combat.hasWeapon( VALVE_WEAPON_CHAINGUN )	||
+			bot->combat.hasWeapon( HUNGER_WEAPON_AP9 ) 			))
+						
+	{	// no big gun at hand...
+		wish[NAV_W_MP5]		= 9;
+		wish[NAV_W_SHOTGUN] = 9;
+		wish[NAV_W_GAUSS]	= 9;
+		wish[NAV_W_EGON]	= 9;
+		wish[NAV_THW_CHAINGUN]	= 9;
+		wish[NAV_THW_AP9]	= 9;
+	}
+	else
+	{	// have one but want more :-)
+		if (!bot->combat.hasWeapon( VALVE_WEAPON_EGON		)) wish[NAV_W_EGON]			= 5;
+		if (!bot->combat.hasWeapon( VALVE_WEAPON_GAUSS		)) wish[NAV_W_GAUSS]		= 5;
+		if (!bot->combat.hasWeapon( VALVE_WEAPON_MP5			)) wish[NAV_W_MP5]			= 4;
+		if (!bot->combat.hasWeapon( VALVE_WEAPON_SHOTGUN		)) wish[NAV_W_SHOTGUN]		= 3;
+		if (!bot->combat.hasWeapon( VALVE_WEAPON_CHAINGUN ))  wish[NAV_THW_CHAINGUN]  = 5;
+		if (!bot->combat.hasWeapon( HUNGER_WEAPON_AP9 )) wish[NAV_THW_AP9] = 4;
+	}
+	// rest of armatory...
+	if (!bot->combat.hasWeapon( VALVE_WEAPON_CROSSBOW	)) wish[NAV_W_CROSSBOW]		= 3;
+	if (!bot->combat.hasWeapon( VALVE_WEAPON_PYTHON		)) wish[NAV_W_PYTHON]		= 2;
+	if (!bot->combat.hasWeapon( VALVE_WEAPON_RPG			)) wish[NAV_W_RPG]			= 4.5;
+	if (!bot->combat.hasWeapon( VALVE_WEAPON_TRIPMINE	)) wish[NAV_W_TRIPMINE]		= 2;
+	if (!bot->combat.hasWeapon( HUNGER_WEAPON_SNIPER       )) wish[NAV_THW_SNIPER]         = 3;
+	if (!bot->combat.hasWeapon( HUNGER_WEAPON_EINAR1       )) wish[NAV_THW_EINAR1]         = 3;
+	if (!bot->combat.hasWeapon( HUNGER_WEAPON_TAURUS       )) wish[NAV_THA_TAURUS] = 2;
+
+	// copy identical ids
+	wish[NAV_W_9MMAR]	= wish[NAV_W_MP5];
+	wish[NAV_W_357]		= wish[NAV_W_PYTHON];
+
+	// grenades
+	wish[NAV_THA_TNT] = 1;
+	wish[NAV_W_SATCHEL] = 1.5;
+	wish[NAV_W_SNARK] = 2;
+
+	// ammo
+	wish[NAV_A_MP5GRENADES] = 1.5;
+	wish[NAV_A_MP5CLIP] = 0.8;
+	wish[NAV_THA_FLAME] = 0.8;
+	wish[NAV_A_RPGCLIP] = 0.8;
+	wish[NAV_A_RPG_ROCKET] = 0.4;
+	wish[NAV_A_CROSSBOW_BOLT] = 0.4;
+	wish[NAV_A_BUCKSHOT] = 0.4;	
+	wish[NAV_A_357] = 0.4;
+	wish[NAV_THA_SNIPER] = 0.4;
+	wish[NAV_THA_TAURUS] = 0.4;
+	wish[NAV_THA_AP9] = 0.4;
+
+	// copy identical ids
+	wish[NAV_A_ARGRENADES]	= wish[NAV_A_MP5GRENADES];
+	wish[NAV_A_9MMCLIP]		= wish[NAV_A_MP5CLIP];
+	wish[NAV_A_9MMAR]		= wish[NAV_A_MP5CLIP];
+	wish[NAV_A_GAUSSCLIP]	= wish[NAV_THA_FLAME];
+	wish[NAV_THA_EINAR1]	= wish[NAV_THA_SNIPER];
+
+	maxWish = 0;
+	for (i=0; i<MAX_NAV_TYPES; i++) 
+		if ( mapGraph.itemAvailable(i) && (wish[i]>maxWish) )
+			maxWish = wish[i];
+	weaponWish = 0;
+	for (i=NAV_W_CROSSBOW; i<=NAV_A_GLOCKCLIP; i++) 
+		if ( mapGraph.itemAvailable(i) ) weaponWish += wish[i];
+	for (i=NAV_THW_AP9; i<=NAV_THA_TNT; i++)
+                if ( mapGraph.itemAvailable(i) ) weaponWish += wish[i];
+}
 
 void PB_Needs::getWishList()
 {
 	switch (mod_id) {
-		case AG_DLL:
-		case HUNGER_DLL:
+		case AG_DLL:		valveWishList();	break;
+		case HUNGER_DLL:	hungerWishList();	break;
 		case VALVE_DLL:		valveWishList();	break;
 		case HOLYWARS_DLL:	hwWishList();		break;
 		case DMC_DLL:		dmcWishList();		break;

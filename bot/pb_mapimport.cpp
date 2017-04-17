@@ -213,6 +213,29 @@ void importGearbox_Specifics()
 	importNav( NAV_OFA_SPORE );
 }
 
+void importAG_Specifics()
+{
+	importHL_Specifics();
+}
+
+void importHunger_Specifics()
+{
+	importHL_Specifics();
+	importNav( NAV_THW_AP9 );
+	importNav( NAV_THW_CHAINGUN );
+	importNav( NAV_THW_EINAR1 );
+	importNav( NAV_THW_MEDKIT );
+	importNav( NAV_THW_SNIPER );
+	importNav( NAV_THW_SHOVEL );
+	importNav( NAV_THW_SPANNER );
+	importNav( NAV_THW_TAURUS );
+	importNav( NAV_THA_AP9 );
+	importNav( NAV_THA_EINAR1 );
+	importNav( NAV_THA_FLAME );
+	importNav( NAV_THA_SNIPER );
+	importNav( NAV_THA_TAURUS );
+	importNav( NAV_THA_TNT );
+}
 
 bool loadLevelData()
 {
@@ -276,8 +299,8 @@ bool loadLevelData()
 
 		// import MOD-specifics
 		switch( mod_id ) {
-		case AG_DLL:
-		case HUNGER_DLL:
+		case AG_DLL:		importAG_Specifics();		break;
+		case HUNGER_DLL:	importHunger_Specifics();	break;
 		case VALVE_DLL:		importHL_Specifics();		break;
 		case CSTRIKE_DLL:	importCS_Specifics();		break;
 		case TFC_DLL:		importTFC_Specifics();		break;

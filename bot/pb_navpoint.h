@@ -153,7 +153,23 @@
 #define NAV_OFA_EAGLECLIP		202
 #define NAV_OFA_SPORE			203
 
-#define MAX_NAV_TYPES			204		// keep up to date!!!
+// They Hunger - Navpoints
+#define NAV_THW_AP9			204
+#define NAV_THW_CHAINGUN		205
+#define NAV_THW_EINAR1			206
+#define NAV_THW_MEDKIT			207
+#define NAV_THW_SNIPER			208
+#define NAV_THW_SHOVEL			209
+#define NAV_THW_SPANNER			210
+#define NAV_THW_TAURUS			211
+#define NAV_THA_AP9			212
+#define NAV_THA_EINAR1			213
+#define NAV_THA_FLAME			214
+#define NAV_THA_SNIPER			215
+#define NAV_THA_TAURUS			216
+#define NAV_THA_TNT			217
+
+#define MAX_NAV_TYPES			218		// keep up to date!!!
 
 
 

@@ -210,7 +210,21 @@ static char navpointClasses[MAX_NAV_TYPES][32] = { "unknown",
 "ammo_556",
 "ammo_762",
 "ammo_eagleclip",
-"ammo_spore"
+"ammo_spore",
+"weapon_th_ap9",
+"weapon_th_chaingun",
+"weapon_einar",
+"weapon_th_medkit",
+"weapon_th_sniper",
+"weapon_th_shovel",
+"weapon_th_spanner",
+"weapon_th_taurus",
+"ammo_th_ap9",
+"ammo_einar1",
+"flame",
+"ammo_th_sniper",
+"ammo_th_taurus",
+"tnt"
 };
 
 
