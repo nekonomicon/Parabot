@@ -260,7 +260,7 @@ void PB_MapGraph::addIfImprovement( PB_Path &path, bool addReturn )
 	//char *cname = path.endNav().classname();
 	bool used = false;
 	std::deque<int> journey;
-	//float oldWeight = shortestJourney( path.startId(), path.endId(), path.mode(), journey ) - 0.1;
+	float oldWeight = shortestJourney( path.startId(), path.endId(), path.mode(), journey ) - 0.1;
 	shortestJourney( path.startId(), path.endId(), path.mode(), journey );
 	if (path.weight() < oldWeight) {
 		addPath( path, GRAPH_ONEWAY );
@@ -280,7 +280,7 @@ void PB_MapGraph::addIfImprovement( PB_Path &path, bool addReturn )
 		rp.initReturnOf( path );
 		//journey.clear();	now in function
 		//oldWeight = shortestJourney( rp.startId(), rp.endId(), rp.mode(), journey ) - 0.1;
-		shortestJourney( rp.startId(), rp.endId(), rp.mode(), journey )
+		shortestJourney( rp.startId(), rp.endId(), rp.mode(), journey );
 		//if (rp.weight() < oldWeight) {		// insert return as well?
 		
 		if (journey.size()==0) {	// only insert return if no alternative path
