@@ -89,7 +89,7 @@ static size_t UTF8_mbtowc( wchar_t *pwc, const char *s )
 	 */
 	wch = (unsigned char)*s++ & mask;
 
-	for (i = 0; i < want; i++) {
+	for (i = 1; i < want; i++) {
 		if ((*s & 0xc0) != 0x80) {
 			/*
 			 * Malformed input; bad characters in the middle
