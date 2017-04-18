@@ -261,7 +261,6 @@ void PB_MapGraph::addIfImprovement( PB_Path &path, bool addReturn )
 	bool used = false;
 	std::deque<int> journey;
 	float oldWeight = shortestJourney( path.startId(), path.endId(), path.mode(), journey ) - 0.1;
-	shortestJourney( path.startId(), path.endId(), path.mode(), journey );
 	if (path.weight() < oldWeight) {
 		addPath( path, GRAPH_ONEWAY );
 		used = true;
