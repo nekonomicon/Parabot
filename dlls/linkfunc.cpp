@@ -599,6 +599,7 @@ LINK_ENTITY_TO_FUNC(info_player_team1);
 LINK_ENTITY_TO_FUNC(info_player_team2);
 LINK_ENTITY_TO_FUNC(item_flag_team1);
 LINK_ENTITY_TO_FUNC(item_flag_team2);
+LINK_ENTITY_TO_FUNC(item_dom_controlpoint);
 
 // entities for Bubblemod
 LINK_ENTITY_TO_FUNC(bmod_squidspit);
