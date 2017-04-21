@@ -341,8 +341,6 @@ void BotCreate( int fixedPersNr )
 	pBot->bot_team = -1;  // don't know what these are yet, server can change them
 	pBot->bot_class = -1;
 	
-	pBot->bot_team = 2;
-
 	adjustAimSkills();	// take care of min-/maxskill
 }
 
