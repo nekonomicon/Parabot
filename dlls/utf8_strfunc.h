@@ -75,7 +75,7 @@ static size_t UTF8_mbtowc( wchar_t *pwc, const char *s )
 	} else if ((ch & 0xf8) == 0xf0) {
 		mask = 0x07;
 		want = 4;
-		lbound = 0x10000;
+		lbound = 0x1000;
 	} else {
 		/*
 		 * Malformed input; input is not UTF-8.
