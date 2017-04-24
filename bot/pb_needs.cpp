@@ -540,6 +540,7 @@ void PB_Needs::hungerWishList()
 
 void PB_Needs::agWishList()
 {
+	CBaseEntity *pent = NULL;
 	int i;
 	for (i=0; i<MAX_NAV_TYPES; i++) wish[i] = 0;
 
