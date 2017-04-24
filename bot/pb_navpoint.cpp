@@ -224,7 +224,13 @@ static char navpointClasses[MAX_NAV_TYPES][32] = { "unknown",
 "flame",
 "ammo_th_sniper",
 "ammo_th_taurus",
-"tnt"
+"tnt",
+"info_hmctfdetect",
+"info_player_team1",
+"info_player_team2",
+"item_flag_team1",
+"item_flag_team2",
+"item_dom_controlpoint"
 };
 
 

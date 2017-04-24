@@ -169,7 +169,15 @@
 #define NAV_THA_TAURUS			216
 #define NAV_THA_TNT			217
 
-#define MAX_NAV_TYPES			218		// keep up to date!!!
+// Adrenaline Gamer - Navpoints
+#define NAV_AGINFO_HMCTFDETECT		218
+#define NAV_AGINFO_PLAYER_ITEM1		219
+#define NAV_AGINFO_PLAYER_ITEM2		220
+#define NAV_AGI_FLAG_TEAM1		221
+#define NAV_AGI_FLAG_TEAM2		222
+#define NAV_AGI_DOM_CONTROLPOINT	223
+
+#define MAX_NAV_TYPES			224		// keep up to date!!!
 
 
 

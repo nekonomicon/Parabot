@@ -216,6 +216,12 @@ void importGearbox_Specifics()
 void importAG_Specifics()
 {
 	importHL_Specifics();
+	importNav( NAV_AGINFO_HMCTFDETECT );
+	importNav( NAV_AGINFO_PLAYER_ITEM1 );
+	importNav( NAV_AGINFO_PLAYER_ITEM2 );
+	importNav( NAV_AGI_FLAG_TEAM1 );
+	importNav( NAV_AGI_FLAG_TEAM2 );
+	importNav( NAV_AGI_DOM_CONTROLPOINT );
 }
 
 void importHunger_Specifics()

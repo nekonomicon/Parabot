@@ -38,6 +38,7 @@ protected:
 	void dmcWishList();
 	void gearboxWishList();
 	void hungerWishList();
+	void agWishList();
 	void getWishList();
 
 	float	wish[MAX_NAV_TYPES];// wish-values for different items
