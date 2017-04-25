@@ -69,7 +69,7 @@ SRC =		../bot/bot.cpp \
 		../bot/utilityfuncs.cpp \
 		../metamod/meta_api.cpp
 
-LDFLAGS +=	-shared -Wl,--no-undefined
+LDFLAGS +=	-shared -static-libgcc -static-libstdc++ -Wl,--no-undefined
 
 LDFLAGS +=	-ldl
 
