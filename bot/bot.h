@@ -25,6 +25,7 @@
 #define Sleep(x) usleep(x * 1000)
 typedef void* HINSTANCE;
 #define FAR
+#define WINAPI
 #endif
 
 typedef int (FAR *GETENTITYAPI)(DLL_FUNCTIONS *, int);
