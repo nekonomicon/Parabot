@@ -5,6 +5,7 @@
 #include "pb_global.h"
 #include "pb_needs.h"
 
+extern char mod_name[32];
 
 void invalidateMapGraphCash();
 
@@ -539,10 +540,8 @@ void PB_MapGraph::prepareBackwardPaths()
 bool PB_MapGraph::load( char *mapname )
 {
 	FILE *fp;
-	char filename[256] = "parabot/navigationfiles/";
-	strcat( filename, mapname );
 
-	if ( (fp = fopen( filename, "rb" )) == NULL ) return false;
+	if ( (fp = fopen( mapname, "rb" )) == NULL ) return false;
 
 	char idString[32];	// check for correct version
 	fread( &idString, 32, 1, fp );
@@ -588,10 +587,8 @@ bool PB_MapGraph::save( char *mapname )
 {
 	FILE *fp;
 	int i, numNpts, numPaths;
-	char filename[256] = "parabot/navigationfiles/";
-	strcat( filename, mapname );
 
-	if ( (fp = fopen( filename, "wb" )) == NULL ) return false;
+	if ( (fp = fopen( mapname, "wb" )) == NULL ) return false;
 
 	// sort out unused paths
 	int maxNotUsed = 40 * numberOfNavpoints();	// maximum unused time after which 
