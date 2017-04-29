@@ -169,11 +169,11 @@ int PB_MapCells::addCell( PB_Cell newCell, bool initNbs, int addedFrom )
 		while (cellArray[cellId].nextCell() != NO_CELL_REGISTERED  && dbgCnt++ < 1000) {
 			cellId = cellArray[cellId].nextCell();
 		}
-		if (dbgCnt == 1000) {
+		/*if (dbgCnt == 1000) {
 			FILE *dfp=fopen( "parabot/crashlog.txt", "a" ); 
 			fprintf( dfp, ">1000 recursions in addCell()!\n" ); 
 			fclose( dfp );
-		}
+		}*/
 		cellArray[cellId].setNextCell( numCells );
 		if (cellId==numCells) errorMsg( "CellId=numCells!\n" );
 	}

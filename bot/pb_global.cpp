@@ -11,6 +11,7 @@ PB_MapCells map;
 int activeBot;			// bot that's thinking
 extern int botNr;		// bot that's getting debugged
 extern int botHalt;		// if set to >0, breaks at checkForBreakpoint()
+extern char mod_name[32];
 
 int gmsgParabot2dMsg = 0;
 int gmsgParabot3dMsg = 0;
@@ -203,8 +204,10 @@ void debugMarker( Vector pos, int life )
 
 void debugFile( char *msg )
 {
+	char logfile[64];
 	if (!dbgFile) return;
-	FILE *fp=fopen( "parabot/debug.txt", "a" ); 
+	sprintf( logfile, "%s/addons/parabot/log/debug.txt", mod_name );
+	FILE *fp=fopen( logfile, "a" ); 
 	fprintf( fp, msg ); 
 	fclose( fp );
 }

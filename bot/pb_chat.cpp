@@ -7,6 +7,7 @@ extern PB_Configuration pbConfig;	// from configfiles.cpp
 extern bot_t bots[32];   // from bot.cpp
 extern int clientWeapon[32];	// from combat.cpp
 extern int gmsgSayText;
+extern char mod_name[32];
 
 /*
 // speech start
@@ -364,11 +365,13 @@ void PB_Chat::parseMessage( edict_t *speaker, char *msg )
 	if ( speaker == 0 || msg == 0 ) return;
 
 	if (pbConfig.onChatLog()) {
-		FILE *fp=fopen( "parabot/chatlog.txt", "a" ); 
+		char logfile[64];
+		sprintf( logfile, "%s/addons/parabot/log/chat.txt", mod_name );
+		FILE *fp=fopen( logfile, "a" );
 		if (!FBitSet( speaker->v.flags, FL_FAKECLIENT)) fprintf( fp, "[HUMAN]" );
-		fprintf( fp, "%s", STRING( speaker->v.netname ) ); 
+		fprintf( fp, "%s", STRING( speaker->v.netname ) );
 		fprintf( fp, ": " );
-		fprintf( fp, "%s", msg ); 
+		fprintf( fp, "%s", msg );
 		fprintf( fp, "\n" );
 		fclose( fp );
 	}

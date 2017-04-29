@@ -26,7 +26,7 @@
 #include "bot.h"
 #include "bot_func.h"
 
-
+extern char mod_name[32];
 extern int mod_id;
 extern bot_t bots[32];
 
@@ -415,9 +415,18 @@ void UTIL_ShowMenu( edict_t *pEdict, int slots, int displaytime, bool needmore, 
    MESSAGE_END();
 }
 
-
-
 #ifdef DEBUG
+
+FILE *UTIL_OpenDebugLog( void )
+{
+	char logfile[64];
+	FILE *fp;
+
+	sprintf( logfile,"%s/addons/parabot/log/debug.txt", mod_name );
+	fp = fopen( logfile, "a" );
+	return fp;
+}
+
 
 	edict_t *DBG_EntOfVars( const entvars_t *pev )
 	{

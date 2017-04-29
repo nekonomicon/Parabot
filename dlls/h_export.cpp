@@ -147,11 +147,15 @@ extern "C" void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, g
 	sprintf( fileName, "%s/addons/parabot/config/%s/characters.cfg", mod_name, mod_name );
 	pbConfig.initPersonalities( fileName );
 
+	fileName[strlen( mod_name )] = '\0';
+	strcat( fileName, "/addons/parabot/log");
+	CreateDirectory( fileName, NULL );
+
 	// always load chatfile, might be enabled ingame:
 	fileName[strlen( mod_name )] = '\0';
 	strcat( fileName, "/addons/parabot/config/lang/" );
-	strcat( chatFile, pbConfig.chatFile() );
-	chat.load( chatFile );
+	strcat( fileName, pbConfig.chatFile() );
+	chat.load( fileName );
 	initSineTable();
 
 	if( !g_meta_init )
