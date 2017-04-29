@@ -98,43 +98,43 @@ extern "C" void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, g
 	}
 	strcpy( mod_name, &game_dir[pos] );
 	
-	if (stricmp(mod_name, "ag") == 0)
+	if (strcmp(mod_name, "ag") == 0)
 	{
 		mod_id = AG_DLL;
 		if( !g_meta_init )
 			h_Library = LoadLibrary( "ag/dlls/ag."OS_LIB_EXT );
 	}
-	else if (stricmp(mod_name, "valve") == 0)
+	else if (strcmp(mod_name, "valve") == 0)
 	{
 		mod_id = VALVE_DLL;
 		if( !g_meta_init )
 			h_Library = LoadLibrary( "valve/dlls/hl."OS_LIB_EXT );
 	}
-	else if (stricmp(mod_name, "Hunger") == 0)
+	else if (strcmp(mod_name, "Hunger") == 0)
 	{
 		mod_id = HUNGER_DLL;
 		if( !g_meta_init )
 			h_Library = LoadLibrary( "Hunger/dlls/einar."OS_LIB_EXT );
 	}
-	else if (stricmp(mod_name, "hldm") == 0)
+	else if (strcmp(mod_name, "hldm") == 0)
 	{
 		mod_id = VALVE_DLL;
 		if( !g_meta_init )
 			h_Library = LoadLibrary( "hldm/dlls/hl."OS_LIB_EXT );
 	}
-	else if (stricmp(mod_name, "holywars") == 0)
+	else if (strcmp(mod_name, "holywars") == 0)
 	{
 		mod_id = HOLYWARS_DLL;
 		if( !g_meta_init )
 			h_Library = LoadLibrary( "holywars/dlls/holywars."OS_LIB_EXT );
 	}
-	else if (stricmp(mod_name, "dmc") == 0)
+	else if (strcmp(mod_name, "dmc") == 0)
 	{
 		mod_id = DMC_DLL;
 		if( !g_meta_init )
 			h_Library = LoadLibrary( "dmc/dlls/dmc."OS_LIB_EXT );
 	}
-	else if (stricmp(mod_name, "gearbox") == 0)
+	else if (strcmp(mod_name, "gearbox") == 0)
 	{
 		mod_id = GEARBOX_DLL;
 		if( !g_meta_init )
