@@ -1,5 +1,6 @@
 #include "pb_mapcells.h"
 
+#include <algorithm>
 extern char mod_name[32];
 
 PB_MapCells::PB_MapCells() : 

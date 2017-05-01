@@ -188,13 +188,13 @@ void BotCreate( int fixedPersNr )
 
 	if( !g_meta_init )
 	{
-		ClientConnect( botEnt, pbConfig.personality( persNr ).name, "127.0.0.1", ptr )
+		ClientConnect( botEnt, pbConfig.personality( persNr ).name, "127.0.0.1", ptr );
 		// Pieter van Dijk - use instead of DispatchSpawn() - Hip Hip Hurray!
 		ClientPutInServer( botEnt );
 	}
 	else
 	{
-		MDLL_ClientConnect( botEnt, pbConfig.personality( persNr ).name, "127.0.0.1", ptr )
+		MDLL_ClientConnect( botEnt, pbConfig.personality( persNr ).name, "127.0.0.1", ptr );
 		MDLL_ClientPutInServer( botEnt );
 	}
 

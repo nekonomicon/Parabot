@@ -12,6 +12,7 @@
 #include "exportdef.h"
 #ifdef _WIN32
 #define OS_LIB_EXT "dll"
+#undef CreateDirectory
 #define CreateDirectory(p, n) CreateDirectoryA(p, n)
 #else
 #ifdef __APPLE__
