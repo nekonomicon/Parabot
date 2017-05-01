@@ -74,7 +74,7 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved )
 
 extern "C" void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, globalvars_t *pGlobals )
 {
-	char game_dir[256], fileName[100];
+	char game_dir[256], filePath[100];
 	int pos = 0;
 
 	// get the engine functions from the engine...
@@ -141,21 +141,20 @@ extern "C" void DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, g
 			h_Library = LoadLibrary( "gearbox/dlls/opfor."OS_LIB_EXT );
 	}
 
-	sprintf( fileName, "%s/addons/parabot/config/%s/parabot.cfg", mod_name, mod_name );
-	pbConfig.initConfiguration( fileName );
-         
-	sprintf( fileName, "%s/addons/parabot/config/%s/characters.cfg", mod_name, mod_name );
-	pbConfig.initPersonalities( fileName );
+	sprintf( filePath, "%s/addons/parabot/config/%s/", mod_name, mod_name );
+	pbConfig.initConfiguration( filePath );         
+	pbConfig.initPersonalities( filePath );
 
-	fileName[strlen( mod_name )] = '\0';
-	strcat( fileName, "/addons/parabot/log");
-	CreateDirectory( fileName, NULL );
+	pos = strlen( mod_name );
+	filePath[pos] = '\0';
+	strcat( filePath, "/addons/parabot/log");
+	CreateDirectory( filePath, NULL );
 
 	// always load chatfile, might be enabled ingame:
-	fileName[strlen( mod_name )] = '\0';
-	strcat( fileName, "/addons/parabot/config/lang/" );
-	strcat( fileName, pbConfig.chatFile() );
-	chat.load( fileName );
+	filePath[pos] = '\0';
+	strcat( filePath, "/addons/parabot/config/lang/" );
+	strcat( filePath, pbConfig.chatFile() );
+	chat.load( filePath );
 	initSineTable();
 
 	if( !g_meta_init )
