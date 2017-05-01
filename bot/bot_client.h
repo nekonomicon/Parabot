@@ -12,6 +12,7 @@ void Client_Valve_DeathMsg(void *p, int noMatter);
 void BotClient_TFC_VGUI(void *p, int bot_index);
 void BotClient_CS_VGUI(void *p, int bot_index);
 void BotClient_CS_ShowMenu(void *p, int bot_index);
+void BotClient_Gearbox_VGUI(void *p, int bot_index);
 
 void BotClient_Valve_WeaponList(void *p, int bot_index);
 void BotClient_Holywars_WeaponList(void *p, int bot_index);

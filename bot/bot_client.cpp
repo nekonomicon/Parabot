@@ -94,7 +94,27 @@ void BotClient_CS_ShowMenu(void *p, int bot_index)
    state = 0;  // reset state machine
 }
 
+// This message is sent when the OpFor VGUI menu is displayed.
+void BotClient_Gearbox_VGUI(void *p, int bot_index)
+{
+   static int state = 0;   // current state machine state
 
+   if (state == 0)
+   {
+      if ((*(int *)p) == 2)  // is it a team select menu?
+
+         bots[bot_index].start_action = MSG_OPFOR_TEAM_SELECT;
+
+      else if ((*(int *)p) == 3)  // is is a class selection menu?
+
+         bots[bot_index].start_action = MSG_OPFOR_CLASS_SELECT;
+   }
+
+   state++;
+
+   if (state == 1)
+      state = 0;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////
 //

@@ -28,7 +28,7 @@ extern PB_Chat chat;
 //extern int maxPers;
 //extern PB_Personality personality[MAX_PERS];	// stores different bot personalities
 //extern bool personalityUsed[MAX_PERS];			// true if bot exists using this personality
-
+extern bool gearbox_ctf;
 
 bot_t bots[32];   // max of 32 bots in a game
 
@@ -212,6 +212,10 @@ void BotCreate( int fixedPersNr )
 		pBot->start_action = MSG_TFC_IDLE;
 	else if (mod_id == CSTRIKE_DLL)
 		pBot->start_action = MSG_CS_IDLE;
+	else if ((mod_id == GEARBOX_DLL) && (gearbox_ctf))
+		pBot->start_action = MSG_OPFOR_IDLE;
+	/*else if (mod_id == FRONTLINE_DLL)
+		pBot->start_action = MSG_FLF_IDLE;*/
 	else
 		pBot->start_action = 0;  // not needed for non-team MODs
 

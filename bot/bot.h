@@ -69,6 +69,11 @@ int Cmd_Argc( void );
 #define MSG_CS_CT_SELECT    3
 #define MSG_CS_T_SELECT     4
 
+// game start messages for OpFor...
+#define MSG_OPFOR_IDLE		1
+#define MSG_OPFOR_TEAM_SELECT	2
+#define MSG_OPFOR_CLASS_SELECT	3
+
 // define player classes used in TFC
 #define TFC_CLASS_CIVILIAN  0
 #define TFC_CLASS_SCOUT     1

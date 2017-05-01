@@ -55,6 +55,7 @@ int wpSpriteTexture, wpBeamTexture, wpSprite2Texture;
 physent_t *ptrPhysents;
 int numPhysents;
 int g_hldm_mod = HLDM;
+bool gearbox_ctf = false;
 
 static FILE *fp;
 
@@ -128,6 +129,8 @@ int DispatchSpawn( edict_t *pent )
 					PRECACHE_SOUND( chatReplyUnknown[i].text );
 		  }
 */
+		gearbox_ctf = false;
+
            PRECACHE_SOUND("weapons/xbow_hit1.wav");      // waypoint add
            PRECACHE_SOUND("weapons/mine_activate.wav");  // waypoint delete
            PRECACHE_SOUND("common/wpn_hudoff.wav");      // path add/delete start
@@ -172,7 +175,22 @@ void DispatchBlocked( edict_t *pentBlocked, edict_t *pentOther )
 
 void DispatchKeyValue( edict_t *pentKeyvalue, KeyValueData *pkvd )
 {
-   (*other_gFunctionTable.pfnKeyValue)(pentKeyvalue, pkvd);
+	if( mod_id == GEARBOX_DLL )
+	{
+		if( !gearbox_ctf )
+		{
+			if( ( !strcmp( pkvd->szKeyName, "classname" ) ) &&
+			( !strcmp(pkvd->szValue, "info_ctfdetect") ) )
+			{
+				gearbox_ctf = true;
+			}
+		}
+	}
+
+	if( !g_meta_init )
+		(*other_gFunctionTable.pfnKeyValue)(pentKeyvalue, pkvd);
+	else
+		RETURN_META(MRES_IGNORED);
 }
 
 void DispatchSave( edict_t *pent, SAVERESTOREDATA *pSaveData )
@@ -657,6 +675,7 @@ extern "C" EXPORT int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interface
 		memset(pFunctionTable, 0, sizeof(DLL_FUNCTIONS));
 		pFunctionTable->pfnGameInit = GameDLLInit;
 		pFunctionTable->pfnSpawn = DispatchSpawn;
+		pFunctionTable->pfnKeyValue = DispatchKeyValue;
 		pFunctionTable->pfnClientConnect = ClientConnect;
 		pFunctionTable->pfnClientDisconnect = ClientDisconnect;
 		pFunctionTable->pfnClientPutInServer = ClientPutInServer;

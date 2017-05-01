@@ -216,7 +216,9 @@ void pfnMessageBegin(int msg_dest, int msg_type, const float *pOrigin, edict_t *
 					botMsgFunction = BotClient_CS_Money;
 				break;
 		case GEARBOX_DLL:
-				if (msg_type == message_WeaponList)
+				if (msg_type == message_VGUI)
+                                        botMsgFunction = BotClient_Gearbox_VGUI;
+				else if (msg_type == message_WeaponList)
 					botMsgFunction = BotClient_Gearbox_WeaponList;
 				else if (msg_type == message_CurWeapon)
 					botMsgFunction = BotClient_Gearbox_CurrentWeapon;
