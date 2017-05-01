@@ -22,6 +22,7 @@ extern int mod_id;
 PB_Configuration pbConfig;
 PB_Chat chat;
 HINSTANCE h_Library = NULL;
+char mod_name[32];
 extern bool g_meta_init;
 enginefuncs_t g_engfuncs;
 globalvars_t  *gpGlobals;
@@ -73,8 +74,7 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved )
 
 extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, globalvars_t *pGlobals )
 {
-	char game_dir[256];
-	char mod_name[32];
+	char game_dir[256], filePath[100];
 	int pos = 0;
 
 	// get the engine functions from the engine...
@@ -98,74 +98,63 @@ extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 	}
 	strcpy( mod_name, &game_dir[pos] );
 	
-	if (stricmp(mod_name, "ag") == 0)
+	if (strcmp(mod_name, "ag") == 0)
 	{
 		mod_id = AG_DLL;
 		if( !g_meta_init )
 			h_Library = LoadLibrary( "ag/dlls/ag."OS_LIB_EXT );
-		pbConfig.initConfiguration( "parabot/ag/parabot.cfg" );
-                pbConfig.initPersonalities( "parabot/ag/characters.cfg" );
 	}
-	else if (stricmp(mod_name, "valve") == 0)
+	else if (strcmp(mod_name, "valve") == 0)
 	{
 		mod_id = VALVE_DLL;
 		if( !g_meta_init )
 			h_Library = LoadLibrary( "valve/dlls/hl."OS_LIB_EXT );
-
-		pbConfig.initConfiguration( "parabot/valve/parabot.cfg" );
-		pbConfig.initPersonalities( "parabot/valve/characters.cfg" );
 	}
-	else if (stricmp(mod_name, "Hunger") == 0)
+	else if (strcmp(mod_name, "Hunger") == 0)
 	{
 		mod_id = HUNGER_DLL;
 		if( !g_meta_init )
 			h_Library = LoadLibrary( "Hunger/dlls/einar."OS_LIB_EXT );
-
-		pbConfig.initConfiguration( "parabot/Hunger/parabot.cfg" );
-		pbConfig.initPersonalities( "parabot/Hunger/characters.cfg" );
 	}
-	else if (stricmp(mod_name, "hldm") == 0)
+	else if (strcmp(mod_name, "hldm") == 0)
 	{
 		mod_id = VALVE_DLL;
 		if( !g_meta_init )
 			h_Library = LoadLibrary( "hldm/dlls/hl."OS_LIB_EXT );
-
-		pbConfig.initConfiguration( "parabot/valve/parabot.cfg" );
-		pbConfig.initPersonalities( "parabot/valve/characters.cfg" );
 	}
-	else if (stricmp(mod_name, "holywars") == 0)
+	else if (strcmp(mod_name, "holywars") == 0)
 	{
 		mod_id = HOLYWARS_DLL;
 		if( !g_meta_init )
 			h_Library = LoadLibrary( "holywars/dlls/holywars."OS_LIB_EXT );
-
-		pbConfig.initConfiguration( "parabot/holywars/parabot.cfg" );
-		pbConfig.initPersonalities( "parabot/holywars/characters.cfg" );
 	}
-	else if (stricmp(mod_name, "dmc") == 0)
+	else if (strcmp(mod_name, "dmc") == 0)
 	{
 		mod_id = DMC_DLL;
 		if( !g_meta_init )
 			h_Library = LoadLibrary( "dmc/dlls/dmc."OS_LIB_EXT );
-
-		pbConfig.initConfiguration( "parabot/dmc/parabot.cfg" );
-		pbConfig.initPersonalities( "parabot/dmc/characters.cfg" );
 	}
-	else if (stricmp(mod_name, "gearbox") == 0)
+	else if (strcmp(mod_name, "gearbox") == 0)
 	{
 		mod_id = GEARBOX_DLL;
 		if( !g_meta_init )
 			h_Library = LoadLibrary( "gearbox/dlls/opfor."OS_LIB_EXT );
-
-		pbConfig.initConfiguration( "parabot/gearbox/parabot.cfg" );
-		pbConfig.initPersonalities( "parabot/gearbox/characters.cfg" );
 	}
 
+	sprintf( filePath, "%s/addons/parabot/config/%s/", mod_name, mod_name );
+	pbConfig.initConfiguration( filePath );         
+	pbConfig.initPersonalities( filePath );
+
+	pos = strlen( mod_name );
+	filePath[pos] = '\0';
+	strcat( filePath, "/addons/parabot/log");
+	CreateDirectory( filePath, NULL );
+
 	// always load chatfile, might be enabled ingame:
-	char chatFile[256];
-	strcpy( chatFile, "parabot/" );
-	strcat( chatFile, pbConfig.chatFile() );
-	chat.load( chatFile );
+	filePath[pos] = '\0';
+	strcat( filePath, "/addons/parabot/config/lang/" );
+	strcat( filePath, pbConfig.chatFile() );
+	chat.load( filePath );
 	initSineTable();
 
 	if( !g_meta_init )

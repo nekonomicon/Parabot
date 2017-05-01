@@ -102,9 +102,9 @@ int PB_Observer::registerPlayer( edict_t *player )
 	int i=0;
 	while (	obs[i].player!=0 && i<MAX_OBS) i++;
 	if (i==MAX_OBS) {
-		FILE *dfp=fopen( "parabot/crashlog.txt", "a" ); 
+		/*FILE *dfp=fopen( "parabot/crashlog.txt", "a" ); 
 		fprintf( dfp, "No free slot in PB_Observer::registerPlayer()!\n" ); 
-		fclose( dfp );
+		fclose( dfp );*/
 		i = MAX_OBS - 1;
 	}
 	obs[i].player = CBaseEntity::Instance( player );
@@ -327,12 +327,12 @@ int PB_Observer::getStartIndex( int oId, PB_Navpoint *endNav )
 				currentIndex--;  if (currentIndex<0) currentIndex = MAX_WPTS-1;
 			}
 		}
-		if (dbgCnt2==1000 || dbgCnt1==999) {
+		/*if (dbgCnt2==1000 || dbgCnt1==999) {
 			FILE *dfp=fopen( "parabot/crashlog.txt", "a" ); 
 			if (dbgCnt2==1000) fprintf( dfp, "Too many loops2 in PB_Observer::getStartIndex()!\n" ); 
 			else fprintf( dfp, "Too many loops1 in PB_Observer::getStartIndex()!\n" ); 
 			fclose( dfp );
-		}
+		}*/
 	}
 	return foundIndex;
 }

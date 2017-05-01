@@ -1,7 +1,6 @@
 #include "pb_mapcells.h"
-#include <algorithm>
 
-
+extern char mod_name[32];
 
 PB_MapCells::PB_MapCells() : 
 	cellArray( MAX_CELLS, 256 )
@@ -170,11 +169,11 @@ int PB_MapCells::addCell( PB_Cell newCell, bool initNbs, int addedFrom )
 		while (cellArray[cellId].nextCell() != NO_CELL_REGISTERED  && dbgCnt++ < 1000) {
 			cellId = cellArray[cellId].nextCell();
 		}
-		if (dbgCnt == 1000) {
+		/*if (dbgCnt == 1000) {
 			FILE *dfp=fopen( "parabot/crashlog.txt", "a" ); 
 			fprintf( dfp, ">1000 recursions in addCell()!\n" ); 
 			fclose( dfp );
-		}
+		}*/
 		cellArray[cellId].setNextCell( numCells );
 		if (cellId==numCells) errorMsg( "CellId=numCells!\n" );
 	}
@@ -416,10 +415,8 @@ int PB_MapCells::getPathToRoamingTarget( short startId, edict_t *botEnt, short p
 bool PB_MapCells::load( char *mapname )
 {
 	FILE *fp;
-	char filename[256] = "parabot/navigationfiles/";
-	strcat( filename, mapname );
 
-	if ( (fp = fopen( filename, "rb" )) == NULL ) return false;
+	if ( (fp = fopen( mapname, "rb" )) == NULL ) return false;
 
 	int count;
 
@@ -436,10 +433,8 @@ bool PB_MapCells::load( char *mapname )
 bool PB_MapCells::save( char *mapname )
 {
 	FILE *fp;
-	char filename[256] = "parabot/navigationfiles/";
-	strcat( filename, mapname );
 
-	if ( (fp = fopen( filename, "wb" )) == NULL ) return false;
+	if ( (fp = fopen( mapname, "wb" )) == NULL ) return false;
 
 	fwrite( &numCells, sizeof(int), 1, fp );
 	for (int i=0; i<numCells; i++) cellArray[i].save( fp );

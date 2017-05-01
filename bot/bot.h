@@ -12,6 +12,7 @@
 #include "exportdef.h"
 #ifdef _WIN32
 #define OS_LIB_EXT "dll"
+#define CreateDirectory(p, n) CreateDirectoryA(p, n)
 #else
 #ifdef __APPLE__
 #define OS_LIB_EXT "dylib"
@@ -20,6 +21,8 @@
 #endif
 #include <dlfcn.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#define CreateDirectory(p, n) mkdir(p, 0777)
 #define GetProcAddress dlsym
 #define LoadLibrary(x) dlopen(x, RTLD_NOW)
 #define Sleep(x) usleep(x * 1000)

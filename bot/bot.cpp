@@ -122,12 +122,12 @@ void BotCreate( int fixedPersNr )
 			persNr = RANDOM_LONG( 0, maxPers-1 );
 		} while (pbConfig.personality( persNr ).inUse && (numBots<maxPers) && (count<1000));
 		
-		if (count>=1000) {
+		/*if (count>=1000) {
 			FILE *dfp=fopen( "parabot/crashlog.txt", "a" ); 
 			fprintf( dfp, "Could not get free character in BotCreate:\n" ); 
 			fprintf( dfp, "maxPers = %i, numBots = %i\n\n", maxPers, numBots );
 			fclose( dfp );
-		}
+		}*/
 	}
 	
 	// try to create entity
@@ -185,25 +185,16 @@ void BotCreate( int fixedPersNr )
 		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "dm", "0");
 		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "ah", "1");
 	}
+
 	if( !g_meta_init )
 	{
-		if (!ClientConnect( botEnt, pbConfig.personality( persNr ).name, "127.0.0.1", ptr ))
-		{
-			FILE *dfp=fopen( "parabot/crashlog.txt", "a" );
-			fprintf( dfp, "BotCreate: ClientConnect() returned false!\n" );
-			fclose( dfp );
-                }
+		ClientConnect( botEnt, pbConfig.personality( persNr ).name, "127.0.0.1", ptr )
 		// Pieter van Dijk - use instead of DispatchSpawn() - Hip Hip Hurray!
 		ClientPutInServer( botEnt );
 	}
 	else
 	{
-		if (!MDLL_ClientConnect( botEnt, pbConfig.personality( persNr ).name, "127.0.0.1", ptr ))
-		{
-			FILE *dfp=fopen( "parabot/crashlog.txt", "a" ); 
-			fprintf( dfp, "BotCreate: ClientConnect() returned false!\n" ); 
-			fclose( dfp );
-		}
+		MDLL_ClientConnect( botEnt, pbConfig.personality( persNr ).name, "127.0.0.1", ptr )
 		MDLL_ClientPutInServer( botEnt );
 	}
 

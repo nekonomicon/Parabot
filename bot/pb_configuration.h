@@ -30,9 +30,13 @@ public:
 
 	PB_Configuration();
 
-	bool initConfiguration( const char *configFile );
+	bool initConfiguration( const char *configPath );
 
-	bool initPersonalities( const char *personalityFile );
+	bool initPersonalities( const char *personalityPath );
+
+	bool createConfiguration( const char *configFile );
+
+	bool createPersonalities( const char *personalityFile );
 
 	bool setBoolVar( const char *name, const char *value );
 

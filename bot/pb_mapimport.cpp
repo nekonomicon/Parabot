@@ -9,7 +9,7 @@ extern PB_MapGraph mapGraph;
 extern PB_MapCells map;
 extern int mod_id;
 
-
+extern char mod_name[32];
 char actualMapname[100] = "";
 
 
@@ -17,13 +17,18 @@ char actualMapname[100] = "";
 void saveLevelData()
 {
 	char fileName[100];
-		
-	strcpy( fileName, actualMapname );
+
+	// Directory exists?
+	strcpy( fileName, mod_name );
+	strcat( fileName, "/addons/parabot/navpoints/" );
+	CreateDirectory( fileName, NULL );
+
+	strcat( fileName, actualMapname );
 	strcat( fileName, ".pnf" );
 	infoMsg( "\nSaving level data to ", fileName, "\n" );
 	mapGraph.save( fileName );
 
-	strcpy( fileName, actualMapname );
+	fileName[strlen(fileName) - 4] = '\0'; // cut file extention
 	strcat( fileName, ".pcf" );
 	infoMsg( "\nSaving cell data to ", fileName, "\n" );
 	map.save( fileName );
@@ -255,7 +260,9 @@ bool loadLevelData()
 	mapGraph.clear();
 	map.clear();
 	strcpy( actualMapname, STRING(gpGlobals->mapname) );
-	strcpy( fileName, STRING(gpGlobals->mapname) );
+	strcpy( fileName, mod_name );
+	strcat( fileName, "/addons/parabot/navpoints/" );
+	strcat( fileName, STRING(gpGlobals->mapname) );
 	strcat( fileName, ".pnf" );
 	if (!mapGraph.load( fileName ))	{
 		infoMsg( "Importing level data...\n" );
@@ -324,7 +331,7 @@ bool loadLevelData()
 		}
 	}
 	else {
-		strcpy( fileName, STRING(gpGlobals->mapname) );
+		fileName[strlen( fileName ) - 4] = '\0'; // cut file extention
 		strcat( fileName, ".pcf" );
 		map.load( fileName );
 		infoMsg( "Loaded level data.\n" );
