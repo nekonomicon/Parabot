@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Set your package name here -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="su.xash.xash3d.parabot"
+      android:versionCode="1"
+      android:versionName="0.92">
+    <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="23"/>
+    <!-- Set your application name here -->
+    <application android:label="Parabot" android:debuggable="true">
+    <!-- Set your launcher title here -->
+        <activity android:name="su.xash.xash3d.LauncherActivity"
+                  android:label="Parabot"
+			android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest> 

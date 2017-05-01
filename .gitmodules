@@ -1,0 +1,3 @@
+[submodule "android/jni/Parabot"]
+	path = android/jni/Parabot
+	url = https://github.com/nekonomicon/Parabot/
