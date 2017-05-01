@@ -479,6 +479,67 @@ void BotStartGame( bot_t *pBot )
          return;
       }
    }
+   else if (gearbox_ctf)
+   {
+      // handle Opposing Force CTF stuff here...
+
+      if (pBot->start_action == MSG_OPFOR_TEAM_SELECT)
+      {
+         pBot->start_action = MSG_OPFOR_IDLE;  // switch back to idle
+
+         if ((pBot->bot_team != 1) && (pBot->bot_team != 2) &&
+             (pBot->bot_team != 3))
+            pBot->bot_team = -1;
+
+         if (pBot->bot_team == -1)
+            pBot->bot_team = RANDOM_LONG(1, 2);
+
+         // select the team the bot wishes to join...
+         if (pBot->bot_team == 1)
+            strcpy(c_team, "1");
+         else if (pBot->bot_team == 2)
+            strcpy(c_team, "2");
+         else
+            strcpy(c_team, "3");
+
+         FakeClientCommand(pEdict, "jointeam", c_team, NULL);
+
+         return;
+      }
+    
+      if (pBot->start_action == MSG_OPFOR_CLASS_SELECT)
+      {
+         pBot->start_action = MSG_OPFOR_IDLE;  // switch back to idle
+      
+         if ((pBot->bot_class < 0) || (pBot->bot_class > 10))
+            pBot->bot_class = -1;
+         if (pBot->bot_class == -1)
+            pBot->bot_class = RANDOM_LONG(1, 10);
+
+         // select the class the bot wishes to use...
+         if (pBot->bot_class == 1)
+            strcpy(c_class, "1");
+         else if (pBot->bot_class == 2)
+            strcpy(c_class, "2");
+         else if (pBot->bot_class == 3)
+            strcpy(c_class, "3");
+         else if (pBot->bot_class == 4)
+            strcpy(c_class, "4");
+         else if (pBot->bot_class == 5)
+            strcpy(c_class, "5");
+         else if (pBot->bot_class == 6)
+            strcpy(c_class, "6");
+         else
+            strcpy(c_class, "7");
+
+         FakeClientCommand(pEdict, "selectchar", c_class, NULL);
+
+         // bot has now joined the game (doesn't need to be started)
+         pBot->not_started = 0;
+
+         return;
+      }
+   }
    else if (mod_id == DMC_DLL)
    {
 	   FakeClientCommand(pEdict, "_firstspawn", NULL, NULL);
