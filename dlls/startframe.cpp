@@ -73,9 +73,9 @@ extern edict_t *camPlayerLaser;
 
 float welcome_time = 0.0;
 #ifdef _DEBUG
-	char welcome_msg[] = "You are playing a debug version of Parabot 0.91.\n";
+	char welcome_msg[] = "You are playing a debug version of Parabot 0.92.\n";
 #else
-	char welcome_msg[] = "Welcome to Parabot 0.91\n";
+	char welcome_msg[] = "Welcome to Parabot 0.92\n";
 #endif
 
 

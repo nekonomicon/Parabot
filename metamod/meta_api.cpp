@@ -22,11 +22,11 @@ META_FUNCTIONS gMetaFunctionTable =
 
 plugin_info_t Plugin_info = {
    META_INTERFACE_VERSION, // interface version
-   "Parabot Reloaded", // plugin name
-   __DATE__, // plugin version
+   "Parabot", // plugin name
+   "0.92", // plugin version
    __DATE__, // date of creation
-   "Tobias Heimann & Bots-United", // plugin author
-   "http://www.bots-united.com", // plugin URL
+   "Andrey Akhmichin, Tobias Heimann & Bots-United", // plugin author
+   "https://github.com/nekonomicon/Parabot", // plugin URL
    "PARABOT", // plugin logtag
    PT_CHANGELEVEL, // when loadable
    PT_ANYTIME, // when unloadable
