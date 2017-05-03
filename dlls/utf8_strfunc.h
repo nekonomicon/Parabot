@@ -434,12 +434,14 @@ static size_t UTF8_mbtowc( int *pwc, const char *s )
 	} else if ((ch & 0xf8) == 0xf0) {
 		mask = 0x07;
 		want = 4;
-		lbound = 0x1000;
+		lbound = 0x10000;
 	} else {
 		/*
 		 * Malformed input; input is not UTF-8.
 		 */
-		return ((size_t)-1);
+		if (pwc != NULL)
+			*pwc = '?';		
+		return 1;
 	}
 
 	/*
@@ -454,26 +456,28 @@ static size_t UTF8_mbtowc( int *pwc, const char *s )
 			 * Malformed input; bad characters in the middle
 			 * of a character.
 			 */
-			return ((size_t)-1);
+			if (pwc != NULL)
+				*pwc = '?';
+			return 1;
 		}
 		wch <<= 6;
 		wch |= *s++ & 0x3f;
-	}
-	if (i < want) {
-		/* Incomplete multibyte sequence. */
-		return ((size_t)-2);
 	}
 	if (wch < lbound) {
 		/*
 		 * Malformed input; redundant encoding.
 		 */
-		return ((size_t)-1);
+		if (pwc != NULL)
+			*pwc = '?';
+		return 1;
 	}
 	if ((wch >= 0xd800 && wch <= 0xdfff) || wch > 0x10ffff) {
 		/*
 		 * Malformed input; invalid code points.
 		 */
-		return ((size_t)-1);
+		if (pwc != NULL)
+			*pwc = '?';
+		return 1;
 	}
 	if (pwc != NULL)
 		*pwc = wch;
@@ -504,7 +508,8 @@ static size_t UTF8_wctomb( char *s, int wc )
 		len = 2;
 	} else if ((wc & ~0xffff) == 0) {
 		if (wc >= 0xd800 && wc <= 0xdfff) {
-			return ((size_t)-1);
+			*s = '?';
+			return 1;
 		}
 		lead = 0xe0;
 		len = 3;
@@ -512,7 +517,8 @@ static size_t UTF8_wctomb( char *s, int wc )
 		lead = 0xf0;
 		len = 4;
 	} else {
-		return ((size_t)-1);
+		*s = '?';
+		return 1;
 	}
 
 	/*
