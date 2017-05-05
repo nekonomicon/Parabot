@@ -629,7 +629,7 @@ void PB_Needs::agWishList()
 	wish[NAV_AGI_DOM_CONTROLPOINT] = 20;
 
 	// CTF
-	if( strcmp( CVAR_GET_STRING( "sv_ag_gamemode" ), "ctf" ) )
+	if( !strcmp( CVAR_GET_STRING( "sv_ag_gamemode" ), "ctf" ) )
 	{
 		if( UTIL_GetTeam( bot->ent ) )
 		{
