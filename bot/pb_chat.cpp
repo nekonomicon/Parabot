@@ -34,6 +34,8 @@ void botChatMessage( edict_t *speaker, char *msg, bool speechSynthesis )
 
 	if ( speaker == 0 || msg == 0 ) return;
 
+	if( !speaker->v.netname )
+		return;
 /*
 	// speech start
 	WCHAR wszSpeak[1024];
