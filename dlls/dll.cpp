@@ -797,10 +797,7 @@ const char *Cmd_Argv( int argc )
    }
    else
    {
-	if(!g_meta_init)
 		return (*g_engfuncs.pfnCmd_Argv)(argc);
-	else
-		RETURN_META_VALUE(MRES_IGNORED, 0);
    }
 }
 
