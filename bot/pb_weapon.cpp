@@ -309,8 +309,30 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 	case VALVE_WEAPON_CROWBAR:
 		if ( flags & WF_NEED_GRENADE ) break;
 		
-		if (distance < 55) score = 9;
-		else if (distance < 100) score = (100-distance) / 5;
+		if( g_hldm_mod == BMOD )
+		{
+                        if( CVAR_GET_FLOAT( "bm_cbar_mod" ) )
+                        {
+				if( distance < 55 )
+				{
+					bestMode[currentWeapon] = 1;
+					score = 9;
+				}
+				else if( distance < 300 )
+				{
+					bestMode[currentWeapon] = 2;
+					score = 5;
+				}
+			}
+			else if( distance < 55 )
+				score = 9;
+			else if( distance < 100 )
+				score = ( 100 - distance ) / 5;
+		}
+		else if( distance < 55 )
+			score = 9;
+		else if( distance < 100 )
+			score = ( 100 - distance ) / 5;
 
 		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
 		break;
@@ -477,6 +499,13 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 		break;
 
 	case VALVE_WEAPON_TRIPMINE:
+		if( g_hldm_mod == BMOD )
+		{
+                        if( CVAR_GET_FLOAT( "bm_trip_mod" ) )
+			{
+				bestMode[currentWeapon] = RANDOM_FLOAT( 1.5, 2.0 );
+			}
+		}
 		return 0;		// never arm for combat
 
 	case VALVE_WEAPON_SATCHEL:

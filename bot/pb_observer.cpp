@@ -23,7 +23,8 @@ extern float roundStartTime;
 extern float globalFrameTime;	// set by the bots in action.msec()
 extern Sounds playerSounds;
 extern bool visualizeCellConnections;
-extern bot_t bots[32];;
+extern bot_t bots[32];
+extern int g_hldm_mod;
 
 PB_Navpoint* getNearestNavpoint( edict_t *pEdict );
 
@@ -547,8 +548,10 @@ void PB_Observer::checkForTripmines( int oId, Vector &pos )
 		assert( (clientIndex >= 0) && (clientIndex < 32) );
 		int playerWeapon = clientWeapon[clientIndex];
 
-		if ( (obs[oId].player->pev->button & IN_ATTACK) && 
-			 (playerWeapon==VALVE_WEAPON_TRIPMINE)				) 
+		if ( ( (obs[oId].player->pev->button & IN_ATTACK) && 
+			 (playerWeapon==VALVE_WEAPON_TRIPMINE)) ||
+			(g_hldm_mod==BMOD &&(obs[oId].player->pev->button & IN_ATTACK2) &&
+                         (playerWeapon==VALVE_WEAPON_TRIPMINE || playerWeapon==VALVE_WEAPON_SNARK ) ) )
 		{	// player is trying set up a tripmine, check if possible:
 			UTIL_MakeVectors( obs[oId].player->pev->v_angle );
 			TraceResult tr;

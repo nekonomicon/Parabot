@@ -9,7 +9,7 @@ extern PB_MapGraph mapGraph;
 extern bool haloOnBase;
 extern bool headToBunker;
 extern float nextAirstrikeTime;
-
+extern int g_hldm_mod;
 
 
 
@@ -69,8 +69,8 @@ float PB_Needs::wishForCombat()
 	switch (mod_id) {
 	case AG_DLL:
 	case VALVE_DLL:
-			 if ( bot->combat.hasWeapon( VALVE_WEAPON_EGON      ) || 
-				  bot->combat.hasWeapon( VALVE_WEAPON_GAUSS     )    )  weapon = 1;
+			if( bot->combat.hasWeapon( VALVE_WEAPON_EGON ) && g_hldm_mod == HLDM ) weapon = 1;
+			if( bot->combat.hasWeapon( VALVE_WEAPON_GAUSS ) ) weapon = 1;
 		else if ( bot->combat.hasWeapon( VALVE_WEAPON_MP5       ) || 
 				  bot->combat.hasWeapon( VALVE_WEAPON_RPG       )    )  weapon = 0.8;
 		else if ( bot->combat.hasWeapon( VALVE_WEAPON_SHOTGUN   )    )  weapon = 0.6;
@@ -211,6 +211,12 @@ void PB_Needs::valveWishList()
 	if (!bot->combat.hasWeapon( VALVE_WEAPON_PYTHON		)) wish[NAV_W_PYTHON]		= 2;
 	if (!bot->combat.hasWeapon( VALVE_WEAPON_RPG			)) wish[NAV_W_RPG]			= 4.5;
 	if (!bot->combat.hasWeapon( VALVE_WEAPON_TRIPMINE	)) wish[NAV_W_TRIPMINE]		= 2;
+
+	if( g_hldm_mod == BMOD )
+	{
+		if( !bot->combat.hasWeapon( VALVE_WEAPON_CROWBAR ) )
+			wish[NAV_W_CROWBAR] = 9;
+	}
 
 	// copy identical ids
 	wish[NAV_W_9MMAR]	= wish[NAV_W_MP5];

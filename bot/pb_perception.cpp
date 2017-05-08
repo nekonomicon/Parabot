@@ -576,7 +576,7 @@ void PB_Perception::collectData()
 		else if ( strcmp( pClassname, "monster_snark" ) == 0 ) {
 			addIfVisible( ent->edict(), PI_SNARK );
 		}
-		else if ( strcmp( pClassname, "monster_tripmine" ) == 0 ) {
+		else if ( strcmp( pClassname, "monster_tripmine" ) == 0 || strcmp( pClassname, "monster_tripsnark" ) == 0 ) {
 			if (tripmineOwner( ent ) == botEnt) {
 				// remember own tripmines even without seeing them:
 				float dist = (ent->pev->origin - botEnt->v.origin).Length();
