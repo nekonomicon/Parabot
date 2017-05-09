@@ -189,7 +189,8 @@ void BotCreate( int fixedPersNr )
 	ClientConnect( botEnt, pbConfig.personality( persNr ).name, "127.0.0.1", ptr );
 	// Pieter van Dijk - use instead of DispatchSpawn() - Hip Hip Hurray!
 	ClientPutInServer( botEnt );
-	MDLL_ClientPutInServer( botEnt );
+	if( g_meta_init )
+		MDLL_ClientPutInServer( botEnt );
 
 	assert( botEnt != 0 );
 	botEnt->v.flags |= FL_FAKECLIENT;
