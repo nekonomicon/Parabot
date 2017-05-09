@@ -16,17 +16,17 @@ LOCAL_CFLAGS += -Dstricmp=strcasecmp -D_stricmp=strcasecmp -Dstrnicmp=strncasecm
 LOCAL_CPPFLAGS := $(LOCAL_CFLAGS) -fno-exceptions -fno-rtti
 
 LOCAL_C_INCLUDES := \
-		-I(LOCAL_PATH)/. \
-		-I(LOCAL_PATH)/.. \
-                -I(LOCAL_PATH)/../bot \
-                -I(LOCAL_PATH)/../utils \
-                -I(LOCAL_PATH)/../common \
-                -I(LOCAL_PATH)/../dlls \
-                -I(LOCAL_PATH)/../engine \
-                -I(LOCAL_PATH)/../pm_shared \
-                -I(LOCAL_PATH)/../metamod
+		$(LOCAL_PATH)/. \
+		$(LOCAL_PATH)/.. \
+                $(LOCAL_PATH)/../bot \
+                $(LOCAL_PATH)/../utils \
+                $(LOCAL_PATH)/../common \
+                $(LOCAL_PATH)/../dlls \
+                $(LOCAL_PATH)/../engine \
+                $(LOCAL_PATH)/../pm_shared \
+                $(LOCAL_PATH)/../metamod
 
-LOCAL_SRC_FILES := \ 
+LOCAL_SRC_FILES := \
 		../bot/bot.cpp \
 		../bot/bot_client.cpp \
 		animation.cpp \
