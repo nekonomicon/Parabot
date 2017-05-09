@@ -364,9 +364,10 @@ bool PB_Perception::isNewPerception( tPerceptionList &oldList, PB_Percept &perc 
 
 		if (perc.model==PI_UNKNOWN) perc.model = match->model;	// remember model 
 		if (perc.pClass==PI_PLAYER) {					// unidentified player:
-			if (match->pClass!=PI_PLAYER) {				// if formerly known
+			classify( perc );
+			/*if (match->pClass!=PI_PLAYER) {				// if formerly known
 				perc.pClass = match->pClass;			// ...remember class
-			}
+			}*/
 		}
 		oldList.erase( match );
 		return false;
@@ -463,7 +464,7 @@ bool PB_Perception::addIfVisible( edict_t *ent, int pClass )
 
 void PB_Perception::checkDamageFor( PB_Percept &player ) 
 {
-	if (player.pClass >= PI_HOSTAGE) return;	// only players cause damage
+	if( player.pClass >= PI_HOSTAGE || player.pClass == PI_FRIEND ) return;	// only players cause damage
 	tPerceptionList::iterator cdi = detections[cdet].begin();
 	while ( cdi != detections[cdet].end() ) {
 		if ((cdi->pClass == PI_DAMAGE) && 
@@ -482,7 +483,7 @@ void PB_Perception::checkInflictorFor( PB_Percept &dmg )
 {
 	tPerceptionList::iterator cdi = detections[cdet].begin();
 	while ( cdi != detections[cdet].end() ) {
-		if ((cdi->pClass < PI_HOSTAGE) && 
+		if( ( cdi->pClass < PI_HOSTAGE && cdi->pClass != PI_FRIEND ) && 
 			(cdi->entity == dmg.entity || (dmg.entity == 0 && cdi->pClass == PI_FOE) )) {
 			cdi->pState |= PI_TACTILE;
 			cdi->pClass = PI_FOE;
