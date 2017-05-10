@@ -304,7 +304,7 @@ bool PB_Configuration::createConfiguration( const char *configFile )
 	fprintf( file, "# When \"ServerMode\" is on this number has no effect.\n\n" );
 	fprintf( file, "NumBots = 6\n\n\n" );
 	fprintf( file, "# PeaceMode = On/Off (Default=Off)\n" );
-	fprintf( file, "# If enabled bots won't shoot at you (nor at each other) while they are not attacked\n" );
+	fprintf( file, "# If enabled bots won't shoot at you (nor at each other) while they are not attacked\n\n" );
 	fprintf( file, "PeaceMode = Off\n\n\n" );
 	fprintf( file, "# RestrictedWeapons = On/Off (Default=Off)\n" );
 	fprintf( file, "# If enabled bots can't use the more powerful weapons (MP5, crossbow, shotgun, rpg, gauss\n" );
@@ -323,7 +323,7 @@ bool PB_Configuration::createConfiguration( const char *configFile )
 	fprintf( file, "# CHAT CONFIGURATION\n" );
 	fprintf( file, "#-------------------------------------------------------------------------------------------\n\n\n" );
 	fprintf( file, "# BotChat = On/Off (Default=On)" );
-	fprintf( file, "# If enabled bots will chat as much as their communication-value permits.\n" );
+	fprintf( file, "# If enabled bots will chat as much as their communication-value permits.\n\n" );
 	fprintf( file, "BotChat = On\n\n\n" );
 	fprintf( file, "# ChatFile determines the language the bots use for chatting (Default=\"ChatEnglish.txt\")\n\n" );
 	fprintf( file, "ChatFile = \"ChatEnglish.txt\"\n\n\n" );
@@ -376,44 +376,54 @@ bool PB_Configuration::createPersonalities( const char *PersonalitityFile )
 
 	switch( mod_id )
 	{
+		case GEARBOX_DLL:
+			fprintf( file, "\"Adrian Shepard\"\t\"shepard\"\t\t9\t8\t8\t6\n" );
+			fprintf( file, "\"Otis Laurey\"\t\t\"otis\"\t\t\t6\t3\t5\t8\n" );
+			fprintf( file, "\"Tower\"\t\t\"tower\"\t\t8\t6\t8\t5\n" );
+			fprintf( file, "\"Sharpe\"\t\t\"drill\"\t\t\t8\t4\t6\t10\n" );
+			fprintf( file, "\"Eugene\"\t\t\t\"beret\"\t\t6\t7\t9\t5\n" );
+			fprintf( file, "\"John Smith\"\t\t\"grunt\"\t\t7\t8\t6\t4\n" );
+			fprintf( file, "\"Charlie Root\"\t\t\"recruit\"\t\t7\t7\t7\t7\n" );
+			fprintf( file, "\"Silent Assassin\"\t\t\"massn\"\t\t10\t1\t10\t1\n" );
+			fprintf( file, "\"Sinister\"\t\t\"fassn\"\t\t\t10\t1\t10\t1\n" );
+			fprintf( file, "\"Biohazard\"\t\t\"cl_suit\"\t\t4\t1\t4\t2\n" );
 		case AG_DLL:
 		case DMC_DLL:
 		case VALVE_DLL:
-		case GEARBOX_DLL:
 			fprintf( file, "\"[PAS]Detonator\"\t\"scientist\"\t\t10\t10\t10\t8\n" );
 			fprintf( file, "\"Charming\"\t\t\"gina\"\t\t\t9\t5\t8\t4\n" );
-			fprintf( file, "\"Quantum Neuromancer\"\t\"helmet\"\t3\t3\t6\t5\n" );
-			fprintf( file, "\"Renaissance\"\t\"recon\"\t\t4\t1\t8\t10\n" );
-			fprintf( file, "\"Arnie\"\t\t\"hgrunt\"\t\t1\t7\t3\t2\n" );
+			fprintf( file, "\"Quantum Neuromancer\"\t\"helmet\"\t\t3\t3\t6\t5\n" );
+			fprintf( file, "\"Renaissance\"\t\t\"recon\"\t\t\t4\t1\t8\t10\n" );
+			fprintf( file, "\"Arnie\"\t\t\t\"hgrunt\"\t\t1\t7\t3\t2\n" );
 			fprintf( file, "\"Alien Hunter\"\t\t\"zombie\"\t\t6\t5\t5\t6\n" );
-			fprintf( file, "\"Lord Helmchen\"\t\"helmet\"\t\t7\t2\t6\t1\n" );
+			fprintf( file, "\"Lord Helmchen\"\t\t\"helmet\"\t\t7\t2\t6\t1\n" );
 			fprintf( file, "\"Cool J.\"\t\t\"gordon\"\t\t8\t6\t9\t3\n" );
 			fprintf( file, "\"Paranoid\"\t\t\"gman\"\t\t\t3\t9\t7\t9\n" );
-			fprintf( file, "\"Blastaway\"\t\t\"cannibal\"\t\t10\t6\t3\t7\n" );
-			fprintf( file, "\"Afterburner\"\t\t\"skeleton\"\t\t1\t8\t7\t4\n" );
+			fprintf( file, "\"Blastaway\"\t\t\"gman\"\t\t10\t6\t3\t7\n" );
+			fprintf( file, "\"Afterburner\"\t\t\"hgrunt\"\t\t1\t8\t7\t4\n" );
 			fprintf( file, "\"Dark Avenger\"\t\t\"scientist\"\t\t2\t5\t2\t6\n" );
-			fprintf( file, "\"[RDZ]Pain\"\t\t\"hgrunt\"\t8\t7\t6\t2\n" );
+			fprintf( file, "\"[RDZ]Pain\"\t\t\"hgrunt\"\t\t8\t7\t6\t2\n" );
 			fprintf( file, "\"[POD]Headshot Deluxe\"\t\"robo\"\t\t\t8\t3\t9\t8\n" );
 			fprintf( file, "\"[CGF]Event Horizon\"\t\"robo\"\t\t\t9\t4\t7\t5\n" );
 			fprintf( file, "\"[HPB]Roots\"\t\t\"robo\"\t\t\t6\t8\t6\t9\n" );
 			fprintf( file, "\"Desperado\"\t\t\"recon\"\t\t\t4\t10\t5\t7\n" );
 			fprintf( file, "\"Don Juan\"\t\t\"barney\"\t\t2\t4\t4\t10\n" );
 			fprintf( file, "\"[PAS]Bladerunner\"\t\"gordon\"\t\t7\t5\t10\t3\n" );
-			fprintf( file, "\"Mad Max\"\t\t\"zombie\"\t4\t6\t5\t1" );
+			fprintf( file, "\"Mad Max\"\t\t\"zombie\"\t\t4\t6\t5\t1" );
 			break;
 		case HOLYWARS_DLL:
 			fprintf( file, "\"[PAS]Detonator\"\t\"bad\"\t\t\t10\t10\t10\t8\n" );
 			fprintf( file, "\"Charming\"\t\t\"bad\"\t\t\t9\t5\t8\t4\n" );
-			fprintf( file, "\"Quantum Neuromancer\"\t\"akedo\"\t\t3\t3\t6\t5\n" );
-			fprintf( file, "\"Renaissance\"\t\"gordon\"\t\t4\t1\t8\t10\n" );
-			fprintf( file, "\"Arnie\"\t\t\"akedo\"\t\t1\t7\t3\t2\n" );
-			fprintf( file, "\"Alien Hunter\"\t\t\"bad\"\t\t6\t5\t5\t6\n" );
+			fprintf( file, "\"Quantum Neuromancer\"\t\"akedo\"\t\t\t3\t3\t6\t5\n" );
+			fprintf( file, "\"Renaissance\"\t\t\"gordon\"\t\t4\t1\t8\t10\n" );
+			fprintf( file, "\"Arnie\"\t\t\t\"akedo\"\t\t\t1\t7\t3\t2\n" );
+			fprintf( file, "\"Alien Hunter\"\t\t\"bad\"\t\t\t6\t5\t5\t6\n" );
 			fprintf( file, "\"Lord Helmchen\"\t\t\"helmet\"\t\t7\t2\t6\t1\n" );
 			fprintf( file, "\"Cool J.\"\t\t\"gordon\"\t\t8\t6\t9\t3\n" );
 			fprintf( file, "\"Paranoid\"\t\t\"helmet\"\t\t3\t9\t7\t9\n" );
 			fprintf( file, "\"Blastaway\"\t\t\"gordon\"\t\t10\t6\t3\t7\n" );
 			fprintf( file, "\"Afterburner\"\t\t\"gordon\"\t\t1\t8\t7\t4\n" );
-			fprintf( file, "\"Dark Avenger\"\t\t\"akedo\"\t\t2\t5\t2\t6\n" );
+			fprintf( file, "\"Dark Avenger\"\t\t\"akedo\"\t\t\t2\t5\t2\t6\n" );
 			fprintf( file, "\"[RDZ]Pain\"\t\t\"akedo\"\t\t\t8\t7\t6\t2\n" );
 			fprintf( file, "\"[POD]Headshot Deluxe\"\t\"robo\"\t\t\t8\t3\t9\t8\n" );
 			fprintf( file, "\"[CGF]Event Horizon\"\t\"robo\"\t\t\t9\t4\t7\t5\n" );
@@ -421,32 +431,41 @@ bool PB_Configuration::createPersonalities( const char *PersonalitityFile )
 			fprintf( file, "\"Desperado\"\t\t\"bad\"\t\t\t4\t10\t5\t7\n" );
 			fprintf( file, "\"Don Juan\"\t\t\"bad\"\t\t\t2\t4\t4\t10\n" );
 			fprintf( file, "\"[PAS]Bladerunner\"\t\"gordon\"\t\t7\t5\t10\t3\n" );
-			fprintf( file, "\"Mad Max\"\t\t\"akedo\"\t\t4\t6\t5\t1" );
+			fprintf( file, "\"Mad Max\"\t\t\"akedo\"\t\t\t4\t6\t5\t1" );
 			break;
 		case HUNGER_DLL:
-			fprintf( file, "\"Don Juan\"\t\"civie\"\t\t2\t4\t4\t10\n" );
-			fprintf( file, "\"[BWG]Dave Waters\"\t\t\"dave\"\t\t\t7\t6\t8\t6\n" );
-			fprintf( file, "\"[BWG]Einar Saukas\"\t\"einar\"\t8\t3\t8\t5\n" );
+			fprintf( file, "\"Don Juan\"\t\t\"civie\"\t\t\t2\t4\t4\t10\n" );
+			fprintf( file, "\"[BWG]Dave Waters\"\t\"dave\"\t\t\t7\t6\t8\t6\n" );
+			fprintf( file, "\"[BWG]Einar Saukas\"\t\"einar\"\t\t\t8\t3\t8\t5\n" );
 			fprintf( file, "\"[BWG]Einar Saukas\"\t\"einarhev\"\t\t8\t3\t8\t5\n" );
 			fprintf( file, "\"Dr. Franklin\"\t\t\"franklin\"\t\t1\t5\t3\t3\n" );
 			fprintf( file, "\"Alien Hunter\"\t\t\"gangster\"\t\t6\t5\t5\t6\n" );
-			fprintf( file, "\"[BWG]Jack Cooper\"\t\"jack\"\t\t7\t2\t6\t5\n" );
-			fprintf( file, "\"[BWG]Magnus Bernekarr\"\t\t\"magnus\"\t\t8\t6\t9\t3\n" );
-			fprintf( file, "\"[BWG]Neil Manke\"\t\t\"neil\"\t\t\t8\t7\t8\t9\n" );
+			fprintf( file, "\"[BWG]Jack Cooper\"\t\"jack\"\t\t\t7\t2\t6\t5\n" );
+			fprintf( file, "\"[BWG]Magnus Bernekarr\"\t\"magnus\"\t\t8\t6\t9\t3\n" );
+			fprintf( file, "\"[BWG]Neil Manke\"\t\"neil\"\t\t\t8\t7\t8\t9\n" );
 			fprintf( file, "\"Nohead Zombie\"\t\t\"nohead\"\t\t1\t1\t1\t1\n" );
 			fprintf( file, "\"Blastaway\"\t\t\"nypdcop\"\t\t10\t6\t3\t7\n" );
 			fprintf( file, "\"[RDZ]Pain\"\t\t\"orderly\"\t\t8\t7\t6\t2\n" );
-			fprintf( file, "\"Paranoid\"\t\t\"patient\"\t3\t9\t7\t9\n" );
+			fprintf( file, "\"Paranoid\"\t\t\"patient\"\t\t3\t9\t7\t9\n" );
 			fprintf( file, "\"[BWG]Paul Taylor\"\t\"paul\"\t\t\t6\t5\t7\t5\n" );
-			fprintf( file, "\"Chester Rockwood\"\t\t\"sheriff\"\t\t\t6\t5\t4\t9\n" );
-			fprintf( file, "\"Desperado\"\t\t\"worker\"\t\t\t6\t4\t6\t7\n" );
-			fprintf( file, "\"Zombie Ork\"\t\t\"zork\"\t\t10\t10\t10\t8\n" );
+			fprintf( file, "\"Chester Rockwood\"\t\"sheriff\"\t\t6\t5\t4\t9\n" );
+			fprintf( file, "\"Desperado\"\t\t\"worker\"\t\t6\t4\t6\t7\n" );
+			fprintf( file, "\"Zombie Ork\"\t\t\"zork\"\t\t\t10\t10\t10\t8\n" );
 			fprintf( file, "\"[HPB]Roots\"\t\t\"civie\"\t\t\t6\t8\t6\t9\n" );
-			fprintf( file, "\"[POD]Headshot Deluxe\"\t\"gangster\"\t\t\t8\t3\t9\t8\n" );
-			fprintf( file, "\"Renaissance\"\t\"patient\"\t\t4\t1\t8\t10\n" );
+			fprintf( file, "\"[POD]Headshot Deluxe\"\t\"gangster\"\t\t8\t3\t9\t8\n" );
+			fprintf( file, "\"Renaissance\"\t\t\"patient\"\t\t4\t1\t8\t10\n" );
 			break;
 	}
 
+	switch( mod_id )
+	{
+		case AG_DLL:
+			fprintf( file, "\"Red Byte\"\t\t\"red\"\t\t\t8\t8\t8\t8\n" );
+			fprintf( file, "\"Blue Byte\"\t\t\"blue\"\t\t\t8\t8\t8\t8\n" );
+			break;
+		default:
+			break;
+	}
 	fclose( file );
 
 	infoMsg( "OK!\n" );
