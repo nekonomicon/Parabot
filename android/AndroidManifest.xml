@@ -6,7 +6,9 @@
       android:versionName="0.92">
     <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="23"/>
     <!-- Set your application name here -->
-    <application android:label="Parabot" android:debuggable="true">
+    <application android:label="Parabot"
+		 android:debuggable="true"
+		 android:icon="@drawable/logo_xash_pb">
     <!-- Set your launcher title here -->
         <activity android:name="su.xash.xash3d.LauncherActivity"
                   android:label="Parabot"
