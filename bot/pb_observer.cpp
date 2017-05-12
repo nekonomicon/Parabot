@@ -380,11 +380,11 @@ void PB_Observer::newNavpointReached( int oId, Vector &pos, PB_Navpoint *endNav 
 				if (waypoint[oId][currentIndex].causedDamage() )
 					pathMode |= PATH_CAUSES_DAMAGE;
 			}
-			if (dbgCnt == 1000) {
+			/*if (dbgCnt == 1000) {
 				FILE *dfp=fopen( "parabot/crashlog.txt", "a" ); 
 				fprintf( dfp, "Too many loops in PB_Observer::newNavpointReached()!\n" ); 
 				fclose( dfp );
-			}
+			}*/
 			if (pathMode & PATH_NEED_LONGJUMP) debugMsg( "PATH NEEDS LONGJUMP!\n" );
 			if (pathMode & PATH_CAUSES_DAMAGE) debugMsg( "PATH CAUSES DAMAGE!\n" );
 			newPath.stopRecord( endNav->id(), worldTime(), pathMode );
