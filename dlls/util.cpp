@@ -285,10 +285,10 @@ int UTIL_GetTeam(edict_t *pEntity)
 	case HUNGER_DLL:
 	case GEARBOX_DLL:
 		infobuffer = (*g_engfuncs.pfnGetInfoKeyBuffer)( pEntity );
-		strcpy( teamName, (g_engfuncs.pfnInfoKeyValue( infobuffer, "team" )) );
 
 		if(gearbox_ctf)
 		{
+			strcpy( modelName, (g_engfuncs.pfnInfoKeyValue( infobuffer, "model" )) );
 			if ((strcmp(modelName, "ctf_barney") == 0) ||
 				(strcmp(modelName, "cl_suit") == 0) ||
 				(strcmp(modelName, "ctf_gina") == 0) ||
@@ -309,8 +309,11 @@ int UTIL_GetTeam(edict_t *pEntity)
 			}
 		}
 		else
+		{
+			strcpy( teamName, (g_engfuncs.pfnInfoKeyValue( infobuffer, "team" )) );
 			for (i=0; i<valveTeamNumber; i++) 
 				if (stricmp( teamName, valveTeamList[i] ) == 0) return i;
+		}
 		debugMsg( "ERROR: Team not found!\n" );
 		return 0;
 	case AG_DLL:
