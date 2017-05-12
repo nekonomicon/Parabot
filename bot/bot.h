@@ -28,6 +28,10 @@
 #define LoadLibrary(x) dlopen(x, RTLD_NOW)
 #define Sleep(x) usleep(x * 1000)
 typedef void* HINSTANCE;
+#define stricmp strcasecmp
+#define _stricmp strcasecmp
+#define strnicmp strncasecmp
+#define _strnicmp strncasecmp
 #define FAR
 #define WINAPI
 #endif

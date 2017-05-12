@@ -2,22 +2,20 @@
 # Copyright © nekonomicon 2016
 
 MODULE =	parabot
-CC ?=		gcc
+SOLIB =		so
 CXX ?=		g++
 
-CFLAGS +=	-O3 -pipe -m32 -DNDEBUG \
+CFLAGS +=	-Os -pipe -m32 -DNDEBUG \
 		-fsigned-char -fPIC \
 		-ffast-math -funroll-loops \
 		-fomit-frame-pointer -ftree-vectorize \
-		-fvisibility=hidden -fno-rtti -fno-exceptions
+		-fvisibility=hidden -fno-rtti -fno-exceptions \
+		-fno-function-sections -fno-data-sections \
+		-fno-asynchronous-unwind-tables
 
-DEFINES =	-Dstricmp=strcasecmp -D_stricmp=strcasecmp \
-		-Dstrnicmp=strncasecmp -D_snprintf=snprintf \
-		-D_strnicmp=strncasecmp \
-		-Wno-write-strings
+DEFINES =	-Wno-write-strings
 
-INCLUDES =	-I$(PREFIX)/include \
-		-I. \
+INCLUDES =	-I. \
 		-I../bot \
 		-I../utils \
 		-I../common \
@@ -69,16 +67,27 @@ SRC =		../bot/bot.cpp \
 		../bot/utilityfuncs.cpp \
 		../metamod/meta_api.cpp
 
-LDFLAGS +=	-shared -static-libgcc -static-libstdc++ -Wl,--no-undefined
-
+SYS =		$(shell $(CXX) -dumpmachine)
+ifneq(, $(findstring linux, $(SYS)))
 LDFLAGS +=	-ldl
+endif
+ifneq(, $(findstring mingw, $(SYS)))
+LDFLAGS +=	-Wl,--add-stdcall-alias
+SOLIB =		dll
+endif
+ifneq(, $(findstring darwin, $(SYS)))
+SOLIB =         dylib
+endif
+
+LDFLAGS +=	-shared -static-libgcc -static-libstdc++ -Wl,--no-undefined -Wl,--gc-sections -Wl,--strip-all
+LIBNAME =	$(MODULE).$(SOLIB)
 
 OBJ = $(SRC:%.cpp=%.o)
 
-all: $(MODULE).so
+all: $(LIBNAME)
 
-$(MODULE).so: $(OBJ)
-	$(CXX) $(OBJ) $(LDFLAGS) -o $(MODULE).so
+$(LIBNAME): $(OBJ)
+	$(CXX) $(OBJ) $(LDFLAGS) -o $(LIBNAME)
 
 .cpp.o:
 	$(CXX) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
@@ -87,4 +96,4 @@ $(MODULE).so: $(OBJ)
 
 clean:
 	rm -rf $(OBJ)
-	rm $(MODULE).so
+	rm $(LIBNAME)
