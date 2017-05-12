@@ -56,6 +56,7 @@ physent_t *ptrPhysents;
 int numPhysents;
 int g_hldm_mod = HLDM;
 bool gearbox_ctf = false;
+char ag_gamemode[8] = {};
 
 static FILE *fp;
 
@@ -175,7 +176,11 @@ void DispatchBlocked( edict_t *pentBlocked, edict_t *pentOther )
 
 void DispatchKeyValue( edict_t *pentKeyvalue, KeyValueData *pkvd )
 {
-	if( mod_id == GEARBOX_DLL )
+	if( mod_id == AG_DLL )
+	{
+		strcpy( ag_gamemode, CVAR_GET_STRING( "sv_ag_gamemode" ) );
+	}
+	else if( mod_id == GEARBOX_DLL )
 	{
 		if( !gearbox_ctf )
 		{

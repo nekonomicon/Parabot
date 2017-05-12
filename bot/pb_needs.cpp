@@ -10,7 +10,7 @@ extern bool haloOnBase;
 extern bool headToBunker;
 extern float nextAirstrikeTime;
 extern int g_hldm_mod;
-
+extern char ag_gamemode[8];
 
 
 void PB_Needs::init( CParabot *botClass )
@@ -635,7 +635,7 @@ void PB_Needs::agWishList()
 	wish[NAV_AGI_DOM_CONTROLPOINT] = 20;
 
 	// CTF
-	if( !strcmp( CVAR_GET_STRING( "sv_ag_gamemode" ), "ctf" ) )
+	if( !strcmp( ag_gamemode, "ctf" ) )
 	{
 		if( UTIL_GetTeam( bot->ent ) )
 		{
@@ -643,6 +643,11 @@ void PB_Needs::agWishList()
 			{
 				if( pent->edict()->v.owner == bot->ent )
 				{
+					wish[NAV_AGI_FLAG_TEAM2] = 20;
+				}
+				else if( bot->aggression < 6 )
+				{
+					wish[NAV_AGI_FLAG_TEAM1] = 2;
 					wish[NAV_AGI_FLAG_TEAM2] = 20;
 				}
 				else
@@ -658,6 +663,11 @@ void PB_Needs::agWishList()
 			{
 				if( pent->edict()->v.owner == bot->ent ) 
 				{
+					wish[NAV_AGI_FLAG_TEAM1] = 20;
+				}
+				else if( bot->aggression < 6 )
+				{
+					wish[NAV_AGI_FLAG_TEAM2] = 2;
 					wish[NAV_AGI_FLAG_TEAM1] = 20;
 				}
 				else

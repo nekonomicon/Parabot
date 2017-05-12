@@ -1266,16 +1266,8 @@ void pfnSetKeyValue(char *infobuffer, char *key, char *value)
 
 void pfnSetClientKeyValue( int clientIndex, char *infobuffer, char *key, char *value )
 {
-	if ((mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == DMC_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) && (strcmp( key, "team" ) == 0)) {	// init teamlist
+	if ((mod_id == VALVE_DLL || mod_id == DMC_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) && (strcmp( key, "team" ) == 0)) {	// init teamlist
 		valveTeamPlayMode = true;
-
-		if( mod_id == AG_DLL )
-		{
-			char gamemode[8];
-			strcpy( gamemode, CVAR_GET_STRING( "sv_ag_gamemode" ) );
-			if( !strcmp( gamemode, "ffa") || !strcmp( gamemode, "lms") )
-				valveTeamPlayMode = false;
-		}
 
 		bool teamKnown = false;
 		for (int team=0; team<valveTeamNumber; team++) 
@@ -1288,6 +1280,10 @@ void pfnSetClientKeyValue( int clientIndex, char *infobuffer, char *key, char *v
 			debugMsg( "Registered team ", value, "\n" );
 			valveTeamNumber++;
 		}
+	}
+	else if( mod_id == AG_DLL )
+	{
+		valveTeamPlayMode = true;
 	}
 #ifdef _DEBUG
 	if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnSetClientKeyValue: %s %s\n",key,value); fclose(fp); }

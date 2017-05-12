@@ -29,6 +29,7 @@ extern PB_Chat chat;
 //extern PB_Personality personality[MAX_PERS];	// stores different bot personalities
 //extern bool personalityUsed[MAX_PERS];			// true if bot exists using this personality
 extern bool gearbox_ctf;
+extern char ag_gamemode[8];
 
 bot_t bots[32];   // max of 32 bots in a game
 
@@ -260,7 +261,7 @@ void BotCreate( int fixedPersNr )
 	pBot->parabot->goalFinder.addGoal( G_MOVE,
 		PI_FRIEND, goalMakeRoom, weightMakeRoom );
 
-	if ( (mod_id == CSTRIKE_DLL) || (mod_id == TFC_DLL) ) {
+	if ( (mod_id == CSTRIKE_DLL) || (mod_id == TFC_DLL) || gearbox_ctf || ( mod_id == AG_DLL && !strcmp( ag_gamemode, "ctf" ) ) ) {
 		pBot->parabot->goalFinder.addGoal( G_ACTION,
 			PI_FRIEND, goalAssistFire, weightAssistFire );
 		pBot->parabot->goalFinder.addGoal( G_MOVE,
