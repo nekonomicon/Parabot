@@ -102,43 +102,43 @@ extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 	{
 		mod_id = AG_DLL;
 		if( !g_meta_init )
-			h_Library = LoadLibrary( "ag/dlls/ag."OS_LIB_EXT );
+			h_Library = LoadLibrary( "ag/dlls/ag"ARCH_SUFFIX"."OS_LIB_EXT );
 	}
 	else if (strcmp(mod_name, "valve") == 0)
 	{
 		mod_id = VALVE_DLL;
 		if( !g_meta_init )
-			h_Library = LoadLibrary( "valve/dlls/hl."OS_LIB_EXT );
+			h_Library = LoadLibrary( "valve/dlls/hl"ARCH_SUFFIX"."OS_LIB_EXT );
 	}
 	else if (strcmp(mod_name, "Hunger") == 0)
 	{
 		mod_id = HUNGER_DLL;
 		if( !g_meta_init )
-			h_Library = LoadLibrary( "Hunger/dlls/einar."OS_LIB_EXT );
+			h_Library = LoadLibrary( "Hunger/dlls/einar"ARCH_SUFFIX"."OS_LIB_EXT );
 	}
 	else if (strcmp(mod_name, "hldm") == 0)
 	{
 		mod_id = VALVE_DLL;
 		if( !g_meta_init )
-			h_Library = LoadLibrary( "hldm/dlls/hl."OS_LIB_EXT );
+			h_Library = LoadLibrary( "hldm/dlls/hl"ARCH_SUFFIX"."OS_LIB_EXT );
 	}
 	else if (strcmp(mod_name, "holywars") == 0)
 	{
 		mod_id = HOLYWARS_DLL;
 		if( !g_meta_init )
-			h_Library = LoadLibrary( "holywars/dlls/holywars."OS_LIB_EXT );
+			h_Library = LoadLibrary( "holywars/dlls/holywars"ARCH_SUFFIX"."OS_LIB_EXT );
 	}
 	else if (strcmp(mod_name, "dmc") == 0)
 	{
 		mod_id = DMC_DLL;
 		if( !g_meta_init )
-			h_Library = LoadLibrary( "dmc/dlls/dmc."OS_LIB_EXT );
+			h_Library = LoadLibrary( "dmc/dlls/dmc"ARCH_SUFFIX"."OS_LIB_EXT );
 	}
 	else if (strcmp(mod_name, "gearbox") == 0)
 	{
 		mod_id = GEARBOX_DLL;
 		if( !g_meta_init )
-			h_Library = LoadLibrary( "gearbox/dlls/opfor."OS_LIB_EXT );
+			h_Library = LoadLibrary( "gearbox/dlls/opfor"ARCH_SUFFIX"."OS_LIB_EXT );
 	}
 
 	sprintf( filePath, "%s/addons/parabot/config/%s/", mod_name, mod_name );
