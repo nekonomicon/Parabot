@@ -2,7 +2,7 @@
 
 Human-like artificial player for Half-Life and some other games on GoldSrc game engine.
 
-- [Additional information](https://github.com/nekonomicon/Parabot/blob/master/addons/parabot/Readme.txt)
+- [Full information](https://github.com/nekonomicon/Parabot/blob/master/addons/parabot/Readme.txt)
 
 ## How to build
 
@@ -15,20 +15,20 @@ TODO
 #### MinGW
 
 ```
-	cd dlls
-	make
+	$ cd dlls
+	$ make
 ```
 
 ### Linux/OS X
 
 ```
-	cd dlls
-	make
+	$ cd dlls
+	$ make
 ```
 
 ### *BSD
 
 ```
-	cd dlls
-	gmake
+	% cd dlls
+	% gmake
 ```

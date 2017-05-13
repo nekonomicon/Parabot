@@ -77,7 +77,7 @@ https://github.com/nekonomicon/Parabot
 1.) ...install or uninstall Parabot:
 
     Copy "addons" folder from archive to Half-Life/<modfolder>.
-    If you have installed metamod then add following lines to
+    If you have installed metamod then add the following lines to
     your plugins.ini:
 	"win32 addons/parabot/dlls/parabot.dll"
 	"lin32 addons/parabot/dlls/parabot.so"
@@ -107,12 +107,11 @@ https://github.com/nekonomicon/Parabot
     the bots, the easiest way is to change the "MinAimSkill" and "MaxAimSkill"
     variables in "parabot.cfg" - look in the correspondant Mod-directory (e.g
     "valve/addons/parabot/config/valve" if you want to change the settings
-    for HL-deathmatch) and 
-    open the file in a texteditor (like notepad.exe). If the bots are too hard
-    for you, change MinAimSkill to 1 (or comment the line out by writing a # at
-    the beginning) and MaxAimSkill to, let's say, 5. 
-    In case the bots are getting too easy for you, you should comment out 
-    MaxAimSkill and setMinAimSkill to a higher value.
+    for HL-deathmatch) and open the file in a texteditor (like notepad.exe).
+    If the bots are too hard for you, change MinAimSkill to 1 (or comment
+    the line out by writing a # at the beginning) and MaxAimSkill to,
+    let's say, 5. In case the bots are getting too easy for you,
+    you should comment out MaxAimSkill and setMinAimSkill to a higher value.
 
 
 4.) ...change the number of bots that join the game:
@@ -250,7 +249,8 @@ v0.92 (xx.05.2017):
 - all files moved to <modfolder>/addons/parabot
 - fixed crashes
 - fixed gauss usage
-- fixed speaker nickname color in teamplay
+- fixed bug with models in teamplay
+- fixed speaker nickname color in chat in teamplay
 - fixed bots behavior in teamplay
 - fixed hangs in DMC
 
