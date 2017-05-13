@@ -141,7 +141,7 @@ bool PB_Configuration::initConfiguration( const char *configPath )
 
 	FILE *file = fopen( str, "rt" );
 	if (!file) {
-		errorMsg( "Missing ", str, "\n" );
+		infoMsg( "Missing ", str, "\n" );
 
 		CreateDirectory( configPath, NULL );
 		if( !createConfiguration( str ) )
@@ -223,7 +223,7 @@ bool PB_Configuration::initPersonalities( const char *personalityPath )
 
 	FILE *file = fopen( str, "rt" );
 	if (!file) {
-		errorMsg( "Missing ", str, "\n" );
+		infoMsg( "Missing ", str, "\n" );
 
 		if( !createPersonalities( str ) )
 			return false;
@@ -274,7 +274,7 @@ bool PB_Configuration::createConfiguration( const char *configFile )
 	FILE *file;
 
 	infoMsg( "Creating ", configFile, "... " );
-	file = fopen( configFile, "a" );
+	file = fopen( configFile, "wt" );
 
 	if( !file )
 	{
@@ -343,7 +343,7 @@ bool PB_Configuration::createPersonalities( const char *PersonalitityFile )
 	FILE *file;
 
 	infoMsg( "Creating ", PersonalitityFile, "... " );
-	file = fopen( PersonalitityFile, "a" );
+	file = fopen( PersonalitityFile, "wt" );
 
 	if( !file )
 	{
@@ -379,12 +379,12 @@ bool PB_Configuration::createPersonalities( const char *PersonalitityFile )
 		case GEARBOX_DLL:
 			fprintf( file, "\"Adrian Shepard\"\t\"shepard\"\t\t9\t8\t8\t6\n" );
 			fprintf( file, "\"Otis Laurey\"\t\t\"otis\"\t\t\t6\t3\t5\t8\n" );
-			fprintf( file, "\"Tower\"\t\t\"tower\"\t\t8\t6\t8\t5\n" );
+			fprintf( file, "\"Tower\"\t\t\t\"tower\"\t\t\t8\t6\t8\t5\n" );
 			fprintf( file, "\"Sharpe\"\t\t\"drill\"\t\t\t8\t4\t6\t10\n" );
-			fprintf( file, "\"Eugene\"\t\t\t\"beret\"\t\t6\t7\t9\t5\n" );
-			fprintf( file, "\"John Smith\"\t\t\"grunt\"\t\t7\t8\t6\t4\n" );
+			fprintf( file, "\"Eugene\"\t\t\"beret\"\t\t\t6\t7\t9\t5\n" );
+			fprintf( file, "\"John Smith\"\t\t\"grunt\"\t\t\t7\t8\t6\t4\n" );
 			fprintf( file, "\"Charlie Root\"\t\t\"recruit\"\t\t7\t7\t7\t7\n" );
-			fprintf( file, "\"Silent Assassin\"\t\t\"massn\"\t\t10\t1\t10\t1\n" );
+			fprintf( file, "\"Silent Assassin\"\t\"massn\"\t\t\t10\t1\t10\t1\n" );
 			fprintf( file, "\"Sinister\"\t\t\"fassn\"\t\t\t10\t1\t10\t1\n" );
 			fprintf( file, "\"Biohazard\"\t\t\"cl_suit\"\t\t4\t1\t4\t2\n" );
 		case AG_DLL:
@@ -399,7 +399,7 @@ bool PB_Configuration::createPersonalities( const char *PersonalitityFile )
 			fprintf( file, "\"Lord Helmchen\"\t\t\"helmet\"\t\t7\t2\t6\t1\n" );
 			fprintf( file, "\"Cool J.\"\t\t\"gordon\"\t\t8\t6\t9\t3\n" );
 			fprintf( file, "\"Paranoid\"\t\t\"gman\"\t\t\t3\t9\t7\t9\n" );
-			fprintf( file, "\"Blastaway\"\t\t\"gman\"\t\t10\t6\t3\t7\n" );
+			fprintf( file, "\"Blastaway\"\t\t\"gman\"\t\t\t10\t6\t3\t7\n" );
 			fprintf( file, "\"Afterburner\"\t\t\"hgrunt\"\t\t1\t8\t7\t4\n" );
 			fprintf( file, "\"Dark Avenger\"\t\t\"scientist\"\t\t2\t5\t2\t6\n" );
 			fprintf( file, "\"[RDZ]Pain\"\t\t\"hgrunt\"\t\t8\t7\t6\t2\n" );
@@ -409,7 +409,7 @@ bool PB_Configuration::createPersonalities( const char *PersonalitityFile )
 			fprintf( file, "\"Desperado\"\t\t\"recon\"\t\t\t4\t10\t5\t7\n" );
 			fprintf( file, "\"Don Juan\"\t\t\"barney\"\t\t2\t4\t4\t10\n" );
 			fprintf( file, "\"[PAS]Bladerunner\"\t\"gordon\"\t\t7\t5\t10\t3\n" );
-			fprintf( file, "\"Mad Max\"\t\t\"zombie\"\t\t4\t6\t5\t1" );
+			fprintf( file, "\"Mad Max\"\t\t\"zombie\"\t\t4\t6\t5\t1\n" );
 			break;
 		case HOLYWARS_DLL:
 			fprintf( file, "\"[PAS]Detonator\"\t\"bad\"\t\t\t10\t10\t10\t8\n" );
