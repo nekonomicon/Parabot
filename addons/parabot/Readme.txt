@@ -1,9 +1,9 @@
 
                         ###############################
                         #                             #
-                        #      PARABOT V0.91 BETA     #
+                        #      PARABOT V0.92 BETA     #
                         #                             #
-                        #        by Killaruna         #
+                        #        by nekonomicon       #
                         #                             #
                         ###############################
 
@@ -38,30 +38,32 @@ V.    Credits
 
 
 The Parabot is an artificial player for Half-Life. The current version 
-(0.91 beta) supports the following playmodes/Mods:
+(0.92 beta) supports the following playmodes/Mods:
 
--> Half-Life 1.1.1.0 (deathmatch & teamplay)
--> Deathmatch Classic (DMC) 1.1.1.0
--> Opposing Force 1.1.1.0 (deathmatch only)
+-> Half-Life (deathmatch & teamplay)
+-> Deathmatch Classic (DMC)
+-> Opposing Force (deathmatch & CTF)
 -> HolyWars 2.0
+-> Bubblemod
+-> Severians
+-> Adrenaline Gamer 6.6 (All gamemodes)
+-> They Hunger Trilogy
 
-You copy the Parabot to your system by executing the "parabot091.exe" self-
-extracting archive.
+You copy the Parabot to your system by extracting the "parabot.zip" archive.
 After that you have to install the bot for the Mods you wish to play (have a
 look at the "How to..." section for that).
 
 The Parabot comes without any waypoint-files that you might know from other 
 bots. It will learn new maps by just playing them together with humans and store
-its experiences in the "Parabot\NavigationFiles" folder. To make this learning 
+its experiences in the "addons/parabot/navpoints" folder. To make this learning 
 more efficient you should move as much as possible when first starting a new 
 map, picking up every item you see on your way. 
 After approximately 15 minutes the Parabot should navigate quite well on average
 sized maps. Note that the storing of the navigation files might cause small 
 delays when changing maps or ending the game.
 
-For recent news and the latest updates have a look at the official 
-Parabot-Website at "http://parabot.nuclearbox.com"
-
+For recent news and the latest updates have a look at the github page 
+https://github.com/nekonomicon/Parabot
 
 
 
@@ -74,10 +76,19 @@ Parabot-Website at "http://parabot.nuclearbox.com"
 
 1.) ...install or uninstall Parabot:
 
-    In the Parabot\dmc, \gearbox, \holywars and \valve folders you will find two 
-    batchfiles: "install.bat" and "remove.bat". If you want to install Parabot
-    for a certain Mod you have to run the "install.bat" of the correspondant
-    directory. For uninstallation run "remove.bat".
+    Copy "addons" folder from archive to Half-Life/<modfolder>.
+    If you have installed metamod then add following lines to
+    your plugins.ini:
+	"win32 addons/parabot/dlls/parabot.dll"
+	"lin32 addons/parabot/dlls/parabot.so"
+
+    If not then edit Half-Life/<modfolder>/liblist.gam.
+    Replace gamedll "dlls/hl.dll"
+       to gamedll "addons/parabot/dlls/parabot.dll". // for Windows
+    Replace gamedll_linux "dlls/hl_i386.so"
+       to gamedll_linux "addons/parabot/dlls/parabot.so". // for Linux
+    Replace gamedll_osx "dlls/hl.dylib"
+       to gamedll_osx "addons/parabot/dlls/parabot.dylib". // for OSX
 
 
 2.) ...play a game with Parabot:
@@ -94,8 +105,9 @@ Parabot-Website at "http://parabot.nuclearbox.com"
 
     If you only want to change the overall difficulty level of playing against
     the bots, the easiest way is to change the "MinAimSkill" and "MaxAimSkill"
-    variables in "Parabot.cfg" - look in the correspondant Mod-directory (e.g
-    "Parabot/valve" if you want to change the settings for HL-deathmatch) and 
+    variables in "parabot.cfg" - look in the correspondant Mod-directory (e.g
+    "valve/addons/parabot/config/valve" if you want to change the settings
+    for HL-deathmatch) and 
     open the file in a texteditor (like notepad.exe). If the bots are too hard
     for you, change MinAimSkill to 1 (or comment the line out by writing a # at
     the beginning) and MaxAimSkill to, let's say, 5. 
@@ -105,7 +117,7 @@ Parabot-Website at "http://parabot.nuclearbox.com"
 
 4.) ...change the number of bots that join the game:
 
-    Open the correspondant "Parabot.cfg" and change the "NumBots" variable
+    Open the correspondant "parabot.cfg" and change the "NumBots" variable
     to the value you like (details are explained in the file).
     Note that while playing you can still add more bots by typing "addbot" in
     the console.
@@ -113,7 +125,7 @@ Parabot-Website at "http://parabot.nuclearbox.com"
 
 5.) ...edit the different bot personalities (name, model, aggressivity,...):
 
-    Open the file "Characters.cfg" in the correspondant Mod-directory as 
+    Open the file "characters.cfg" in the correspondant Mod-directory as 
     explained in 3.) and have a look at the contents. All possible values
     (name, model, aim-skill, perception, aggressivity and communication) are
     explained in there and you can change them as you like or add completely 
@@ -122,9 +134,9 @@ Parabot-Website at "http://parabot.nuclearbox.com"
 
 6.) ...change the language the bots are speaking:
 
-    Change the "ChatFile" setting in the appropriate "Parabot.cfg". 
+    Change the "ChatFile" setting in the appropriate "parabot.cfg". 
     The languages available in this version are English, Spanish, French, 
-    German, Czech, Finnish, Romanian, Swedish and Danish.
+    German, Czech, Finnish, Romanian, Swedish, Danish and Russian.
 
 
 7.) ...edit the chatfiles:
@@ -137,14 +149,14 @@ Parabot-Website at "http://parabot.nuclearbox.com"
     replaced by the weapon that has been used/picked up (only for @GOT_KILLED,
     @KILLED_PLAYER and @GOT_WEAPON).
     You can define new keywords as well (maximum length 30 characters, only
-    containing letters A-Z in uppercase) and add them to the last section.
+    containing letters in uppercase) and add them to the last section.
     It is important to know that keywords appearing first in the file are chosen
     first in case that a sentence contains several known keywords.
 
 
 8.) ...change other options/gamemodes:
 
-    All other options can be adjusted in the appropriate "Parabot.cfg" file.
+    All other options can be adjusted in the appropriate "parabot.cfg" file.
     If you are a real newbie and the bots beat you even at aim-skill 1 (or if
     you are just sick of them blasting you away with the rocketlauncher...) you
     can restrict the weapons they can use or let them run in PeaceMode where 
@@ -200,8 +212,9 @@ specified they work on both normal and dedicated servers:
    - continues after a botstop
 
 You can type these commands in your console or bind them to special keys by 
-editing the corresponding "config.cfg" (in Half-Life\valve, \dmc , \gearbox or 
-\holywars). For the latter you could just copy and paste the following lines:
+editing the corresponding "config.cfg" (in Half-Life\valve, \dmc, \gearbox, 
+\holywars, \ag or \Hunger ). For the latter you could just copy and paste
+the following lines:
 
 bind "F4" "addbot"
 bind "F5" "botcam"
@@ -221,6 +234,25 @@ bind "F12" "restrictedweapons off"
   IV. Version history
 
 ********************************************************************************
+
+v0.92 (xx.05.2017):
+
+- added Steam HL and Xash3D support
+- added metamod support
+- added Linux/OSX/*BSD/Android support
+- added Adrenaline Gamer support
+- added They Hunger Trilogy support
+- added BubbleMOD support
+- added Severians support
+- added Opposing Force CTF support
+- added case-insensitive UTF-8 characters comparison
+- added new chatfile (Russian)
+- all files moved to <modfolder>/addons/parabot
+- fixed crashes
+- fixed gauss usage
+- fixed speaker nickname color in teamplay
+- fixed bots behavior in teamplay
+- fixed hangs in DMC
 
 
 v0.91 (09.10.2002):
@@ -251,7 +283,8 @@ v0.8 (10.03.2002):
 - new combat behaviour (using terrain data)
 - improved hunting and fleeing
 - basic support for Opposing Force (no CTF)
-- fixed various bugs on dedicated servers: "addbot" command working now, botchat as well
+- fixed various bugs on dedicated servers: "addbot" command working now,
+  botchat as well
 - fixed bug that bots don't react when shot
 - fixed several crash bugs
 - added new chatfile (Danish)
@@ -328,9 +361,10 @@ free of charge.
 
 ********************************************************************************
 
+Original Author: Tobias "Killaruna" Heimann ( killaruna@nuclearbox.com )
 
 The Parabot wouldn't have been possible without Botman releasing his 
-HPB Template Code which I used as a base for getting the bot into the game 
+HPB Template Code which used as a base for getting the bot into the game 
 ( http://www.planethalflife.com/botman ).
 A big "THANK YOU" to Botman for this great work!
 
@@ -340,17 +374,17 @@ for the inspiring discussions and comments!
 
 The chat-and-response system was inspired by discussions from the Nuclearbox-
 forums, thanks to Hampst0r and the others for all their suggestions (Only 
-afterwards I played Q3). The original chatfile was written in collaboration with
-Turms and Homer. Thanks to all the translators!
+afterwards Killaruna played Q3). The original chatfile was written
+in collaboration with Turms and Homer. Thanks to all the translators!
 
 Thanks to Rhino for testing Parabot on his dedicated server at Fragville.net!
 
-
+Thanks to Whistler for "Parabot Reloaded" ( http://www.bots-united.com )
 
 And now: Stop reading and have some fragging fun!
 
 
 ********************************************************************************
 
-For any questions or comments e-mail me at killaruna@nuclearbox.com
-or visit the Parabot forum at http://forums.nuclearbox.com 
+For any questions or comments e-mail me at uselessd11@gmail.com
+or visit at the github page: https://github.com/nekonomicon/Parabot
