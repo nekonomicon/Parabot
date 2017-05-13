@@ -2,7 +2,7 @@
 # Copyright © nekonomicon 2016
 
 MODULE =	parabot
-SOLIB =		so
+OSLIB =		so
 CXX ?=		g++
 
 CFLAGS +=	-Os -pipe -m32 -DNDEBUG \
@@ -10,7 +10,7 @@ CFLAGS +=	-Os -pipe -m32 -DNDEBUG \
 		-ffast-math -funroll-loops \
 		-fomit-frame-pointer -ftree-vectorize \
 		-fvisibility=hidden -fno-rtti -fno-exceptions \
-		-fno-function-sections -fno-data-sections \
+		-ffunction-sections -fdata-sections \
 		-fno-asynchronous-unwind-tables
 
 DEFINES =	-Wno-write-strings
@@ -68,19 +68,20 @@ SRC =		../bot/bot.cpp \
 		../metamod/meta_api.cpp
 
 SYS =		$(shell $(CXX) -dumpmachine)
-ifneq(, $(findstring linux, $(SYS)))
+ifneq (, $(findstring linux, $(SYS)))
 LDFLAGS +=	-ldl
 endif
-ifneq(, $(findstring mingw, $(SYS)))
+ifneq (, $(findstring mingw, $(SYS)))
+CFLAGS +=       -fno-data-sections
 LDFLAGS +=	-Wl,--add-stdcall-alias
-SOLIB =		dll
+OSLIB =		dll
 endif
-ifneq(, $(findstring darwin, $(SYS)))
-SOLIB =         dylib
+ifneq (, $(findstring darwin, $(SYS)))
+OSLIB =         dylib
 endif
 
 LDFLAGS +=	-shared -static-libgcc -static-libstdc++ -Wl,--no-undefined -Wl,--gc-sections -Wl,--strip-all
-LIBNAME =	$(MODULE).$(SOLIB)
+LIBNAME =	$(MODULE).$(OSLIB)
 
 OBJ = $(SRC:%.cpp=%.o)
 
