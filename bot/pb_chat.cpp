@@ -263,7 +263,7 @@ char* PB_Chat::checkMessageForWeapon( const char *msg, const char *wpnName, edic
 	
 	char usedWpn[32];
 
-	char *wpnPos = strstr( msg, "%w" );
+	char *wpnPos = (char *)strstr( msg, "%w" );
 	if (!wpnPos) {
 		strcpy( weaponMsg, msg );
 		return &weaponMsg[0];
@@ -276,7 +276,7 @@ char* PB_Chat::checkMessageForWeapon( const char *msg, const char *wpnName, edic
 		strcpy( usedWpn, getWeaponName( clientWeapon[owner] ) );
 	}
 
-	char *namePos = strstr( msg, "%s" );
+	char *namePos = (char *)strstr( msg, "%s" );
 
 	if (!namePos) {
 		wpnPos[1] = 's';
