@@ -802,7 +802,11 @@ const char *Cmd_Argv( int argc )
    }
    else
    {
-		return (*g_engfuncs.pfnCmd_Argv)(argc);
+		const char *pargv = (*g_engfuncs.pfnCmd_Argv)(argc);
+		if(!g_meta_init)
+			return pargv;
+		else
+			RETURN_META_VALUE(MRES_SUPERCEDE, pargv);
    }
 }
 
