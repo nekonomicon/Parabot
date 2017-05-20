@@ -13,7 +13,7 @@ endif
 LOCAL_CFLAGS += -Wno-write-strings
 
 LOCAL_CPPFLAGS := $(LOCAL_CFLAGS) -fno-exceptions -fno-rtti -ffunction-sections -fdata-sections \
-			-fno-asynchronous-unwind-tables
+			-fno-asynchronous-unwind-tables -fsigned-char
 
 LOCAL_LDFLAGS += -Wl,--gc-sections
 

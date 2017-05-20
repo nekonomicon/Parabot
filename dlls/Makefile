@@ -5,7 +5,7 @@ MODULE =	parabot
 OSLIB =		so
 CXX ?=		g++
 
-CFLAGS +=	-Os -pipe -m32 -DNDEBUG \
+CFLAGS +=	-Os -pipe -DNDEBUG \
 		-fsigned-char -fPIC \
 		-ffast-math -funroll-loops \
 		-fomit-frame-pointer -ftree-vectorize \
@@ -78,6 +78,9 @@ OSLIB =		dll
 endif
 ifneq (, $(findstring darwin, $(SYS)))
 OSLIB =         dylib
+endif
+ifneq (, $(findstring x86_64, $(SYS)))
+CFLAGS +=	-m32
 endif
 
 LDFLAGS +=	-shared -static-libgcc -static-libstdc++ -Wl,--no-undefined -Wl,--gc-sections -Wl,--strip-all
