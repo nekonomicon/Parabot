@@ -1,6 +1,6 @@
 # Parabot for Half-Life
 
-Human-like artificial player for Half-Life and some other games on GoldSrc game engine.
+Human-like artificial player for Half-Life and some other games on GoldSrc and Xash3D game engines.
 
 - [Full information](https://github.com/nekonomicon/Parabot/blob/master/addons/parabot/Readme.txt)
 
@@ -32,3 +32,7 @@ TODO
 	% cd dlls
 	% gmake
 ```
+
+### Android
+
+Look **android/build.sh** script.
