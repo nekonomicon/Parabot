@@ -17,6 +17,7 @@
 #include "pb_global.h"
 #include "pb_configuration.h"
 #include "pb_chat.h"
+#include "pakextractor.h"
 
 extern int mod_id;
 PB_Configuration pbConfig;
@@ -31,7 +32,6 @@ GIVEFNPTRSTODLL other_GiveFnptrsToDll;
 GETNEWDLLFUNCTIONS other_GetNewDLLFunctions; 
 
 float sineTable[256];					// sine table for e.g. look-arounds
-
 
 void initSineTable()
 {
@@ -75,6 +75,7 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved )
 extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, globalvars_t *pGlobals )
 {
 	char game_dir[256], filePath[100];
+	struct stat checkdir;
 	int pos = 0;
 
 	// get the engine functions from the engine...
@@ -98,50 +99,43 @@ extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 	}
 	strcpy( mod_name, &game_dir[pos] );
 	
-	if (strcmp(mod_name, "ag") == 0)
+	if( !strcmp( mod_name, "ag" ) )
 	{
 		mod_id = AG_DLL;
-		if( !g_meta_init )
-			h_Library = LoadLibrary( "ag/dlls/ag"ARCH_SUFFIX"."OS_LIB_EXT );
 	}
-	else if (strcmp(mod_name, "valve") == 0)
+	else if( !strcmp( mod_name, "valve" ) || !strcmp( mod_name, "hldm" ) )
 	{
 		mod_id = VALVE_DLL;
-		if( !g_meta_init )
-			h_Library = LoadLibrary( "valve/dlls/hl"ARCH_SUFFIX"."OS_LIB_EXT );
 	}
-	else if (strcmp(mod_name, "Hunger") == 0)
+	else if( !strcmp( mod_name, "Hunger" ) )
 	{
 		mod_id = HUNGER_DLL;
-		if( !g_meta_init )
-			h_Library = LoadLibrary( "Hunger/dlls/einar"ARCH_SUFFIX"."OS_LIB_EXT );
 	}
-	else if (strcmp(mod_name, "hldm") == 0)
-	{
-		mod_id = VALVE_DLL;
-		if( !g_meta_init )
-			h_Library = LoadLibrary( "hldm/dlls/hl"ARCH_SUFFIX"."OS_LIB_EXT );
-	}
-	else if (strcmp(mod_name, "holywars") == 0)
+	else if( !strcmp( mod_name, "holywars" ) )
 	{
 		mod_id = HOLYWARS_DLL;
-		if( !g_meta_init )
-			h_Library = LoadLibrary( "holywars/dlls/holywars"ARCH_SUFFIX"."OS_LIB_EXT );
 	}
-	else if (strcmp(mod_name, "dmc") == 0)
+	else if( !strcmp( mod_name, "dmc" ) )
 	{
 		mod_id = DMC_DLL;
-		if( !g_meta_init )
-			h_Library = LoadLibrary( "dmc/dlls/dmc"ARCH_SUFFIX"."OS_LIB_EXT );
 	}
-	else if (strcmp(mod_name, "gearbox") == 0)
+	else if( !strcmp( mod_name, "gearbox" ) )
 	{
 		mod_id = GEARBOX_DLL;
-		if( !g_meta_init )
-			h_Library = LoadLibrary( "gearbox/dlls/opfor"ARCH_SUFFIX"."OS_LIB_EXT );
 	}
 
 	sprintf( filePath, "%s/addons/parabot/config/%s/", mod_name, mod_name );
+#if defined(__ANDROID__)
+	if( 0 > stat( filePath, &checkdir ) )
+	{
+		FILE *pfile = fopen( getenv( "PARABOT_EXTRAS_PAK" ), "rb" );
+		if( pfile )
+		{
+			extrpak( pfile, mod_name );
+			fclose( pfile );
+		}
+	}
+#endif
 	pbConfig.initConfiguration( filePath );         
 	pbConfig.initPersonalities( filePath );
 
@@ -159,6 +153,42 @@ extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 
 	if( !g_meta_init )
 	{
+#if defined(__ANDROID__)
+#ifdef LOAD_HARDFP
+		const char *serverdll = "libserver_hardfp.so";
+#else
+		const char *serverdll = "libserver.so";
+#endif
+		snprintf( filePath, sizeof(filePath), "%s/%s", getenv( "XASH3D_GAMELIBDIR" ), serverdll );
+#else
+		filePath[pos]= '\0';
+
+		switch( mod_id )
+		{
+			case AG_DLL:
+				strcat( filePath, "/dlls/ag"ARCH_SUFFIX"."OS_LIB_EXT );
+				break;
+			case VALVE_DLL:
+				strcat( filePath, "/dlls/hl."OS_LIB_EXT );
+				break;
+			case DMC_DLL:
+				strcat( filePath, "/dlls/dmc."OS_LIB_EXT );
+				break;
+			case GEARBOX_DLL:
+				strcat( filePath, "/dlls/opfor."OS_LIB_EXT );
+				break;
+			case HOLYWARS_DLL:
+				strcat( filePath, "/dlls/holywars"ARCH_SUFFIX"."OS_LIB_EXT );
+				break;
+			case HUNGER_DLL:
+                                strcat( filePath, "/dlls/einar"ARCH_SUFFIX"."OS_LIB_EXT );
+                                break;
+			default:
+				break;
+		}
+#endif
+		h_Library = LoadLibrary( filePath );
+
 		if (h_Library == NULL) {	// Directory error or Unsupported MOD!
 			errorMsg( "MOD Dll not found (or unsupported MOD)!" );
 			debugFile( "Library = 0\n" );

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+	android:text="@string/launch_button"
+        android:id="@+id/layout_launcher"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:background="#252525"
+        android:weightSum="1"
+        tools:context="in.celest.xash3d.LauncherActivity">
+<TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+	android:text="@string/cmd_args_text"
+        android:id="@+id/textView_args"/>
+<EditText
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/cmdArgs"/>
+<TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+	android:text="@string/mod_spinner_text"
+        android:id="@+id/textView_mod"
+        android:layout_marginTop="10px"/>
+<Spinner
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:id="@+id/modSpinner"/>
+<Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/button_launch"
+        android:layout_gravity="right"
+        android:layout_marginTop="10px"
+        android:onClick="startXash"/>
+</LinearLayout>
