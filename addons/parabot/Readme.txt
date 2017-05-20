@@ -49,7 +49,7 @@ The Parabot is an artificial player for Half-Life. The current version
 -> Adrenaline Gamer 6.6 (All gamemodes)
 -> They Hunger Trilogy
 
-You copy the Parabot to your system by extracting the "parabot.zip" archive.
+You copy the Parabot to your system by extracting the "parabot092-pc.zip" archive.
 After that you have to install the bot for the Mods you wish to play (have a
 look at the "How to..." section for that).
 
@@ -85,7 +85,7 @@ https://github.com/nekonomicon/Parabot
     If not then edit Half-Life/<modfolder>/liblist.gam.
     Replace gamedll "dlls/hl.dll"
        to gamedll "addons/parabot/dlls/parabot.dll". // for Windows
-    Replace gamedll_linux "dlls/hl_i386.so"
+    Replace gamedll_linux "dlls/hl.so"
        to gamedll_linux "addons/parabot/dlls/parabot.so". // for Linux
     Replace gamedll_osx "dlls/hl.dylib"
        to gamedll_osx "addons/parabot/dlls/parabot.dylib". // for OSX
@@ -159,8 +159,7 @@ https://github.com/nekonomicon/Parabot
     If you are a real newbie and the bots beat you even at aim-skill 1 (or if
     you are just sick of them blasting you away with the rocketlauncher...) you
     can restrict the weapons they can use or let them run in PeaceMode where 
-    they won't attack anyone before they get hurt themselves. You can switch off
-    the chat as well if it irritates you.
+    they won't attack. You can switch off the chat as well if it irritates you.
 
 
 
@@ -234,7 +233,7 @@ bind "F12" "restrictedweapons off"
 
 ********************************************************************************
 
-v0.92 (xx.05.2017):
+v0.92 (21.05.2017):
 
 - added Steam HL and Xash3D support
 - added metamod support
@@ -247,6 +246,7 @@ v0.92 (xx.05.2017):
 - added case-insensitive UTF-8 characters comparison
 - added new chatfile (Russian)
 - all files moved to <modfolder>/addons/parabot
+- removed debug code from release builds
 - fixed crashes
 - fixed gauss usage
 - fixed bug with models in teamplay
