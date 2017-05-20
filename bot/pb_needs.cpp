@@ -70,6 +70,11 @@ float PB_Needs::wishForCombat()
 	case AG_DLL:
 	case VALVE_DLL:
 			if( bot->combat.hasWeapon( VALVE_WEAPON_EGON ) && g_hldm_mod == HLDM ) weapon = 1;
+			else if( bot->combat.hasWeapon( VALVE_WEAPON_EGON ) && g_hldm_mod == BMOD )
+			{
+				if( !CVAR_GET_FLOAT( "bm_gluon_mod" ) )
+					weapon = 1;					
+			}
 			if( bot->combat.hasWeapon( VALVE_WEAPON_GAUSS ) ) weapon = 1;
 		else if ( bot->combat.hasWeapon( VALVE_WEAPON_MP5       ) || 
 				  bot->combat.hasWeapon( VALVE_WEAPON_RPG       )    )  weapon = 0.8;
