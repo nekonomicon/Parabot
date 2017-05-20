@@ -281,6 +281,7 @@ int UTIL_GetTeam(edict_t *pEntity)
 
 	switch( mod_id ) 
 	{
+	case DMC_DLL:
 	case VALVE_DLL:
 	case HUNGER_DLL:
 	case GEARBOX_DLL:

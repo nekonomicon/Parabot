@@ -1266,7 +1266,7 @@ void pfnSetKeyValue(char *infobuffer, char *key, char *value)
 
 void pfnSetClientKeyValue( int clientIndex, char *infobuffer, char *key, char *value )
 {
-	if (((mod_id == VALVE_DLL || mod_id == DMC_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) && (strcmp( key, "team" ) == 0))||(mod_id == DMC_DLL && CVAR_GET_FLOAT("mp_teamplay") == 6 )) {	// init teamlist
+	if ((mod_id == VALVE_DLL || mod_id == DMC_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) && (strcmp( key, "team" ) == 0)) {	// init teamlist
 		valveTeamPlayMode = true;
 
 		bool teamKnown = false;
