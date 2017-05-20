@@ -2,7 +2,6 @@
 <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-	android:text="@string/launch_button"
         android:id="@+id/layout_launcher"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -27,12 +26,13 @@
         android:layout_marginTop="10px"/>
 <Spinner
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:id="@+id/modSpinner"/>
 <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/button_launch"
+	android:text="@string/launch_button"
         android:layout_gravity="right"
         android:layout_marginTop="10px"
         android:onClick="startXash"/>

@@ -124,7 +124,7 @@ extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 		mod_id = GEARBOX_DLL;
 	}
 
-	sprintf( filePath, "%s/addons/parabot/config/%s/", mod_name, mod_name );
+	sprintf( filePath, "%s/addons/parabot/config/", mod_name );
 #if defined(__ANDROID__)
 	if( 0 > stat( filePath, &checkdir ) )
 	{
@@ -136,7 +136,8 @@ extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 		}
 	}
 #endif
-	pbConfig.initConfiguration( filePath );         
+	strcat( filePath, mod_name );
+	pbConfig.initConfiguration( filePath );
 	pbConfig.initPersonalities( filePath );
 
 	pos = strlen( mod_name );

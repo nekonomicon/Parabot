@@ -33,6 +33,7 @@ public class LauncherActivity extends Activity {
 		// Build layout
 		setContentView(R.layout.activity_launcher);	
 		cmdArgs = (EditText)findViewById(R.id.cmdArgs);
+		cmdArgs.setSingleLine(true);
 		modSpinner= (Spinner)findViewById(R.id.modSpinner);
                 modSpinner.setEnabled(true);
 		final String[] list = {
@@ -48,6 +49,7 @@ public class LauncherActivity extends Activity {
                 modSpinner.setAdapter(adapter);
 		mPref = getSharedPreferences("bot", 0);
 		cmdArgs.setText(mPref.getString("argv", "-dev 3 -log"));
+		modSpinner.setSelection(mPref.getInt("spinner", 0));
 	}
 
 	public void startXash(View view)
@@ -56,9 +58,10 @@ public class LauncherActivity extends Activity {
 		Intent intent = new Intent();
 		intent.setAction("in.celest.xash3d.START");
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
+		String argv=cmdArgs.getText().toString();
 		SharedPreferences.Editor editor = mPref.edit();
-		editor.putString("argv", cmdArgs.getText().toString());
+		editor.putString("argv", argv);
+		editor.putInt("spinner", modSpinner.getSelectedItemPosition());
 		editor.commit();
 		String fullPath = getFilesDir().getAbsolutePath().replace("/files", "/lib");
 		File pb_hardfp = new File(fullPath + "/libparabot_hardfp.so");
@@ -72,38 +75,38 @@ public class LauncherActivity extends Activity {
 		{
 			fullPath = fullPath.replace("parabot", "hunger");
 			gamedir = "Hunger";
-			checkLibraryExistence(fullPath, "They Hunger ");
-			return;
+			if(!checkLibraryExistence(fullPath, "They Hunger "))
+				return;
 		}
 		else if(modSpinner.getSelectedItemPosition() == 4)
 		{
 			fullPath = fullPath.replace("in.celest", "su.xash");
 			fullPath = fullPath.replace("parabot", "ag");
 			gamedir = "ag";
-			checkLibraryExistence(fullPath, "Adrenaline Gamer ");
-                        return;
+			if(!checkLibraryExistence(fullPath, "Adrenaline Gamer "))
+				return;
 		}
 		else if(modSpinner.getSelectedItemPosition() == 3) // anti-lost_gamer patch(port Opposing Force or die)
 		{
 			fullPath = fullPath.replace("parabot", "gearbox");
 			gamedir = "gearbox";
-			checkLibraryExistence(fullPath, "OP4CELauncher ");
-                        return;
+			if(!checkLibraryExistence(fullPath, "OP4CELauncher "))
+				return;
 		}
 		else if(modSpinner.getSelectedItemPosition() == 2)
 		{
 			fullPath = fullPath.replace("in.celest", "su.xash");
 			fullPath = fullPath.replace("parabot", "dmc");
 			gamedir = "dmc";
-			checkLibraryExistence(fullPath, "QCLauncher ");
-                        return;
+			if(!checkLibraryExistence(fullPath, "QCLauncher "))
+				return;
 		}
 		else if(modSpinner.getSelectedItemPosition() == 1)
 		{
 			fullPath = fullPath.replace("parabot", "bubblemod");
 			gamedir = "valve";
-			checkLibraryExistence(fullPath, "Bubblemod ");
-                        return;
+			if(!checkLibraryExistence(fullPath, "Bubblemod "))
+				return;
 		}
 		else
 		{
@@ -136,15 +139,19 @@ public class LauncherActivity extends Activity {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
 		builder.setTitle("Xash error")
-		.setMessage(msg + R.string.alert_dialog_text)
+		.setMessage(msg + getString(R.string.alert_dialog_text))
 		.show();
 	}
 
-	public void checkLibraryExistence(String Path, String msg)
+	public boolean checkLibraryExistence(String Path, String msg)
 	{
 		File serverlib_hardfp = new File(Path + "/libserver_hardfp.so");
 		File serverlib = new File(Path + "/libserver.so");
 		if(!serverlib.exists() && !serverlib_hardfp.exists())
+		{
 			showXashInstallDialog(msg);
+			return false;
+		}
+		return true;
 	}
 }
