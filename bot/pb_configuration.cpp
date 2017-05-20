@@ -322,7 +322,7 @@ bool PB_Configuration::createConfiguration( const char *configFile )
 	fprintf( file, "#-------------------------------------------------------------------------------------------\n" );
 	fprintf( file, "# CHAT CONFIGURATION\n" );
 	fprintf( file, "#-------------------------------------------------------------------------------------------\n\n\n" );
-	fprintf( file, "# BotChat = On/Off (Default=On)" );
+	fprintf( file, "# BotChat = On/Off (Default=On)\n" );
 	fprintf( file, "# If enabled bots will chat as much as their communication-value permits.\n\n" );
 	fprintf( file, "BotChat = On\n\n\n" );
 	fprintf( file, "# ChatFile determines the language the bots use for chatting (Default=\"ChatEnglish.txt\")\n\n" );

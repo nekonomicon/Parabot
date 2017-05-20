@@ -101,7 +101,7 @@ bool PB_Chat::load( char *chatFile )
 
 	FILE *file = fopen( chatFile, "rt" );
 	if (!file) {
-		errorMsg( "Missing ", chatFile );
+		errorMsg( "Missing ", chatFile, "\n" );
 		return false;
 	}
 
