@@ -83,7 +83,7 @@ ifneq (, $(findstring x86_64, $(SYS)))
 CFLAGS +=       -m32
 endif
 
-LDFLAGS +=	-shared -static-libgcc -static-libstdc++ -Wl,--undefined -Wl,--gc-sections -Wl,--strip-all
+LDFLAGS +=	-shared -static-libgcc -static-libstdc++ -Wl,--no-undefined -Wl,--gc-sections -Wl,--strip-all
 LIBNAME =	$(MODULE).$(OSLIB)
 
 OBJ = $(SRC:%.cpp=%.o)
