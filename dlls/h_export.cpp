@@ -75,7 +75,6 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved )
 extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, globalvars_t *pGlobals )
 {
 	char game_dir[256], filePath[100];
-	struct stat checkdir;
 	int pos = 0;
 
 	// get the engine functions from the engine...
@@ -126,6 +125,7 @@ extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 
 	sprintf( filePath, "%s/addons/parabot/config/", mod_name );
 #if defined(__ANDROID__)
+	struct stat checkdir;
 	if( 0 > stat( filePath, &checkdir ) )
 	{
 		FILE *pfile = fopen( getenv( "PARABOT_EXTRAS_PAK" ), "rb" );
