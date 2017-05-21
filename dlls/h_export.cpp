@@ -137,6 +137,7 @@ extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 	}
 #endif
 	strcat( filePath, mod_name );
+	strcat( filePath, "/" );
 	pbConfig.initConfiguration( filePath );
 	pbConfig.initPersonalities( filePath );
 
