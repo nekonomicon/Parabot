@@ -73,17 +73,20 @@ LDFLAGS +=	-ldl
 endif
 ifneq (, $(findstring mingw, $(SYS)))
 CFLAGS +=       -fno-data-sections
-LDFLAGS +=	-Wl,--add-stdcall-alias
+LDFLAGS +=	-Wl,--add-stdcall-alias -static-libgcc -static-libstdc++
 OSLIB =		dll
 endif
 ifneq (, $(findstring darwin, $(SYS)))
 OSLIB =         dylib
 endif
+ifneq (, $(findstring gcc, $(CC)))
+LDFLAGS +=       -static-libstdc++
+endif
 ifneq (, $(findstring x86_64, $(SYS)))
 CFLAGS +=       -m32
 endif
 
-LDFLAGS +=	-shared -static-libgcc -static-libstdc++ -Wl,--undefined -Wl,--gc-sections -Wl,--strip-all
+LDFLAGS +=	-shared 
 LIBNAME =	$(MODULE).$(OSLIB)
 
 OBJ = $(SRC:%.cpp=%.o)
