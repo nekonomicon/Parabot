@@ -79,7 +79,7 @@ endif
 ifneq (, $(findstring darwin, $(SYS)))
 OSLIB =         dylib
 endif
-ifneq (, $(findstring g++, $(CXX)))
+ifneq (, $(findstring gcc, $(CC)))
 LDFLAGS +=      -static-libgcc -static-libstdc++
 endif
 ifneq (, $(findstring x86_64, $(SYS)))
