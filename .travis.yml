@@ -7,7 +7,7 @@ os:
   - osx
 sudo: true
 before_script:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install gcc-multilib g++-multilib; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install gcc-multilib g++-multilib libstdc++6-4.6-pic; fi
 script:
   - cd dlls
   - make -j2

@@ -79,11 +79,14 @@ endif
 ifneq (, $(findstring darwin, $(SYS)))
 OSLIB =         dylib
 endif
+ifneq (, $(findstring g++, $(CXX)))
+LDFLAGS +=      -static-libgcc -static-libstdc++
+endif
 ifneq (, $(findstring x86_64, $(SYS)))
-CFLAGS +=	-m32
+CFLAGS +=       -m32
 endif
 
-LDFLAGS +=	-shared -Wl,--no-undefined -Wl,--gc-sections -Wl,--strip-all
+LDFLAGS +=	-shared  -Wl,--gc-sections -Wl,--strip-all
 LIBNAME =	$(MODULE).$(OSLIB)
 
 OBJ = $(SRC:%.cpp=%.o)
