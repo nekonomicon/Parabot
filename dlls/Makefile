@@ -81,6 +81,7 @@ OSLIB =         dylib
 endif
 ifneq (, $(findstring x86_64, $(SYS)))
 CFLAGS +=       -m32
+LDFLAGS +=	-m32
 endif
 
 LDFLAGS +=	-shared -static-libgcc -static-libstdc++ -Wl,--no-undefined -Wl,--gc-sections -Wl,--strip-all
