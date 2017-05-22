@@ -50,6 +50,7 @@ public class LauncherActivity extends Activity {
 		mPref = getSharedPreferences("bot", 0);
 		cmdArgs.setText(mPref.getString("argv", "-dev 3 -log"));
 		modSpinner.setSelection(mPref.getInt("spinner", 0));
+		InstallReceiver.extractPAK(this, false);
 	}
 
 	public void startXash(View view)
