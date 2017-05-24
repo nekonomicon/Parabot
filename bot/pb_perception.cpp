@@ -583,7 +583,7 @@ void PB_Perception::collectData()
 			addIfVisible( ent->edict(), PI_SNARK );
 		}
 		else if ( strcmp( pClassname, "monster_tripmine" ) == 0 || strcmp( pClassname, "monster_tripsnark" ) == 0 ) {
-			if (tripmineOwner( ent ) == botEnt) {
+			if (ent->edict()->v.owner == botEnt) {
 				// remember own tripmines even without seeing them:
 				float dist = (ent->pev->origin - botEnt->v.origin).Length();
 				detections[cdet].push_back( PB_Percept( sensitivity, ent->edict(), PI_TRACKABLE, PI_TRIPMINE, dist) );

@@ -288,22 +288,31 @@ bool PB_WeaponHandling::armBestWeapon( float distance, float hitProb, int flags 
 			}
 		}
 		else if ( bestWeapon==VALVE_WEAPON_RPG ) {
-			char *rpgClass = (char*)getActiveItem( botEnt );
-			if (rpgClass) {
-				int  *spotActive = (int*)(rpgClass+124);
-				if ( bestMode==1 && (*spotActive)==0 && 
-					(lastModeSwitch+0.5)<worldTime() ) {
-					botAction->add( BOT_FIRE_SEC );
-					lastModeSwitch = worldTime();
-					debugMsg( "Using RPG laser mode!\n" );
-				}
-				else if ( bestMode==2 && (*spotActive)!=0 &&
-					(lastModeSwitch+0.5)<worldTime() ) {
-					botAction->add( BOT_FIRE_SEC );
-					debugMsg( "Using RPG sneak mode!\n" );
-					lastModeSwitch = worldTime();
+			CBaseEntity *pent = NULL;
+			bool spotActive = false;
+			while( ( pent = UTIL_FindEntityInSphere( pent, botEnt->v.origin, MAX_DIST_VP ) ) )
+			{
+				if( !strcmp( STRING( pent->pev->classname ), "laser_spot" ) )
+				{
+					if( laserdotOwner( pent->edict() ) == botEnt )
+					{
+						spotActive = true;
+						break;
+					}
 				}
 			}
+			if( bestMode==1 && !spotActive && 
+				(lastModeSwitch+0.5)<worldTime() ) {
+				botAction->add( BOT_FIRE_SEC );
+				lastModeSwitch = worldTime();
+				debugMsg( "Using RPG laser mode!\n" );
+			}
+			else if ( bestMode==2 && spotActive &&
+				(lastModeSwitch+0.5)<worldTime() ) {
+				botAction->add( BOT_FIRE_SEC );
+				debugMsg( "Using RPG sneak mode!\n" );
+				lastModeSwitch = worldTime();
+			}	
 		}
 	}
 	// check for reload
