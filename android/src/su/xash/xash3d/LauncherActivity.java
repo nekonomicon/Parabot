@@ -76,7 +76,7 @@ public class LauncherActivity extends Activity {
 		{
 			fullPath = fullPath.replace("parabot", "hunger");
 			gamedir = "Hunger";
-			if(!checkLibraryExistence(fullPath, "They Hunger "))
+			if(!checkLibraryExistence(fullPath, "They Hunger ", true))
 				return;
 		}
 		else if(modSpinner.getSelectedItemPosition() == 4)
@@ -84,14 +84,14 @@ public class LauncherActivity extends Activity {
 			fullPath = fullPath.replace("in.celest", "su.xash");
 			fullPath = fullPath.replace("parabot", "ag");
 			gamedir = "ag";
-			if(!checkLibraryExistence(fullPath, "Adrenaline Gamer "))
+			if(!checkLibraryExistence(fullPath, "Adrenaline Gamer ", true))
 				return;
 		}
 		else if(modSpinner.getSelectedItemPosition() == 3) // anti-lost_gamer patch(port Opposing Force or die)
 		{
 			fullPath = fullPath.replace("parabot", "gearbox");
 			gamedir = "gearbox";
-			if(!checkLibraryExistence(fullPath, "OP4CELauncher "))
+			if(!checkLibraryExistence(fullPath, "OP4CELauncher ", true))
 				return;
 		}
 		else if(modSpinner.getSelectedItemPosition() == 2)
@@ -99,19 +99,21 @@ public class LauncherActivity extends Activity {
 			fullPath = fullPath.replace("in.celest", "su.xash");
 			fullPath = fullPath.replace("parabot", "dmc");
 			gamedir = "dmc";
-			if(!checkLibraryExistence(fullPath, "QCLauncher "))
+			if(!checkLibraryExistence(fullPath, "QCLauncher ", true))
 				return;
 		}
 		else if(modSpinner.getSelectedItemPosition() == 1)
 		{
 			fullPath = fullPath.replace("parabot", "bubblemod");
 			gamedir = "valve";
-			if(!checkLibraryExistence(fullPath, "Bubblemod "))
+			if(!checkLibraryExistence(fullPath, "Bubblemod ", true))
 				return;
 		}
 		else
 		{
-			fullPath = fullPath.replace("parabot", "hl");
+			fullPath = fullPath.replace("parabot", "hl-test");
+			if(!checkLibraryExistence(fullPath, "", false))
+				fullPath = fullPath.replace("hl-test", "hl");
 			gamedir = "valve";
 		}
 
@@ -144,13 +146,14 @@ public class LauncherActivity extends Activity {
 		.show();
 	}
 
-	public boolean checkLibraryExistence(String Path, String msg)
+	public boolean checkLibraryExistence(String Path, String msg, boolean showMsg)
 	{
 		File serverlib_hardfp = new File(Path + "/libserver_hardfp.so");
 		File serverlib = new File(Path + "/libserver.so");
 		if(!serverlib.exists() && !serverlib_hardfp.exists())
 		{
-			showXashInstallDialog(msg);
+			if(showMsg)
+				showXashInstallDialog(msg);
 			return false;
 		}
 		return true;
