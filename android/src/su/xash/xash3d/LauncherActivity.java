@@ -111,9 +111,9 @@ public class LauncherActivity extends Activity {
 		}
 		else
 		{
-			fullPath = fullPath.replace("parabot", "hl-test");
+			fullPath = fullPath.replace("parabot", "hl.test");
 			if(!checkLibraryExistence(fullPath, "", false))
-				fullPath = fullPath.replace("hl-test", "hl");
+				fullPath = fullPath.replace("hl.test", "hl");
 			gamedir = "valve";
 		}
 
