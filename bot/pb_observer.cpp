@@ -487,7 +487,7 @@ void PB_Observer::checkForUse( int oId, Vector &pos )
 void PB_Observer::checkForMove( int oId, Vector &pos )
 {
 	// sharp turn means >90 degrees yaw change and moved >10 units:
-	bool sharpTurn = ((abs( UTIL_AngleDiff(obs[oId].lastWpYaw, obs[oId].player->pev->v_angle.y) ) > 90) &&
+	bool sharpTurn = ((std::abs( UTIL_AngleDiff(obs[oId].lastWpYaw, obs[oId].player->pev->v_angle.y) ) > 90) &&
 					 (pos-obs[oId].lastWpPos).Length() > 10);
 
 	if ( ((pos-obs[oId].lastWpPos).Length() > MIN_WAYPOINT_DIST) || sharpTurn )

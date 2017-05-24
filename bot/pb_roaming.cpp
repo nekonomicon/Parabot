@@ -439,8 +439,8 @@ void PB_Roaming::checkWay( const Vector &targetPos )
 				right.blocked = false;	// direction change -> cancel everything
 				left.shouldJump = false;
 				right.shouldJump = false;
-				if ( (abs(UTIL_AngleDiff(action->moveAngleYaw(),targetAngle.y))<=90) &&
-					(abs(UTIL_AngleDiff(action->moveAngleYaw()+90,targetAngle.y))<=90) ) {
+				if ( (std::abs(UTIL_AngleDiff(action->moveAngleYaw(),targetAngle.y))<=90) &&
+					(std::abs(UTIL_AngleDiff(action->moveAngleYaw()+90,targetAngle.y))<=90) ) {
 					followLeft=false;
 					if (debugWay) debugMsg( "Freed from left wall.\n");
 				}
@@ -501,8 +501,8 @@ void PB_Roaming::checkWay( const Vector &targetPos )
 				left.blocked = false;	// direction change -> cancel everything
 				left.shouldJump = false;
 				right.shouldJump = false;
-				if ( (abs(UTIL_AngleDiff(action->moveAngleYaw(),targetAngle.y))<=90) &&
-					(abs(UTIL_AngleDiff(action->moveAngleYaw()-90,targetAngle.y))<=90) ) {
+				if ( (std::abs(UTIL_AngleDiff(action->moveAngleYaw(),targetAngle.y))<=90) &&
+					(std::abs(UTIL_AngleDiff(action->moveAngleYaw()-90,targetAngle.y))<=90) ) {
 					followRight=false;
 					if (debugWay) debugMsg( "Freed from right wall.\n");
 				}
@@ -559,7 +559,7 @@ void PB_Roaming::checkWay( const Vector &targetPos )
 			int turn;
 			if (left.wallAngle.y==right.wallAngle.y) { // in front of plain wall
 				float adtw = UTIL_AngleDiff(left.wallAngle.y, targetAngle.y);
-				if (abs(adtw)>135) { // target straight behind
+				if (std::abs(adtw)>135) { // target straight behind
 					turn = searchExit (left.wallAngle);
 					if (turn==NO_DIR) {
 						if (debugWay) debugMsg( "Blocked, no exit found: ");
@@ -639,7 +639,7 @@ void PB_Roaming::checkWay( const Vector &targetPos )
 
 	if (targetVisible) { // special behaviour if target is visible:
 		if ( (targetDistance<70) ||	     // - too close to target, ignore walls
-			 ((followLeft||followRight) && sideValid && (abs(UTIL_AngleDiff(side.wallAngle.y,targetAngle.y))<=90)) ) {	
+			 ((followLeft||followRight) && sideValid && (std::abs(UTIL_AngleDiff(side.wallAngle.y,targetAngle.y))<=90)) ) {	
 			//if (debugWay) 
 			//debugMsg( "Close to target!\n");
 			action->setMoveAngleYaw (targetAngle.y);

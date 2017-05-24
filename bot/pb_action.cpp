@@ -401,7 +401,7 @@ void PB_Action::perform()
 	if (longJumpState > 0) {
 		Vector difAngle = ent->v.angles - moveAngle;
 		fixAngle( difAngle );
-		float difX = abs(difAngle.x);
+		float difX = std::abs(difAngle.x);
 		if (difX > 90) difX = 180 - difX;
 		//float vel = ((Vector)ent->v.velocity).Length();
 		//if ( (vel * difX)  > 2000 ) {
