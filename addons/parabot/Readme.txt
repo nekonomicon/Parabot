@@ -233,6 +233,12 @@ bind "F12" "restrictedweapons off"
 
 ********************************************************************************
 
+v0.92.1 (21.05.2017)
+
+- fixed crashes with steam hl libraries and some mods.
+- fixed crashes with test android version of Xash3D FWGS.
+
+
 v0.92 (21.05.2017):
 
 - added Steam HL and Xash3D support

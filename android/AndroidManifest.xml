@@ -2,8 +2,8 @@
 <!-- Set your package name here -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="su.xash.xash3d.parabot"
-      android:versionCode="1"
-      android:versionName="0.92">
+      android:versionCode="4"
+      android:versionName="0.92.1">
     <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="23"/>
     <!-- Set your application name here -->
     <application android:label="Parabot"
