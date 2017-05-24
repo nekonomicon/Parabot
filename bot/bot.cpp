@@ -628,7 +628,7 @@ float BotChangeYaw( bot_t *pBot, float speed )
    ideal = pEdict->v.ideal_yaw;
 
    // find the difference in the current and ideal angle
-   diff = abs(current - ideal);
+   diff = std::abs(current - ideal);
 
    // check if the bot is already facing the ideal_yaw direction...
    if (diff <= 1)
