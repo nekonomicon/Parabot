@@ -570,7 +570,7 @@ int BotInFieldOfView(bot_t *pBot, Vector dest)
    // 45 degrees to the right is the limit of the normal view angle
 
    // rsm - START angle bug fix
-   int angle = std::abs((int)view_angle - (int)entity_angles.y);
+   int angle = abs((int)view_angle - (int)entity_angles.y);
 
    if (angle > 180)
       angle = 360 - angle;
