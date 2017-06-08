@@ -63,7 +63,7 @@ void botChatMessage( edict_t *speaker, char *msg, bool speechSynthesis )
 		strcat( sayText, msg );
 		strcat( sayText, "\n" );
 
-		MESSAGE_BEGIN( MSG_ALL, gmsgSayText, NULL, &speaker->v );
+		MESSAGE_BEGIN( MSG_ALL, gmsgSayText );
 			WRITE_BYTE( ENTINDEX( speaker ) );
 			WRITE_STRING( sayText );
 		MESSAGE_END();
