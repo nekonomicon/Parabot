@@ -28,9 +28,11 @@ PB_Navpoint* getNearestNavpoint( edict_t *pEdict );
 
 CParabot::CParabot( edict_t *botEnt, int botSlot )
 {
+#ifdef DEBUG
 	goalMove[0] = 0;
 	goalView[0] = 0;
 	goalAct[0] = 0;
+#endif
 	ent = botEnt;
 	slot = botSlot;
 	actualPath = 0;
@@ -96,19 +98,25 @@ void CParabot::initAfterRespawn()
 
 void CParabot::setGoalViewDescr( char *descr )
 {
+#ifdef DEBUG
 	strcpy( goalView, descr );
+#endif
 }
 
 
 void CParabot::setGoalMoveDescr( char *descr )
 {
+#ifdef DEBUG
 	strcpy( goalMove, descr );
+#endif
 }
 
 
 void CParabot::setGoalActDescr( char *descr )
 {
+#ifdef DEBUG
 	strcpy( goalAct, descr );
+#endif
 }
 
 

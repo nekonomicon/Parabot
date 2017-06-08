@@ -15,9 +15,11 @@ void PB_GoalFinder::init( CParabot *pb )
 // initializes all necessary variables
 {
 	bot = pb;
+#ifdef DEBUG
 	bot->goalMove[0] = 0;
 	bot->goalView[0] = 0;
 	bot->goalAct[0] = 0;
+#endif
 	for (int i=0; i<MAX_GOALS; i++) { 
 		bestGoalFunction[i] = 0;
 		responsiblePercept[i] = 0;
