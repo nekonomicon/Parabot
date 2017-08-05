@@ -10,8 +10,6 @@ ifeq ($(TARGET_ARCH_ABI),armeabi-v7a-hard)
 LOCAL_MODULE_FILENAME = libparabot_hardfp
 endif
 
-LOCAL_CFLAGS += -Wno-write-strings
-
 LOCAL_CPPFLAGS := $(LOCAL_CFLAGS) -fno-exceptions -fno-rtti -ffunction-sections -fdata-sections \
 			-fno-asynchronous-unwind-tables -fsigned-char
 

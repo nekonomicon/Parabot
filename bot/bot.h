@@ -57,7 +57,7 @@ BOOL ClientConnect( edict_t *pEntity, const char *pszName,
 void ClientPutInServer( edict_t *pEntity );
 void ClientCommand( edict_t *pEntity );
 
-void FakeClientCommand(edict_t *pBot, char *arg1, char *arg2, char *arg3);
+void FakeClientCommand(edict_t *pBot, const char *arg1, const char *arg2, const char *arg3);
 
 const char *Cmd_Args( void );
 const char *Cmd_Argv( int argc );
@@ -170,7 +170,7 @@ int UTIL_GetTeam(edict_t *pEntity);
 int UTIL_GetBotIndex(edict_t *pEdict);
 bot_t *UTIL_GetBotPointer(edict_t *pEdict);
 void UTIL_SelectItem(edict_t *pEdict, char *item_name);
-void UTIL_ShowMenu( edict_t *pEdict, int slots, int displaytime, bool needmore, char *pText );
+void UTIL_ShowMenu( edict_t *pEdict, int slots, int displaytime, bool needmore, const char *pText );
 CBaseEntity	*UTIL_PlayerByIndex( int playerIndex );
 
 

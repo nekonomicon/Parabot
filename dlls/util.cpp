@@ -274,7 +274,7 @@ extern int  valveTeamNumber;
 // return team number 0 through 3 based what MOD uses for team numbers
 int UTIL_GetTeam(edict_t *pEntity)
 {
-	char *infobuffer;
+	const char *infobuffer;
 	char teamName[32];
 	char modelName[32];
 	int i;
@@ -404,7 +404,7 @@ void UTIL_SelectItem(edict_t *pEdict, char *item_name)
 }
 
 
-void UTIL_ShowMenu( edict_t *pEdict, int slots, int displaytime, bool needmore, char *pText )
+void UTIL_ShowMenu( edict_t *pEdict, int slots, int displaytime, bool needmore, const char *pText )
 {
    if (gmsgShowMenu == 0)
       gmsgShowMenu = REG_USER_MSG( "ShowMenu", -1 );

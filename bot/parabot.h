@@ -132,10 +132,9 @@ public:
 	void registerKill( edict_t *victim, const char *wpnName );
 	void reportEnemySpotted();
 
-	void setGoalViewDescr( char *descr );
-	void setGoalMoveDescr( char *descr );
-	void setGoalActDescr( char *descr );
-
+	void setGoalViewDescr( const char *descr );
+	void setGoalMoveDescr( const char *descr );
+	void setGoalActDescr( const char *descr );
 };
 
 

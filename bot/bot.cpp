@@ -149,7 +149,7 @@ void BotCreate( int fixedPersNr )
 	pbConfig.personalityJoins( persNr, worldTime() );	// now we know the bot can be created
 
 	char ptr[128];  // allocate space for message from ClientConnect
-	char *infobuffer;
+	const char *infobuffer;
 	int clientIndex;
 
 	// Fix from Lean Hartwig at Topica

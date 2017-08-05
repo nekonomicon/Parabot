@@ -694,7 +694,7 @@ extern "C" EXPORT int GetNewDLLFunctions( NEW_DLL_FUNCTIONS *pFunctionTable, int
 	return TRUE; 
 }
 
-void FakeClientCommand(edict_t *pBot, char *arg1, char *arg2, char *arg3)
+void FakeClientCommand(edict_t *pBot, const char *arg1, const char *arg2, const char *arg3)
 {
    int length;
 

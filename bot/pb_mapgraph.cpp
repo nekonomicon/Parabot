@@ -10,7 +10,7 @@ extern char mod_name[32];
 void invalidateMapGraphCash();
 
 // id used in waypoint files
-char *PNFidString = "Parabot Waypoint File 0.8      ";
+const char *PNFidString = "Parabot Waypoint File 0.8      ";
 
 
 

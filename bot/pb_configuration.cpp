@@ -42,7 +42,7 @@ PB_Personality PB_Configuration::personality( int index )
 }
 
 
-int PB_Configuration::clampInt( char *str, int min, int max )
+int PB_Configuration::clampInt( const char *str, int min, int max )
 {
 	int val = atoi( str );
 	if (val<min) val=min;
@@ -51,7 +51,7 @@ int PB_Configuration::clampInt( char *str, int min, int max )
 }
 
 
-bool PB_Configuration::varSet( char *srcName, FILE *file, char *varName, bool &var )
+bool PB_Configuration::varSet( const char *srcName, FILE *file, const char *varName, bool &var )
 {
 	char buffer[1024];
 
@@ -65,7 +65,7 @@ bool PB_Configuration::varSet( char *srcName, FILE *file, char *varName, bool &v
 }
 
 
-bool PB_Configuration::varSet( const char *srcName, const char *srcValue, char *varName, bool &var )
+bool PB_Configuration::varSet( const char *srcName, const char *srcValue, const char *varName, bool &var )
 {
 	if ( _stricmp( srcName, varName ) == 0 ) {
 		if (srcValue == 0) {
@@ -91,7 +91,7 @@ bool PB_Configuration::varSet( const char *srcName, const char *srcValue, char *
 }
 
 
-bool PB_Configuration::varSet( const char *srcName, int srcValue, char *varName, int &var )
+bool PB_Configuration::varSet( const char *srcName, int srcValue, const char *varName, int &var )
 {
 	char buffer[64];
 	if ( _stricmp( srcName, varName ) == 0 ) {

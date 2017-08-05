@@ -86,13 +86,13 @@ public:
 
 protected:
 
-	int clampInt( char *str, int min, int max );
+	int clampInt( const char *str, int min, int max );
 
-	bool varSet( const char *srcName, const char *srcValue, char *varName, bool &var );
+	bool varSet( const char *srcName, const char *srcValue, const char *varName, bool &var );
 
-	bool varSet( const char *srcName, int srcValue, char *varName, int &var );
+	bool varSet( const char *srcName, int srcValue, const char *varName, int &var );
 
-	bool varSet( char *srcName, FILE *file, char *varName, bool &var );
+	bool varSet( const char *srcName, FILE *file, const char *varName, bool &var );
 
 
 

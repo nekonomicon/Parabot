@@ -92,7 +92,7 @@ int menuSlot( int number )
 
 void showMainMenu( edict_t *pEntity )
 {
-	char *main_menu = {"\
+	const char *main_menu = {"\
 	Parabot Configuration\n\n\
 	1. Change Number of Bots\n\
 	2. Change Botskill\n\

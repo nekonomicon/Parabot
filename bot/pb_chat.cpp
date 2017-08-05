@@ -27,7 +27,7 @@ void pfnEmitAmbientSound(edict_t *entity, float *pos, const char *samp, float vo
 extern edict_t *playerEnt;
 
 // this should go into the player class:
-void botChatMessage( edict_t *speaker, char *msg, bool speechSynthesis )
+void botChatMessage( edict_t *speaker, const char *msg, bool speechSynthesis )
 // prints the message to everybody
 {
 	int j;
@@ -57,10 +57,7 @@ void botChatMessage( edict_t *speaker, char *msg, bool speechSynthesis )
                 sayText[1] = '\0';
 		strcat( sayText, STRING(speaker->v.netname) );
 		strcat( sayText, ": " );
-		j = sizeof( sayText ) - 2 - strlen( sayText );  // -2 for /n and null terminator
-		if( (int)strlen( msg ) > j )
-			msg[j] = '\0';
-		strcat( sayText, msg );
+		strncat( sayText, msg, sizeof( sayText ) - strlen( sayText ) - 2 ); // -2 for /n and null terminator
 		strcat( sayText, "\n" );
 
 		MESSAGE_BEGIN( MSG_ALL, gmsgSayText );
@@ -94,7 +91,7 @@ PB_Chat::~PB_Chat()
 }
 
 
-bool PB_Chat::load( char *chatFile )
+bool PB_Chat::load( const char *chatFile )
 {
 	char str[256];
 	ChatList *currentCodeBlock;
@@ -223,7 +220,7 @@ PB_ChatMessage* PB_Chat::getMessageFromList( ChatList &clist, bool forceReply )
 }
 
 
-edict_t* PB_Chat::findNameInMessage( char *msg, bool forceReply )
+edict_t* PB_Chat::findNameInMessage( const char *msg, bool forceReply )
 // looks if one of the playernames appears in msg and returns the correponding edict
 // or 0 if msg doesn't contain any playernames
 {
@@ -257,7 +254,7 @@ edict_t* PB_Chat::findNameInMessage( char *msg, bool forceReply )
 }
 
 
-char* PB_Chat::checkMessageForWeapon( const char *msg, const char *wpnName, edict_t *wpnOwner )
+const char* PB_Chat::checkMessageForWeapon( const char *msg, const char *wpnName, edict_t *wpnOwner )
 // checks if msg contains %w and replaces it by the weapon wpnOwner is carrying
 {
 	
@@ -341,10 +338,10 @@ edict_t* PB_Chat::getRandomResponder( edict_t *excluding, bool forceReply )
 }
 
 
-void PB_Chat::suggestMessage( edict_t *speaker, PB_ChatMessage *msg, edict_t *objective, char *realText )
+void PB_Chat::suggestMessage( edict_t *speaker, PB_ChatMessage *msg, edict_t *objective, const char *realText )
 // realText (if supplied) is the modified msg
 {
-	char *realMsg;
+	const char *realMsg;
 	if (realText) realMsg = realText;
 	else		  realMsg = msg->text;
 	char suggestedMsg[256];
@@ -361,7 +358,7 @@ void PB_Chat::suggestMessage( edict_t *speaker, PB_ChatMessage *msg, edict_t *ob
 }
 
 
-void PB_Chat::parseMessage( edict_t *speaker, char *msg )
+void PB_Chat::parseMessage( edict_t *speaker, const char *msg )
 // analyze the message the speaker says
 {
 	if ( speaker == 0 || msg == 0 ) return;
@@ -446,7 +443,7 @@ void PB_Chat::registerGotKilled( edict_t *victim, edict_t *killer, const char *w
 		if ( rand < chatRate ) {
 			PB_ChatMessage *msg = getMessageFromList( chatGotKilled );
 			if (msg) {
-				char *text = checkMessageForWeapon( msg->text, wpnName, killer );
+				const char *text = checkMessageForWeapon( msg->text, wpnName, killer );
 				suggestMessage( victim, msg, killer, text );
 			}
 		}
@@ -466,7 +463,7 @@ void PB_Chat::registerKilledPlayer( edict_t *victim, edict_t *killer, const char
 		if ( rand < chatRate ) {
 			PB_ChatMessage *msg = getMessageFromList( chatKilledPlayer );
 			if (msg) {
-				char *text = checkMessageForWeapon( msg->text, wpnName, killer );
+				const char *text = checkMessageForWeapon( msg->text, wpnName, killer );
 				suggestMessage( killer, msg, victim, text );
 			}
 		}
@@ -485,7 +482,7 @@ void PB_Chat::registerGotWeapon( edict_t *finder, const char *wpnName )
 	if ( rand < chatRate ) {
 		PB_ChatMessage *msg = getMessageFromList( chatGotWeapon );
 		if (msg) {
-			char *text = checkMessageForWeapon( msg->text, wpnName, finder );
+			const char *text = checkMessageForWeapon( msg->text, wpnName, finder );
 			suggestMessage( finder, msg, 0, text );
 		}
 	}

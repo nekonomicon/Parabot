@@ -55,7 +55,7 @@ int message_Money = 0;  // for Counter-Strike
 
 static FILE *fp;
 
-void pfnChangeLevel(char* s1, char* s2)
+void pfnChangeLevel(const char *s1, const char *s2)
 {
 #ifdef _DEBUG
    if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnChangeLevel:\n"); fclose(fp); }
@@ -325,7 +325,7 @@ void pfnMessageEnd(void)
 //  FORWARD ENGINE FUNCTIONS...
 //
 ///////////////////////////////////////////////////////////////////////////////////
-int pfnPrecacheModel(char* s)
+int pfnPrecacheModel(const char *s)
 {
 #ifdef _DEBUG
    if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnPrecacheModel: %s\n",s); fclose(fp); }
@@ -333,7 +333,7 @@ int pfnPrecacheModel(char* s)
    return (*g_engfuncs.pfnPrecacheModel)(s);
 }
 
-int pfnPrecacheSound(char* s)
+int pfnPrecacheSound( const char *s )
 {
 #ifdef _DEBUG
    if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnPrecacheSound: %s\n",s); fclose(fp); }
@@ -658,7 +658,7 @@ void pfnGetAimVector(edict_t* ent, float speed, float *rgflReturn)
 
 //void BotCreate( edict_t *pPlayer, const char *botTeam, const char *botClass, const char *arg3, const char *arg4 );
 
-void pfnServerCommand(char* str)
+void pfnServerCommand(const char* str)
 {
 	infoMsg( "ServerCommand: ", str, "\n" );
 #ifdef _DEBUG
@@ -682,7 +682,7 @@ void pfnServerExecute(void)
    (*g_engfuncs.pfnServerExecute)();
 }
 
-void pfnClientCommand(edict_t* pEdict, char* szFmt, ...)
+void pfnClientCommand(edict_t* pEdict, const char* szFmt, ...)
 {
 #ifdef _DEBUG
 	if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnClientCommand=%s\n",szFmt); fclose(fp); }
@@ -716,7 +716,7 @@ void pfnParticleEffect(const float *org, const float *dir, float color, float co
    (*g_engfuncs.pfnParticleEffect)(org, dir, color, count);
 }
 
-void pfnLightStyle(int style, char* val)
+void pfnLightStyle(int style, const char* val)
 {
 #ifdef _DEBUG
 //   if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnLightStyle:\n"); fclose(fp); }
@@ -1152,7 +1152,7 @@ void pfnCrosshairAngle(const edict_t *pClient, float pitch, float yaw)
    (*g_engfuncs.pfnCrosshairAngle)(pClient, pitch, yaw);
 }
 
-byte *pfnLoadFileForMe(char *filename, int *pLength)
+byte *pfnLoadFileForMe(const char *filename, int *pLength)
 {
 #ifdef _DEBUG
    if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnLoadFileForMe: filename=%s\n",filename); fclose(fp); }
@@ -1176,7 +1176,7 @@ void pfnEndSection(const char *pszSectionName)
    (*g_engfuncs.pfnEndSection)(pszSectionName);
 }
 
-int pfnCompareFileTime(char *filename1, char *filename2, int *iCompare)
+int pfnCompareFileTime(const char *filename1, const char *filename2, int *iCompare)
 {
 #ifdef _DEBUG
    if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnCompareFileTime:\n"); fclose(fp); }
@@ -1184,7 +1184,7 @@ int pfnCompareFileTime(char *filename1, char *filename2, int *iCompare)
    return (*g_engfuncs.pfnCompareFileTime)(filename1, filename2, iCompare);
 }
 
-void pfnGetGameDir(char *szGetGameDir)
+void pfnGetGameDir(const char *szGetGameDir)
 {
 #ifdef _DEBUG
    if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnGetGameDir:\n"); fclose(fp); }
@@ -1240,7 +1240,7 @@ int pfnNumberOfEntities(void)
    return (*g_engfuncs.pfnNumberOfEntities)();
 }
 
-char* pfnGetInfoKeyBuffer(edict_t *e)
+const char* pfnGetInfoKeyBuffer(edict_t *e)
 {
 #ifdef _DEBUG
    if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnGetInfoKeyBuffer:\n"); fclose(fp); }
@@ -1248,7 +1248,7 @@ char* pfnGetInfoKeyBuffer(edict_t *e)
    return (*g_engfuncs.pfnGetInfoKeyBuffer)(e);
 }
 
-char* pfnInfoKeyValue(char *infobuffer, char *key)
+const char* pfnInfoKeyValue(const char *infobuffer, const char *key)
 {
 #ifdef _DEBUG
    if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnInfoKeyValue: %s %s\n",infobuffer,key); fclose(fp); }
@@ -1256,7 +1256,7 @@ char* pfnInfoKeyValue(char *infobuffer, char *key)
    return (*g_engfuncs.pfnInfoKeyValue)(infobuffer, key);
 }
 
-void pfnSetKeyValue(char *infobuffer, char *key, char *value)
+void pfnSetKeyValue(const char *infobuffer, const char *key, const char *value)
 {
 #ifdef _DEBUG
    if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnSetKeyValue: %s %s\n",key,value); fclose(fp); }
@@ -1264,7 +1264,7 @@ void pfnSetKeyValue(char *infobuffer, char *key, char *value)
    (*g_engfuncs.pfnSetKeyValue)(infobuffer, key, value);
 }
 
-void pfnSetClientKeyValue( int clientIndex, char *infobuffer, char *key, char *value )
+void pfnSetClientKeyValue( int clientIndex, const char *infobuffer, const char *key, const char *value )
 {
 	if ((mod_id == VALVE_DLL || mod_id == DMC_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) && (strcmp( key, "team" ) == 0)) {	// init teamlist
 		valveTeamPlayMode = true;
@@ -1294,7 +1294,7 @@ void pfnSetClientKeyValue( int clientIndex, char *infobuffer, char *key, char *v
 		RETURN_META(MRES_IGNORED);
 }
 
-int pfnIsMapValid(char *filename)
+int pfnIsMapValid(const char *filename)
 {
 #ifdef _DEBUG
    if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnIsMapValid:\n"); fclose(fp); }
@@ -1310,7 +1310,7 @@ void pfnStaticDecal( const float *origin, int decalIndex, int entityIndex, int m
    (*g_engfuncs.pfnStaticDecal)(origin, decalIndex, entityIndex, modelIndex);
 }
 
-int pfnPrecacheGeneric(char* s)
+int pfnPrecacheGeneric(const char* s)
 {
 #ifdef _DEBUG
    if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnPrecacheGeneric: %s\n",s); fclose(fp); }
@@ -1365,7 +1365,7 @@ unsigned int pfnGetPlayerWONId(edict_t *e)
 
 // new stuff for SDK 2.0
 
-void pfnInfo_RemoveKey(char *s, const char *key)
+void pfnInfo_RemoveKey(const char *s, const char *key)
 {
 #ifdef _DEBUG
    if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnInfo_RemoveKey:\n"); fclose(fp); }
@@ -1465,7 +1465,7 @@ void pfnDeltaUnsetField(struct delta_s *pFields, const char *fieldname)
    (*g_engfuncs.pfnDeltaUnsetField)(pFields, fieldname);
 }
 
-void pfnDeltaAddEncoder(char *name, void (*conditionalencode)( struct delta_s *pFields, const unsigned char *from, const unsigned char *to))
+void pfnDeltaAddEncoder(const char *name, void (*conditionalencode)( struct delta_s *pFields, const unsigned char *from, const unsigned char *to))
 {
 #ifdef _DEBUG
 //   if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnDeltaAddEncoder:\n"); fclose(fp); }
@@ -1529,7 +1529,7 @@ int pfnCreateInstancedBaseline(int classname, struct entity_state_s *baseline)
    return (*g_engfuncs.pfnCreateInstancedBaseline)(classname, baseline);
 }
 
-void pfnCvar_DirectSet(struct cvar_s *var, char *value)
+void pfnCvar_DirectSet(struct cvar_s *var, const char *value)
 {
 #ifdef _DEBUG
    if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnCvar_DirectSet:\n"); fclose(fp); }
@@ -1553,7 +1553,7 @@ void pfnGetPlayerStats(const edict_t *pClient, int *ping, int *packet_loss)
    (*g_engfuncs.pfnGetPlayerStats)(pClient, ping, packet_loss);
 }
 
-void pfnAddServerCommand( char *cmd_name, void (*function) (void) )
+void pfnAddServerCommand( const char *cmd_name, void (*function) (void) )
 {
 #ifdef _DEBUG
    if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnAddServerCommand:\n"); fclose(fp); }

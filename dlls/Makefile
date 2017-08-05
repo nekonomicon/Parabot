@@ -13,8 +13,6 @@ CFLAGS +=	-Os -pipe -DNDEBUG \
 		-ffunction-sections -fdata-sections \
 		-fno-asynchronous-unwind-tables
 
-DEFINES =	-Wno-write-strings
-
 INCLUDES =	-I. \
 		-I../bot \
 		-I../utils \
@@ -94,7 +92,7 @@ $(LIBNAME): $(OBJ)
 	$(CXX) $(OBJ) $(LDFLAGS) -o $(LIBNAME)
 
 .cpp.o:
-	$(CXX) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(CXX) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 .PHONY: all clean
 

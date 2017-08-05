@@ -49,7 +49,7 @@ public:
 	PB_Chat();
 	~PB_Chat();
 
-	bool load( char *chatFile );
+	bool load( const char *chatFile );
 	bool free();
 
 	void registerGotKilled( edict_t *victim, edict_t *killer, const char *wpnName );
@@ -60,7 +60,7 @@ public:
 
 	void registerJoin( edict_t *joiner );
 
-	void parseMessage( edict_t *pEntity, char *msg );
+	void parseMessage( edict_t *pEntity, const char *msg );
 
 	void check();
 	// checks if the next chat message should get displayed
@@ -69,11 +69,11 @@ public:
 protected:
 
 	PB_ChatMessage* getMessageFromList( ChatList &clist, bool forceReply = false );
-	edict_t* findNameInMessage( char *msg, bool forceReply );
-	char* checkMessageForWeapon( const char *msg, const char *wpnName, edict_t *wpnOwner );
+	edict_t* findNameInMessage( const char *msg, bool forceReply );
+	const char* checkMessageForWeapon( const char *msg, const char *wpnName, edict_t *wpnOwner );
 	const char* getName( edict_t *player );
 	edict_t* getRandomResponder( edict_t *excluding, bool forceReply );
-	void suggestMessage( edict_t *speaker, PB_ChatMessage *msg, edict_t *objective=0, char *realText=0 );
+	void suggestMessage( edict_t *speaker, PB_ChatMessage *msg, edict_t *objective=0, const char *realText=0 );
 
 
 	std::vector<ReplyList*> chatReplies;

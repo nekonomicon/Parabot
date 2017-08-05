@@ -96,7 +96,7 @@ void CParabot::initAfterRespawn()
 }
 
 
-void CParabot::setGoalViewDescr( char *descr )
+void CParabot::setGoalViewDescr( const char *descr )
 {
 #ifdef DEBUG
 	strcpy( goalView, descr );
@@ -104,7 +104,7 @@ void CParabot::setGoalViewDescr( char *descr )
 }
 
 
-void CParabot::setGoalMoveDescr( char *descr )
+void CParabot::setGoalMoveDescr( const char *descr )
 {
 #ifdef DEBUG
 	strcpy( goalMove, descr );
@@ -112,7 +112,7 @@ void CParabot::setGoalMoveDescr( char *descr )
 }
 
 
-void CParabot::setGoalActDescr( char *descr )
+void CParabot::setGoalActDescr( const char *descr )
 {
 #ifdef DEBUG
 	strcpy( goalAct, descr );
