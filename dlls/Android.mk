@@ -31,7 +31,6 @@ LOCAL_C_INCLUDES := \
 LOCAL_SRC_FILES := \
 		../bot/bot.cpp \
 		../bot/bot_client.cpp \
-		animation.cpp \
 		commands.cpp \
 		dll.cpp \
 		engine.cpp \

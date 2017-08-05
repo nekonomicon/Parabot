@@ -1,7 +1,6 @@
 #include "pb_observer.h"
 #include "pb_mapgraph.h"
 #include "pb_mapcells.h"
-#include "animation.h"
 #include "bot.h"
 #include "parabot.h"
 #include "sounds.h"
@@ -413,25 +412,16 @@ void PB_Observer::checkForJump( int oId, Vector &pos )
 
 	if (!obs[oId].jumpPressed && (obs[oId].player->pev->button & IN_JUMP)) {
 		obs[oId].jumpPressed = true;		// jump started
-		
-		void *pmodel	 = GET_MODEL_PTR( ENT(obs[oId].player->pev) );
-		int jumpSeq      = LookupActivity( pmodel, obs[oId].player->pev, ACT_HOP );
-		int longjumpSeq  = LookupActivity( pmodel, obs[oId].player->pev, ACT_LEAP );
-		int seq			 = obs[oId].player->pev->sequence;
-		int jumpType	 = 0;
-		
-		
-		if (seq == jumpSeq) {
-			// it may still be a longjump, so better check:
-			if ( (obs[oId].player->pev->button & IN_DUCK) &&
-				( ((Vector)obs[oId].player->pev->velocity).Length() > 500 ) )
-				jumpType = 2;
-			else jumpType = 1;
-		}
-		else if	(seq == longjumpSeq) jumpType = 2;
-		
+
+		int jumpType = 1;
+
+		// it may still be a longjump, so better check:
+		if ( (obs[oId].player->pev->button & IN_DUCK) &&
+			( ((Vector)obs[oId].player->pev->velocity).Length() > 500 ) )
+			jumpType = 2;
+
 		//int flags = checkGround( oId );
-		
+
 		if (jumpType==1) {
 			// normal jump, check if bot should stop before jumping:
 			Vector vel = obs[oId].player->pev->velocity;

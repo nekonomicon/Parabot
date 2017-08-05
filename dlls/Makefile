@@ -26,7 +26,6 @@ INCLUDES =	-I. \
 
 SRC =		../bot/bot.cpp \
 		../bot/bot_client.cpp \
-		animation.cpp \
 		commands.cpp \
 		dll.cpp \
 		engine.cpp \

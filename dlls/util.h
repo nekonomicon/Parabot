@@ -15,10 +15,6 @@
 //
 // Misc utility code
 //
-#ifndef ACTIVITY_H
-#include "activity.h"
-#endif
-
 #ifndef ENGINECALLBACK_H
 #include "enginecallback.h"
 #endif
@@ -90,12 +86,6 @@ typedef int BOOL;
 // Keeps clutter down a bit, when declaring external entity/global method prototypes
 #define DECLARE_GLOBAL_METHOD(MethodName)  extern void DLLEXPORT MethodName( void )
 #define GLOBAL_METHOD(funcname)					void DLLEXPORT funcname(void)
-
-// This is the glue that hooks .MAP entity class names to our CPP classes
-// The _declspec forces them to be exported by name so we can do a lookup with GetProcAddress()
-// The function is used to intialize / allocate the object for the entity
-
-#define LINK_ENTITY_TO_CLASS(mapClassName,DLLClassName) extern "C" EXPORT void mapClassName( entvars_t *pev ); void mapClassName( entvars_t *pev ) { GetClassPtr( (DLLClassName *)pev ); }
 
 //
 // Conversion among the three types of "entity", including identity-conversions.

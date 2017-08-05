@@ -2,7 +2,7 @@
 #include "pb_global.h"
 #include "bot.h"
 #include "bot_weapons.h"
-#include "pm_defs.h"
+#include "usercmd.h"
 #include "pb_configuration.h"
 #include "parabot.h"
 

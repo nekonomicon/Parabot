@@ -12,7 +12,6 @@
 #include "enginecallback.h"
 #include "dllapi.h"
 #include "meta_api.h"
-#include "pm_defs.h"
 
 
 
@@ -52,8 +51,6 @@ int min_bots = -1;
 bool g_GameRules = FALSE;		
 int welcome_index = -1;	
 int wpSpriteTexture, wpBeamTexture, wpSprite2Texture;
-physent_t *ptrPhysents;
-int numPhysents;
 int g_hldm_mod = HLDM;
 bool gearbox_ctf = false;
 char ag_gamemode[8] = {};
@@ -462,14 +459,7 @@ void Sys_Error( const char *error_string )
 
 void PM_Move ( struct playermove_s *ppmove, int server )
 {
-	assert( ppmove != 0 );
-	ptrPhysents = &(ppmove->visents[0]);
-	numPhysents = ppmove->numvisent;
-	if(!g_meta_init)
-		(*other_gFunctionTable.pfnPM_Move)(ppmove, server);
-	else
-		RETURN_META(MRES_IGNORED);
-
+	(*other_gFunctionTable.pfnPM_Move)(ppmove, server);
 }
 
 void PM_Init ( struct playermove_s *ppmove )

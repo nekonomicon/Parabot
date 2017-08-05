@@ -12,7 +12,6 @@
 #include "bot.h"
 #include "bot_func.h"
 
-#include "animation.h"
 #include "pb_mapgraph.h"
 #include "pb_mapcells.h"
 #include "pb_global.h"
