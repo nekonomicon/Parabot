@@ -1,17 +1,79 @@
 # Makefile for parabot
 # Copyright © nekonomicon 2016
 
-MODULE =	parabot
-OSLIB =		so
 CXX ?=		g++
 
-CFLAGS +=	-Os -pipe -DNDEBUG \
-		-fsigned-char -fPIC \
-		-ffast-math -funroll-loops \
-		-fomit-frame-pointer -ftree-vectorize \
-		-fvisibility=hidden -fno-rtti -fno-exceptions \
-		-ffunction-sections -fdata-sections \
-		-fno-asynchronous-unwind-tables
+CPPFLAGS =	-fno-rtti
+
+SYS =		$(shell $(CXX) -dumpmachine)
+
+ifneq ($(PB_64BIT),1)
+MODULE =	parabot
+ifneq (, $(findstring x86_64, $(SYS)))
+CFLAGS +=	-m32
+LDFLAGS +=	-m32
+endif
+else
+MODULE =	parabot64
+endif
+
+ifneq ($(DEBUG),1)
+CFLAGS +=	-O2 -pipe -DNDEBUG
+ifeq (, $(findstring darwin, $(SYS)))
+LDFLAGS +=	-Wl,--strip-all
+endif
+ifeq ($(NO_EXCEPTIONS),1)
+CPPFLAGS +=	-fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables
+CFLAGS +=	-fomit-frame-pointer
+endif
+else
+CFLAGS +=	-O0 -pipe -DDEBUG -D_DEBUG -g -gdwarf-2
+endif
+
+ifeq ($(AGGR_OPT),1)
+CPPFLAGS +=	-fvisibility-inlines-hidden
+CFLAGS +=	-O3 -fvisibility=hidden -ffast-math -funroll-loops -ftree-vectorize
+endif
+
+ifeq ($(SIZE_OPT),1)
+CFLAGS +=	-Os
+endif
+
+ifneq ($(LTO),1)
+ifeq ($(SIZE_OPT),1)
+ifneq (, $(findstring mingw, $(SYS)))
+CFLAGS +=	-fno-data-sections
+else
+CFLAGS +=	-fdata-sections
+endif
+CPPFLAGS +=	-fvisibility-inlines-hidden
+CFLAGS +=	-fvisibility=hidden -ffunction-sections
+LDFLAGS +=	-Wl,--gc-sections
+endif
+else
+CFLAGS +=	-flto
+LDFLAGS +=	-flto
+endif
+
+ifeq ($(STATIC_GCCLIBS),1)
+LDFLAGS +=	-static-libgcc -static-libstdc++
+endif
+
+ifneq (, $(findstring mingw, $(SYS)))
+LDFLAGS +=	-Wl,--add-stdcall-alias -static-libgcc -static-libstdc++ -Wl,--no-undefined
+OSLIB =		dll
+else
+CFLAGS +=	-fPIC
+ifneq (, $(findstring darwin, $(SYS)))
+OSLIB =		dylib
+else
+OSLIB =		so
+LDFLAGS +=	-Wl,--no-undefined
+ifneq (, $(findstring linux, $(SYS)))
+LDFLAGS +=	-ldl
+endif
+endif
+endif
 
 INCLUDES =	-I. \
 		-I../bot \
@@ -64,24 +126,7 @@ SRC =		../bot/bot.cpp \
 		../bot/utilityfuncs.cpp \
 		../metamod/meta_api.cpp
 
-SYS =		$(shell $(CXX) -dumpmachine)
-ifneq (, $(findstring linux, $(SYS)))
-LDFLAGS +=	-ldl
-endif
-ifneq (, $(findstring mingw, $(SYS)))
-CFLAGS +=       -fno-data-sections
-LDFLAGS +=	-Wl,--add-stdcall-alias
-OSLIB =		dll
-endif
-ifneq (, $(findstring darwin, $(SYS)))
-OSLIB =         dylib
-endif
-ifneq (, $(findstring x86_64, $(SYS)))
-CFLAGS +=       -m32
-LDFLAGS +=	-m32
-endif
-
-LDFLAGS +=	-shared -static-libgcc -static-libstdc++ -Wl,--no-undefined -Wl,--gc-sections -Wl,--strip-all
+LDFLAGS +=	-shared
 LIBNAME =	$(MODULE).$(OSLIB)
 
 OBJ = $(SRC:%.cpp=%.o)
@@ -92,7 +137,7 @@ $(LIBNAME): $(OBJ)
 	$(CXX) $(OBJ) $(LDFLAGS) -o $(LIBNAME)
 
 .cpp.o:
-	$(CXX) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	$(CXX) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
 
 .PHONY: all clean
 

@@ -11,7 +11,7 @@ LOCAL_MODULE_FILENAME = libparabot_hardfp
 endif
 
 LOCAL_CPPFLAGS := $(LOCAL_CFLAGS) -fno-exceptions -fno-rtti -ffunction-sections -fdata-sections \
-			-fno-asynchronous-unwind-tables -fsigned-char
+			-fno-asynchronous-unwind-tables -fno-unwind-tables
 
 LOCAL_LDFLAGS += -Wl,--gc-sections
 
