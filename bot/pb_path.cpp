@@ -503,7 +503,6 @@ void PB_Path::reportTargetFailed()
 void PB_Path::addAttack( Vector &origin )
 // stores the position of attack (inclusive actual position in path)
 {
-	assert( currentWaypoint != 0 );
 	assert( hiddenAttack != 0 );
 
 	PB_Path_Attack att;
@@ -519,7 +518,6 @@ Vector PB_Path::getViewPos( edict_t *traveller, int &prior )
 { 
 	assert( waypoint != 0 );
 	if ( lastReachedWaypoint != waypoint->end() ) {	// watch at buttons for pressing them
-		assert( lastReachedWaypoint != 0 );
 		if (lastReachedWaypoint->action()==BOT_USE) {
 			assert( traveller != 0 );
 			Vector t = traveller->v.origin;
@@ -540,7 +538,6 @@ bool PB_Path::timeOut( float worldTime )
 
 	assert( waypoint != 0 );
 	if (currentWaypoint != waypoint->end()) {	// approaching another waypoint
-		assert( currentWaypoint != 0 );
 		if (forwardPass) {						// path in forward direction ?
 			plan = currentWaypoint->data.arrival;
 		}
@@ -585,7 +582,6 @@ int PB_Path::getNextAction()
 
 	assert( waypoint != 0 );
 	if (currentWaypoint != waypoint->end()) {	// approaching another waypoint
-		assert( currentWaypoint != 0 );
 		return currentWaypoint->action();
 	}
 	else return 0;
@@ -686,7 +682,6 @@ PB_Path_Waypoint PB_Path::getNextWaypoint()
 {
 	assert( waypoint != 0 );
 	if (currentWaypoint != waypoint->end()) { // approaching another waypoint
-		assert( currentWaypoint != 0 );
 		return (*currentWaypoint);
 	}
 	else {	// approaching the target navpoint
@@ -701,7 +696,6 @@ Vector PB_Path::getLastWaypointPos( edict_t *playerEnt )
 {
 	assert( waypoint != 0 );
 	if (lastReachedWaypoint != waypoint->end()) { // at least one waypoint has been reached
-		assert( lastReachedWaypoint != 0 );
 		return lastReachedWaypoint->pos( playerEnt );
 	}
 	else {	// nothing reached yet

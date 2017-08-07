@@ -2,9 +2,7 @@
 #ifndef DYNPQ_H
 #define DYNPQ_H
 
-#include "checkvec.h"
 #include <algorithm>
-
 
 // compares the associated values of passed pointers
 template<class T>
@@ -18,7 +16,7 @@ class  dynamic_priority_queue
 {	
 public:
 	// constructor
-	dynamic_priority_queue( vector<key_type>& v);
+	dynamic_priority_queue( std::vector<key_type>& v);
 
 	// public type definitions
 	  typedef typename std::vector<key_type>::size_type size_type;
@@ -41,8 +39,8 @@ public:
     size_type size() const { return csize;}
 
   private:
-    checkedVector<index_type> Indices;  // auxiliary vector
-    checkedVector<key_type*> c;         // heap of pointers
+    std::vector<index_type> Indices;  // auxiliary vector
+    std::vector<key_type*> c;         // heap of pointers
     key_type* first;                    // beginning of the external vector
     PtrGreater<key_type*> comp;         // comparison object
     index_type csize;                    // current heap size
@@ -54,7 +52,7 @@ public:
 
 template <class key_type>
 dynamic_priority_queue<key_type>::dynamic_priority_queue(
-     vector<key_type>& v)
+     std::vector<key_type>& v)
 : Indices(v.size()), c(v.size()), first(&(*v.begin())),
   csize(v.size())
 {
