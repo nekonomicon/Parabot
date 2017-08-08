@@ -36,7 +36,8 @@ CFLAGS +=	-O3 -fvisibility=hidden -ffast-math -funroll-loops -ftree-vectorize
 endif
 
 ifeq ($(SIZE_OPT),1)
-CFLAGS +=	-Os
+CPPFLAGS +=     -fvisibility-inlines-hidden
+CFLAGS +=	-Os -fvisibility=hidden
 endif
 
 ifneq ($(LTO),1)
@@ -46,8 +47,7 @@ CFLAGS +=	-fno-data-sections
 else
 CFLAGS +=	-fdata-sections
 endif
-CPPFLAGS +=	-fvisibility-inlines-hidden
-CFLAGS +=	-fvisibility=hidden -ffunction-sections
+CFLAGS +=	-ffunction-sections
 LDFLAGS +=	-Wl,--gc-sections
 endif
 else
