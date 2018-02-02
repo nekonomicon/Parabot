@@ -58,9 +58,9 @@ Screw this %w, man!
 Where was that guy???
 Ooops!
 Camper!!! :(
-Next time I´ll kick your ass, %s!
+Next time I'll kick your ass, %s!
 Wazzzzzzzuuuup???
-Beginner luck! I´m sure!
+Beginner luck! I'm sure!
 Why do you hate me, %s?
 Kill someone else please, %s
 %s is cheating!
@@ -128,7 +128,7 @@ My revenge was bad, hmm?
 Boom :)
 Why don't u kill me too, %s?
 You can shoot, but running is better for you, %s!
-I think I´m strong enough to save the world all by myself :)
+I think I'm strong enough to save the world all by myself :)
 I was born with the %w - you didn't really have a chance, %s! ;)
 Oh my God: They killed Kenny!
 Oh my God: They killed %s!
@@ -162,9 +162,9 @@ Hey! I found the %w! Can anybody tell me how to use it?
 Now let's kick some asses! 
 I've got bad news for ya! Come and hear them ):)
 Now I just need some ammo!
-What´s that?
+What's that?
 Who wants a %w?
-What´s that for a button on the %w?
+What's that for a button on the %w?
 Hey the %w is my favourite weapon
 The %w, the best friend of a player :)
 
@@ -217,8 +217,8 @@ o--]===>
 Kamikaze!!!
 Light, Camera, ACTION!
 Wazzzzuuuuuuup?
-I´m so booooored... 
-What´s better: AMD or INTEL?
+I'm so booooored... 
+What's better: AMD or INTEL?
 Have you got ICQ, %s?
 What's the best bot around?
 
