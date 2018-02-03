@@ -158,11 +158,11 @@ int PB_Observer::checkGround( int oId, edict_t **plat )
 	edict_t *ground = obs[oId].player->pev->groundentity;
 	if (ground) {
 		const char *groundName = STRING( ground->v.classname );
-		if (strcmp( groundName, "worldspawn" ) != 0) {
+		if ( !FStrEq( groundName, "worldspawn" ) ) {
 			// we are walking on special ground, check if it is moving:
-			if ( (strcmp( groundName, "func_door" ) == 0) ||
-				 (strcmp( groundName, "func_plat" ) == 0) ||
-				 (strcmp( groundName, "func_train" ) == 0)   ) 
+			if ( (FStrEq( groundName, "func_door" ) ) ||
+				 (FStrEq( groundName, "func_plat" ) ) ||
+				 (FStrEq( groundName, "func_train" ) )   ) 
 			{
 				// try to find the corresponding navpoint for this groundentity:
 				int sId = obs[oId].lastPlatId;
@@ -588,7 +588,7 @@ void PB_Observer::checkForButtonShot( int oId, Vector &pos )
 			UTIL_TraceLine( startTrace, endTrace, dont_ignore_monsters, ENT(obs[oId].player->pev), &tr );
 			if (tr.flFraction<1.0 && tr.pHit!=0) {
 				const char *hitClass = STRING( tr.pHit->v.classname );
-				if ( strcmp( hitClass, "func_button" ) == 0 &&
+				if ( FStrEq( hitClass, "func_button" ) &&
 					 tr.pHit->v.health > 0						)
 				{
 					// player shot at button, check if navpoint is already stored nearby
@@ -786,7 +786,7 @@ void PB_Observer::observeAll()
 
 		/*	if (obs[i].player->pev->groundentity) {
 				const char *ground = STRING(obs[i].player->pev->groundentity->v.classname);
-				if (strcmp( ground, "world_spawn" ) != 0) {
+				if ( !FStrEq( ground, "world_spawn" ) ) {
 					debugMsg( "Ground entity = ", ground, "\n" );
 				}
 			}				 

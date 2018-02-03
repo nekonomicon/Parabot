@@ -290,21 +290,21 @@ int UTIL_GetTeam(edict_t *pEntity)
 		if(gearbox_ctf)
 		{
 			strcpy( modelName, (g_engfuncs.pfnInfoKeyValue( infobuffer, "model" )) );
-			if ((strcmp(modelName, "ctf_barney") == 0) ||
-				(strcmp(modelName, "cl_suit") == 0) ||
-				(strcmp(modelName, "ctf_gina") == 0) ||
-				(strcmp(modelName, "ctf_gordon") == 0) ||
-				(strcmp(modelName, "otis") == 0) ||
-				(strcmp(modelName, "ctf_scientist") == 0))
+			if ((FStrEq(modelName, "ctf_barney") ) ||
+				(FStrEq(modelName, "cl_suit") ) ||
+				(FStrEq(modelName, "ctf_gina") ) ||
+				(FStrEq(modelName, "ctf_gordon") ) ||
+				(FStrEq(modelName, "otis") ) ||
+				(FStrEq(modelName, "ctf_scientist") ))
 			{
 				return 0;
 			}
-			else if ((strcmp(modelName, "beret") == 0) ||
-				(strcmp(modelName, "drill") == 0) ||
-				(strcmp(modelName, "grunt") == 0) ||
-				(strcmp(modelName, "recruit") == 0) ||
-				(strcmp(modelName, "shephard") == 0) ||
-				(strcmp(modelName, "tower") == 0))
+			else if ((FStrEq(modelName, "beret") ) ||
+				(FStrEq(modelName, "drill") ) ||
+				(FStrEq(modelName, "grunt") ) ||
+				(FStrEq(modelName, "recruit") ) ||
+				(FStrEq(modelName, "shephard") ) ||
+				(FStrEq(modelName, "tower") ))
 			{
 				return 1;
 			}
@@ -326,19 +326,19 @@ int UTIL_GetTeam(edict_t *pEntity)
 		infobuffer = (*g_engfuncs.pfnGetInfoKeyBuffer)( pEntity );
 		strcpy(modelName, (g_engfuncs.pfnInfoKeyValue(infobuffer, "model")));
 		
-		if ((strcmp( modelName, "terror"   ) == 0) ||  // Phoenix Connektion
-			(strcmp( modelName, "arab"     ) == 0) ||    // Old L337 Krew
-			(strcmp( modelName, "leet") == 0) ||    // L337 Krew
-			(strcmp( modelName, "arctic"   ) == 0) ||  // Artic Avenger
-			(strcmp( modelName, "guerilla" ) == 0))  // Gorilla Warfare
+		if ((FStrEq( modelName, "terror"   ) ) ||  // Phoenix Connektion
+			(FStrEq( modelName, "arab"     ) ) ||    // Old L337 Krew
+			(FStrEq( modelName, "leet") ) ||    // L337 Krew
+			(FStrEq( modelName, "arctic"   ) ) ||  // Artic Avenger
+			(FStrEq( modelName, "guerilla" ) ))  // Gorilla Warfare
 		{
 			return 0;
 		}
-		else if ((strcmp( modelName, "urban" ) == 0) ||  // Seal Team 6
-				 (strcmp( modelName, "gsg9"  ) == 0) ||   // German GSG-9
-				 (strcmp( modelName, "sas"   ) == 0) ||    // UK SAS
-				 (strcmp( modelName, "gign"  ) == 0) ||   // French GIGN
-				 (strcmp( modelName, "vip"   ) == 0))      // VIP
+		else if ((FStrEq( modelName, "urban" ) ) ||  // Seal Team 6
+				 (FStrEq( modelName, "gsg9"  ) ) ||   // German GSG-9
+				 (FStrEq( modelName, "sas"   ) ) ||    // UK SAS
+				 (FStrEq( modelName, "gign"  ) ) ||   // French GIGN
+				 (FStrEq( modelName, "vip"   ) ))      // VIP
 		{
 			return 1;
 		}
@@ -383,11 +383,11 @@ bool UTIL_ButtonTriggers( edict_t *button, edict_t *target )
 {
 	const char *targetName = STRING( target->v.targetname );
 	const char *buttonTarget = STRING( button->v.target );
-	if (strcmp( buttonTarget, targetName )==0) return true;
+	if ( FStrEq( buttonTarget, targetName ) ) return true;
 	// multimanager in between?
 	edict_t *bTarget = FIND_ENTITY_BY_TARGETNAME( 0, buttonTarget );
 	if (!bTarget) return false;
-	if (strcmp( STRING( bTarget->v.classname ), "multi_manager" )==0) {
+	if ( FStrEq( STRING( bTarget->v.classname ), "multi_manager" ) ) {
 		CMultiManager *mm = (CMultiManager*)GET_PRIVATE( bTarget );
 		// check all multimanager targets:
 		for ( int i=0; i<mm->m_cTargets; i++ ) {

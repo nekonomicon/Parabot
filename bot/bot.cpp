@@ -261,7 +261,7 @@ void BotCreate( int fixedPersNr )
 	pBot->parabot->goalFinder.addGoal( G_MOVE,
 		PI_FRIEND, goalMakeRoom, weightMakeRoom );
 
-	if ( (mod_id == CSTRIKE_DLL) || (mod_id == TFC_DLL) || gearbox_ctf || ( mod_id == AG_DLL && !strcmp( ag_gamemode, "ctf" ) ) ) {
+	if ( (mod_id == CSTRIKE_DLL) || (mod_id == TFC_DLL) || gearbox_ctf || ( mod_id == AG_DLL && FStrEq( ag_gamemode, "ctf" ) ) ) {
 		pBot->parabot->goalFinder.addGoal( G_ACTION,
 			PI_FRIEND, goalAssistFire, weightAssistFire );
 		pBot->parabot->goalFinder.addGoal( G_MOVE,

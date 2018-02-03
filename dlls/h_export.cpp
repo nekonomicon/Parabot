@@ -74,6 +74,7 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved )
 
 extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEngine, globalvars_t *pGlobals )
 {
+	const char *gamedll;
 	char game_dir[256], filePath[100];
 	int pos = 0;
 
@@ -98,27 +99,27 @@ extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 	}
 	strcpy( mod_name, &game_dir[pos] );
 	
-	if( !strcmp( mod_name, "ag" ) )
+	if( FStrEq( mod_name, "ag" ) )
 	{
 		mod_id = AG_DLL;
 	}
-	else if( !strcmp( mod_name, "valve" ) || !strcmp( mod_name, "hldm" ) )
+	else if( FStrEq( mod_name, "valve" ) || FStrEq( mod_name, "hldm" ) )
 	{
 		mod_id = VALVE_DLL;
 	}
-	else if( !strcmp( mod_name, "Hunger" ) )
+	else if( FStrEq( mod_name, "Hunger" ) )
 	{
 		mod_id = HUNGER_DLL;
 	}
-	else if( !strcmp( mod_name, "holywars" ) )
+	else if( FStrEq( mod_name, "holywars" ) )
 	{
 		mod_id = HOLYWARS_DLL;
 	}
-	else if( !strcmp( mod_name, "dmc" ) )
+	else if( FStrEq( mod_name, "dmc" ) )
 	{
 		mod_id = DMC_DLL;
 	}
-	else if( !strcmp( mod_name, "gearbox" ) )
+	else if( FStrEq( mod_name, "gearbox" ) )
 	{
 		mod_id = GEARBOX_DLL;
 	}
@@ -157,9 +158,9 @@ extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 	{
 #if defined(__ANDROID__)
 #ifdef LOAD_HARDFP
-		const char *serverdll = "libserver_hardfp.so";
+		gamedll = "libserver_hardfp.so";
 #else
-		const char *serverdll = "libserver.so";
+		gamedll = "libserver.so";
 #endif
 		snprintf( filePath, sizeof(filePath), "%s/%s", getenv( "XASH3D_GAMELIBDIR" ), serverdll );
 #else
@@ -168,26 +169,26 @@ extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 		switch( mod_id )
 		{
 			case AG_DLL:
-				strcat( filePath, "/dlls/ag"ARCH_SUFFIX"."OS_LIB_EXT );
+				gamedll = "/dlls/ag."OS_LIB_EXT;
 				break;
+			default:
 			case VALVE_DLL:
-				strcat( filePath, "/dlls/hl."OS_LIB_EXT );
+				gamedll = "/dlls/hl."OS_LIB_EXT;
 				break;
 			case DMC_DLL:
-				strcat( filePath, "/dlls/dmc."OS_LIB_EXT );
+				gamedll = "/dlls/dmc."OS_LIB_EXT;
 				break;
 			case GEARBOX_DLL:
-				strcat( filePath, "/dlls/opfor."OS_LIB_EXT );
+				gamedll = "/dlls/opfor."OS_LIB_EXT;
 				break;
 			case HOLYWARS_DLL:
-				strcat( filePath, "/dlls/holywars"ARCH_SUFFIX"."OS_LIB_EXT );
+				gamedll = "/dlls/holywars."OS_LIB_EXT;
 				break;
 			case HUNGER_DLL:
-                                strcat( filePath, "/dlls/einar"ARCH_SUFFIX"."OS_LIB_EXT );
+                                gamedll = "/dlls/einar."OS_LIB_EXT;
                                 break;
-			default:
-				break;
 		}
+		strcat( filePath, gamedll );
 #endif
 		h_Library = LoadLibrary( filePath );
 

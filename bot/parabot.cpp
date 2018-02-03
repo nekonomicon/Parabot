@@ -138,16 +138,16 @@ void CParabot::registerDamage( int amount, Vector origin, int type )
 	CBaseEntity *di = UTIL_FindEntityInSphere( 0, origin, 5 );
 	if (di) {
 		diname = STRING( di->pev->classname );
-		if (strcmp(diname, "player") != 0) {
-			if (strcmp(diname, "grenade") == 0) {
+		if (!FStrEq(diname, "player") ) {
+			if ( FStrEq(diname, "grenade") ) {
 			}
-			else if (strcmp(diname, "monster_satchel") == 0) {
+			else if ( FStrEq(diname, "monster_satchel") ) {
 			}
-			else if (strcmp(diname, "monster_tripmine") == 0) {
+			else if ( FStrEq(diname, "monster_tripmine") ) {
 			}
-			else if (strcmp(diname, "rpg_rocket") == 0) {
+			else if ( FStrEq(diname, "rpg_rocket") ) {
 			}
-			else if (strcmp(diname, "bodyque") == 0) {
+			else if ( FStrEq(diname, "bodyque") ) {
 			}
 			else debugMsg( "DAMAGE BY ", diname, "\n" );
 		}
@@ -271,7 +271,7 @@ bool CParabot::hasLongJump()
 {
 	if ( !(mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) ) return false;
 	const char *value = pfnGetPhysicsKeyValue( ent, "slj");
-	if (strcmp( value, "1" )==0) return true;
+	if ( FStrEq( value, "1" ) ) return true;
 	else return false;
 }
 

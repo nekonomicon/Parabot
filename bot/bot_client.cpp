@@ -78,15 +78,15 @@ void BotClient_CS_ShowMenu(void *p, int bot_index)
       return;
    }
 
-   if (strcmp((char *)p, "#Team_Select") == 0)  // team select menu?
+   if (FStrEq((char *)p, "#Team_Select") )  // team select menu?
    {
       bots[bot_index].start_action = MSG_CS_TEAM_SELECT;
    }
-   else if (strcmp((char *)p, "#Terrorist_Select") == 0)  // T model select?
+   else if (FStrEq((char *)p, "#Terrorist_Select") )  // T model select?
    {
       bots[bot_index].start_action = MSG_CS_T_SELECT;
    }
-   else if (strcmp((char *)p, "#CT_Select") == 0)  // CT model select menu?
+   else if (FStrEq((char *)p, "#CT_Select") )  // CT model select menu?
    {
       bots[bot_index].start_action = MSG_CS_CT_SELECT;
    }

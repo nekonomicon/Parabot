@@ -110,7 +110,7 @@ int DispatchSpawn( edict_t *pent )
          fclose(fp);
       }
 #endif
-      if (strcmp(pClassname, "worldspawn") == 0)
+      if( FstrEq( pClassname, "worldspawn" ) )
       {
          // do level initialization stuff here...
 /*
@@ -141,9 +141,9 @@ int DispatchSpawn( edict_t *pent )
 
          g_GameRules = TRUE;
       }
-//	  else if (strcmp(pClassname, "env_sound") == 0) debugMsg( "DISPATCH env_sound\n" );
-//	  else if (strcmp(pClassname, "env_shake") == 0) debugMsg( "DISPATCH env_shake\n" );
-//	  else if (strcmp(pClassname, "env_explosion") == 0) debugMsg( "DISPATCH env_explosion\n" );
+//	  else if (FStrEq( pClassname, "env_sound" ) ) debugMsg( "DISPATCH env_sound\n" );
+//	  else if (FStrEq( pClassname, "env_shake" ) ) debugMsg( "DISPATCH env_shake\n" );
+//	  else if (FStrEq( pClassname, "env_explosion" ) ) debugMsg( "DISPATCH env_explosion\n" );
    }
 	if(!g_meta_init)
 		return (*other_gFunctionTable.pfnSpawn)(pent);
@@ -181,8 +181,8 @@ void DispatchKeyValue( edict_t *pentKeyvalue, KeyValueData *pkvd )
 	{
 		if( !gearbox_ctf )
 		{
-			if( ( !strcmp( pkvd->szKeyName, "classname" ) ) &&
-			( !strcmp(pkvd->szValue, "info_ctfdetect") ) )
+			if( ( FStrEq( pkvd->szKeyName, "classname" ) ) &&
+			( FStrEq(pkvd->szValue, "info_ctfdetect") ) )
 			{
 				gearbox_ctf = true;
 			}
@@ -254,13 +254,13 @@ BOOL ClientConnect( edict_t *pEntity, const char *pszName, const char *pszAddres
 		if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp, "ClientConnect: pent=%p name=%s\n",pEntity,pszName); fclose(fp); }
 #endif
 		// check if this client is the listen server client
-		if (strcmp(pszAddress, "loopback") == 0)
+		if (FstrEq(pszAddress, "loopback" ) )
 		{
 			// save the edict of the listen server client...
 			playerEnt = pEntity;
 		}
 		// check if this is NOT a bot joining the server...
-		if (strcmp(pszAddress, "127.0.0.1") != 0) {
+		if ( !FStrEq( pszAddress, "127.0.0.1" ) ) {
 			// don't try to add bots for 10 seconds, give client time to get added
 			if (bot_check_time < gpGlobals->time + 10.0) bot_check_time = gpGlobals->time + 10.0;
 		}

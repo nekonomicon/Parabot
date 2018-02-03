@@ -46,7 +46,7 @@ edict_t* getEntity( const char *classname, Vector pos )
 	while ( (pOther = UTIL_FindEntityByClassname (pOther, classname)) != NULL) {
 		p = (pOther->pev->absmax + pOther->pev->absmin) * 0.5;
 /*		float d = (pos-p).Length();
-		if ( strcmp( STRING(pOther->pev->classname), "func_train" )==0 ) {
+		if ( FStrEq( STRING(pOther->pev->classname), "func_train" ) ) {
 			debugMsg( "train\n" );
 		}*/
 		if (p==pos) { found=true; break; }

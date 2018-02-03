@@ -281,21 +281,21 @@ int pfnRegUserMsg(const char *pszName, int iSize)
 	{
 		//fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnRegUserMsg: pszName=%s msg=%d\n",pszName,msg); fclose(fp);
 				
-			 if (strcmp( pszName, "WeaponList"	) == 0)	message_WeaponList = msg;
-		else if (strcmp( pszName, "CurWeapon"	) == 0)	message_CurWeapon = msg;
-		else if (strcmp( pszName, "AmmoX"       ) == 0)	message_AmmoX = msg;
-		else if (strcmp( pszName, "AmmoPickup"  ) == 0)	message_AmmoPickup = msg;
-		else if (strcmp( pszName, "WeapPickup"  ) == 0)	message_WeapPickup = msg;
-		else if (strcmp( pszName, "ItemPickup"  ) == 0)	message_ItemPickup = msg;
-		else if (strcmp( pszName, "Health"      ) == 0)	message_Health = msg;
-		else if (strcmp( pszName, "Battery"     ) == 0)	message_Battery = msg;
-		else if (strcmp( pszName, "Damage"      ) == 0)	message_Damage = msg;
-		else if (strcmp( pszName, "DeathMsg"    ) == 0)	message_Death = msg;
+			 if (FStrEq( pszName, "WeaponList" ) )	message_WeaponList = msg;
+		else if (FStrEq( pszName, "CurWeapon"	) )	message_CurWeapon = msg;
+		else if (FStrEq( pszName, "AmmoX"       ) )	message_AmmoX = msg;
+		else if (FStrEq( pszName, "AmmoPickup"  ) )	message_AmmoPickup = msg;
+		else if (FStrEq( pszName, "WeapPickup"  ) )	message_WeapPickup = msg;
+		else if (FStrEq( pszName, "ItemPickup"  ) )	message_ItemPickup = msg;
+		else if (FStrEq( pszName, "Health"      ) )	message_Health = msg;
+		else if (FStrEq( pszName, "Battery"     ) )	message_Battery = msg;
+		else if (FStrEq( pszName, "Damage"      ) )	message_Damage = msg;
+		else if (FStrEq( pszName, "DeathMsg"    ) )	message_Death = msg;
 		// TFC / CS
-		else if (strcmp(pszName, "VGUIMenu"		) == 0) message_VGUI = msg;
+		else if (FStrEq(pszName, "VGUIMenu"	) ) message_VGUI = msg;
 		// CS only			
-		else if (strcmp(pszName, "ShowMenu"		) == 0) message_ShowMenu = msg;
-		else if (strcmp(pszName, "Money"		) == 0) message_Money = msg;         		
+		else if (FStrEq(pszName, "ShowMenu"	) ) message_ShowMenu = msg;
+		else if (FStrEq(pszName, "Money"	) ) message_Money = msg;         		
 	}
 	if(!g_meta_init)
 		return msg;
@@ -435,8 +435,8 @@ edict_t* pfnFindEntityByString(edict_t *pEdictStartSearchAfter, const char *pszF
 	//   if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnFindEntityByString: %s\n",pszValue); fclose(fp); }
 #endif
 	if (( mod_id == CSTRIKE_DLL ) &&
-		( strcmp( pszField, "classname" ) == 0 ) && 
-		( strcmp( pszValue, "info_map_parameters" ) == 0 ) ) {
+		( FStrEq( pszField, "classname" ) ) && 
+		( FStrEq( pszValue, "info_map_parameters" ) ) ) {
 		//debugMsg( "NEW CS-ROUND!\n" );
 		roundStartTime = worldTime() + CVAR_GET_FLOAT("mp_freezetime");	// 5 seconds until round starts
 	}
@@ -1266,12 +1266,12 @@ void pfnSetKeyValue(const char *infobuffer, const char *key, const char *value)
 
 void pfnSetClientKeyValue( int clientIndex, const char *infobuffer, const char *key, const char *value )
 {
-	if ((mod_id == VALVE_DLL || mod_id == DMC_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) && (strcmp( key, "team" ) == 0)) {	// init teamlist
+	if ((mod_id == VALVE_DLL || mod_id == DMC_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) && (FStrEq( key, "team" ) ) ) {	// init teamlist
 		valveTeamPlayMode = true;
 
 		bool teamKnown = false;
 		for (int team=0; team<valveTeamNumber; team++) 
-			if (strcmp( value, valveTeamList[team] ) == 0) {
+			if (FStrEq( value, valveTeamList[team] ) ) {
 				teamKnown = true;
 				break;
 			}

@@ -292,7 +292,7 @@ bool PB_WeaponHandling::armBestWeapon( float distance, float hitProb, int flags 
 			bool spotActive = false;
 			while( ( pent = UTIL_FindEntityInSphere( pent, botEnt->v.origin, MAX_DIST_VP ) ) )
 			{
-				if( !strcmp( STRING( pent->pev->classname ), "laser_spot" ) )
+				if( FStrEq( STRING( pent->pev->classname ), "laser_spot" ) )
 				{
 					if( laserdotOwner( pent->edict() ) == botEnt )
 					{

@@ -1418,7 +1418,7 @@ bool PB_Weapon::attackValveSatchel( Vector &target )
 	if (!grenadePrepared) {
 		//debugMsg( "Throwing satchel!\n" );
 		botAction->add( BOT_FIRE_PRIM );
-		if ( strcmp( STRING(botEnt->v.viewmodel), "models/v_satchel_radio.mdl" ) == 0 ) {
+		if ( FStrEq( STRING(botEnt->v.viewmodel), "models/v_satchel_radio.mdl" ) ) {
 			grenadePrepared=true;
 			grenadeLaunchTime = worldTime() + 1.5;
 			grenadeWId = VALVE_WEAPON_SATCHEL;

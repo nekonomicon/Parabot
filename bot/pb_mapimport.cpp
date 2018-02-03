@@ -252,9 +252,9 @@ bool loadLevelData()
 {
 	char fileName[100];
 	
-	if (strcmp( STRING(gpGlobals->mapname), actualMapname )==0) return true;
+	if ( FStrEq( STRING(gpGlobals->mapname), actualMapname ) ) return true;
 
-	if ( strcmp( actualMapname, "" ) != 0 && 
+	if ( !FStrEq( actualMapname, "" ) && 
 		 mapGraph.numberOfNavpoints() > 0    ) saveLevelData();
 	
 	mapGraph.clear();
@@ -324,7 +324,7 @@ bool loadLevelData()
 		}
 		
 		// import specials
-		if ((mod_id==VALVE_DLL || mod_id==AG_DLL) && strcmp( STRING(gpGlobals->mapname), "crossfire" )==0) {
+		if ((mod_id==VALVE_DLL || mod_id==AG_DLL) && FStrEq( STRING(gpGlobals->mapname), "crossfire" ) ) {
 			Vector v( 0,-2236,-1852 );
 			n.init( v, NAV_S_AIRSTRIKE_BUTTON, 0 );
 			mapGraph.addNavpoint( n );

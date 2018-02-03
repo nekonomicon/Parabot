@@ -37,7 +37,7 @@ PB_Cell::PB_Cell( edict_t *pEdict )
 	edict_t *ground = pEdict->v.groundentity;
 	if (ground) {
 		const char *groundName = STRING( ground->v.classname );
-		if (strcmp( groundName, "worldspawn" ) != 0) {
+		if ( !FStrEq( groundName, "worldspawn" ) ) {
 			data.ground = getNavpointIndex( ground );
 			if (data.ground < 0) data.ground = -1;
 		}

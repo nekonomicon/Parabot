@@ -243,7 +243,7 @@ bool PB_Perception::classify( PB_Percept &perc )
 		perc.pClass = PI_FOE;	// no friends in deathmatch...
 		return true;
 	}
-	else if (mod_id==AG_DLL && ( !strcmp( ag_gamemode, "ffa" ) || !strcmp( ag_gamemode, "lms" ) ) )
+	else if (mod_id==AG_DLL && ( FStrEq( ag_gamemode, "ffa" ) || FStrEq( ag_gamemode, "lms" ) ) )
 	{
 		perc.pClass = PI_FOE;	// no friends in deathmatch...
 		return true;
@@ -521,7 +521,7 @@ void PB_Perception::collectData()
 		char *pClassname = (char *)STRING(ent->pev->classname);
 		
 		// detect players
-		if ( strcmp( pClassname, "player" ) == 0 ) {
+		if ( FStrEq( pClassname, "player" ) ) {
 			// check if valid
 			if (ent->pev == &(botEnt->v)) continue;		// skip self
 			if (!isAlive( ENT(ent->pev) )) continue;	// skip player if not alive
@@ -550,28 +550,28 @@ void PB_Perception::collectData()
 				}
 			}	
    		}
-		else if ( ( mod_id != DMC_DLL && strcmp( pClassname, "weaponbox" ) == 0 ) ||
-				  ( mod_id == DMC_DLL && strcmp( pClassname, "item_backpack" ) == 0 ) )	{
+		else if ( ( mod_id != DMC_DLL && FStrEq( pClassname, "weaponbox" ) ) ||
+				  ( mod_id == DMC_DLL && FStrEq( pClassname, "item_backpack" ) ) )	{
 			addIfVisible( ent->edict(), PI_WEAPONBOX );
 		}
-		else if ( strcmp( pClassname, "halo" ) == 0 ) {
+		else if ( FStrEq( pClassname, "halo" ) ) {
 			addIfVisible( ent->edict(), PI_HALO );
 		}
-		else if ( strcmp( pClassname, "hostage_entity" ) == 0 ) {
+		else if ( FStrEq( pClassname, "hostage_entity" ) ) {
 			addIfVisible( ent->edict(), PI_HOSTAGE );
 		}
-		else if ( strcmp( pClassname, "weapon_c4" ) == 0 ) {
+		else if ( FStrEq( pClassname, "weapon_c4" ) ) {
 			addIfVisible( ent->edict(), PI_BOMB );
 		}
-		else if ( strcmp( pClassname, "laser_spot" ) == 0 ) {
+		else if ( FStrEq( pClassname, "laser_spot" ) ) {
 			if ((ent->pev->origin != aimingPos) && !(ent->pev->effects & EF_NODRAW)) {
 				addIfVisible( ent->edict(), PI_LASERDOT );
 			}
 		}
-		else if ( strcmp( pClassname, "monster_satchel" ) == 0 ) {
+		else if ( FStrEq( pClassname, "monster_satchel" ) ) {
 			addIfVisible( ent->edict(), PI_EXPLOSIVE );
 		}
-		else if ( strcmp( pClassname, "grenade" ) == 0 ) {
+		else if ( FStrEq( pClassname, "grenade" ) ) {
 			if (!addIfVisible( ent->edict(), PI_EXPLOSIVE )) {
 				float dist = (ent->pev->origin - botEnt->v.origin).Length();
 				if (dist < 200*sensitivity) {
@@ -579,10 +579,10 @@ void PB_Perception::collectData()
 				}
 			}
 		}
-		else if ( strcmp( pClassname, "monster_snark" ) == 0 ) {
+		else if ( FStrEq( pClassname, "monster_snark" ) ) {
 			addIfVisible( ent->edict(), PI_SNARK );
 		}
-		else if ( strcmp( pClassname, "monster_tripmine" ) == 0 || strcmp( pClassname, "monster_tripsnark" ) == 0 ) {
+		else if ( FStrEq( pClassname, "monster_tripmine" ) || FStrEq( pClassname, "monster_tripsnark" ) ) {
 			if (ent->edict()->v.owner == botEnt) {
 				// remember own tripmines even without seeing them:
 				float dist = (ent->pev->origin - botEnt->v.origin).Length();

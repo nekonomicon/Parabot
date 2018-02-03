@@ -545,7 +545,7 @@ bool PB_MapGraph::load( char *mapname )
 
 	char idString[32];	// check for correct version
 	fread( &idString, 32, 1, fp );
-	if (strcmp( idString, PNFidString) !=0 ) {
+	if ( !FStrEq( idString, PNFidString) ) {
 		fclose( fp );
 		return false;
 	}

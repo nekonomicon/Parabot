@@ -805,13 +805,13 @@ void ClientCommand( edict_t *pEntity )
 				const char *modelname = STRING(ent->pev->model);
 				ALERT( at_console, "%s at (%.f, %.f, %.f), pev=%x\n", 
 					iname, p.x, p.y, p.z, ent->pev );
-				if (strcmp( iname, "monster_tripmine" )==0) {
+				if (FStrEq( iname, "monster_tripmine" )) {
 					char *tmClass = (char*)ent;// rpgClass = pointer to CWeaponRPG
 					char **ownerEd = (char**)(tmClass+680);
 					edict_t *tmOwner = (edict_t*)(*ownerEd);
 					edict_t *tmOwner2 = *((edict_t**)(ent+680));
 				}
-				/*if (strcmp( iname, "func_button" )==0) {
+				/*if (FstrEq( iname, "func_button" )) {
 					CBaseButton *buttonClass = (CBaseButton*)ent;// rpgClass = pointer to CWeaponRPG
 					buttonClass->TriggerAndWait();
 					//char **targetPev = (char**)(buttonClass+500);	// (*targetPev) = pointer to Pev

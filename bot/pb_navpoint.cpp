@@ -376,7 +376,7 @@ bool PB_Navpoint::visible( edict_t *playerEnt )
 
 		if (tr.pHit) {	// maybe traceline hit object itself
 			const char *hitClass = STRING( tr.pHit->v.classname );
-			if ( strcmp(hitClass, classname()) == 0 ) return true;
+			if ( FStrEq( hitClass, classname() ) ) return true;
 			return false;
 		}
 	}
