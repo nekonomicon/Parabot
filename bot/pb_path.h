@@ -181,7 +181,7 @@ public:
 	// return true if bot has to wait for a platform before continuing to the next waypoint
 
 	Vector nextPlatformPos();
-	// returns the next waypoint on a platform or (0,0,0) if no platform on path
+	// returns the next waypoint on a platform or null vector if no platform on path
 
 	PB_Path_Waypoint getNextWaypoint();
 	// returns the next waypoint

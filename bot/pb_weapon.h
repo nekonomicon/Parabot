@@ -245,7 +245,7 @@ public:
 	float getAudibleDistance( int attackFlags );
 	// returns the audible distance
 
-	bool attack( Vector target, float accuracy, Vector relVel = Vector(0,0,0) );
+	bool attack( Vector target, float accuracy, Vector relVel = g_vecZero );
 	// attacks in best mode at best time the given position when accuracy is reached
 
 	bool hasToFinishAttack() { return grenadePrepared; }

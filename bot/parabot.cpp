@@ -56,7 +56,7 @@ void CParabot::initAfterRespawn()
 	lastCamp = worldTime() - 100;
 	setRoamingIndex( -1 );
 	roamingBreak = 0;
-	lastJumpPos = Vector( 0,0,0 );
+	lastJumpPos = g_vecZero;
 	makeRoomTime = 0;
 	preemptiveFire = false;
 	cellTimeOut = 0;
@@ -168,7 +168,7 @@ void CParabot::registerDamage( int amount, Vector origin, int type )
 		}
 	}
 
-	if (origin == Vector(0,0,0)) return;	// falling etc.
+	if (origin == g_vecZero) return;	// falling etc.
 
 	// who is shooting at the bot?
 	bool found = false;
@@ -791,7 +791,7 @@ void CParabot::followActualRoute()
 			}
 			PB_Cell tc = map.cell( botCell );
 			if (roamingTarget) roamingTarget->doNotVisitBefore( ent, worldTime()+10.0 );
-			lastJumpPos = Vector( 0,0,0 );
+			lastJumpPos = g_vecZero;
 			roamingTarget = 0;
 			setRoamingIndex( -1 );
 			return;

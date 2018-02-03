@@ -51,7 +51,7 @@ Vector PB_Combat::evade( PB_Percept &perceipt )
 
 	if (strafeState==0) return(  speed*right );
 	if (strafeState==2) return( -speed*right );
-	return Vector( 0,0,0 );
+	return g_vecZero;
 }
 
 

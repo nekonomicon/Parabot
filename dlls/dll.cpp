@@ -43,7 +43,7 @@ int numberOfClients = 0;
 edict_t *playerEnt = 0;
 edict_t *clients[32];
 DLL_FUNCTIONS other_gFunctionTable;
-DLL_GLOBAL const Vector g_vecZero = Vector(0,0,0);
+DLL_GLOBAL const Vector g_vecZero( 0, 0, 0 );
 int isFakeClientCommand = 0;
 int fake_arg_count;
 float bot_check_time = 10.0;	// will be set to correct value when client connects

@@ -168,8 +168,8 @@ void PB_Needs::valveWishList()
 			newItemPriorities = true;
 			airstrikeKnown = true;
 		}
-		Vector v(0,0,0);
-		if (mapGraph.getNearestNavpoint( v, NAV_S_AIRSTRIKE_COVER ))
+
+		if (mapGraph.getNearestNavpoint( g_vecZero, NAV_S_AIRSTRIKE_COVER ))
 			return;	// only head for bunker if cover exists!
 	}
 	else if (airstrikeKnown) {
@@ -562,8 +562,7 @@ void PB_Needs::agWishList()
 			newItemPriorities = true;
 			airstrikeKnown = true;
 		}
-		Vector v(0,0,0);
-		if (mapGraph.getNearestNavpoint( v, NAV_S_AIRSTRIKE_COVER ))
+		if (mapGraph.getNearestNavpoint( g_vecZero, NAV_S_AIRSTRIKE_COVER ))
 			return;	// only head for bunker if cover exists!
 	}
 	else if (airstrikeKnown) {

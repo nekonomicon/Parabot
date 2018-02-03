@@ -644,11 +644,11 @@ bool PB_Path::waitForPlatform()
 
 
 Vector PB_Path::nextPlatformPos()
-// returns the next waypoint on a platform or (0,0,0) if no platform on path
+// returns the next waypoint on a platform or null vector if no platform on path
 {
 	Vector wpPlatPos;
 	assert( platformPos != 0 );
-	if (platformPos->size() == 0) return Vector( 0,0,0 );	// no platform on path
+	if (platformPos->size() == 0) return g_vecZero;	// no platform on path
 	
 	if ( (currentWaypoint != waypoint->end()) && currentWaypoint->isOnPlatform() ) {
 		wpPlatPos = currentWaypoint->pos();

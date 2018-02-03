@@ -25,7 +25,7 @@ public:
 	void setViewAngle( Vector angle, int prior = 0 );
 	void setViewDir( Vector vec, int prior = 0 );
 	void setViewLikeMove();
-	void setAimDir( Vector currentPos, Vector relVelocity = Vector(0,0,0) );
+	void setAimDir( Vector currentPos, Vector relVelocity = g_vecZero );
 	void setSpeed( float value )	  { speed = value;     }
 	void setMaxSpeed();
 	float getMaxSpeed() { return maxSpeed; }

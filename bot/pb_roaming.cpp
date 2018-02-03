@@ -24,7 +24,7 @@ void PB_Roaming::init( edict_t *botEnt, PB_Action *act )
 	action = act;
 	debugTrace = false;
 	debugWay = false;
-	reset( Vector(0,0,0) );
+	reset( g_vecZero );
 	//markerId = marker.newMarker( jumpTarget, 1 );
 }
 

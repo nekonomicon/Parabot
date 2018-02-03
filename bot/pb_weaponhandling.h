@@ -28,7 +28,7 @@ public:
 	bool available( int wId );
 	// returns true if bot can use weapon wId
 
-	bool attack( Vector target, float accuracy, Vector relVel = Vector(0,0,0) );
+	bool attack( Vector target, float accuracy, Vector relVel = g_vecZero );
 	// attacks in best mode at best time the given position when accuracy is reached
 
 	void checkForForcedAttack();

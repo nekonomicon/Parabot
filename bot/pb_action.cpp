@@ -36,15 +36,15 @@ void PB_Action::init( edict_t *botEnt )
 	duckEndTime = 0;
 	stopEndTime = 0;
 	nextViewUpdate = 0;
-	deltaView = Vector(0,0,0);
+	deltaView = g_vecZero;
 	turnCount = 1;
 	maxTurn = 0;
 	fineJump = false;
 	longJumpState = 0;
 	maxSpeed = CVAR_GET_FLOAT("sv_maxspeed");
-	viewAngle = Vector(0,0,0);
-	currentView = Vector(0,0,0);
-	targetPos = Vector(0,0,0);
+	viewAngle = g_vecZero;
+	currentView = g_vecZero;
+	targetPos = g_vecZero;
 	hitProb = 0;
 	currentMSec = 0;
 	targetDist = 0;
@@ -68,7 +68,7 @@ void PB_Action::reset()
 	viewPrior = 0;
 	movePrior = 0;
 	notStucking = false;
-	targetVel = Vector(0,0,0);
+	targetVel = g_vecZero;
 }
 
 
@@ -198,7 +198,7 @@ void PB_Action::setViewAngle( Vector angle, int prior )
 	if (prior>=viewPrior) {
 		viewAngle = angle;
 		viewPrior = prior;
-		targetVel = Vector(0,0,0);		// must be set != 0 afterwards!
+		targetVel = g_vecZero;		// must be set != 0 afterwards!
 	}
 }
 
@@ -309,7 +309,7 @@ Vector PB_Action::calcViewAngle()
 	if (worldTimeReached( nextViewUpdate )) {
 		nextViewUpdate = worldTime() + vupdTime;
 
-		if (targetVel != Vector(0,0,0)) {	
+		if (targetVel != g_vecZero) {	
 			// predict position for moving target:
 			Vector predPos = targetPos + vupdTime * targetVel;
 			Vector tVec = predPos - (ent->v.origin + ent->v.view_ofs);

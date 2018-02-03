@@ -769,7 +769,7 @@ void BotThink( bot_t *pBot )
 	   pBot->parabot->botThink();						// started
    }
    else {	// prevent crashes...???
-	   g_engfuncs.pfnRunPlayerMove( pEdict, Vector(0,0,0), 0,
+	   g_engfuncs.pfnRunPlayerMove( pEdict, g_vecZero, 0,
 		   0, 0, 0, 0, pBot->msecval);
    }
 
