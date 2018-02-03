@@ -230,15 +230,15 @@ edict_t* PB_Chat::findNameInMessage( const char *msg, bool forceReply )
 
 		strcpy( name1, STRING( bots[i].pEdict->v.netname ) );
 		UTF8_strupr( name1 );
-		char *firstName = &name1[0];
+		const char *firstName = &name1[0];
 
-		char *clanTagStart = strchr( firstName, '[' );
+		const char *clanTagStart = strchr( firstName, '[' );
 		if (clanTagStart) {
-			char *clanTagEnd = strchr( firstName, ']' );
+			const char *clanTagEnd = strchr( firstName, ']' );
 			if ( (clanTagEnd-clanTagStart) < 5	&&
 			 strlen(firstName) > 5			) firstName = clanTagEnd+1;
 		}
-		char *space = strchr( firstName, ' ' );
+		const char *space = strchr( firstName, ' ' );
 		if (space) {
 			*space = 0;						// shorten first part
 			strcpy( name2, (space+1) );		// store second part
@@ -287,7 +287,7 @@ const char* PB_Chat::checkMessageForWeapon( const char *msg, const char *wpnName
 		wpnPos[1] = 'w';
 		namePos[0] = '%';
 		namePos = strstr( weaponMsg, "!s" );
-		namePos[0] = '%';
+		 namePos[0] = '%';
 	}
 
 	return &weaponMsg[0];
@@ -297,17 +297,17 @@ const char* PB_Chat::checkMessageForWeapon( const char *msg, const char *wpnName
 const char* PB_Chat::getName( edict_t *player )
 {
 	strcpy( nameBuffer, STRING( player->v.netname ) );
-	char *fullName = &nameBuffer[0];
+	const char *fullName = &nameBuffer[0];
 
-	char *clanTagStart = strchr( fullName, '[' );
+	const char *clanTagStart = strchr( fullName, '[' );
 	if (clanTagStart) {
-		char *clanTagEnd = strchr( fullName, ']' );
+		const char *clanTagEnd = strchr( fullName, ']' );
 		int remove = RANDOM_LONG( 0, 2 );		// remove clantag in 2/3 of all cases
 		if ( (clanTagEnd-clanTagStart) < 5	&&
 			 strlen(fullName) > 5			&&  
 			 remove	> 0							) fullName = clanTagEnd+1;
 	}
-	char *space = strchr( fullName, ' ' );
+	const char *space = strchr( fullName, ' ' );
 	if (space) {
 		int rand = RANDOM_LONG( 0, 2 );
 		if (rand==1) {  *space = 0;  return fullName;  }	// return first part
@@ -391,7 +391,7 @@ void PB_Chat::parseMessage( edict_t *speaker, const char *msg )
 	while ( (pos=strcspn( parseBuffer, ",;-'()/.!?" )) < len ) parseBuffer[pos]=' ';
 
 	// find keyword
-	char *wordFound = 0;
+	const char *wordFound = 0;
 	for (i=0; i<chatReplies.size(); i++) {
 		wordFound = strstr( parseBuffer, chatReplies[i]->code );
 		if (wordFound) break;

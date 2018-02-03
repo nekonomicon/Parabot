@@ -225,8 +225,8 @@ void CParabot::registerDamage( int amount, Vector origin, int type )
 */
 	if (found) {
 #ifdef _DEBUG
-		char *botName = (char *)STRING(ent->v.netname);
-		char *inflictorName = (char *)STRING(pPlayer->pev->netname);
+		const char *botName = STRING(ent->v.netname);
+		const char *inflictorName = STRING(pPlayer->pev->netname);
 		debugMsg( botName, " hurt by ", inflictorName );	debugMsg( "\n" );
 #endif
 		senses.addAttack( pPlayer->edict(), amount );
@@ -575,7 +575,7 @@ void CParabot::checkForTripmines()
 	edict_t *mine = senses.getNearestTripmine();
 	
 	if (!mine) return;
-	char *mineClass = (char*)GET_PRIVATE( mine );
+	const char *mineClass = GET_PRIVATE( mine );
 	if (!mineClass) return;
 	
 	Vector mine_vecDir = mine->v.angles;
@@ -810,7 +810,7 @@ void CParabot::executeGoals()
 	
 	checkForBreakpoint( BREAK_GOALS );
 
-	//debugFile( (char*) STRING(ent->v.netname) );
+	//debugFile( STRING(ent->v.netname) );
 	for (int i=0; i<MAX_GOALS; i++) {
 		goalFunction = goalFinder.bestGoal( i );
 		if (goalFunction) {

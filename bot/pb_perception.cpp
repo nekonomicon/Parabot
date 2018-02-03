@@ -518,7 +518,7 @@ void PB_Perception::collectData()
 
 	while( ( ent = UTIL_FindEntityInSphere( ent, botEnt->v.origin, sensitivity * MAX_DIST_VP ) ) ) 
 	{
-		char *pClassname = (char *)STRING(ent->pev->classname);
+		const char *pClassname = STRING(ent->pev->classname);
 		
 		// detect players
 		if ( FStrEq( pClassname, "player" ) ) {
@@ -589,7 +589,7 @@ void PB_Perception::collectData()
 				detections[cdet].push_back( PB_Percept( sensitivity, ent->edict(), PI_TRACKABLE, PI_TRIPMINE, dist) );
 			}
 			else if ( !addIfVisible( ent->edict(), PI_TRIPMINE ) ) {		// check beamstart
-				char *mineClass = (char*)ent;
+				const char *mineClass = (const char *)ent;
 				Vector *mine_vecDir = (Vector*) (mineClass+616);
 				float *mine_flBeamLength = (float*) (mineClass+640);
 				Vector beamEnd = ent->pev->origin + (*mine_vecDir) * 2048 * (*mine_flBeamLength);

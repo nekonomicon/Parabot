@@ -472,7 +472,7 @@ bool PB_Configuration::createPersonalities( const char *PersonalitityFile )
 	return true;
 }
 
-char* PB_Configuration::getColor( int persNr, int modulo )
+const char* PB_Configuration::getColor( int persNr, int modulo )
 {
 	static char color[4];
 	int code = 0;

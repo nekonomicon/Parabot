@@ -44,7 +44,7 @@ public:
 
 	PB_Personality personality( int index );
 
-	char* getColor( int persNr, int modulo );
+	const char* getColor( int persNr, int modulo );
 
 	void personalityJoins( int index, float time ) { character[index].inUse = true; }
 

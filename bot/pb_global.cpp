@@ -272,13 +272,13 @@ void infoMsg( const char *str1, const char *str2, const char *str3, const char *
 void debugMsg( const char *str1, int data1, int data2, int data3 )
 {
 	if (botNr != activeBot) return;
-	ALERT ( at_console, (char*)str1, data1, data2, data3 );
+	ALERT ( at_console, str1, data1, data2, data3 );
 }
 
 void debugMsg( const char *str1, float data1, float data2, float data3 )
 {
 	if (botNr != activeBot) return;
-	ALERT ( at_console, (char*)str1, data1, data2, data3 );
+	ALERT ( at_console, str1, data1, data2, data3 );
 }
 
 void debugSound( edict_t *recipient, const char *sample )
