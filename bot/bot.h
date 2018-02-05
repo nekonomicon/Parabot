@@ -116,7 +116,6 @@ typedef struct
 } bot_current_weapon_t;
 
 
-class CBaseEntity;
 class CParabot;
 
 
@@ -171,8 +170,6 @@ int UTIL_GetBotIndex(edict_t *pEdict);
 bot_t *UTIL_GetBotPointer(edict_t *pEdict);
 void UTIL_SelectItem(edict_t *pEdict, char *item_name);
 void UTIL_ShowMenu( edict_t *pEdict, int slots, int displaytime, bool needmore, const char *pText );
-CBaseEntity	*UTIL_PlayerByIndex( int playerIndex );
-
 
 #endif // BOT_H
 

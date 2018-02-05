@@ -135,9 +135,9 @@ void CParabot::registerDamage( int amount, Vector origin, int type )
 	if (dmgType & IGNORE_DAMAGE) return;
 */
 	const char *diname;
-	CBaseEntity *di = UTIL_FindEntityInSphere( 0, origin, 5 );
+	edict_t *di = FIND_ENTITY_IN_SPHERE( 0, origin, 5 );
 	if (di) {
-		diname = STRING( di->pev->classname );
+		diname = STRING( di->v.classname );
 		if (!FStrEq(diname, "player") ) {
 			if ( FStrEq(diname, "grenade") ) {
 			}
@@ -152,7 +152,7 @@ void CParabot::registerDamage( int amount, Vector origin, int type )
 			else debugMsg( "DAMAGE BY ", diname, "\n" );
 		}
 		else {
-			if (di->pev->origin == botPos()) debugMsg( "SELF-DAMAGE\n" );
+			if (di->v.origin == botPos()) debugMsg( "SELF-DAMAGE\n" );
 			//else debugMsg( "DAMAGE BY PLAYER\n" );
 		}
 	}
@@ -172,15 +172,15 @@ void CParabot::registerDamage( int amount, Vector origin, int type )
 
 	// who is shooting at the bot?
 	bool found = false;
-	CBaseEntity *pPlayer = 0;
+	edict_t *pPlayer = 0;
 	for (int i=1; i<=gpGlobals->maxClients; i++) {
-		pPlayer = UTIL_PlayerByIndex( i );
+		pPlayer = INDEXENT( i );
 		if (!pPlayer) continue;							// skip invalid players
-		if ( pPlayer->pev == &(ent->v) ) continue;		// skip self
-		if (!isAlive( ENT(pPlayer->pev) )) continue;	// skip player if not alive
-		if (pPlayer->pev->solid == SOLID_NOT) continue;	
+		if ( pPlayer == ent ) continue;		// skip self
+		if (!isAlive( ENT(pPlayer) )) continue;	// skip player if not alive
+		if (pPlayer->v.solid == SOLID_NOT) continue;	
 		
-		if ((pPlayer->pev->origin - origin).Length() < 30 ) {
+		if ((pPlayer->v.origin - origin).Length() < 30 ) {
 			found = true;
 			break;
 		}
@@ -189,11 +189,11 @@ void CParabot::registerDamage( int amount, Vector origin, int type )
 	if (!found) {	// now we'll have to guess
 		//debugMsg( "Guessing!\n" );
 		for (int i=1; i<=gpGlobals->maxClients; i++) {
-			pPlayer = UTIL_PlayerByIndex( i );
+			pPlayer = INDEXENT( i );
 			if (!pPlayer) continue;							// skip invalid players
-			if ( pPlayer->pev == &(ent->v) ) continue;		// skip self
-			if (!isAlive( ENT(pPlayer->pev) )) continue;	// skip player if not alive
-			if (pPlayer->pev->solid == SOLID_NOT) continue;	
+			if ( pPlayer == ent ) continue;		// skip self
+			if (!isAlive( ENT(pPlayer) )) continue;	// skip player if not alive
+			if (pPlayer->v.solid == SOLID_NOT) continue;	
 		
 /*			int usedWeapon = clientWeapon[i];
 			switch (mod_id) {
@@ -208,28 +208,28 @@ void CParabot::registerDamage( int amount, Vector origin, int type )
 								break;
 
 			}*/
-			UTIL_MakeVectors( pPlayer->pev->v_angle );
-			Vector dir = (botPos() - pPlayer->pev->origin).Normalize();
+			UTIL_MakeVectors( pPlayer->v.v_angle );
+			Vector dir = (botPos() - pPlayer->v.origin).Normalize();
 			float aim = DotProduct( gpGlobals->v_forward, dir );
 			//debugMsg( "Aim=%.3f\n", aim );
 			if (aim < 0.95) continue;
-			if ( !canShootAt( pPlayer->edict(), botPos() ) ) continue;
+			if ( !canShootAt( pPlayer, botPos() ) ) continue;
 
 			found = true;
 			break;
 		}
 	}
 	/*
-	pPlayer = (CBaseEntity*)GET_PRIVATE( ent->v.dmg_inflictor );
-	if ( pPlayer && strlen( STRING(pPlayer->pev->netname) )>0 ) found = true;
+	pPlayer = ent->v.dmg_inflictor;
+	if ( pPlayer && strlen( STRING(pPlayer->v.netname) )>0 ) found = true;
 */
 	if (found) {
 #ifdef _DEBUG
 		const char *botName = STRING(ent->v.netname);
-		const char *inflictorName = STRING(pPlayer->pev->netname);
+		const char *inflictorName = STRING(pPlayer->v.netname);
 		debugMsg( botName, " hurt by ", inflictorName );	debugMsg( "\n" );
 #endif
-		senses.addAttack( pPlayer->edict(), amount );
+		senses.addAttack( pPlayer, amount );
 	}
 	else {
 		//debugMsg( "No damage inflictor found!\n" );
@@ -574,9 +574,7 @@ void CParabot::checkForTripmines()
 	TraceResult trAll, trHalf;
 	edict_t *mine = senses.getNearestTripmine();
 	
-	if (!mine) return;
-	const char *mineClass = GET_PRIVATE( mine );
-	if (!mineClass) return;
+	if ( FNullEnt( mine ) ) return;
 	
 	Vector mine_vecDir = mine->v.angles;
 	fixAngle( mine_vecDir );

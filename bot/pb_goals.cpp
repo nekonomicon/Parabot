@@ -562,11 +562,11 @@ void goalFollow( CParabot *pb, PB_Percept*item )
 	assert( item != 0 );
 	//debugMsg( "FollowAndAssistLeader\n" );
 	if (pb->partner==0) debugMsg( "WARNING: partner == 0!\n" );
-	if ( (pb->partner == 0 ) || (pb->partner->edict() != item->entity ) ) {
+	if ( (pb->partner == 0 ) || (pb->partner != item->entity ) ) {
 		int partnerId = observer.playerId( item->entity );
 		if (partnerId >= 0) {
 			observer.reportPartner( pb->slot, partnerId );
-			pb->partner = (CBaseEntity*) GET_PRIVATE( item->entity );
+			pb->partner = item->entity;
 			pb->actualPath = 0;
 		}
 	}
@@ -585,7 +585,7 @@ void goalFollow( CParabot *pb, PB_Percept*item )
 			observer.reportWaypointReached( pb->slot );		// confirm waypoint
 		}
 		
-		pb->action.setViewDir( pb->partner->pev->origin );		// set viewAngle
+		pb->action.setViewDir( pb->partner->v.origin );		// set viewAngle
 		pb->action.setMoveDir( wp.pos(pb->ent) );				// set moveAngle and speed
 		pb->action.setMaxSpeed();
 		pb->pathCheckWay();	
@@ -605,7 +605,7 @@ void goalFollow( CParabot *pb, PB_Percept*item )
 float weightFollowLeader( CParabot *pb, PB_Percept*item )
 {
 	if (pb->partner) {
-		if (pb->partner->edict() == item->entity ) return 4;	// keep on following!
+		if (pb->partner == item->entity ) return 4;	// keep on following!
 	}
 
 	if ( (item->isVisible()) &&						// leader visible

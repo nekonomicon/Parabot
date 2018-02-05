@@ -64,7 +64,7 @@ public:
 private:
 
 	typedef struct {
-		EHANDLE		player;				// pointer to observed players
+		edict_t		*player;				// pointer to observed players
 		bool		active;				// true if observation runs
 		int			leadWaypoint;		// latest waypoint and plat of observed
 		int			lastPlatId;			//   player, indices in waypoint-table

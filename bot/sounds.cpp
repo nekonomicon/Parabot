@@ -141,27 +141,27 @@ void Sounds::getAllClientSounds()
 	float hearSteps = CVAR_GET_FLOAT( "mp_footsteps" );
 	if ( mod_id == DMC_DLL ) hearSteps = 0;		// no step sounds in DMC
 
-	CBaseEntity *pPlayer = 0;
+	edict_t *pPlayer = 0;
 	for (int i=1; i<=gpGlobals->maxClients; i++) {
-		pPlayer = UTIL_PlayerByIndex( i );
+		pPlayer = INDEXENT( i );
 		if (!pPlayer) continue;							// skip invalid players
-		if (!isAlive( ENT(pPlayer->pev) )) continue;	// skip player if not alive
-		if (pPlayer->pev->solid == SOLID_NOT) continue;	
+		if (!isAlive( ENT(pPlayer) )) continue;	// skip player if not alive
+		if (pPlayer->v.solid == SOLID_NOT) continue;	
 		
 		// get step sounds
-		if (hearSteps > 0) calcStepSound( i-1, pPlayer->edict(), writeResult );
+		if (hearSteps > 0) calcStepSound( i-1, pPlayer, writeResult );
 		// get attack sounds
-		if ( (pPlayer->pev->button & (IN_ATTACK|IN_ATTACK2)) ) {
+		if ( (pPlayer->v.button & (IN_ATTACK|IN_ATTACK2)) ) {
 			int wid = clientWeapon[i-1];
 			PB_Weapon w( wid );
-			float sensDist = w.getAudibleDistance( pPlayer->pev->button );
+			float sensDist = w.getAudibleDistance( pPlayer->v.button );
 			float trackDist = sensDist/3;
 			if (sensDist > stepSensableDist[i-1]) stepSensableDist[i-1] = sensDist;
 			if (trackDist > stepTrackableDist[i-1]) stepTrackableDist[i-1] = trackDist;
 		}
 		// get jump sounds
 		if ( mod_id==HOLYWARS_DLL || mod_id==DMC_DLL ) {
-			if ( (pPlayer->pev->button & IN_JUMP) && !isUnderwater( ENT(pPlayer->pev) ) ) {
+			if ( (pPlayer->v.button & IN_JUMP) && !isUnderwater( ENT(pPlayer) ) ) {
 				float sensDist = 300;
 				float trackDist = 150;
 				if (sensDist > stepSensableDist[i-1]) stepSensableDist[i-1] = sensDist;
@@ -169,7 +169,7 @@ void Sounds::getAllClientSounds()
 			}
 		}
 		// get reload sounds
-		if ( pPlayer->pev->button & IN_RELOAD ) {
+		if ( pPlayer->v.button & IN_RELOAD ) {
 			float sensDist = 200;
 			float trackDist = 100;
 			if (sensDist > stepSensableDist[i-1]) stepSensableDist[i-1] = sensDist;
@@ -408,15 +408,15 @@ int UTIL_GetNearestPlayerIndex( Vector &pos )
 {
 	float dist, bestDist = 10000;
 	int	  bestPlayer = 0;
-	CBaseEntity *pPlayer = 0;
+	edict_t *pPlayer = 0;
 
 	for (int i=1; i<=gpGlobals->maxClients; i++) {
-		pPlayer = UTIL_PlayerByIndex( i );
+		pPlayer = INDEXENT( i );
 		if (!pPlayer) continue;							// skip invalid players
-		if (!isAlive( ENT(pPlayer->pev) )) continue;	// skip player if not alive
-		if (pPlayer->pev->solid == SOLID_NOT) continue;	
+		if (!isAlive( ENT(pPlayer) )) continue;	// skip player if not alive
+		if (pPlayer->v.solid == SOLID_NOT) continue;	
 		
-		dist = (pPlayer->pev->origin - pos).Length();
+		dist = (pPlayer->v.origin - pos).Length();
 		if (dist < bestDist) {
 			bestDist = dist;
 			bestPlayer = i;

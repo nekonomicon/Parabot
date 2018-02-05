@@ -15,9 +15,7 @@ bool isUnderwater( edict_t *ent );
 bool needsAir( edict_t *ent );
 
 // for Valve:
-edict_t* tripmineOwner( CBaseEntity *tripmine );
 edict_t* laserdotOwner( edict_t *laser );
-CBaseEntity* getActiveItem( edict_t *player );
 
 // for HolyWars:
 bool isTheSaint( edict_t *ent );

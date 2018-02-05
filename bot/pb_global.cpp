@@ -39,19 +39,19 @@ bool LOSExists( Vector v1, Vector v2 )
 edict_t* getEntity( const char *classname, Vector pos )
 // returns a pointer to edict at pos if it exists, else 0
 {
-	CBaseEntity *pOther = NULL;
+	edict_t *pOther = NULL;
 	Vector p;
 	bool found = false;
 
-	while ( (pOther = UTIL_FindEntityByClassname (pOther, classname)) != NULL) {
-		p = (pOther->pev->absmax + pOther->pev->absmin) * 0.5;
+	while ( !FNullEnt(pOther = FIND_ENTITY_BY_CLASSNAME (pOther, classname))) {
+		p = (pOther->v.absmax + pOther->v.absmin) * 0.5;
 /*		float d = (pos-p).Length();
-		if ( FStrEq( STRING(pOther->pev->classname), "func_train" ) ) {
+		if ( FStrEq( STRING(pOther->v.classname), "func_train" ) ) {
 			debugMsg( "train\n" );
 		}*/
 		if (p==pos) { found=true; break; }
 	}
-	if (found) return pOther->edict();
+	if (found) return pOther;
 	else return 0;
 }
 

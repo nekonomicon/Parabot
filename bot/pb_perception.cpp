@@ -502,7 +502,7 @@ void PB_Perception::checkInflictorFor( PB_Percept &dmg )
 
 void PB_Perception::collectData()
 {
-	CBaseEntity *ent = 0;
+	edict_t *ent = 0;
 	bool detected;
 
 	UTIL_MakeVectors( botEnt->v.v_angle );
@@ -516,86 +516,86 @@ void PB_Perception::collectData()
 	int h=cdet;  cdet=odet;  odet=h;	// switch lists
 	detections[cdet].clear();
 
-	while( ( ent = UTIL_FindEntityInSphere( ent, botEnt->v.origin, sensitivity * MAX_DIST_VP ) ) ) 
+	while( !FNullEnt( ent = FIND_ENTITY_IN_SPHERE( ent, botEnt->v.origin, sensitivity * MAX_DIST_VP ) ) ) 
 	{
-		const char *pClassname = STRING(ent->pev->classname);
+		const char *pClassname = STRING(ent->v.classname);
 		
 		// detect players
 		if ( FStrEq( pClassname, "player" ) ) {
 			// check if valid
-			if (ent->pev == &(botEnt->v)) continue;		// skip self
-			if (!isAlive( ENT(ent->pev) )) continue;	// skip player if not alive
-			if (ent->pev->solid == SOLID_NOT) continue;	// skip player if observer
+			if (ent == botEnt) continue;		// skip self
+			if (!isAlive( ENT(ent) )) continue;	// skip player if not alive
+			if (ent->v.solid == SOLID_NOT) continue;	// skip player if observer
 			
-			detected = addIfVisible( ent->edict(), PI_PLAYER );
-			if (!detected) detected = addIfVisible( ent->pev->absmin, ent->edict(), PI_PLAYER );
-			if (!detected) detected = addIfVisible( ent->pev->absmax, ent->edict(), PI_PLAYER );
+			detected = addIfVisible( ent, PI_PLAYER );
+			if (!detected) detected = addIfVisible( ent->v.absmin, ent, PI_PLAYER );
+			if (!detected) detected = addIfVisible( ent->v.absmax, ent, PI_PLAYER );
 
 			// if not detected check if audible by shooting
 			if ( !detected ) {
-				int clientIndex = ENTINDEX( ent->edict() );
-				float dist = (ent->pev->origin - botEnt->v.origin).Length();
+				int clientIndex = ENTINDEX( ent );
+				float dist = (ent->v.origin - botEnt->v.origin).Length();
 				float audibleDist = playerSounds.getSensableDist( clientIndex );
 				if (dist < audibleDist*sensitivity) {
 					detected = true;
 					float trackableDist = playerSounds.getTrackableDist( clientIndex );
 					if (dist < trackableDist*sensitivity) {
 						//debugMsg( "Player trackable\n" );
-						detections[cdet].push_back( PB_Percept( sensitivity, ent->edict(), PI_TRACKABLE, PI_PLAYER, dist) );
+						detections[cdet].push_back( PB_Percept( sensitivity, ent, PI_TRACKABLE, PI_PLAYER, dist) );
 					}
 					else {
 						//debugMsg( "Player audible\n" );
-						detections[cdet].push_back( PB_Percept( sensitivity, ent->edict(), PI_AUDIBLE, PI_PLAYER, dist) );
+						detections[cdet].push_back( PB_Percept( sensitivity, ent, PI_AUDIBLE, PI_PLAYER, dist) );
 					}
 				}
 			}	
    		}
 		else if ( ( mod_id != DMC_DLL && FStrEq( pClassname, "weaponbox" ) ) ||
 				  ( mod_id == DMC_DLL && FStrEq( pClassname, "item_backpack" ) ) )	{
-			addIfVisible( ent->edict(), PI_WEAPONBOX );
+			addIfVisible( ent, PI_WEAPONBOX );
 		}
 		else if ( FStrEq( pClassname, "halo" ) ) {
-			addIfVisible( ent->edict(), PI_HALO );
+			addIfVisible( ent, PI_HALO );
 		}
 		else if ( FStrEq( pClassname, "hostage_entity" ) ) {
-			addIfVisible( ent->edict(), PI_HOSTAGE );
+			addIfVisible( ent, PI_HOSTAGE );
 		}
 		else if ( FStrEq( pClassname, "weapon_c4" ) ) {
-			addIfVisible( ent->edict(), PI_BOMB );
+			addIfVisible( ent, PI_BOMB );
 		}
 		else if ( FStrEq( pClassname, "laser_spot" ) ) {
-			if ((ent->pev->origin != aimingPos) && !(ent->pev->effects & EF_NODRAW)) {
-				addIfVisible( ent->edict(), PI_LASERDOT );
+			if ((ent->v.origin != aimingPos) && !(ent->v.effects & EF_NODRAW)) {
+				addIfVisible( ent, PI_LASERDOT );
 			}
 		}
 		else if ( FStrEq( pClassname, "monster_satchel" ) ) {
-			addIfVisible( ent->edict(), PI_EXPLOSIVE );
+			addIfVisible( ent, PI_EXPLOSIVE );
 		}
 		else if ( FStrEq( pClassname, "grenade" ) ) {
-			if (!addIfVisible( ent->edict(), PI_EXPLOSIVE )) {
-				float dist = (ent->pev->origin - botEnt->v.origin).Length();
+			if (!addIfVisible( ent, PI_EXPLOSIVE )) {
+				float dist = (ent->v.origin - botEnt->v.origin).Length();
 				if (dist < 200*sensitivity) {
-					detections[cdet].push_back( PB_Percept( sensitivity, ent->edict(), PI_AUDIBLE, PI_EXPLOSIVE, dist) );
+					detections[cdet].push_back( PB_Percept( sensitivity, ent, PI_AUDIBLE, PI_EXPLOSIVE, dist) );
 				}
 			}
 		}
 		else if ( FStrEq( pClassname, "monster_snark" ) ) {
-			addIfVisible( ent->edict(), PI_SNARK );
+			addIfVisible( ent, PI_SNARK );
 		}
 		else if ( FStrEq( pClassname, "monster_tripmine" ) || FStrEq( pClassname, "monster_tripsnark" ) ) {
-			if (ent->edict()->v.owner == botEnt) {
+			if (ent->v.owner == botEnt) {
 				// remember own tripmines even without seeing them:
-				float dist = (ent->pev->origin - botEnt->v.origin).Length();
-				detections[cdet].push_back( PB_Percept( sensitivity, ent->edict(), PI_TRACKABLE, PI_TRIPMINE, dist) );
+				float dist = (ent->v.origin - botEnt->v.origin).Length();
+				detections[cdet].push_back( PB_Percept( sensitivity, ent, PI_TRACKABLE, PI_TRIPMINE, dist) );
 			}
-			else if ( !addIfVisible( ent->edict(), PI_TRIPMINE ) ) {		// check beamstart
-				const char *mineClass = (const char *)ent;
-				Vector *mine_vecDir = (Vector*) (mineClass+616);
-				float *mine_flBeamLength = (float*) (mineClass+640);
-				Vector beamEnd = ent->pev->origin + (*mine_vecDir) * 2048 * (*mine_flBeamLength);
-				Vector beamCenter = (ent->pev->origin + beamEnd) / 2;
-				if ( !addIfVisible( beamEnd, ent->edict(), PI_TRIPMINE ) )	// check beamend
-					addIfVisible( beamCenter, ent->edict(), PI_TRIPMINE );	// check beamcenter
+			else if ( !addIfVisible( ent, PI_TRIPMINE ) ) {		// check beamstart
+				Vector mine_vecEnd = ent->v.origin + gpGlobals->v_forward * 2048;
+				UTIL_TraceLine( ent->v.origin, mine_vecEnd, dont_ignore_monsters, ENT( ent ), &tr );
+				float mine_flBeamLength = tr.flFraction;
+				Vector beamEnd = mine_vecEnd * mine_flBeamLength;
+				Vector beamCenter = (ent->v.origin + beamEnd) / 2;
+				if ( !addIfVisible( beamEnd, ent, PI_TRIPMINE ) )	// check beamend
+					addIfVisible( beamCenter, ent, PI_TRIPMINE );	// check beamcenter
 			}
 		}
 		

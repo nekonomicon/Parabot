@@ -103,10 +103,6 @@ extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 	{
 		mod_id = AG_DLL;
 	}
-	else if( FStrEq( mod_name, "valve" ) || FStrEq( mod_name, "hldm" ) )
-	{
-		mod_id = VALVE_DLL;
-	}
 	else if( FStrEq( mod_name, "Hunger" ) )
 	{
 		mod_id = HUNGER_DLL;
@@ -123,6 +119,8 @@ extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 	{
 		mod_id = GEARBOX_DLL;
 	}
+	else
+		mod_id = VALVE_DLL;
 
 	sprintf( filePath, "%s/addons/parabot/config/", mod_name );
 #if defined(__ANDROID__)

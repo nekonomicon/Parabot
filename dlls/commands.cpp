@@ -263,11 +263,11 @@ void startBotCam( edict_t *pEntity )
 		if ( clientWeapon[clientIndex]==VALVE_WEAPON_RPG     ||
 			 (mod_id==GEARBOX_DLL && clientWeapon[clientIndex]==GEARBOX_WEAPON_EAGLE ) ) 
 		{	// kill laserspot
-			CBaseEntity *dot = NULL;
-			while ( (dot = UTIL_FindEntityByClassname (dot, "laser_spot")) != NULL) {
-				if ( laserdotOwner( dot->edict() ) == pEntity ) {
-					dot->pev->effects |= EF_NODRAW;
-					camPlayerLaser = dot->edict();
+			edict_t *dot = NULL;
+			while ( !FNullEnt(dot = FIND_ENTITY_BY_CLASSNAME(dot, "laser_spot") )) {
+				if ( laserdotOwner( dot ) == pEntity ) {
+					dot->v.effects |= EF_NODRAW;
+					camPlayerLaser = dot;
 					break;
 				}
 			}

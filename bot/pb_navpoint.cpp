@@ -285,9 +285,9 @@ void PB_Navpoint::initEntityPtr()
 		else {
 			if (!FStringNull( ent->v.targetname )) {
 				// we have a targetname, let's see if there are buttons for it...
-				CBaseEntity *pButton = NULL;
-				while ((pButton = UTIL_FindEntityByClassname( pButton, "func_button" )) != NULL) {
-					if (UTIL_ButtonTriggers( ENT(pButton->pev), ent )) {
+				edict_t *pButton = NULL;
+				while (!FNullEnt(pButton = FIND_ENTITY_BY_CLASSNAME( pButton, "func_button" ) )) {
+					if (UTIL_ButtonTriggers( pButton, ent )) {
 						needsTrigger = true;
 						break;
 					}
@@ -298,8 +298,8 @@ void PB_Navpoint::initEntityPtr()
 				(type() == NAV_F_DOOR)  || 
 				(type() == NAV_F_BUTTON)   ) 
 			{
-				CBaseToggle *toggleClass = (CBaseToggle*)GET_PRIVATE( ent );
-				normalState = toggleClass->m_toggle_state;
+				int toggle_state = *(int *)((char*)ent->pvPrivateData + 128);
+				normalState = toggle_state;
 			}
 		}
 	}
@@ -336,26 +336,26 @@ bool PB_Navpoint::isTriggered()
 	if (!needsTriggering()) return false;
 	assert( ent != 0 );
 
-	CBaseToggle *toggleClass = (CBaseToggle*)GET_PRIVATE( ent );
+	int toggle_state = *(int *)((char*)ent->pvPrivateData + 128);
 
 	if (mod_id != DMC_DLL) {
-		if (toggleClass->m_toggle_state == normalState) return false;
+		if (toggle_state == normalState) return false;
 		else return true;
 	}
 
 	// for DMC:
 	if (type()==NAV_F_DOOR) {
 		if (ent->v.spawnflags & SF_DOOR_START_OPEN) {
-			if (toggleClass->m_toggle_state == TS_AT_BOTTOM) return false;
+			if (toggle_state == TS_AT_BOTTOM) return false;
 			else return true;
 		}
 		else {
-			if (toggleClass->m_toggle_state == TS_AT_TOP) return false;
+			if (toggle_state == TS_AT_TOP) return false;
 			else return true;
 		}
 	}
 	else {
-		if (toggleClass->m_toggle_state == TS_AT_TOP) return false;
+		if (toggle_state == TS_AT_TOP) return false;
 		else return true;
 	}
 }

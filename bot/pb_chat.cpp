@@ -238,7 +238,7 @@ edict_t* PB_Chat::findNameInMessage( const char *msg, bool forceReply )
 			if ( (clanTagEnd-clanTagStart) < 5	&&
 			 strlen(firstName) > 5			) firstName = clanTagEnd+1;
 		}
-		const char *space = strchr( firstName, ' ' );
+		char *space = (char *)strchr( firstName, ' ' );
 		if (space) {
 			*space = 0;						// shorten first part
 			strcpy( name2, (space+1) );		// store second part
@@ -307,7 +307,7 @@ const char* PB_Chat::getName( edict_t *player )
 			 strlen(fullName) > 5			&&  
 			 remove	> 0							) fullName = clanTagEnd+1;
 	}
-	const char *space = strchr( fullName, ' ' );
+	char *space = (char *)strchr( fullName, ' ' );
 	if (space) {
 		int rand = RANDOM_LONG( 0, 2 );
 		if (rand==1) {  *space = 0;  return fullName;  }	// return first part

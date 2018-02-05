@@ -288,13 +288,13 @@ bool PB_WeaponHandling::armBestWeapon( float distance, float hitProb, int flags 
 			}
 		}
 		else if ( bestWeapon==VALVE_WEAPON_RPG ) {
-			CBaseEntity *pent = NULL;
+			edict_t *pent = NULL;
 			bool spotActive = false;
-			while( ( pent = UTIL_FindEntityInSphere( pent, botEnt->v.origin, MAX_DIST_VP ) ) )
+			while( !FNullEnt( pent = FIND_ENTITY_IN_SPHERE( pent, botEnt->v.origin, MAX_DIST_VP ) ) )
 			{
-				if( FStrEq( STRING( pent->pev->classname ), "laser_spot" ) )
+				if( FStrEq( STRING( pent->v.classname ), "laser_spot" ) )
 				{
-					if( laserdotOwner( pent->edict() ) == botEnt )
+					if( laserdotOwner( pent ) == botEnt )
 					{
 						spotActive = true;
 						break;

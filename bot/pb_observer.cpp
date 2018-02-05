@@ -77,10 +77,10 @@ void PB_Observer::startObservation( int oId )
 	obs[oId].lastReachedNav = 0;
 
 	assert( obs[oId].player != 0 );
-	obs[oId].lastFramePos = obs[oId].player->pev->origin;
-	obs[oId].lastFrameVel = obs[oId].player->pev->velocity;
-	obs[oId].frags = obs[oId].player->pev->frags;
-	obs[oId].health = obs[oId].player->pev->health;
+	obs[oId].lastFramePos = obs[oId].player->v.origin;
+	obs[oId].lastFrameVel = obs[oId].player->v.velocity;
+	obs[oId].frags = obs[oId].player->v.frags;
+	obs[oId].health = obs[oId].player->v.health;
 
 	obs[oId].jumpPressed = false;
 	obs[oId].usePressed = false;
@@ -91,7 +91,7 @@ void PB_Observer::startObservation( int oId )
 	obs[oId].lastCell = NO_CELL_FOUND;
 	obs[oId].lastCellTime = 0;
 	
-	addWaypoint( oId, obs[oId].player->pev->origin );	// add first waypoint
+	addWaypoint( oId, obs[oId].player->v.origin );	// add first waypoint
 }
 
 
@@ -107,11 +107,11 @@ int PB_Observer::registerPlayer( edict_t *player )
 		fclose( dfp );*/
 		i = MAX_OBS - 1;
 	}
-	obs[i].player = CBaseEntity::Instance( player );
+	obs[i].player = player;
 	if ( obs[i].player != 0 ) {
 		// init vars:
 		startObservation( i );
-		debugMsg( "PB_Observer registered ", STRING(obs[i].player->pev->netname), "\n" );
+		debugMsg( "PB_Observer registered ", STRING(obs[i].player->v.netname), "\n" );
 		return i;
 	}
 	return -1;
@@ -121,7 +121,7 @@ int PB_Observer::registerPlayer( edict_t *player )
 int PB_Observer::playerId( edict_t *player )
 // returns the observer id of player
 {
-	for (int i=0; i<MAX_OBS; i++) if (obs[i].player.Get() == player) return i;
+	for (int i=0; i<MAX_OBS; i++) if (obs[i].player == player) return i;
 
 	return registerPlayer( player );	// if not in list, register for observing
 }
@@ -153,9 +153,9 @@ int PB_Observer::checkGround( int oId, edict_t **plat )
 
 	int flags = 0;
 	
-	if (obs[oId].player->pev->movetype == MOVETYPE_FLY) flags |= WP_ON_LADDER;
+	if (obs[oId].player->v.movetype == MOVETYPE_FLY) flags |= WP_ON_LADDER;
 
-	edict_t *ground = obs[oId].player->pev->groundentity;
+	edict_t *ground = obs[oId].player->v.groundentity;
 	if (ground) {
 		const char *groundName = STRING( ground->v.classname );
 		if ( !FStrEq( groundName, "worldspawn" ) ) {
@@ -186,7 +186,7 @@ int PB_Observer::checkGround( int oId, edict_t **plat )
 					PB_Navpoint platNav = getNavpoint( sId );
 					if (platNav.needsTriggering() && platNav.isTriggered()) {
 						flags |= WP_PLAT_NEEDS_TRIGGER;
-						debugSound( ENT(obs[oId].player->pev), "weapons/mine_activate.wav" );
+						debugSound( ENT(obs[oId].player), "weapons/mine_activate.wav" );
 						debugMsg( "Plat needs triggering by " );
 						for (int ni=0; ni<mapGraph.numberOfNavpoints(); ni++) {
 							PB_Navpoint t = getNavpoint( ni );
@@ -237,7 +237,7 @@ bool PB_Observer::shouldObservePlayer( int oId )
 // determines if player oId should be observed or not and returns the result
 {
 	if ( obs[oId].player != 0 ) {
-		if ( obs[oId].player.Get() == 0 || GET_PRIVATE(obs[oId].player.Get()) == 0 ) {
+		if ( !obs[oId].player->pvPrivateData ) {
 			// player disconnected
 			obs[oId].active = false;
 			obs[oId].player = 0;
@@ -253,16 +253,16 @@ bool PB_Observer::shouldObservePlayer( int oId )
 
 	if (obs[oId].active) {	// check if observation has to stop...
 		assert (obs[oId].player != 0 );
-		if ( (obs[oId].player->pev->health < 1)		|| 
-			 (obs[oId].player->pev->solid == SOLID_NOT) ) 
+		if ( (obs[oId].player->v.health < 1)		|| 
+			 (obs[oId].player->v.solid == SOLID_NOT) ) 
 		{	// ...yes -> mark inactive
 			//debugMsg( "Stopping observation\n" );
 			obs[oId].active = false;
 		}
 	}
 	else if (obs[oId].player !=0 ) {	// check if observation has to continue...
-		if ( (obs[oId].player->pev->health >= 1)	&& 
-			 (obs[oId].player->pev->solid != SOLID_NOT) ) 
+		if ( (obs[oId].player->v.health >= 1)	&& 
+			 (obs[oId].player->v.solid != SOLID_NOT) ) 
 		{
 			//debugMsg( "Continue observation...\n" );
 			startObservation( oId );	// sets active[i] to true
@@ -288,7 +288,7 @@ int PB_Observer::getStartIndex( int oId, PB_Navpoint *endNav )
 		triggerOk[i] = true;
 	}
 	if (endNav->needsTriggering()) {
-		debugSound( ENT(obs[oId].player->pev), "weapons/mine_activate.wav" );
+		debugSound( ENT(obs[oId].player), "weapons/mine_activate.wav" );
 		trigger[triggerCount] = endNav;	
 		triggerOk[triggerCount] = false;
 		triggerCount++;
@@ -355,7 +355,7 @@ void PB_Observer::newNavpointReached( int oId, Vector &pos, PB_Navpoint *endNav 
 	}
 
 	// only add new paths for human clients:
-	if (!FBitSet( obs[oId].player->pev->flags, FL_FAKECLIENT )) {
+	if (!FBitSet( obs[oId].player->v.flags, FL_FAKECLIENT )) {
 		// search beginning of path
 		int startIndex = getStartIndex( oId, endNav );
 		if (startIndex != -1) {	// beginning of this path was recorded
@@ -395,7 +395,7 @@ void PB_Observer::newNavpointReached( int oId, Vector &pos, PB_Navpoint *endNav 
 		}
 
 		// bots report visits in their movement-code, so this is for players only:
-		endNav->reportVisit( ENT(obs[oId].player->pev), worldTime() );
+		endNav->reportVisit( ENT(obs[oId].player), worldTime() );
 	}
 
 	// add this navpoint to waypoint-list:
@@ -406,25 +406,25 @@ void PB_Observer::newNavpointReached( int oId, Vector &pos, PB_Navpoint *endNav 
 
 void PB_Observer::checkForJump( int oId, Vector &pos )
 {
-	if (obs[oId].jumpPressed && !(obs[oId].player->pev->button & IN_JUMP)) {
+	if (obs[oId].jumpPressed && !(obs[oId].player->v.button & IN_JUMP)) {
 		obs[oId].jumpPressed = false;		// jump ended
 	}
 
-	if (!obs[oId].jumpPressed && (obs[oId].player->pev->button & IN_JUMP)) {
+	if (!obs[oId].jumpPressed && (obs[oId].player->v.button & IN_JUMP)) {
 		obs[oId].jumpPressed = true;		// jump started
 
 		int jumpType = 1;
 
 		// it may still be a longjump, so better check:
-		if ( (obs[oId].player->pev->button & IN_DUCK) &&
-			( ((Vector)obs[oId].player->pev->velocity).Length() > 500 ) )
+		if ( (obs[oId].player->v.button & IN_DUCK) &&
+			( ((Vector)obs[oId].player->v.velocity).Length() > 500 ) )
 			jumpType = 2;
 
 		//int flags = checkGround( oId );
 
 		if (jumpType==1) {
 			// normal jump, check if bot should stop before jumping:
-			Vector vel = obs[oId].player->pev->velocity;
+			Vector vel = obs[oId].player->v.velocity;
 			vel.z = 0;
 			if (vel.Length() < 50) {
 				addWaypoint( oId, pos, BOT_DELAYED_JUMP );
@@ -437,7 +437,7 @@ void PB_Observer::checkForJump( int oId, Vector &pos )
 		}
 		else if (jumpType==2) {
 			// longjump has to start earlier:
-			pos = pos - globalFrameTime*obs[oId].player->pev->velocity;
+			pos = pos - globalFrameTime*obs[oId].player->v.velocity;
 			//glMarker.newMarker( pos, 1 );
 			addWaypoint( oId, pos, BOT_LONGJUMP );
 			//debugMsg( "Stored Longjump=\n" );
@@ -448,11 +448,11 @@ void PB_Observer::checkForJump( int oId, Vector &pos )
 
 void PB_Observer::checkForUse( int oId, Vector &pos )
 {
-	if (obs[oId].usePressed && !(obs[oId].player->pev->button & IN_USE)) {
+	if (obs[oId].usePressed && !(obs[oId].player->v.button & IN_USE)) {
 		obs[oId].usePressed = false;		// use ended
 	}
 	
-	if (!obs[oId].usePressed && (obs[oId].player->pev->button & IN_USE)) {
+	if (!obs[oId].usePressed && (obs[oId].player->v.button & IN_USE)) {
 		obs[oId].usePressed = true;		// use started
 		
 		int navType = -1; 
@@ -477,15 +477,15 @@ void PB_Observer::checkForUse( int oId, Vector &pos )
 void PB_Observer::checkForMove( int oId, Vector &pos )
 {
 	// sharp turn means >90 degrees yaw change and moved >10 units:
-	bool sharpTurn = ((std::abs( UTIL_AngleDiff(obs[oId].lastWpYaw, obs[oId].player->pev->v_angle.y) ) > 90) &&
+	bool sharpTurn = ((std::abs( UTIL_AngleDiff(obs[oId].lastWpYaw, obs[oId].player->v.v_angle.y) ) > 90) &&
 					 (pos-obs[oId].lastWpPos).Length() > 10);
 
 	if ( ((pos-obs[oId].lastWpPos).Length() > MIN_WAYPOINT_DIST) || sharpTurn )
 	{	// distance reached or angle too big
 		//debugMsg( "x" );
-		if ( FBitSet( obs[oId].player->pev->flags, FL_ONGROUND )	// on ground
-			|| (obs[oId].player->pev->waterlevel > 0 )				// or in water
-			|| (obs[oId].player->pev->movetype == MOVETYPE_FLY) )	// or on ladder
+		if ( FBitSet( obs[oId].player->v.flags, FL_ONGROUND )	// on ground
+			|| (obs[oId].player->v.waterlevel > 0 )				// or in water
+			|| (obs[oId].player->v.movetype == MOVETYPE_FLY) )	// or on ladder
 		{
 			//int flags = checkGround( oId );
 			addWaypoint( oId, pos, 0 );
@@ -496,8 +496,8 @@ void PB_Observer::checkForMove( int oId, Vector &pos )
 
 void PB_Observer::checkForCamping( int oId, Vector &pos )
 {
-	if (obs[oId].player->pev->frags != obs[oId].frags ) {
-		if (obs[oId].player->pev->frags > obs[oId].frags) {
+	if (obs[oId].player->v.frags != obs[oId].frags ) {
+		if (obs[oId].player->v.frags > obs[oId].frags) {
 			// player has a frag more than before...
 			if ((worldTime() - obs[oId].lastWpTime) > MIN_CAMP_TIME) {
 				// ... and he seems to be camping
@@ -507,14 +507,14 @@ void PB_Observer::checkForCamping( int oId, Vector &pos )
 				if( ( nearestCamp && ( ( nearestCamp->pos()-pos).Length() < 128 ) ) ||
 					( nearestTank && ( ( nearestTank->pos()-pos).Length() < 128 ) ) ) 
 				{	// ...yes -> let bots camp longer here!
-					bot_t *bot = UTIL_GetBotPointer( ENT(obs[oId].player->pev) );
+					bot_t *bot = UTIL_GetBotPointer( ENT(obs[oId].player) );
 					if (bot) bot->parabot->campTime = 0;	
 				}
 				else {
 					// ...no -> insert new camping navpoint:
 					PB_Navpoint campNav;
-					int angleX = (short) obs[oId].player->pev->v_angle.x + 360;
-					int angleY = (short) obs[oId].player->pev->v_angle.y + 360;
+					int angleX = (short) obs[oId].player->v.v_angle.x + 360;
+					int angleY = (short) obs[oId].player->v.v_angle.y + 360;
 					angleY <<= 16;
 					int campAngle = angleY | angleX;
 					campNav.init( pos, NAV_S_CAMPING, campAngle );
@@ -524,7 +524,7 @@ void PB_Observer::checkForCamping( int oId, Vector &pos )
 			}
 			
 		}
-		obs[oId].frags = obs[oId].player->pev->frags;
+		obs[oId].frags = obs[oId].player->v.frags;
 	}
 }
 
@@ -534,18 +534,18 @@ void PB_Observer::checkForTripmines( int oId, Vector &pos )
 {
 	if (mod_id==VALVE_DLL || mod_id==AG_DLL || mod_id==HUNGER_DLL || mod_id==GEARBOX_DLL) {
 		// find weapon the player is handling:
-		int clientIndex = ENTINDEX( ENT(obs[oId].player->pev) ) - 1;
+		int clientIndex = ENTINDEX( ENT(obs[oId].player) ) - 1;
 		assert( (clientIndex >= 0) && (clientIndex < 32) );
 		int playerWeapon = clientWeapon[clientIndex];
 
-		if ( ( (obs[oId].player->pev->button & IN_ATTACK) && 
+		if ( ( (obs[oId].player->v.button & IN_ATTACK) && 
 			 (playerWeapon==VALVE_WEAPON_TRIPMINE)) ||
-			(g_hldm_mod==BMOD &&(obs[oId].player->pev->button & IN_ATTACK2) &&
+			(g_hldm_mod==BMOD &&(obs[oId].player->v.button & IN_ATTACK2) &&
                          (playerWeapon==VALVE_WEAPON_TRIPMINE || playerWeapon==VALVE_WEAPON_SNARK ) ) )
 		{	// player is trying set up a tripmine, check if possible:
-			UTIL_MakeVectors( obs[oId].player->pev->v_angle );
+			UTIL_MakeVectors( obs[oId].player->v.v_angle );
 			TraceResult tr;
-			Vector startTrace = pos + obs[oId].player->pev->view_ofs;
+			Vector startTrace = pos + obs[oId].player->v.view_ofs;
 			Vector endTrace = startTrace + 100 * gpGlobals->v_forward;
 			UTIL_TraceLine( startTrace, endTrace, ignore_monsters, 0, &tr );
 			if (tr.flFraction < 1.0) {
@@ -574,18 +574,18 @@ void PB_Observer::checkForButtonShot( int oId, Vector &pos )
 {
 	if (mod_id==DMC_DLL) {
 		// find weapon the player is handling:
-		int clientIndex = ENTINDEX( ENT(obs[oId].player->pev) ) - 1;
+		int clientIndex = ENTINDEX( ENT(obs[oId].player) ) - 1;
 		assert( (clientIndex >= 0) && (clientIndex < 32) );
 		int playerWeapon = clientWeapon[clientIndex];
 
-		if ( (obs[oId].player->pev->button & IN_ATTACK) && 
+		if ( (obs[oId].player->v.button & IN_ATTACK) && 
 			 (playerWeapon!=DMC_WEAPON_CROWBAR)				) 
 		{	// player is shooting at something, check at what:
-			UTIL_MakeVectors( obs[oId].player->pev->v_angle );
+			UTIL_MakeVectors( obs[oId].player->v.v_angle );
 			TraceResult tr;
-			Vector startTrace = pos + obs[oId].player->pev->view_ofs;
+			Vector startTrace = pos + obs[oId].player->v.view_ofs;
 			Vector endTrace = startTrace + 1024 * gpGlobals->v_forward;
-			UTIL_TraceLine( startTrace, endTrace, dont_ignore_monsters, ENT(obs[oId].player->pev), &tr );
+			UTIL_TraceLine( startTrace, endTrace, dont_ignore_monsters, ENT(obs[oId].player), &tr );
 			if (tr.flFraction<1.0 && tr.pHit!=0) {
 				const char *hitClass = STRING( tr.pHit->v.classname );
 				if ( FStrEq( hitClass, "func_button" ) &&
@@ -597,7 +597,7 @@ void PB_Observer::checkForButtonShot( int oId, Vector &pos )
 						debugMsg( "Buttonshot stored nearby!\n" );
 						// set this navpoint in path:
 						addWaypoint( oId, nearest->pos(), WP_IS_NAVPOINT, 2 );				
-						obs[oId].lastReachedNav = nearest;	
+						obs[oId].lastReachedNav = nearest;
 					}
 					else {
 						// ...no -> add new navpoint
@@ -620,28 +620,28 @@ void PB_Observer::checkPlayerHealth( int oId )
 // sets PATH_CAUSES_DAMAGE-flag and the inCombat-variable
 {
 	// check for fall damage
-	if (obs[oId].player->pev->flFallVelocity > CRITICAL_FALL_VELOCITY) {
+	if (obs[oId].player->v.flFallVelocity > CRITICAL_FALL_VELOCITY) {
 		obs[oId].fallTime = worldTime();
 		//debugMsg( "falling at %.f\n", observedPlayer->pev->flFallVelocity);
 	}
-	if (obs[oId].player->pev->dmg_take > 0) {
+	if (obs[oId].player->v.dmg_take > 0) {
 		if ( (worldTime()-obs[oId].fallTime) < 0.3 ) {
 			waypoint[oId][obs[oId].leadWaypoint].data.act |= WP_DMG_OCURRED;
 			//observedPathMode[oId] |= PATH_CAUSES_DAMAGE;
 			//debugMsg( "Fall " );
 		}
-		else if ( (obs[oId].player->pev->watertype == CONTENT_LAVA) ||
-			(obs[oId].player->pev->watertype == CONTENT_SLIME)	 ) {
+		else if ( (obs[oId].player->v.watertype == CONTENT_LAVA) ||
+			(obs[oId].player->v.watertype == CONTENT_SLIME)	 ) {
 			waypoint[oId][obs[oId].leadWaypoint].data.act |= WP_DMG_OCURRED;
 			//observedPathMode[oId] |= PATH_CAUSES_DAMAGE;
 			//debugMsg( "Slime/Lava " );
 		}
-		obs[oId].health = obs[oId].player->pev->health;
+		obs[oId].health = obs[oId].player->v.health;
 		//debugMsg( "damage\n");
 	}
-	else if (obs[oId].player->pev->health < obs[oId].health) {
+	else if (obs[oId].player->v.health < obs[oId].health) {
 		// must have some cause
-		obs[oId].health = obs[oId].player->pev->health;
+		obs[oId].health = obs[oId].player->v.health;
 		obs[oId].inCombat = true;
 	}
 }
@@ -650,15 +650,15 @@ void drawCube( edict_t *ent, Vector pos, float size );
 
 void PB_Observer::updateCellInfo( int i )
 {
-	edict_t *obsEdict = ENT( obs[i].player->pev );
+	edict_t *obsEdict = ENT( obs[i].player );
 	Vector obsPos = PB_Cell::makePos( obsEdict );
 	// check if new cell has to be added:
 	short obsCell = map.getCellId( obsPos );
 	if (obsCell == NO_CELL_FOUND) {
 		if (   UTIL_PointContents( obsPos ) != CONTENTS_SOLID			// Bugfix!!!
-			&& (	FBitSet( obs[i].player->pev->flags, FL_ONGROUND )	// on ground
-				|| (obs[i].player->pev->waterlevel > 0 )				// or in water
-				|| (obs[i].player->pev->movetype == MOVETYPE_FLY) 		// or on ladder
+			&& (	FBitSet( obs[i].player->v.flags, FL_ONGROUND )	// on ground
+				|| (obs[i].player->v.waterlevel > 0 )				// or in water
+				|| (obs[i].player->v.movetype == MOVETYPE_FLY) 		// or on ladder
 				)
 			)
 			obsCell = map.addCell( PB_Cell( obsEdict ), true, obs[i].lastCell );
@@ -695,7 +695,7 @@ void PB_Observer::updateCellInfo( int i )
 				float fd4 = ( map.cell( obs[i].currentCell ).focus.cellsForDir( Vector( 0,-1,0 ) )+
 							  3*map.cell( obs[i].currentCell ).kills.forDir( Vector( 0,-1,0 ) )    )
 					* (1.5 - moveDir.y);
-				
+
 				Vector bp = obsEdict->v.origin;
 				if (fd1>fd2 && fd1>fd3 && fd1>fd4) {
 					bots[bNr].parabot->senses.addNewArea( Vector( 1000, 0, 0 ) );
@@ -753,17 +753,17 @@ void PB_Observer::observeAll()
 			assert (obs[i].player != 0 );
 			obs[i].inCombat = false;	// only true for one frame
 
-			pos = obs[i].player->pev->origin;
+			pos = obs[i].player->v.origin;
 			if (i==playerNr) playerPos = pos;
-			nav = getNearestNavpoint( obs[i].player->edict() );
+			nav = getNearestNavpoint( obs[i].player );
 			assert( nav != 0 );
 
 			if( !nav )
 				continue;
-			if ( nav->reached( obs[i].player->edict() ) ) {
+			if ( nav->reached( obs[i].player ) ) {
 				// check if reached new navpoint	
 				if ( (nav!=obs[i].lastReachedNav) &&
-					(nav->entity() != obs[i].player->pev->groundentity) )	// take care with plats,
+					(nav->entity() != obs[i].player->v.groundentity) )	// take care with plats,
 				{																// bot has to wait before approaching
 					newNavpointReached( i, pos, nav );
 				}
@@ -784,8 +784,8 @@ void PB_Observer::observeAll()
 			// modify path-flags?
 			checkPlayerHealth( i );
 
-		/*	if (obs[i].player->pev->groundentity) {
-				const char *ground = STRING(obs[i].player->pev->groundentity->v.classname);
+		/*	if (obs[i].player->v.groundentity) {
+				const char *ground = STRING(obs[i].player->v.groundentity->v.classname);
 				if ( !FStrEq( ground, "world_spawn" ) ) {
 					debugMsg( "Ground entity = ", ground, "\n" );
 				}
@@ -794,8 +794,8 @@ void PB_Observer::observeAll()
 			*/
 
 			// remember these things for teleporters:
-			obs[i].lastFramePos = obs[i].player->pev->origin;
-			obs[i].lastFrameVel = obs[i].player->pev->velocity;
+			obs[i].lastFramePos = obs[i].player->v.origin;
+			obs[i].lastFrameVel = obs[i].player->v.velocity;
 		}
 	}
 }
@@ -828,8 +828,8 @@ void PB_Observer::addWaypoint( int oId, Vector pos, int action, int col )
 		platInfo[oId][obs[oId].leadWaypoint] = pf;
 	}
 	obs[oId].lastWpTime = worldTime();
-	obs[oId].lastWpPos = obs[oId].player->pev->origin;
-	obs[oId].lastWpYaw = obs[oId].player->pev->v_angle.y;
+	obs[oId].lastWpPos = obs[oId].player->v.origin;
+	obs[oId].lastWpYaw = obs[oId].player->v.v_angle.y;
 	/*
 	if (action & WP_ON_PLATFORM) col = 1;
 	else col = 2;
@@ -889,7 +889,7 @@ bool PB_Observer::shouldFollow( int botId, edict_t *bot )
 	// if partner not valid don't follow
 	if (!partnerValid(nr)) return false;
 
-	float dist = (obs[nr].player->pev->origin - bot->v.origin).Length();
+	float dist = (obs[nr].player->v.origin - bot->v.origin).Length();
 	// follow if distance > ...
 	if ( dist > 100 ) return true;
 	else return false;	

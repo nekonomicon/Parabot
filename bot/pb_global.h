@@ -8,7 +8,6 @@
 #include "dllapi.h"
 #include "meta_api.h"
 #include "entity_state.h"
-#include "cbase.h"
 #include "hl_classes.h"
 #include "pb_path.h"
 #include "assert.h"

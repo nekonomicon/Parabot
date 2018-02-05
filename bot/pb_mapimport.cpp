@@ -39,14 +39,14 @@ void saveLevelData()
 
 void importNav( int code )
 {
-	CBaseEntity *pOther = NULL;
+	edict_t *pOther = NULL;
 	PB_Navpoint n;
 	Vector pos;
 	
-	char *classname = PB_Navpoint::classname( code ); 
+	const char *classname = PB_Navpoint::classname( code ); 
 
-	while ( (pOther = UTIL_FindEntityByClassname (pOther, classname)) != NULL) {
-		pos = (pOther->pev->absmax + pOther->pev->absmin) * 0.5;
+	while ( !FNullEnt(pOther = FIND_ENTITY_BY_CLASSNAME(pOther, classname)) ) {
+		pos = (pOther->v.absmax + pOther->v.absmin) * 0.5;
 		n.init( pos, code, 0 );
 		mapGraph.addNavpoint( n );
 	}
@@ -55,15 +55,15 @@ void importNav( int code )
 
 void importNav( int code, const char *modelName )
 {
-	CBaseEntity *pOther = NULL;
+	edict_t *pOther = NULL;
 	PB_Navpoint n;
 	Vector pos;
 	
 	char *classname = PB_Navpoint::classname( code ); 
 
-	while ( (pOther = UTIL_FindEntityByClassname (pOther, classname)) != NULL) {
-		if (!FStrEq( STRING(pOther->pev->model), modelName )) continue;
-		pos = (pOther->pev->absmax + pOther->pev->absmin) * 0.5;
+	while ( !FNullEnt(pOther = FIND_ENTITY_BY_CLASSNAME(pOther, classname))) {
+		if (!FStrEq( STRING(pOther->v.model), modelName )) continue;
+		pos = (pOther->v.absmax + pOther->v.absmin) * 0.5;
 		n.init( pos, code, 0 );
 		mapGraph.addNavpoint( n );
 	}
@@ -285,15 +285,15 @@ bool loadLevelData()
 		importNav(  NAV_TRIG_TELEPORT );	
 		
 	// import ladders
-		CBaseEntity *pOther = NULL;
+		edict_t *pOther = NULL;
 		PB_Navpoint n;
 		Vector posUp, posDown;
 	
-		while ( (pOther = UTIL_FindEntityByClassname (pOther, "func_ladder")) != NULL) {
-			posUp = (pOther->pev->absmax + pOther->pev->absmin) * 0.5;
-			posUp.z = pOther->pev->absmax.z;
+		while ( !FNullEnt(pOther = FIND_ENTITY_BY_CLASSNAME (pOther, "func_ladder"))) {
+			posUp = (pOther->v.absmax + pOther->v.absmin) * 0.5;
+			posUp.z = pOther->v.absmax.z;
 			posDown = posUp;
-			posDown.z = pOther->pev->absmin.z;
+			posDown.z = pOther->v.absmin.z;
 		/*	Vector dir = pOther->v.absmax - pOther->v.absmin;
 			dir.z = 0;
 			dir = CrossProduct( dir, Vector(0,0,1));

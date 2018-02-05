@@ -66,7 +66,7 @@ public:
 	short		cellToReach;
 
 	// used in FOLLOW_AND_ASSIST
-	EHANDLE		partner;			// player the bot is following
+	edict_t		*partner;			// player the bot is following
 	
 	// used in IN_COMBAT
 	PB_Combat	combat;

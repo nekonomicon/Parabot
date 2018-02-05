@@ -15,6 +15,9 @@
 //
 // Misc utility code
 //
+#ifndef UTIL_H
+#define UTIL_H
+
 #ifndef ENGINECALLBACK_H
 #include "enginecallback.h"
 #endif
@@ -199,8 +202,6 @@ inline BOOL FClassnameIs(entvars_t* pev, const char* szClassname)
 	return FStrEq(STRING(pev->classname), szClassname);
 }
 
-class CBaseEntity;
-
 // Misc. Prototypes
 extern void			UTIL_SetSize			(entvars_t* pev, const Vector &vecMin, const Vector &vecMax);
 extern float		UTIL_VecToYaw			(const Vector &vec);
@@ -208,41 +209,17 @@ extern Vector		UTIL_VecToAngles		(const Vector &vec);
 extern float		UTIL_AngleMod			(float a);
 extern float		UTIL_AngleDiff			( float destAngle, float srcAngle );
 
-extern CBaseEntity	*UTIL_FindEntityInSphere(CBaseEntity *pStartEntity, const Vector &vecCenter, float flRadius);
-extern CBaseEntity	*UTIL_FindEntityByString(CBaseEntity *pStartEntity, const char *szKeyword, const char *szValue );
-extern CBaseEntity	*UTIL_FindEntityByClassname(CBaseEntity *pStartEntity, const char *szName );
-extern CBaseEntity	*UTIL_FindEntityByTargetname(CBaseEntity *pStartEntity, const char *szName );
-extern CBaseEntity	*UTIL_FindEntityGeneric(const char *szName, Vector &vecSrc, float flRadius );
-
-// returns a CBaseEntity pointer to a player by index.  Only returns if the player is spawned and connected
-// otherwise returns NULL
-// Index is 1 based
-extern CBaseEntity	*UTIL_PlayerByIndex( int playerIndex );
 
 #define UTIL_EntitiesInPVS(pent)			(*g_engfuncs.pfnEntitiesInPVS)(pent)
 extern void			UTIL_MakeVectors		(const Vector &vecAngles);
-
-// Pass in an array of pointers and an array size, it fills the array and returns the number inserted
-extern int			UTIL_MonstersInSphere( CBaseEntity **pList, int listMax, const Vector &center, float radius );
-extern int			UTIL_EntitiesInBox( CBaseEntity **pList, int listMax, const Vector &mins, const Vector &maxs, int flagMask );
 
 inline void UTIL_MakeVectorsPrivate( const Vector &vecAngles, float *p_vForward, float *p_vRight, float *p_vUp )
 {
 	g_engfuncs.pfnAngleVectors( vecAngles, p_vForward, p_vRight, p_vUp );
 }
 
-extern void			UTIL_MakeAimVectors		( const Vector &vecAngles ); // like MakeVectors, but assumes pitch isn't inverted
-extern void			UTIL_MakeInvVectors		( const Vector &vec, globalvars_t *pgv );
 
 extern void			UTIL_SetOrigin			( entvars_t* pev, const Vector &vecOrigin );
-extern void			UTIL_EmitAmbientSound	( edict_t *entity, const Vector &vecOrigin, const char *samp, float vol, float attenuation, int fFlags, int pitch );
-extern void			UTIL_ParticleEffect		( const Vector &vecOrigin, const Vector &vecDirection, ULONG ulColor, ULONG ulCount );
-extern void			UTIL_ScreenShake		( const Vector &center, float amplitude, float frequency, float duration, float radius );
-extern void			UTIL_ScreenShakeAll		( const Vector &center, float amplitude, float frequency, float duration );
-extern void			UTIL_ShowMessage		( const char *pString, CBaseEntity *pPlayer );
-extern void			UTIL_ShowMessageAll		( const char *pString );
-extern void			UTIL_ScreenFadeAll		( const Vector &color, float fadeTime, float holdTime, int alpha, int flags );
-extern void			UTIL_ScreenFade			( CBaseEntity *pEntity, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags );
 
 typedef enum
 {
@@ -274,26 +251,7 @@ extern void			UTIL_TraceModel			(const Vector &vecStart, const Vector &vecEnd, i
 extern Vector		UTIL_GetAimVector		(edict_t* pent, float flSpeed);
 extern int			UTIL_PointContents		(const Vector &vec);
 
-extern int			UTIL_IsMasterTriggered	(string_t sMaster, CBaseEntity *pActivator);
-extern void			UTIL_BloodStream( const Vector &origin, const Vector &direction, int color, int amount );
-extern void			UTIL_BloodDrips( const Vector &origin, const Vector &direction, int color, int amount );
-extern Vector		UTIL_RandomBloodVector( void );
-extern BOOL			UTIL_ShouldShowBlood( int bloodColor );
-extern void			UTIL_BloodDecalTrace( TraceResult *pTrace, int bloodColor );
-extern void			UTIL_DecalTrace( TraceResult *pTrace, int decalNumber );
-extern void			UTIL_PlayerDecalTrace( TraceResult *pTrace, int playernum, int decalNumber, BOOL bIsCustom );
-extern void			UTIL_GunshotDecalTrace( TraceResult *pTrace, int decalNumber );
-extern void			UTIL_Sparks( const Vector &position );
-extern void			UTIL_Ricochet( const Vector &position, float scale );
-extern void			UTIL_StringToVector( float *pVector, const char *pString );
-extern void			UTIL_StringToIntArray( int *pVector, int count, const char *pString );
-extern Vector		UTIL_ClampVectorToBox( const Vector &input, const Vector &clampSize );
-extern float		UTIL_Approach( float target, float value, float speed );
-extern float		UTIL_ApproachAngle( float target, float value, float speed );
-extern float		UTIL_AngleDistance( float next, float cur );
-
 extern char			*UTIL_VarArgs( char *format, ... );
-extern void			UTIL_Remove( CBaseEntity *pEntity );
 extern BOOL			UTIL_IsValidEntity( edict_t *pent );
 extern BOOL			UTIL_TeamsMatch( const char *pTeamName1, const char *pTeamName2 );
 
@@ -305,9 +263,6 @@ extern float		UTIL_WaterLevel( const Vector &position, float minz, float maxz );
 extern void			UTIL_Bubbles( Vector mins, Vector maxs, int count );
 extern void			UTIL_BubbleTrail( Vector from, Vector to, int count );
 
-// allows precacheing of other entities
-extern void			UTIL_PrecacheOther( const char *szClassname );
-
 // prints a message to each client
 extern void			UTIL_ClientPrintAll( int msg_dest, const char *msg_name, const char *param1 = NULL, const char *param2 = NULL, const char *param3 = NULL, const char *param4 = NULL );
 
@@ -316,16 +271,8 @@ inline void			UTIL_CenterPrintAll( const char *msg_name, const char *param1 = NU
 	UTIL_ClientPrintAll( HUD_PRINTCENTER, msg_name, param1, param2, param3, param4 );
 }
 
-class CBasePlayerItem;
-class CBasePlayer;
-extern BOOL UTIL_GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerItem *pCurrentWeapon );
-
 // prints messages through the HUD
 extern void ClientPrint( entvars_t *client, int msg_dest, const char *msg_name, const char *param1 = NULL, const char *param2 = NULL, const char *param3 = NULL, const char *param4 = NULL );
-
-// prints a message to the HUD say (chat)
-extern void			UTIL_SayText( const char *pText, CBaseEntity *pEntity );
-extern void			UTIL_SayTextAll( const char *pText, CBaseEntity *pEntity );
 
 typedef struct hudtextparms_s
 {
@@ -340,10 +287,6 @@ typedef struct hudtextparms_s
 	float		fxTime;
 	int			channel;
 } hudtextparms_t;
-
-// prints as transparent 'title' to the HUD
-extern void			UTIL_HudMessageAll( const hudtextparms_t &textparms, const char *pMessage );
-extern void			UTIL_HudMessage( CBaseEntity *pEntity, const hudtextparms_t &textparms, const char *pMessage );
 
 // for handy use with ClientPrint params
 extern char *UTIL_dtos1( int d );
@@ -538,16 +481,6 @@ void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname);
 extern int g_groupmask;
 extern int g_groupop;
 
-class UTIL_GroupTrace
-{
-public:
-	UTIL_GroupTrace( int groupmask, int op );
-	~UTIL_GroupTrace( void );
-
-private:
-	int m_oldgroupmask, m_oldgroupop;
-};
-
 void UTIL_SetGroupTrace( int groupmask, int op );
 void UTIL_UnsetGroupTrace( void );
 
@@ -556,3 +489,4 @@ float UTIL_SharedRandomFloat( unsigned int seed, float low, float high );
 
 float UTIL_WeaponTimeBase( void );
 FILE *UTIL_OpenDebugLog( void );
+#endif // UTIL_H

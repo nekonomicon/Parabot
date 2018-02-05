@@ -44,62 +44,6 @@ int gmsgShowMenu = 0;
 //
 ///////////////////////////////////////////////////////////////////////////////////////
 
-edict_t * EHANDLE::Get( void )
-{ 
-	if (m_pent)
-	{
-		if (m_pent->serialnumber == m_serialnumber) 
-			return m_pent; 
-		else
-			return NULL;
-	}
-	return NULL; 
-};
-
-edict_t * EHANDLE::Set( edict_t *pent ) 
-{ 
-	m_pent = pent;  
-	if (pent) 
-		m_serialnumber = m_pent->serialnumber; 
-	return pent; 
-};
-
-
-EHANDLE :: operator CBaseEntity *() 
-{ 
-	return (CBaseEntity *)GET_PRIVATE( Get( ) ); 
-};
-
-
-CBaseEntity * EHANDLE :: operator = (CBaseEntity *pEntity)
-{
-	if (pEntity)
-	{
-		m_pent = ENT( pEntity->pev );
-		if (m_pent)
-			m_serialnumber = m_pent->serialnumber;
-	}
-	else
-	{
-		m_pent = NULL;
-		m_serialnumber = 0;
-	}
-	return pEntity;
-}
-
-EHANDLE :: operator int ()
-{
-	return Get() != NULL;
-}
-
-CBaseEntity * EHANDLE :: operator -> ()
-{
-	return (CBaseEntity *)GET_PRIVATE( Get( ) ); 
-}
-
-
-
-
 Vector UTIL_VecToAngles( const Vector &vec )
 {
    float rgflVecOut[3];
@@ -139,60 +83,6 @@ void UTIL_MakeVectors( const Vector &vecAngles )
 {
    MAKE_VECTORS( vecAngles );
 }
-
-
-CBaseEntity* UTIL_FindEntityByString( CBaseEntity *pStartEntity, const char *szKeyword, const char *szValue )
-{
-	edict_t	*pentEntity;
-
-	if (pStartEntity)
-		pentEntity = pStartEntity->edict();
-	else
-		pentEntity = NULL;
-
-	pentEntity = FIND_ENTITY_BY_STRING( pentEntity, szKeyword, szValue );
-
-	if (!FNullEnt(pentEntity))
-		return CBaseEntity::Instance(pentEntity);
-	return NULL;
-}
-
-
-CBaseEntity* UTIL_FindEntityByClassname( CBaseEntity *pStartEntity, const char *szName )
-{
-	return UTIL_FindEntityByString( pStartEntity, "classname", szName );
-}
-
-
-CBaseEntity* UTIL_FindEntityInSphere( CBaseEntity *pStartEntity, const Vector &vecCenter, float flRadius )
-{
-	edict_t	*pentEntity;
-
-	if (pStartEntity)
-		pentEntity = pStartEntity->edict();
-	else
-		pentEntity = NULL;
-
-	pentEntity = FIND_ENTITY_IN_SPHERE( pentEntity, vecCenter, flRadius);
-
-	if (!FNullEnt(pentEntity))
-		return CBaseEntity::Instance(pentEntity);
-	return NULL;
-}
-
-
-CBaseEntity	*UTIL_PlayerByIndex( int playerIndex )
-{
-	CBaseEntity *pPlayer = NULL;
-
-	if ( playerIndex > 0 && playerIndex <= gpGlobals->maxClients ) {
-		edict_t *pPlayerEdict = INDEXENT( playerIndex );
-		if ( pPlayerEdict && !pPlayerEdict->free ) 
-			pPlayer = CBaseEntity::Instance( pPlayerEdict );
-	}	
-	return pPlayer;
-}
-
 
 int UTIL_PointContents( const Vector &vec )
 {
@@ -388,10 +278,10 @@ bool UTIL_ButtonTriggers( edict_t *button, edict_t *target )
 	edict_t *bTarget = FIND_ENTITY_BY_TARGETNAME( 0, buttonTarget );
 	if (!bTarget) return false;
 	if ( FStrEq( STRING( bTarget->v.classname ), "multi_manager" ) ) {
-		CMultiManager *mm = (CMultiManager*)GET_PRIVATE( bTarget );
+		string_t *szTargetName = (string_t *)( (char *)bTarget->pvPrivateData + 272 );
 		// check all multimanager targets:
-		for ( int i=0; i<mm->m_cTargets; i++ ) {
-			if ( FStrEq(targetName, STRING(mm->m_iTargetName[i])) )	return true;
+		for ( ; *szTargetName; szTargetName++ ) {
+			if ( FStrEq(targetName, STRING(*szTargetName)) )        return true;
 		}
 	}
 	return false;
@@ -455,27 +345,3 @@ FILE *UTIL_OpenDebugLog( void )
 
 #endif	//DEBUG
 
-
-
-
-/*
-int UTIL_IsMasterTriggered(string_t sMaster, CBaseEntity *pActivator)
-{
-	if (sMaster)
-	{
-		edict_t *pentTarget = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(sMaster));
-	
-		if ( !FNullEnt(pentTarget) )
-		{
-			CBaseEntity *pMaster = CBaseEntity::Instance(pentTarget);
-			if ( pMaster && (pMaster->ObjectCaps() & FCAP_MASTER) )
-				return pMaster->IsTriggered( pActivator );
-		}
-
-		ALERT(at_console, "Master was null or not a master!\n");
-	}
-
-	// if this isn't a master entity, just say yes.
-	return 1;
-}
-*/

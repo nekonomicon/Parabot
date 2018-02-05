@@ -229,12 +229,12 @@ short FixedSigned16( float value, float scale )
 	return (short)output;
 }
 
-void UTIL_HudMessage( CBaseEntity *pEntity, const hudtextparms_t &textparms, const char *pMessage )
+void UTIL_HudMessage( edict_t *pEntity, const hudtextparms_t &textparms, const char *pMessage )
 {
-	if ( !pEntity || !pEntity->IsNetClient() )
+	if ( FNullEnt( pEntity ) )
 		return;
 
-	MESSAGE_BEGIN( MSG_ONE, SVC_TEMPENTITY, NULL, pEntity->edict() );
+	MESSAGE_BEGIN( MSG_ONE, SVC_TEMPENTITY, NULL, pEntity );
 		WRITE_BYTE( TE_TEXTMESSAGE );
 		WRITE_BYTE( textparms.channel & 0xFF );
 
@@ -509,21 +509,21 @@ void checkForAirStrike()
 	if (airStrikeTime==0) return;
 	if (worldTime()<airStrikeTime) return;
 
-	CBaseEntity *pPlayer = 0;
+	edict_t *pPlayer = 0;
 	for (int i=1; i<=gpGlobals->maxClients; i++) {
-		pPlayer = UTIL_PlayerByIndex( i );
+		pPlayer = INDEXENT( i );
 		if (!pPlayer) continue;							// skip invalid players
-		if (!isAlive( ENT(pPlayer->pev) )) continue;	// skip player if not alive
-		if (pPlayer->pev->solid == SOLID_NOT) continue;	
+		if (!isAlive( ENT(pPlayer) )) continue;	// skip player if not alive
+		if (pPlayer->v.solid == SOLID_NOT) continue;	
 
-		bot_t *bot = UTIL_GetBotPointer( pPlayer->edict() );
+		bot_t *bot = UTIL_GetBotPointer( pPlayer );
 		if ( bot == 0 ) continue;
 		if ( (worldTime() - bot->parabot->lastRespawn) < 1.0 ) continue;
 #ifdef _DEBUG
-		const char *name = STRING(pPlayer->pev->netname);
+		const char *name = STRING(pPlayer->v.netname);
 		debugMsg( name, " was save at airstrike!\n" );
 #endif
-		Vector pos = pPlayer->pev->origin;
+		Vector pos = pPlayer->v.origin;
 		PB_Navpoint *nearest = mapGraph.getNearestNavpoint( pos, NAV_S_AIRSTRIKE_COVER );
 		if ( nearest && ((nearest->pos()-pos).Length() < 256) ) {
 			debugMsg( "Airstrike cover stored nearby!\n" );

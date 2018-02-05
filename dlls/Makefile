@@ -3,7 +3,7 @@
 
 CXX ?=		g++
 
-CPPFLAGS =	-fno-rtti
+CPPFLAGS =	-std=c++98
 
 SYS =		$(shell $(CXX) -dumpmachine)
 
@@ -31,12 +31,12 @@ CFLAGS +=	-O0 -pipe -DDEBUG -D_DEBUG -g -gdwarf-2
 endif
 
 ifeq ($(AGGR_OPT),1)
-CPPFLAGS +=	-fvisibility-inlines-hidden
+CPPFLAGS +=	-fvisibility-inlines-hidden -fno-rtti
 CFLAGS +=	-O3 -fvisibility=hidden -ffast-math -funroll-loops -ftree-vectorize
 endif
 
 ifeq ($(SIZE_OPT),1)
-CPPFLAGS +=     -fvisibility-inlines-hidden
+CPPFLAGS +=     -fvisibility-inlines-hidden -fno-rtti
 CFLAGS +=	-Os -fvisibility=hidden
 endif
 

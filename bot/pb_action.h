@@ -3,7 +3,7 @@
 
 
 #include "extdll.h"
-
+#include "util.h"
 
 // movement constants:
 #define	MAX_YAW			 20

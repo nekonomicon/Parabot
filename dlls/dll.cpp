@@ -110,7 +110,7 @@ int DispatchSpawn( edict_t *pent )
          fclose(fp);
       }
 #endif
-      if( FstrEq( pClassname, "worldspawn" ) )
+      if( FStrEq( pClassname, "worldspawn" ) )
       {
          // do level initialization stuff here...
 /*
@@ -254,7 +254,7 @@ BOOL ClientConnect( edict_t *pEntity, const char *pszName, const char *pszAddres
 		if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp, "ClientConnect: pent=%p name=%s\n",pEntity,pszName); fclose(fp); }
 #endif
 		// check if this client is the listen server client
-		if (FstrEq(pszAddress, "loopback" ) )
+		if (FStrEq(pszAddress, "loopback" ) )
 		{
 			// save the edict of the listen server client...
 			playerEnt = pEntity;
@@ -353,10 +353,6 @@ void ClientPutInServer( edict_t *pEntity )
 		if (welcome_index == -1) welcome_index = index;
 	}
 	
-	EHANDLE np;
-	np.Set( pEntity );
-	//HL_World *hlw = (HL_World*)game.world();
-	//hlw->addPlayer( np );
 	numberOfClients++;
 	if(!g_meta_init)
 		(*other_gFunctionTable.pfnClientPutInServer)(pEntity);

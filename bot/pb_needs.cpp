@@ -551,7 +551,7 @@ void PB_Needs::hungerWishList()
 
 void PB_Needs::agWishList()
 {
-	CBaseEntity *pent = NULL;
+	edict_t *pent = NULL;
 	int i;
 	for (i=0; i<MAX_NAV_TYPES; i++) wish[i] = 0;
 
@@ -643,9 +643,9 @@ void PB_Needs::agWishList()
 	{
 		if( UTIL_GetTeam( bot->ent ) )
 		{
-			while( ( pent = UTIL_FindEntityByClassname( pent, "carried_flag_team1" ) ) != NULL )
+			while( !FNullEnt( pent = FIND_ENTITY_BY_CLASSNAME( pent, "carried_flag_team1" ) ) )
 			{
-				if( pent->edict()->v.owner == bot->ent )
+				if( pent->v.owner == bot->ent )
 				{
 					wish[NAV_AGI_FLAG_TEAM2] = 20;
 				}
@@ -663,9 +663,9 @@ void PB_Needs::agWishList()
 		}
 		else
 		{
-			while( ( pent = UTIL_FindEntityByClassname( pent, "carried_flag_team2" ) ) != NULL )
+			while( !FNullEnt( pent = FIND_ENTITY_BY_CLASSNAME( pent, "carried_flag_team2" ) ) )
 			{
-				if( pent->edict()->v.owner == bot->ent ) 
+				if( pent->v.owner == bot->ent ) 
 				{
 					wish[NAV_AGI_FLAG_TEAM1] = 20;
 				}
