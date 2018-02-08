@@ -3,7 +3,7 @@
 
 CXX ?=		g++
 
-CPPFLAGS =	-std=c++98
+CPPFLAGS =	-std=gnu++98
 
 SYS =		$(shell $(CXX) -dumpmachine)
 

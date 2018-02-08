@@ -53,7 +53,7 @@ int welcome_index = -1;
 int wpSpriteTexture, wpBeamTexture, wpSprite2Texture;
 int g_hldm_mod = HLDM;
 bool gearbox_ctf = false;
-char ag_gamemode[8] = {};
+char ag_gamemode[8] = {0};
 
 static FILE *fp;
 
