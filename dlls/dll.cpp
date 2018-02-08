@@ -671,7 +671,6 @@ extern "C" EXPORT int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interface
 		pFunctionTable->pfnClientDisconnect = ClientDisconnect;
 		pFunctionTable->pfnClientPutInServer = ClientPutInServer;
 		pFunctionTable->pfnServerDeactivate = ServerDeactivate;
-		pFunctionTable->pfnPM_Move = PM_Move;
 		pFunctionTable->pfnStartFrame = StartFrame;
 		pFunctionTable->pfnClientCommand = ClientCommand;
 	}
