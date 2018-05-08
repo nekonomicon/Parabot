@@ -82,9 +82,15 @@ void debugMsg( const char *str1, const char *str2=0, const char *str3=0, const c
 void debugMsg( const char *str1, int data1, int data2=NO_I_VALUE, int data3=NO_I_VALUE );
 void debugMsg( const char *str1, float data1, float data2=NO_F_VALUE, float data3=NO_F_VALUE );
 #else
+#if _MSC_VER == 1200
 #define checkForBreakpoint(reason)
 #define debugMsg(str1, data1, data2, data3)
 #define debugFile(msg)
+#else
+#define checkForBreakpoint(...)
+#define debugMsg(...)
+#define debugFile(...)
+#endif
 #endif
 
 void infoMsg( const char *str1, const char *str2=0, const char *str3=0, const char *str4=0 );
@@ -96,8 +102,14 @@ void debugSound( edict_t *recipient, const char *sample );
 void debugBeam( Vector start, Vector end, int life, int color=1 );
 void debugMarker( Vector pos, int life );
 #else
+#if _MSC_VER == 1200
 #define debugSound(recipient, sample)
 #define debugBeam(start, end, life)
 #define debugMarker(pos, life)
+#else
+#define debugSound(...)
+#define debugBeam(...)
+#define debugMarker(...)
+#endif
 #endif
 #endif
