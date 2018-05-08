@@ -75,4 +75,12 @@ typedef float vec_t;				// needed before including progdefs.h
 
 // Shared header between the client DLL and the game DLLs
 #include "cdll_dll.h"
+
+#ifndef Q_min
+#define Q_min(a,b)  (((a) < (b)) ? (a) : (b))
+#endif //Q_min
+#ifndef Q_max
+#define Q_max(a,b)  (((a) > (b)) ? (a) : (b))
+#endif //Q_max
+
 #endif //EXTDLL_H

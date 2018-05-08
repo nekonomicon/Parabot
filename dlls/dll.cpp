@@ -7,14 +7,10 @@
 // dll.cpp
 //
 
-
 #include "extdll.h"
 #include "enginecallback.h"
 #include "dllapi.h"
 #include "meta_api.h"
-
-
-
 #include "bot.h"
 #include "bot_func.h"
 #include "pb_global.h"
@@ -22,7 +18,7 @@
 #include "pb_chat.h"
 #include "pb_mapcells.h"
 #include "pb_configuration.h"
-
+#include "sounds.h"
 
 extern int debug_engine;
 extern bool speechSynthesis;
@@ -54,9 +50,9 @@ int wpSpriteTexture, wpBeamTexture, wpSprite2Texture;
 int g_hldm_mod = HLDM;
 bool gearbox_ctf = false;
 char ag_gamemode[8] = {0};
+extern Sounds playerSounds;
 
 static FILE *fp;
-
 
 void StartFrame( void );	// in startframe.cpp
 void saveLevelData( void );	// in pb_mapimport.cpp
@@ -66,8 +62,6 @@ void DSsimulate();
 void DSlogChat();
 void DSrestrictedWeapons();
 void DSpeace();
-
-
 
 void GameDLLInit( void )
 {
@@ -139,6 +133,7 @@ int DispatchSpawn( edict_t *pent )
 		   wpSpriteTexture = PRECACHE_MODEL( "sprites/hotglow.spr");
 		   wpSprite2Texture = PRECACHE_MODEL( "sprites/laserdot.spr");
 
+	playerSounds.init();
          g_GameRules = TRUE;
       }
 //	  else if (FStrEq( pClassname, "env_sound" ) ) debugMsg( "DISPATCH env_sound\n" );
