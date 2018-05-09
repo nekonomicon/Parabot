@@ -90,7 +90,7 @@ SRC =		../bot/bot.cpp \
 		dll.cpp \
 		engine.cpp \
 		h_export.cpp \
-		linkfunc.cpp \
+		physint.cpp \
 		startframe.cpp \
 		util.cpp \
 		../bot/marker.cpp \
