@@ -198,11 +198,10 @@ void PB_Path::print()
 #include "marker.h"
 #include <queue>
 
-extern CMarker		glMarker;
-
 void PB_Path::mark()
 // mark all waypoints
 {
+#ifdef _DEBUG
 	WaypointList::iterator wpi = waypoint->begin();
 	PB_Path_Waypoint wp;
 	while (wpi != waypoint->end()) {
@@ -217,6 +216,7 @@ void PB_Path::mark()
 		glMarker.newMarker( Vector(0,0,10)+lastReachedWaypoint->pos(), 2 );
 	}
 	else debugMsg( "Last reached wp = end\n" );
+#endif //_DEBUG
 }
 
 
@@ -732,12 +732,8 @@ void PB_Path::reportWaypointReached()
 	}
 }
 
-
 void PB_Path::reportWaypointFailed()
 // message that the waypoint has not been reached in time, roll back possible changes
 {
 	//startTime += 1.5;
 }
-
-
-

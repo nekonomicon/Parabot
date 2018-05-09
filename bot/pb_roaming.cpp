@@ -9,11 +9,7 @@
 #define LEFT   1
 #define RIGHT  2
 
-
 extern int mod_id;
-//CMarker marker;
-
-
 
 void fixAngle( Vector &angle );
 

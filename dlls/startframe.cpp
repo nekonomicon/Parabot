@@ -85,7 +85,6 @@ extern int botNr;
 extern edict_t *camPlayer;
 extern Vector camPos;
 
-extern CMarker		glMarker;
 extern int   need_init;
 
 extern bool headToBunker;
@@ -146,7 +145,9 @@ void checkForMapChange()
 	if (previous_time > gpGlobals->time)
 	{
 		srvMaxSpeed = CVAR_GET_FLOAT("sv_maxspeed");
+#ifdef _DEBUG
 		glMarker.deleteAll();
+#endif
 //		need_init = 1;
 		camPlayer = 0;
 		camPlayerLaser = 0;
@@ -689,7 +690,9 @@ void StartFrame( void )
 			checkForBotRespawn();
 			checkForBotCreation();
 			if (!pb_pause) chat.check();
+#ifdef _DEBUG
 			glMarker.drawMarkers();
+#endif //_DEBUG
 		}
 	}
 	if( !g_meta_init )

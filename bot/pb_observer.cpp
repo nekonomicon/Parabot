@@ -49,9 +49,10 @@ void PB_Observer::clear( int oId )
 	for (int i=0; i<MAX_WPTS; i++) {
 		waypoint[oId][i].reset();
 	}
-
+#ifdef _DEBUG
 	trail[oId].deleteAll();
 	while (!markerId[oId].empty()) markerId[oId].pop();	
+#endif //_DEBUG
 }
 
 
@@ -230,7 +231,6 @@ int PB_Observer::checkGround( int oId, edict_t **plat )
 	return flags;
 }
 
-extern CMarker glMarker;
 
 
 bool PB_Observer::shouldObservePlayer( int oId )

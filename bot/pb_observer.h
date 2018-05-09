@@ -95,9 +95,10 @@ private:
 	int			partner[MAX_BOTS];			// stores botpartner
 	int			currentWaypoint[MAX_BOTS];	// index in waypoint-table
 
+#ifdef _DEBUG
 	CMarker		trail[MAX_OBS];
 	std::queue<int>	markerId[MAX_OBS];
-
+#endif //_DEBUG
 
 	int registerPlayer( edict_t *player );	
 	// registers the player for observation, observerId is returned

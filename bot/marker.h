@@ -1,3 +1,4 @@
+#ifdef _DEBUG
 #if !defined( MARKER_H )
 #define MARKER_H
 
@@ -51,4 +52,6 @@ private:
 
 };
 
-#endif
+extern CMarker		glMarker;
+#endif //MARKER_H
+#endif //_DEBUG

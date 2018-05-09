@@ -32,7 +32,9 @@ extern int numberOfClients;
 
 static FILE *fp;
 
+#ifdef _DEBUG
 CMarker		glMarker;
+#endif //_DEBUG
 int botNr = 0;			// bot to debug
 int botHalt = 0;		// if set >0, breaks for botNr at certain place
 int botTarget = -1;		// target nav id to approach (-1 = nothing)

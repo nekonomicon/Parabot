@@ -1,3 +1,4 @@
+#ifdef _DEBUG
 #include "marker.h"
 
 extern int wpSpriteTexture;
@@ -208,3 +209,4 @@ void CMarker::drawMarkers()
 		m++;
 	}
 }
+#endif

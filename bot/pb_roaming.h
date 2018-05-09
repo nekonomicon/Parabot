@@ -44,8 +44,9 @@ public:
 	PB_Action *action;
 	Vector target, jumpTarget;
 	float lastXyDist;	// last XY-Dist to target
+#ifdef _DEBUG
 	int markerId;
-
+#endif //_DEBUG
 
 
 void checkJump(vec3_t origin, vec3_t dir, checkWayRes *res );
