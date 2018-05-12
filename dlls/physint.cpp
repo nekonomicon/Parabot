@@ -31,7 +31,7 @@ extern HINSTANCE h_Library;
 //
 int DispatchCreateEntity( edict_t *pent, const char *szName )
 {
-	LINK_ENTITY_FUNC SpawnEdict = (LINK_ENTITY_FUNC)dlsym( h_Library, szName );
+	LINK_ENTITY_FUNC SpawnEdict = (LINK_ENTITY_FUNC)GetProcAddress( h_Library, szName );
 
 	if( SpawnEdict )	// found the valid spawn
 	{

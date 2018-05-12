@@ -23,8 +23,6 @@ extern int clientWeapon[32];
 
 bot_weapon_t weapon_defs[MAX_WEAPONS]; // array of weapon definitions
 
-static FILE *fp;
-
 ///////////////////////////////////////////////////////////////////////////////////
 //
 //  MENU MESSAGES
@@ -178,17 +176,7 @@ void BotClient_Valve_WeaponList(void *p, int bot_index)
    {
       bot_weapon.iFlags = *(int *)p;  // flags for weapon (WTF???)
 
-      // store away this weapon with it's ammo information...
-		if (mod_id==DMC_DLL) {
-			int siId = bot_weapon.iId;	// shifted ID
-			bots[bot_index].bot_weapons |= siId;  // set this weapon bit
-			bot_weapon.iId = 0;
-			while (siId!=1) {  siId>>=1;  bot_weapon.iId++;  }	// get real ID
-		}
       weapon_defs[bot_weapon.iId] = bot_weapon;
-	  /*char tdb[256];
-	  sprintf( tdb, "%i:%s\n", bot_weapon.iId, bot_weapon.szClassname );
-	  debugFile( tdb );*/
 
       state = 0;
    }
@@ -258,8 +246,6 @@ void BotClient_Valve_CurrentWeapon(void *p, int bot_index)
 		if (iState==1 && iId>0 && iId<32) {
 			iClip = *(int *)p;  // ammo currently in the clip for this weapon
 			
-			bots[bot_index].bot_weapons |= (1<<iId);  // set this weapon bit
-			
 			bots[bot_index].current_weapon.iId = iId;
 			bots[bot_index].current_weapon.iClip = iClip;
 			
@@ -311,7 +297,6 @@ void BotClient_DMC_CurrentWeapon(void *p, int bot_index)
 			iClip = *(int *)p;  // ammo currently in the clip for this weapon
 			
 			int siId = iId;	// shifted ID
-			bots[bot_index].bot_weapons |= siId;  // set this weapon bit
 			iId = 0;
 			while (siId!=1) {  siId>>=1;  iId++;  }	// get real ID
 			
@@ -360,59 +345,6 @@ void BotClient_Hunger_CurrentWeapon(void *p, int bot_index)
 {
    // this is just like the Valve Current Weapon message
    BotClient_Valve_CurrentWeapon(p, bot_index);
-}
-
-// This message gets sent when the bot picks up a weapon.
-void BotClient_Valve_WeaponPickup(void *p, int bot_index)
-{
-   int index = *(int *)p;
-
-   // set this weapon bit to indicate that we are carrying this weapon
-   bots[bot_index].bot_weapons |= (1<<index);
-}
-
-
-void BotClient_Holywars_WeaponPickup(void *p, int bot_index)
-{
-   // this is just like the Valve Weapon Pickup message
-   BotClient_Valve_WeaponPickup(p, bot_index);
-}
-
-
-void BotClient_DMC_WeaponPickup(void *p, int bot_index)
-{
-   int index = *(int *)p;
-
-   // set this weapon bit to indicate that we are carrying this weapon
-   debugMsg( "DMC_WeaponPickup: index=%i\n", index );
-   bots[bot_index].bot_weapons |= index;
-}
-
-
-void BotClient_TFC_WeaponPickup(void *p, int bot_index)
-{
-   // this is just like the Valve Weapon Pickup message
-   BotClient_Valve_WeaponPickup(p, bot_index);
-}
-
-
-void BotClient_CS_WeaponPickup(void *p, int bot_index)
-{
-   // this is just like the Valve Weapon Pickup message
-   BotClient_Valve_WeaponPickup(p, bot_index);
-}
-
-
-void BotClient_Gearbox_WeaponPickup(void *p, int bot_index)
-{
-   // this is just like the Valve Weapon Pickup message
-   BotClient_Valve_WeaponPickup(p, bot_index);
-}
-
-void BotClient_Hunger_WeaponPickup(void *p, int bot_index)
-{
-   // this is just like the Valve Weapon Pickup message
-   BotClient_Valve_WeaponPickup(p, bot_index);
 }
 
 void HumanClient_CurrentWeapon( void *p, int clientIndex )
@@ -607,60 +539,6 @@ void BotClient_Hunger_AmmoPickup(void *p, int bot_index)
 
 ///////////////////////////////////////////////////////////////////////////////////
 //
-//  ITEMS
-//
-///////////////////////////////////////////////////////////////////////////////////
-
-
-// This message gets sent when the bot picks up an item (like a battery
-// or a healthkit)
-void BotClient_Valve_ItemPickup(void *p, int bot_index)
-{
-}
-
-
-void BotClient_Holywars_ItemPickup(void *p, int bot_index)
-{
-   // this is just like the Valve Item Pickup message
-   BotClient_Valve_ItemPickup(p, bot_index);
-}
-
-
-void BotClient_DMC_ItemPickup(void *p, int bot_index)
-{
-   // this is just like the Valve Item Pickup message
-   BotClient_Valve_ItemPickup(p, bot_index);
-}
-
-
-void BotClient_TFC_ItemPickup(void *p, int bot_index)
-{
-   // this is just like the Valve Item Pickup message
-   BotClient_Valve_ItemPickup(p, bot_index);
-}
-
-
-void BotClient_CS_ItemPickup(void *p, int bot_index)
-{
-   // this is just like the Valve Item Pickup message
-   BotClient_Valve_ItemPickup(p, bot_index);
-}
-
-
-void BotClient_Gearbox_ItemPickup(void *p, int bot_index)
-{
-   // this is just like the Valve Item Pickup message
-   BotClient_Valve_ItemPickup(p, bot_index);
-}
-
-void BotClient_Hunger_ItemPickup(void *p, int bot_index)
-{
-   // this is just like the Valve Item Pickup message
-   BotClient_Valve_ItemPickup(p, bot_index);
-}
-
-///////////////////////////////////////////////////////////////////////////////////
-//
 //  HEALTH & ARMOR
 //
 ///////////////////////////////////////////////////////////////////////////////////
@@ -704,104 +582,7 @@ void Client_Valve_DeathMsg(void *p, int noMatter)
 	}
 }
 
-
-// This message gets sent when the bots health changes.
-void BotClient_Valve_Health(void *p, int bot_index)
-{
-   bots[bot_index].bot_health = *(int *)p;  // health ammount
-}
-
-
-void BotClient_Holywars_Health(void *p, int bot_index)
-{
-   // this is just like the Valve Health message
-   BotClient_Valve_Health(p, bot_index);
-}
-
-
-void BotClient_DMC_Health(void *p, int bot_index)
-{
-   // this is just like the Valve Health message
-   BotClient_Valve_Health(p, bot_index);
-}
-
-
-void BotClient_TFC_Health(void *p, int bot_index)
-{
-   // this is just like the Valve Health message
-   BotClient_Valve_Health(p, bot_index);
-}
-
-
-void BotClient_CS_Health(void *p, int bot_index)
-{
-   // this is just like the Valve Health message
-   BotClient_Valve_Health(p, bot_index);
-}
-
-
-void BotClient_Gearbox_Health(void *p, int bot_index)
-{
-   // this is just like the Valve Health message
-   BotClient_Valve_Health(p, bot_index);
-}
-
-void BotClient_Hunger_Health(void *p, int bot_index)
-{
-   // this is just like the Valve Health message
-   BotClient_Valve_Health(p, bot_index);
-}
-
-// This message gets sent when the bots armor changes.
-void BotClient_Valve_Battery(void *p, int bot_index)
-{
-   bots[bot_index].bot_armor = *(int *)p;  // armor ammount
-}
-
-
-void BotClient_Holywars_Battery(void *p, int bot_index)
-{
-   // this is just like the Valve Battery message
-   BotClient_Valve_Battery(p, bot_index);
-}
-
-
-void BotClient_DMC_Battery(void *p, int bot_index)
-{
-   // this is just like the Valve Battery message
-   BotClient_Valve_Battery(p, bot_index);
-}
-
-
-void BotClient_TFC_Battery(void *p, int bot_index)
-{
-   // this is just like the Valve Battery message
-   BotClient_Valve_Battery(p, bot_index);
-}
-
-
-void BotClient_CS_Battery(void *p, int bot_index)
-{
-   // this is just like the Valve Battery message
-   BotClient_Valve_Battery(p, bot_index);
-}
-
-
-void BotClient_Gearbox_Battery(void *p, int bot_index)
-{
-   // this is just like the Valve Battery message
-   BotClient_Valve_Battery(p, bot_index);
-}
-
-void BotClient_Hunger_Battery(void *p, int bot_index)
-{
-   // this is just like the Valve Battery message
-   BotClient_Valve_Battery(p, bot_index);
-}
-
 extern bool pb_pause;
-
-
 
 // This message gets sent when the bots are getting damaged.
 void BotClient_Valve_Damage(void *p, int bot_index)
@@ -919,5 +700,27 @@ void BotClient_CS_Money(void *p, int bot_index)
    else
    {
       state = 0;  // ingore this field
+   }
+}
+
+void BotClient_CS_HLTV(void *p, int bot_index)
+{  
+       static int state = 0;   // current state machine state
+       static int players;
+       int index;
+
+   if (state == 0)
+      players = *(int *) p;
+   else if (state == 1)
+   {
+      // new round in CS 1.6
+      if ((players == 0) && (*(int *) p == 0))
+      {
+         for (index = 0; index < 32; index++)
+         {
+            if (bots[index].is_used)
+               BotSpawnInit (&bots[index]); // reset bots for new round
+         }
+      }
    }
 }

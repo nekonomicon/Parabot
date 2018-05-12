@@ -263,14 +263,10 @@ void CParabot::registerKill( edict_t *victim, const char *wpnName )
 	}
 }
 
-
-const char *pfnGetPhysicsKeyValue(const edict_t *pClient, const char *key);
-// in engine.cpp
-
 bool CParabot::hasLongJump()
 {
 	if ( !(mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) ) return false;
-	const char *value = pfnGetPhysicsKeyValue( ent, "slj");
+	const char *value = g_engfuncs.pfnGetPhysicsKeyValue( ent, "slj");
 	if ( FStrEq( value, "1" ) ) return true;
 	else return false;
 }

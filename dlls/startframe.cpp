@@ -44,13 +44,16 @@ extern PB_Chat			chat;
 extern int				numberOfClients;
 
 extern int debug_engine;
-static FILE *fp;
 
 static char		cmd_line[80];
 static float	respawn_time = 0.0;
 static float	client_update_time = 0.0;
 //extern int max_bots;
 
+// TheFatal's method for calculating the msecval
+int msecnum;
+float msecdel;
+float msecval;
 
 
 Vector playerPos;
@@ -85,8 +88,6 @@ extern int botNr;
 extern edict_t *camPlayer;
 extern Vector camPos;
 
-extern int   need_init;
-
 extern bool headToBunker;
 extern float airStrikeTime;
 
@@ -100,40 +101,12 @@ bool loadLevelData();
 
 float srvMaxSpeed = 270;
 
-
-
-
 float serverMaxSpeed()
 {
 	return srvMaxSpeed;
 }
 
-
-void updateBotClients()
-{
-	clientdata_s cd;
-
-	if (client_update_time <= gpGlobals->time)	// update bot clients every 0.5 sec
-	{
-		client_update_time = gpGlobals->time + 0.5;
-		
-		for (int i=0; i < 32; i++) {
-            if (bots[i].is_used) {
-				memset(&cd, 0, sizeof(cd));					// assumed by UpdateClientData
-				if( !g_meta_init )
-					UpdateClientData( bots[i].pEdict, 1, &cd );
-				else
-					MDLL_UpdateClientData( bots[i].pEdict, 1, &cd );
-
-				// see if a weapon was dropped...
-				if (bots[i].bot_weapons != cd.weapons) bots[i].bot_weapons = cd.weapons;
-            }
-		}
-	}
-}
-
 #include "parabot.h"
-
 
 void checkForMapChange()
 {
@@ -142,13 +115,16 @@ void checkForMapChange()
 	
 
 	// if a new map has started then...
-	if (previous_time > gpGlobals->time)
+	if( previous_time > gpGlobals->time + 0.1 )
 	{
+		msecnum = 0;
+		msecdel = 0;
+		msecval = 0;
+
 		srvMaxSpeed = CVAR_GET_FLOAT("sv_maxspeed");
 #ifdef _DEBUG
 		glMarker.deleteAll();
 #endif
-//		need_init = 1;
 		camPlayer = 0;
 		camPlayerLaser = 0;
 		fatalParabotError = !loadLevelData();
@@ -182,6 +158,25 @@ void checkForMapChange()
 		}
 	}
 	previous_time = gpGlobals->time;
+
+	// adjust the millisecond delay based on the frame rate interval...
+	if( msecdel <= gpGlobals->time )
+	{
+		msecdel = gpGlobals->time + 0.5;
+
+		if( msecnum > 0 )
+			msecval = 450.0 / msecnum;
+
+		msecnum = 0;
+	}
+	else
+		msecnum++;
+
+	if( msecval < 1 )	// don't allow msec to be less than 1...
+		msecval = 1;
+
+	if( msecval > 100 )	// ...or greater than 100
+		msecval = 100;
 
 	if (mod_id==CSTRIKE_DLL) {
 		// detect CS-roundstart
@@ -652,7 +647,6 @@ void StartFrame( void )
 		checkForMapChange();
 
 		if (!fatalParabotError) {
-			updateBotClients();
 			playerSounds.getAllClientSounds();
 			
 			//print3dDebugInfo();
@@ -697,6 +691,6 @@ void StartFrame( void )
 	}
 	if( !g_meta_init )
 		(*other_gFunctionTable.pfnStartFrame)();
-	else
-		RETURN_META(MRES_IGNORED);
+
+	RETURN_META(MRES_IGNORED);
 }

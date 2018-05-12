@@ -195,163 +195,33 @@ extern "C" void DLLEXPORT WINAPI GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 			debugFile( "Library = 0\n" );
 		}
 
-		other_GetEntityAPI = (GETENTITYAPI)GetProcAddress( h_Library, "GetEntityAPI" );
-		if (other_GetEntityAPI == NULL)	errorMsg( "Can't get MOD's GetEntityAPI!\n" );
+		GetEngineFunctions( pengfuncsFromEngine, NULL );
 
-		if (mod_id == TFC_DLL) {	// NewDLLFunctions only necessary for TFC
-			other_GetNewDLLFunctions = (GETNEWDLLFUNCTIONS)GetProcAddress( h_Library, "GetNewDLLFunctions" ); 
-			if (other_GetNewDLLFunctions == NULL) errorMsg( "Can't get TFC GetNewDLLFunctions!\n" );
-		} 
-	
-		other_GiveFnptrsToDll = (GIVEFNPTRSTODLL)GetProcAddress(h_Library, "GiveFnptrsToDll"); 
-		if (other_GiveFnptrsToDll == NULL) errorMsg( "Can't get MOD's GiveFnptrsToDll!\n" );
-		pengfuncsFromEngine->pfnCmd_Args = Cmd_Args;
-		pengfuncsFromEngine->pfnCmd_Argv = Cmd_Argv;
-		pengfuncsFromEngine->pfnCmd_Argc = Cmd_Argc;
-
-		pengfuncsFromEngine->pfnPrecacheModel = pfnPrecacheModel;
-		pengfuncsFromEngine->pfnPrecacheSound = pfnPrecacheSound;
-		pengfuncsFromEngine->pfnSetModel = pfnSetModel;
-		pengfuncsFromEngine->pfnModelIndex = pfnModelIndex;
-		pengfuncsFromEngine->pfnModelFrames = pfnModelFrames;
-		pengfuncsFromEngine->pfnSetSize = pfnSetSize;
-		pengfuncsFromEngine->pfnChangeLevel = pfnChangeLevel;
-		pengfuncsFromEngine->pfnGetSpawnParms = pfnGetSpawnParms;
-		pengfuncsFromEngine->pfnSaveSpawnParms = pfnSaveSpawnParms;
-		pengfuncsFromEngine->pfnVecToYaw = pfnVecToYaw;
-		pengfuncsFromEngine->pfnVecToAngles = pfnVecToAngles;
-		pengfuncsFromEngine->pfnMoveToOrigin = pfnMoveToOrigin;
-		pengfuncsFromEngine->pfnChangeYaw = pfnChangeYaw;
-		pengfuncsFromEngine->pfnChangePitch = pfnChangePitch;
-		pengfuncsFromEngine->pfnFindEntityByString = pfnFindEntityByString;
-		pengfuncsFromEngine->pfnGetEntityIllum = pfnGetEntityIllum;
-		pengfuncsFromEngine->pfnFindEntityInSphere = pfnFindEntityInSphere;
-		pengfuncsFromEngine->pfnFindClientInPVS = pfnFindClientInPVS;
-		pengfuncsFromEngine->pfnEntitiesInPVS = pfnEntitiesInPVS;
-		pengfuncsFromEngine->pfnMakeVectors = pfnMakeVectors;
-		pengfuncsFromEngine->pfnAngleVectors = pfnAngleVectors;
-		pengfuncsFromEngine->pfnCreateEntity = pfnCreateEntity;
-		pengfuncsFromEngine->pfnRemoveEntity = pfnRemoveEntity;
-		pengfuncsFromEngine->pfnCreateNamedEntity = pfnCreateNamedEntity;
-		pengfuncsFromEngine->pfnMakeStatic = pfnMakeStatic;
-		pengfuncsFromEngine->pfnEntIsOnFloor = pfnEntIsOnFloor;
-		pengfuncsFromEngine->pfnDropToFloor = pfnDropToFloor;
-		pengfuncsFromEngine->pfnWalkMove = pfnWalkMove;
-		pengfuncsFromEngine->pfnSetOrigin = pfnSetOrigin;
-		pengfuncsFromEngine->pfnEmitSound = pfnEmitSound;
-		pengfuncsFromEngine->pfnEmitAmbientSound = pfnEmitAmbientSound;
-		pengfuncsFromEngine->pfnTraceLine = pfnTraceLine;
-		pengfuncsFromEngine->pfnTraceToss = pfnTraceToss;
-		pengfuncsFromEngine->pfnTraceMonsterHull = pfnTraceMonsterHull;
-		pengfuncsFromEngine->pfnTraceHull = pfnTraceHull;
-		pengfuncsFromEngine->pfnTraceModel = pfnTraceModel;
-		pengfuncsFromEngine->pfnTraceTexture = pfnTraceTexture;
-		pengfuncsFromEngine->pfnTraceSphere = pfnTraceSphere;
-		pengfuncsFromEngine->pfnGetAimVector = pfnGetAimVector;
-		pengfuncsFromEngine->pfnServerCommand = pfnServerCommand;
-		pengfuncsFromEngine->pfnServerExecute = pfnServerExecute;
-
-		pengfuncsFromEngine->pfnClientCommand = pfnClientCommand;
-	
-		pengfuncsFromEngine->pfnParticleEffect = pfnParticleEffect;
-		pengfuncsFromEngine->pfnLightStyle = pfnLightStyle;
-		pengfuncsFromEngine->pfnDecalIndex = pfnDecalIndex;
-		pengfuncsFromEngine->pfnPointContents = pfnPointContents;
-		pengfuncsFromEngine->pfnMessageBegin = pfnMessageBegin;
-		pengfuncsFromEngine->pfnMessageEnd = pfnMessageEnd;
-		pengfuncsFromEngine->pfnWriteByte = pfnWriteByte;
-		pengfuncsFromEngine->pfnWriteChar = pfnWriteChar;
-		pengfuncsFromEngine->pfnWriteShort = pfnWriteShort;
-		pengfuncsFromEngine->pfnWriteLong = pfnWriteLong;
-		pengfuncsFromEngine->pfnWriteAngle = pfnWriteAngle;
-		pengfuncsFromEngine->pfnWriteCoord = pfnWriteCoord;
-		pengfuncsFromEngine->pfnWriteString = pfnWriteString;
-		pengfuncsFromEngine->pfnWriteEntity = pfnWriteEntity;
-		pengfuncsFromEngine->pfnCVarRegister = pfnCVarRegister;
-		pengfuncsFromEngine->pfnCVarGetFloat = pfnCVarGetFloat;
-		pengfuncsFromEngine->pfnCVarGetString = pfnCVarGetString;
-		pengfuncsFromEngine->pfnCVarSetFloat = pfnCVarSetFloat;
-		pengfuncsFromEngine->pfnCVarSetString = pfnCVarSetString;
-		pengfuncsFromEngine->pfnPvAllocEntPrivateData = pfnPvAllocEntPrivateData;
-		pengfuncsFromEngine->pfnPvEntPrivateData = pfnPvEntPrivateData;
-		pengfuncsFromEngine->pfnFreeEntPrivateData = pfnFreeEntPrivateData;
-		pengfuncsFromEngine->pfnSzFromIndex = pfnSzFromIndex;
-		pengfuncsFromEngine->pfnAllocString = pfnAllocString;
-		pengfuncsFromEngine->pfnGetVarsOfEnt = pfnGetVarsOfEnt;
-		pengfuncsFromEngine->pfnPEntityOfEntOffset = pfnPEntityOfEntOffset;
-		pengfuncsFromEngine->pfnEntOffsetOfPEntity = pfnEntOffsetOfPEntity;
-		pengfuncsFromEngine->pfnIndexOfEdict = pfnIndexOfEdict;
-		pengfuncsFromEngine->pfnPEntityOfEntIndex = pfnPEntityOfEntIndex;
-		pengfuncsFromEngine->pfnFindEntityByVars = pfnFindEntityByVars;
-		pengfuncsFromEngine->pfnGetModelPtr = pfnGetModelPtr;
-		pengfuncsFromEngine->pfnRegUserMsg = pfnRegUserMsg;
-		pengfuncsFromEngine->pfnAnimationAutomove = pfnAnimationAutomove;
-		pengfuncsFromEngine->pfnGetBonePosition = pfnGetBonePosition;
-		pengfuncsFromEngine->pfnFunctionFromName = pfnFunctionFromName;
-		pengfuncsFromEngine->pfnNameForFunction = pfnNameForFunction;
-		pengfuncsFromEngine->pfnClientPrintf = pfnClientPrintf;
-		pengfuncsFromEngine->pfnServerPrint = pfnServerPrint;
-		pengfuncsFromEngine->pfnGetAttachment = pfnGetAttachment;
-		pengfuncsFromEngine->pfnCRC32_Init = pfnCRC32_Init;
-		pengfuncsFromEngine->pfnCRC32_ProcessBuffer = pfnCRC32_ProcessBuffer;
-		pengfuncsFromEngine->pfnCRC32_ProcessByte = pfnCRC32_ProcessByte;
-		pengfuncsFromEngine->pfnCRC32_Final = pfnCRC32_Final;
-		pengfuncsFromEngine->pfnRandomLong = pfnRandomLong;
-		pengfuncsFromEngine->pfnRandomFloat = pfnRandomFloat;
-		pengfuncsFromEngine->pfnSetView = pfnSetView;
-		pengfuncsFromEngine->pfnTime = pfnTime;
-		pengfuncsFromEngine->pfnCrosshairAngle = pfnCrosshairAngle;
-		pengfuncsFromEngine->pfnLoadFileForMe = pfnLoadFileForMe;
-		pengfuncsFromEngine->pfnFreeFile = pfnFreeFile;
-		pengfuncsFromEngine->pfnEndSection = pfnEndSection;
-		pengfuncsFromEngine->pfnCompareFileTime = pfnCompareFileTime;
-		pengfuncsFromEngine->pfnGetGameDir = pfnGetGameDir;
-		pengfuncsFromEngine->pfnCvar_RegisterVariable = pfnCvar_RegisterVariable;
-		pengfuncsFromEngine->pfnFadeClientVolume = pfnFadeClientVolume;
-		pengfuncsFromEngine->pfnSetClientMaxspeed = pfnSetClientMaxspeed;
-		pengfuncsFromEngine->pfnCreateFakeClient = pfnCreateFakeClient;
-		pengfuncsFromEngine->pfnRunPlayerMove = pfnRunPlayerMove;
-		pengfuncsFromEngine->pfnNumberOfEntities = pfnNumberOfEntities;
-		pengfuncsFromEngine->pfnGetInfoKeyBuffer = pfnGetInfoKeyBuffer;
-		pengfuncsFromEngine->pfnInfoKeyValue = pfnInfoKeyValue;
-		pengfuncsFromEngine->pfnSetKeyValue = pfnSetKeyValue;
-		pengfuncsFromEngine->pfnSetClientKeyValue = pfnSetClientKeyValue;
-		pengfuncsFromEngine->pfnIsMapValid = pfnIsMapValid;
-		pengfuncsFromEngine->pfnStaticDecal = pfnStaticDecal;
-		pengfuncsFromEngine->pfnPrecacheGeneric = pfnPrecacheGeneric;
-		pengfuncsFromEngine->pfnGetPlayerUserId = pfnGetPlayerUserId;
-		pengfuncsFromEngine->pfnBuildSoundMsg = pfnBuildSoundMsg;
-		pengfuncsFromEngine->pfnIsDedicatedServer = pfnIsDedicatedServer;
-		pengfuncsFromEngine->pfnCVarGetPointer = pfnCVarGetPointer;
-		pengfuncsFromEngine->pfnGetPlayerWONId = pfnGetPlayerWONId;
-
-		// missing:
-		/*	pengfuncsFromEngine->pfnCanSkipPlayer = pfnCanSkipPlayer;
-		pengfuncsFromEngine->pfnCheckVisibility = pfnCheckVisibility;
-		pengfuncsFromEngine->pfnCreateInstancedBaseline = pfnCreateInstancedBaseline;
-		pengfuncsFromEngine->pfnCvar_DirectSet = pfnCvar_DirectSet;
-		pengfuncsFromEngine->pfnDeltaAddEncoder = pfnDeltaAddEncoder;
-		pengfuncsFromEngine->pfnDeltaFindField = pfnDeltaFindField;
-		pengfuncsFromEngine->pfnDeltaSetField = pfnDeltaSetField;
-		pengfuncsFromEngine->pfnDeltaSetFieldByIndex = pfnDeltaSetFieldByIndex;
-		pengfuncsFromEngine->pfnDeltaUnsetField = pfnDeltaUnsetField;
-		pengfuncsFromEngine->pfnDeltaUnsetFieldByIndex = pfnDeltaUnsetFieldByIndex;
-		pengfuncsFromEngine->pfnForceUnmodified = pfnForceUnmodified;
-		pengfuncsFromEngine->pfnGetCurrentPlayer = pfnGetCurrentPlayer;
-		pengfuncsFromEngine->pfnGetPhysicsInfoString = pfnGetPhysicsInfoString;
-		pengfuncsFromEngine->pfnGetPhysicsKeyValue = pfnGetPhysicsKeyValue;
-		pengfuncsFromEngine->pfnGetPlayerStats = pfnGetPlayerStats;
-		pengfuncsFromEngine->pfnInfo_RemoveKey = pfnInfo_RemoveKey;
-		pengfuncsFromEngine->pfnPlaybackEvent = pfnPlaybackEvent;
-		pengfuncsFromEngine->pfnPrecacheEvent = pfnPrecacheEvent;
-		pengfuncsFromEngine->pfnSetFatPAS = pfnSetFatPAS;
-		pengfuncsFromEngine->pfnSetFatPVS = pfnSetFatPVS;
-		pengfuncsFromEngine->pfnSetGroupMask = pfnSetGroupMask;
-		pengfuncsFromEngine->pfnSetPhysicsKeyValue = pfnSetPhysicsKeyValue;
-		pengfuncsFromEngine->pfnAddServerCommand = pfnAddServerCommand;
-		*/
-
-		// give the engine functions to the other DLL...
-		(*other_GiveFnptrsToDll)(pengfuncsFromEngine, pGlobals);
+		// give the engine functions to the other DLL...	
+		(*(GIVEFNPTRSTODLL) GetProcAddress (h_Library, "GiveFnptrsToDll")) (pengfuncsFromEngine, pGlobals);
 	}	
+}
+
+extern "C" EXPORT int Server_GetBlendingInterface( int version, struct sv_blending_interface_s **ppinterface, struct engine_studio_api_s *pstudio, float (*rotationmatrix)[3][4], float (*bonetransform)[MAXSTUDIOBONES][3][4] )
+{
+	static SERVER_GETBLENDINGINTERFACE other_Server_GetBlendingInterface = NULL;
+	static bool missing = FALSE;
+
+	// if the blending interface has been formerly reported as missing, give up
+	if (missing)
+		return FALSE;
+
+	// do we NOT know if the blending interface is provided ? if so, look for its address
+	if (other_Server_GetBlendingInterface == NULL)
+		other_Server_GetBlendingInterface = (SERVER_GETBLENDINGINTERFACE) GetProcAddress (h_Library, "Server_GetBlendingInterface");
+
+	// have we NOT found it ?
+	if (!other_Server_GetBlendingInterface)
+	{
+		missing = TRUE; // then mark it as missing, no use to look for it again in the future
+		return FALSE; // and give up
+	}
+
+	// else call the function that provides the blending interface on request
+	return ((other_Server_GetBlendingInterface) (version, ppinterface, pstudio, rotationmatrix, bonetransform));
 }

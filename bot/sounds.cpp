@@ -10,7 +10,6 @@ extern int clientWeapon[32];
 extern PB_MapGraph mapGraph;	// mapgraph for waypoints
 extern bool fatalParabotError;
 extern PB_Chat chat;
-extern DLL_FUNCTIONS other_gFunctionTable;
 extern PB_Navpoint* getNearestNavpoint( edict_t *pEdict );
 
 bool headToBunker = false;
@@ -234,7 +233,7 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 						//debugMsg( "texture: ", player[clientIndex].textureName, "\n" );
 						
 						// get texture type
-						player[clientIndex].textureType = other_gFunctionTable.pfnPM_FindTextureType( player[clientIndex].textureName );	
+						player[clientIndex].textureType = MDLL_PM_FindTextureType( player[clientIndex].textureName );	
 					}
 				}
 			}

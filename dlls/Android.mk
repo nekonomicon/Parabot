@@ -31,7 +31,9 @@ LOCAL_SRC_FILES := \
 		../bot/bot_client.cpp \
 		commands.cpp \
 		dll.cpp \
+		dll_debug.cpp \
 		engine.cpp \
+		engine_debug.cpp \
 		h_export.cpp \
 		physint.cpp \
 		startframe.cpp \

@@ -10,9 +10,6 @@ extern bot_t bots[32];
 extern int mod_id;
 extern bot_weapon_t weapon_defs[MAX_WEAPONS];
 extern PB_Configuration pbConfig;	// from configfiles.cpp
-extern bool g_meta_init;
-
-
 
 PB_WeaponHandling::PB_WeaponHandling()
 {
@@ -165,7 +162,7 @@ bool PB_WeaponHandling::available( int wId )
 	}
 
 	int mask = 1 << wId;
-	if (bots[botSlot].bot_weapons & mask) {
+	if (bots[botSlot].pEdict->v.weapons & mask) {
 		// bot has this weapon - ammo as well?
 		PB_Weapon wpn( wId );
 		wpn.init( botSlot, botEnt, botAction );
@@ -200,9 +197,6 @@ int PB_WeaponHandling::getBestWeapon( float distance, float hitProb, int flags )
 }
 
 extern int debug_engine;
-void CmdStart( const edict_t *player, const struct usercmd_s *cmd, unsigned int random_seed );
-void CmdEnd ( const edict_t *player );
-
 
 void PB_WeaponHandling::switchToWeapon( int wId )
 {
@@ -222,16 +216,8 @@ void PB_WeaponHandling::switchToWeapon( int wId )
 		cmd.impulse = 0;					// Impulse command issued.
 		cmd.weaponselect = wId+1;			// Current weapon id ( WEAPON SLOT! )
 
-		if(!g_meta_init)
-		{
-			CmdStart( botEnt, &cmd, 0 );
-			CmdEnd( botEnt );
-		}
-		else
-		{
-			MDLL_CmdStart( botEnt, &cmd, 0 );
-			MDLL_CmdEnd( botEnt );
-		}
+		MDLL_CmdStart( botEnt, &cmd, 0 );
+		MDLL_CmdEnd( botEnt );
 	}
 	else { 
 		UTIL_SelectItem( bots[botSlot].pEdict, weapon.name() );

@@ -30,8 +30,6 @@ extern PB_Configuration pbConfig;
 extern PB_Chat chat;
 extern int numberOfClients;
 
-static FILE *fp;
-
 #ifdef _DEBUG
 CMarker		glMarker;
 #endif //_DEBUG
@@ -341,7 +339,7 @@ void ClientCommand( edict_t *pEntity )
 	{
 #ifdef _DEBUG
 		CParabot *pb = bots[botNr].parabot;
-		if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp,"ClientCommand: %s %s %s\n",pcmd, arg1, arg2); fclose(fp); }
+		if (debug_engine) { FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"ClientCommand: %s %s %s\n",pcmd, arg1, arg2); fclose(fp); }
 #endif
 		// mapchange redefined:
 		if (FStrEq( pcmd, "map" )) {	
@@ -350,16 +348,16 @@ void ClientCommand( edict_t *pEntity )
 				debugMsg( "Map not valid!\n" );
 				if(!g_meta_init)
 					return;
-				else
-					RETURN_META(MRES_IGNORED);
+
+				RETURN_META(MRES_IGNORED);
 			}
 			debugFile( "Changing map...\n" );
 			FakeClientCommand( pEntity, "hideconsole", 0, 0 );
 			CHANGE_LEVEL( newmap, NULL );
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		// bot commands:
 		else if (FStrEq(pcmd, "botmenu"))
@@ -369,8 +367,8 @@ void ClientCommand( edict_t *pEntity )
 			showMainMenu( pEntity );
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq(pcmd, "menuselect"))
 		{
@@ -495,51 +493,51 @@ void ClientCommand( edict_t *pEntity )
 			}
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq(pcmd, "addbot"))
 		{
 			BotCreate();
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "peacemode" )) {
 			DSpeace();
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "restrictedweapons" )) {
 			DSrestrictedWeapons();
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "hidewelcome" )) {
 			DSsimulate();
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "chatlog" )) {
 			DSlogChat();
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "botstop" )) {
 			pb_pause = true;
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "botgo" )) {
 			pb_pause = false;
@@ -552,8 +550,8 @@ void ClientCommand( edict_t *pEntity )
 			}
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "botcam" )) {
 			if (!camPlayer)	startBotCam( pEntity );
@@ -568,15 +566,15 @@ void ClientCommand( edict_t *pEntity )
 			}
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "camstop" )) {
 			endBotCam();
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 
 // rest only for debugmode!
@@ -587,8 +585,8 @@ void ClientCommand( edict_t *pEntity )
 			ClientPrint( VARS(pEntity), HUD_PRINTNOTIFY, "debug_engine enabled!\n");
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq(pcmd, "debug_off"))
 		{
@@ -596,8 +594,8 @@ void ClientCommand( edict_t *pEntity )
 			ClientPrint( VARS(pEntity), HUD_PRINTNOTIFY, "debug_engine disabled!\n");
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "dbgfile" )) {
 			if (FStrEq( arg1, "on" )) {
@@ -608,8 +606,8 @@ void ClientCommand( edict_t *pEntity )
 			}
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq(pcmd, "debugTrace"))
 		{
@@ -623,8 +621,8 @@ void ClientCommand( edict_t *pEntity )
 			rt.checkWay( pos );
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq(pcmd, "setstep")) {
 			char *newSample = (char*) arg1;
@@ -633,8 +631,8 @@ void ClientCommand( edict_t *pEntity )
 			debugMsg( "New stepSound = ", stepSound, "\n" );
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq(pcmd, "setstepnr")) {
 			char *newNr = (char*) arg1;
@@ -643,8 +641,8 @@ void ClientCommand( edict_t *pEntity )
 			debugMsg( "New stepSound = ", stepSound, "\n" );
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq(pcmd, "setvol")) {
 			char *newVol = (char*) arg1;
@@ -654,24 +652,24 @@ void ClientCommand( edict_t *pEntity )
 			debugMsg( "New stepVolume = %.2f\n", stepVol );
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq(pcmd, "playstep")) {
 			//EMIT_SOUND( pb->ent, CHAN_BODY, stepSound, stepVol, ATTN_NORM);
 			pfnEmitSound( pb->ent, CHAN_BODY, stepSound, stepVol, ATTN_NORM, 0, 100 );
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq(pcmd, "playsound")) {
 			char *sound = (char*) arg1;
 			pfnEmitSound( pEntity, CHAN_BODY, sound, 1.0, ATTN_NORM, 0, 100 );
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq(pcmd, "debugbreak"))
 		{
@@ -680,8 +678,8 @@ void ClientCommand( edict_t *pEntity )
 			else if ( FStrEq(reason, "goals") ) botHalt = BREAK_GOALS;
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "setbotnr" )) {
 			char *stopstr;
@@ -689,16 +687,16 @@ void ClientCommand( edict_t *pEntity )
 			debugMsg( "OK.\n" );
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "botdist" )) {
 			Vector p = pb->ent->v.origin - pEntity->v.origin;
 			debugMsg( "Distance = %.f\n", p.Length() );
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "pathinfo" )) {
 			if (pb->actualPath) {
@@ -706,8 +704,8 @@ void ClientCommand( edict_t *pEntity )
 			}
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "wpinfo" )) {
 			if (pb->actualPath) {
@@ -716,8 +714,8 @@ void ClientCommand( edict_t *pEntity )
 			}
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "ground" )) {
 			assert( pEntity != 0 );
@@ -735,16 +733,16 @@ void ClientCommand( edict_t *pEntity )
 				lastGround->v.solid );
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "lastground" )) {
 			if (lastGround==0) {
 				debugMsg( "No ground entity!\n" );
 				if(!g_meta_init)
 					return;
-				else
-					RETURN_META(MRES_IGNORED);
+
+				RETURN_META(MRES_IGNORED);
 			}
 			Vector p = lastGround->v.absmin;
 			ALERT( at_console, "%s, min at(%.f, %.f, %.f), ", STRING(lastGround->v.classname), p.x, p.y, p.z);
@@ -753,16 +751,16 @@ void ClientCommand( edict_t *pEntity )
 				lastGround->v.solid );
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "navinfo" ) && (pb->actualNavpoint)) {
 			debugMsg( "Actual navpoint is ");  pb->actualNavpoint->print();  
 			debugMsg( ", Linkage=%i\n", mapGraph.linkedNavpointsFrom( pb->actualNavpoint ) );
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "playernav" )) {
 			PB_Navpoint *nav = mapGraph.getNearestNavpoint( pEntity->v.origin );
@@ -794,8 +792,8 @@ void ClientCommand( edict_t *pEntity )
 			}
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "items" )) {
 			Vector pos = pEntity->v.origin;
@@ -822,16 +820,16 @@ void ClientCommand( edict_t *pEntity )
 			}
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "botpos" )) {
 			Vector p = pb->botPos();
 			debugMsg( "Botpos = (%.f, %.f, %.f)\n", p.x, p.y, p.z);
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "setbotpos" )) {
 			char *stopstr;
@@ -845,8 +843,8 @@ void ClientCommand( edict_t *pEntity )
 			pb->actualJourney.cancel();
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "bottarget" )) {
 			if (pb->botState==PB_ON_TOUR) {
@@ -857,8 +855,7 @@ void ClientCommand( edict_t *pEntity )
 			}
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "setbottarget" )) {
 			char *stopstr;
@@ -866,23 +863,23 @@ void ClientCommand( edict_t *pEntity )
 			debugMsg( "Affirmative\n" );
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "nopartner" )) {
 			pb->partner = 0;
 			pb->botState = PB_NO_TASK;
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "ptbot" )) {
 			ptBotPos = map.getCellId( pEntity );
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "ptcover" )) {
 			short plId = map.getCellId( pEntity );
@@ -898,8 +895,8 @@ void ClientCommand( edict_t *pEntity )
 			}
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "ptattack" )) {
 			short plId = map.getCellId( pEntity );
@@ -915,8 +912,8 @@ void ClientCommand( edict_t *pEntity )
 			}
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "showcells" )) {
 			if (FStrEq( arg1, "on" )) {
@@ -927,8 +924,8 @@ void ClientCommand( edict_t *pEntity )
 			}
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "markvis" )) {
 			glMarker.deleteAll();
@@ -942,8 +939,8 @@ void ClientCommand( edict_t *pEntity )
 			}
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}	
 		else if (FStrEq( pcmd, "markfocus" )) {
 			glMarker.deleteAll();
@@ -961,8 +958,8 @@ void ClientCommand( edict_t *pEntity )
 			}
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}	
 		else if (FStrEq( pcmd, "markenv" )) {
 			char *thresh = (char*) arg1;
@@ -975,30 +972,29 @@ void ClientCommand( edict_t *pEntity )
 			}
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}	
 		else if (FStrEq( pcmd, "savemap" )) {
 			saveLevelData();
 			ClientPrint( VARS(pEntity), HUD_PRINTNOTIFY, "Map data saved.\n" );
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 		else if (FStrEq( pcmd, "delmarkers" )) {
 			glMarker.deleteAll();
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+			RETURN_META(MRES_IGNORED);
 		}	
 		else if (FStrEq( pcmd, "numclients" )) {
 			debugMsg( "Number of clients = %i\n", numberOfClients );
 			if(!g_meta_init)
 				return;
-			else
-				RETURN_META(MRES_IGNORED);
+
+			RETURN_META(MRES_IGNORED);
 		}
 // end of debug mode commands...
 #endif
@@ -1006,6 +1002,6 @@ void ClientCommand( edict_t *pEntity )
 
 	if(!g_meta_init)
 		(*other_gFunctionTable.pfnClientCommand)(pEntity);
-	else
-		RETURN_META(MRES_IGNORED);
+
+	RETURN_META(MRES_IGNORED);
 }

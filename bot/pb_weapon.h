@@ -107,7 +107,7 @@ typedef struct {
 #define MIN_CS_WEAPONS		     1
 
 #define CS_WEAPON_P228           1
-#define CS_WEAPON_UNKNOWN1       2
+#define CS_WEAPON_SHIELDGUN       2
 #define CS_WEAPON_SCOUT          3
 #define CS_WEAPON_HEGRENADE      4
 #define CS_WEAPON_XM1014         5
@@ -119,8 +119,8 @@ typedef struct {
 #define CS_WEAPON_FIVESEVEN     11
 #define CS_WEAPON_UMP45         12
 #define CS_WEAPON_SG550         13
-#define CS_WEAPON_UNKNOWN6      14
-#define CS_WEAPON_UNKNOWN7      15
+#define CS_WEAPON_GALIL      14
+#define CS_WEAPON_FAMAS      15
 #define CS_WEAPON_USP           16
 #define CS_WEAPON_GLOCK18       17
 #define CS_WEAPON_AWP           18

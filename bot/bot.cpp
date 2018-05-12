@@ -19,8 +19,6 @@
 #include "pb_chat.h"
 #include "pb_configuration.h"
 
-extern bool g_meta_init;
-extern HINSTANCE h_Library;
 extern int mod_id;
 extern float roundStartTime;
 extern PB_Configuration pbConfig;
@@ -30,48 +28,22 @@ extern PB_Chat chat;
 //extern bool personalityUsed[MAX_PERS];			// true if bot exists using this personality
 extern bool gearbox_ctf;
 extern char ag_gamemode[8];
+extern int numberOfClients;
+
+// TheFatal's method for calculating the msecval
+extern int msecnum;
+extern float msecdel;
+extern float msecval;
 
 bot_t bots[32];   // max of 32 bots in a game
 
-int   need_init = 1;
-
-static FILE *fp;
-
 void adjustAimSkills();
-
-// this is the LINK_ENTITY_TO_CLASS function that creates a player (bot)
-void player( entvars_t *pev )
-{
-	static LINK_ENTITY_FUNC otherClassName = NULL;
-	if (otherClassName == NULL)
-		otherClassName = (LINK_ENTITY_FUNC)GetProcAddress(h_Library, "player");
-	if (otherClassName != NULL){
-		(*otherClassName)( pev );
-	}
-	else {
-		errorMsg( "Can't get player() function from MOD!" );
-		printf("Parabot - Can't get player() function from MOD!\n" );
-		Sleep(5000);
-		exit(0);
-	}
-}
 
 // init variables for spawning here!
 void BotSpawnInit( bot_t *pBot )
 {
 	assert( pBot != 0 );
    pBot->v_prev_origin = Vector(9999.0, 9999.0, 9999.0);
-
-   pBot->msecnum = 0;
-   pBot->msecdel = 0.0;
-   pBot->msecval = 0.0;
-
-   pBot->bot_health = 0;
-   pBot->bot_armor = 0;
-   pBot->bot_weapons = 0;
-   pBot->bot_money = 0;
-
-   pBot->f_max_speed = CVAR_GET_FLOAT("sv_maxspeed");
 
    pBot->prev_speed = 0.0;  // fake "paused" since bot is NOT stuck
 
@@ -84,7 +56,6 @@ void BotSpawnInit( bot_t *pBot )
    pBot->need_to_initialize = FALSE;
    
 }
-
 
 //void BotCreate( edict_t *pPlayer, const char *botTeam, const char *botClass,
 //			   const char *arg3, const char *arg4)
@@ -160,10 +131,8 @@ void BotCreate( int fixedPersNr )
                  
 	// create the player entity by calling MOD's player function
 	// (from LINK_ENTITY_TO_CLASS for player object)
-	if( !g_meta_init )
-		player( VARS(botEnt) );
-	else
-		CALL_GAME_ENTITY(PLID, "player", &botEnt->v);
+	CALL_GAME_ENTITY(PLID, "player", &botEnt->v);
+
 	infobuffer = GET_INFOKEYBUFFER( botEnt );
 
 	clientIndex = ENTINDEX( botEnt );
@@ -187,11 +156,12 @@ void BotCreate( int fixedPersNr )
 		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "ah", "1");
 	}
 
-	ClientConnect( botEnt, pbConfig.personality( persNr ).name, "127.0.0.1", ptr );
+	MDLL_ClientConnect( botEnt, pbConfig.personality( persNr ).name, "127.0.0.1", ptr );
+
+	numberOfClients++;
+
 	// Pieter van Dijk - use instead of DispatchSpawn() - Hip Hip Hurray!
-	ClientPutInServer( botEnt );
-	if( g_meta_init )
-		MDLL_ClientPutInServer( botEnt );
+	MDLL_ClientPutInServer( botEnt );
 
 	assert( botEnt != 0 );
 	botEnt->v.flags |= FL_FAKECLIENT;
@@ -333,7 +303,6 @@ void BotCreate( int fixedPersNr )
 	
 	adjustAimSkills();	// take care of min-/maxskill
 }
-
 
 // Checks bot->start_action:
 // if ==TEAM_SELECT selects team bot->bot_team
@@ -547,7 +516,6 @@ void BotStartGame( bot_t *pBot )
    }
 }
 
-
 int BotInFieldOfView(bot_t *pBot, Vector dest)
 {
 	assert( pBot != 0 );
@@ -579,7 +547,6 @@ int BotInFieldOfView(bot_t *pBot, Vector dest)
    // rsm - END
 }
 
-
 bool BotEntityIsVisible( bot_t *pBot, Vector dest )
 {
    TraceResult tr;
@@ -597,7 +564,6 @@ bool BotEntityIsVisible( bot_t *pBot, Vector dest )
       return FALSE;
 }
 
-
 void BotFixIdealYaw(edict_t *pEdict)
 {
 	assert( pEdict != 0 );
@@ -608,7 +574,6 @@ void BotFixIdealYaw(edict_t *pEdict)
    if (pEdict->v.ideal_yaw < -180)
       pEdict->v.ideal_yaw += 360;
 }
-
 
 float BotChangeYaw( bot_t *pBot, float speed )
 {
@@ -685,11 +650,9 @@ float BotChangeYaw( bot_t *pBot, float speed )
    return speed;  // return number of degrees turned
 }
 
-
 bool pb_pause = false;
 
 void fixAngle( Vector &angle );
-
 
 void BotThink( bot_t *pBot )
 {
@@ -706,28 +669,10 @@ void BotThink( bot_t *pBot )
    if (pBot->name[0] == 0)  // name filled in yet?
       strcpy(pBot->name, STRING(pBot->pEdict->v.netname));
 
-
-// TheFatal - START from Advanced Bot Framework (Thanks Rich!)
-
-   // adjust the millisecond delay based on the frame rate interval...
-   if (pBot->msecdel <= gpGlobals->time)
-   {
-      pBot->msecdel = gpGlobals->time + 0.5;
-      if (pBot->msecnum > 0)
-         pBot->msecval = 450.0/pBot->msecnum;
-      pBot->msecnum = 0;
-   }
-   else
-      pBot->msecnum++;
-
-   if (pBot->msecval < 5)    // don't allow msec to be less than 5...
-      pBot->msecval = 5;
-
-   if (pBot->msecval > 100)  // ...or greater than 100
-      pBot->msecval = 100;
-
-// TheFatal - END
-
+	if (mod_id == CSTRIKE_DLL)
+		pBot->f_max_speed = pEdict->v.maxspeed;
+	else
+		pBot->f_max_speed = CVAR_GET_FLOAT("sv_maxspeed");
 
    pEdict->v.button = 0;
    pBot->f_move_speed = 0.0;
@@ -737,7 +682,7 @@ void BotThink( bot_t *pBot )
       BotStartGame( pBot );
 	  fixAngle( pEdict->v.v_angle );
       g_engfuncs.pfnRunPlayerMove( pEdict, pEdict->v.v_angle, 0.0,
-                                   0, 0, pEdict->v.button, 0, pBot->msecval);
+                                   0, 0, pEdict->v.button, 0, msecval);
 	  pEdict->v.flags |= FL_FAKECLIENT;
       return;
    }
@@ -754,7 +699,7 @@ void BotThink( bot_t *pBot )
 
 	  fixAngle( pEdict->v.v_angle );
       g_engfuncs.pfnRunPlayerMove( pEdict, pEdict->v.v_angle, 0.0,
-                                   0, 0, pEdict->v.button, 0, pBot->msecval);
+                                   0, 0, pEdict->v.button, 0, msecval);
 	  pEdict->v.flags |= FL_FAKECLIENT;
 	  return;
    }
@@ -770,7 +715,7 @@ void BotThink( bot_t *pBot )
    }
    else {	// prevent crashes...???
 	   g_engfuncs.pfnRunPlayerMove( pEdict, g_vecZero, 0,
-		   0, 0, 0, 0, pBot->msecval);
+		   0, 0, 0, 0, msecval);
    }
 
    pEdict->v.flags |= FL_FAKECLIENT;

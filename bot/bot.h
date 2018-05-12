@@ -10,6 +10,9 @@
 #define BOT_H
 
 #include "exportdef.h"
+#include "studio.h"
+#include "pb_global.h"
+
 #ifdef _WIN32
 #define ARCH_SUFFIX
 #define OS_LIB_EXT "dll"
@@ -48,8 +51,9 @@ typedef void* HINSTANCE;
 typedef int (FAR *GETENTITYAPI)(DLL_FUNCTIONS *, int);
 typedef int (FAR *GETNEWDLLFUNCTIONS)(NEW_DLL_FUNCTIONS *, int *); 
 
-typedef void (*GIVEFNPTRSTODLL)(enginefuncs_t *, globalvars_t *);
+typedef void (WINAPI *GIVEFNPTRSTODLL)(enginefuncs_t *, globalvars_t *);
 typedef void (FAR *LINK_ENTITY_FUNC)(entvars_t *);
+typedef int (*SERVER_GETBLENDINGINTERFACE) (int, struct sv_blending_interface_s **, struct engine_studio_api_s *, float (*)[3][4], float (*)[MAXSTUDIOBONES][3][4]);
 
 // define some function prototypes...
 BOOL ClientConnect( edict_t *pEntity, const char *pszName,
@@ -132,21 +136,12 @@ typedef struct
    int start_action;			// actions before getting started (chose team/class)
    float menuSelectTime;
 
-// TheFatal - START
-   int msecnum;
-   float msecdel;
-   float msecval;
-// TheFatal - END				// ...for runPlayerMove-Timing
-
    char name[BOT_NAME_LEN+1];
    char skin[BOT_SKIN_LEN+1];
 
    // things from pev in CBasePlayer...
    int bot_team;
    int bot_class;
-   int bot_health;
-   int bot_armor;
-   int bot_weapons;  // bit map of weapons the bot is carrying
    int bot_money;    // for Counter-Strike
 
    //edict_t *pBotEnemy;
