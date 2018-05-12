@@ -26,7 +26,9 @@ float nextAirstrikeTime = 500;
 #define CHAR_TEX_WOOD		'W'
 #define CHAR_TEX_COMPUTER	'P'
 #define CHAR_TEX_GLASS		'Y'
-#define CHAR_TEX_FLESH		'F'
+#define CHAR_TEX_GEARBOX_SNOW	'O'
+#define CHAR_TEX_CSTRIKE_SNOW	'N'
+#define CHAR_TEX_CSTRIKE_GRASS	'X'
 
 bool UTIL_IsOnLadder( edict_t *ent )
 {
