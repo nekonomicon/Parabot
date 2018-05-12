@@ -159,23 +159,24 @@ static tWeaponRec hungerWeapon[MAX_HUNGER_WEAPONS] = {
         { "weapon_9mmhandgun", 200,             0.052,  0.5,            false,  WV_NORMAL,      WV_NORMAL,      WF_NORMAL,      WF_NORMAL,      0.0,    "beretta"                 },      // = glock
         { "weapon_357",            600,         0.017,  0.5,            false,  WV_LOUD,        WV_NONE,        WF_NORMAL,      WF_NONE,        0.0,    "python"                },      // = python
         { "weapon_9mmAR",          200,         0.104,  0.4,            true,   WV_NORMAL,      WV_NORMAL,      WF_NORMAL,      WF_BRIGHT,      0.0,    "Thompson"                   },      // = mp5
-	{ "weapon_th_chaingun", 50,             0.173,  0.5,            false,  WV_NORMAL,      WV_NORMAL,      WF_NORMAL,      WF_NORMAL,      0.0,    "chaingun"                 },
+	{ "",			0,             0.1,  0.0,            false,  WV_NONE,      WV_NONE,      WF_NONE,      WF_NONE,      0.0,    ""                 },
         { "weapon_crossbow",   600,             0.017,  0.5,            false,  WV_QUIET,       WV_NONE,        WF_NONE,        WF_NONE,        0.0,    "crossbow"              },
         { "weapon_shotgun",             50,             0.173,  0.5,            false,  WV_LOUD,        WV_LOUD,        WF_NORMAL,      WF_NORMAL,      0.0,    "shotgun"               },
         { "weapon_rpg",            400,         0.173,  0.1,            false,  WV_LOUD,        WV_NONE,        WF_BRIGHT,      WF_NONE,        0.0,    "rocketlauncher"	},
         { "weapon_gauss",          300,         0.017,  0.5,            false,  WV_FLASH,       WV_LOAD,        WF_NORMAL,      WF_NONE,        0.0,    "gauss"                 },
-        { "weapon_egon",           50,         0.017,  0.5,            false,  WV_FLASH,       WV_FLASH,       WF_BRIGHT,      WF_BRIGHT,      0.0,    "flamethrower"                  },
+        { "weapon_egon",           200,         0.017,  0.5,            false,  WV_FLASH,       WV_FLASH,       WF_BRIGHT,      WF_BRIGHT,      0.0,    "flamethrower"                  },
         { "",  					0,             0.1,  0.0,            false,  WV_NONE,       WV_NONE,      WF_NONE,      WF_NONE,      0.0,    ""             },
         { "weapon_handgrenade",400,             0.342,  0.3,            false,  WV_NONE,        WV_NONE,        WF_NONE,        WF_NONE,        0.0,    "TNT"   },
         { "weapon_tripmine",     0,             0.1,    0.0,            false,  WV_QUIET,       WV_NONE,        WF_NONE,        WF_NONE,        0.0,    "tripmine"              },
         { "weapon_satchel",    400,             0.342,  0.3,            false,  WV_QUIET,       WV_QUIET,       WF_NONE,        WF_NONE,        0.0,    "satchel"               },
         { "weapon_snark",          400,         0.173,  0.1,            false,  WV_QUIET,       WV_QUIET,       WF_NONE,        WF_NONE,        0.0,    "snark"                 },
-	{ "weapon_th_shovel",            10,             0.866,  0.0,            false,  WV_SWING,       WV_SWING,       WF_NONE,        WF_NONE,        0.0,    "shovel"               },
 	{ "weapon_th_spanner",            10,             0.866,  0.0,            false,  WV_SWING,       WV_SWING,       WF_NONE,        WF_NONE,        0.0,    "spanner"               },
-	{ "weapon_th_ap9",	200,             0.104,  0.5,            false,  WV_NORMAL,      WV_NORMAL,      WF_NORMAL,      WF_NORMAL,      0.0,    "AP9"               },
+	{ "weapon_th_ap9",      200,             0.104,  0.5,            false,  WV_NORMAL,      WV_NORMAL,      WF_NORMAL,      WF_NORMAL,      0.0,    "AP9"               },
+	{ "weapon_th_shovel",            10,             0.866,  0.0,            false,  WV_SWING,       WV_SWING,       WF_NONE,        WF_NONE,        0.0,    "shovel"               },
+	{ "weapon_th_sniper",   600,             0.017,  0.5,            false,  WV_QUIET,       WV_NONE,        WF_NONE,        WF_NONE,        0.0,    "H&K G36"              },
+	{ "weapon_einar1",   600,             0.017,  0.5,            false,  WV_QUIET,       WV_NONE,        WF_NONE,        WF_NONE,        0.0,    "H&K G36"              },
 	{ "weapon_th_taurus", 200,             0.052,  0.5,            false,  WV_NORMAL,      WV_NORMAL,      WF_NORMAL,      WF_NORMAL,      0.0,    "taurus"                 },
-	{ "weapon_einar1",   600,             0.017,  0.5,            false,  WV_QUIET,       WV_NONE,        WF_NONE,        WF_NONE,        0.0,    "einar1"              },
-	{ "weapon_th_sniper",   600,             0.017,  0.5,            false,  WV_QUIET,       WV_NONE,        WF_NONE,        WF_NONE,        0.0,    "HK G36"              },
+	{ "weapon_th_chaingun", 200,             0.104,    0.5,            false,  WV_LOUD,       WV_LOUD,        WF_NORMAL,        WF_NORMAL,        0.0,    "chaingun" },
 	{ "weapon_th_medkit", 0,             0.1,    0.0,            false,  WV_NONE,       WV_NONE,        WF_NONE,        WF_NONE,        0.0,    "medkit" },
 };
 
@@ -1206,19 +1207,25 @@ float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bo
 		}
 		break;
 
-	case VALVE_WEAPON_CHAINGUN:
+	case HUNGER_WEAPON_CHAINGUN:
 	case VALVE_WEAPON_EGON:
                 if ( flags & (WF_UNDERWATER | WF_NEED_GRENADE) ) break;
-
-                score = 6 - (6*distance/1200);
-                if (score<0.2) score = 0.2;
+                
+		if (distance < 250) {
+			score = (distance-150) / 12.5;
+			if (score<0.5) score = 0.5;
+		}
+		else {
+			score = 8 - 8*(distance-250)/1600;
+			if (score<4) score = 4;         // not that bad...
+		}
 
                 if (checkAmmo) {
                         if (ammo1() == 0) score = 0;
                         else if (ammo1() <= 10) score /= 2;
                 }
-                if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
-                break;
+		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
+		break;
 
 	case VALVE_WEAPON_SHOTGUN:
 		if ( flags & (WF_UNDERWATER | WF_NEED_GRENADE) ) break;
@@ -1298,7 +1305,7 @@ float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bo
 		break;
 
 	case HUNGER_WEAPON_SNIPER:
-	case HUNGER_WEAPON_EINAR1:
+	case HUNGER_WEAPON_TFCSNIPER:
                 if ( flags & (WF_UNDERWATER | WF_NEED_GRENADE) ) break;
                 if (checkAmmo && ammo1() == 0) break;
 

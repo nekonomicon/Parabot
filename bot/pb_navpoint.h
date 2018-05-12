@@ -163,21 +163,18 @@
 #define NAV_THW_SPANNER			210
 #define NAV_THW_TAURUS			211
 #define NAV_THA_AP9			212
-#define NAV_THA_EINAR1			213
-#define NAV_THA_FLAME			214
-#define NAV_THA_SNIPER			215
-#define NAV_THA_TAURUS			216
-#define NAV_THA_TNT			217
+#define NAV_THA_SNIPER			213
+#define NAV_THA_TAURUS			214
 
 // Adrenaline Gamer - Navpoints
-#define NAV_AGINFO_HMCTFDETECT		218
-#define NAV_AGINFO_PLAYER_ITEM1		219
-#define NAV_AGINFO_PLAYER_ITEM2		220
-#define NAV_AGI_FLAG_TEAM1		221
-#define NAV_AGI_FLAG_TEAM2		222
-#define NAV_AGI_DOM_CONTROLPOINT	223
+#define NAV_AGINFO_HMCTFDETECT		215
+#define NAV_AGINFO_PLAYER_ITEM1		216
+#define NAV_AGINFO_PLAYER_ITEM2		217
+#define NAV_AGI_FLAG_TEAM1		218
+#define NAV_AGI_FLAG_TEAM2		219
+#define NAV_AGI_DOM_CONTROLPOINT	220
 
-#define MAX_NAV_TYPES			224		// keep up to date!!!
+#define MAX_NAV_TYPES			221		// keep up to date!!!
 
 
 

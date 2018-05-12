@@ -241,11 +241,8 @@ void importHunger_Specifics()
 	importNav( NAV_THW_SPANNER );
 	importNav( NAV_THW_TAURUS );
 	importNav( NAV_THA_AP9 );
-	importNav( NAV_THA_EINAR1 );
-	importNav( NAV_THA_FLAME );
 	importNav( NAV_THA_SNIPER );
 	importNav( NAV_THA_TAURUS );
-	importNav( NAV_THA_TNT );
 }
 
 bool loadLevelData()

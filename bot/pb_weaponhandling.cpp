@@ -142,7 +142,7 @@ bool PB_WeaponHandling::available( int wId )
 				wId == VALVE_WEAPON_GAUSS	||
 				wId == VALVE_WEAPON_EGON	||
 				wId == HUNGER_WEAPON_AP9	||
-				wId == HUNGER_WEAPON_EINAR1	||
+				wId == HUNGER_WEAPON_TFCSNIPER	||
 				wId == HUNGER_WEAPON_SNIPER
 				) return false;
                         break;
