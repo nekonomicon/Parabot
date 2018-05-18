@@ -7,7 +7,7 @@ extern int mod_id;
 
 
 
-static char navpointClasses[MAX_NAV_TYPES][32] = { "unknown",
+static const char *navpointClasses[MAX_NAV_TYPES] = { "unknown",
 "weapon_crossbow",
 "weapon_crowbar",
 "weapon_egon",
@@ -274,7 +274,7 @@ void PB_Navpoint::initEntityPtr()
 		 (type() == NAV_F_TRAIN)		 || 
 		 (type() == NAV_F_DOOR)             ) 
 	{
-		char *name = classname();
+		const char *name = classname();
 		ent = getEntity( name, data.pos );
 		if (ent==0) { 
 			debugMsg( "initEntityPtr() failed for %i\n", type() );
@@ -395,7 +395,7 @@ bool PB_Navpoint::doorOpen( edict_t *playerEnt )
 	if (tr.flFraction != 1.0) {
 		/*if (tr.pHit) {
 			if (!FStringNull(tr.pHit->v.classname))
-				debugMsg( "Door blocked by ", STRING(tr.pHit->v.classname), "\n" );
+				debugMsg( "Door blocked by %s\n", STRING(tr.pHit->v.classname) );
 			else
 				debugMsg( "Door blocked by unknown class\n" );
 		}*/
@@ -447,23 +447,18 @@ void PB_Navpoint::save( FILE *fp )
 	fwrite( &data, sizeof(TSaveData), 1, fp );
 }
 
-
+#ifdef _DEBUG
 void PB_Navpoint::print()
 {
-	debugMsg( classname() );
-	debugMsg( " (ID %i)", id() );
+	debugMsg( "%s (ID %i)", classname(), id() );
 }
 
 
 void PB_Navpoint::printPos()
 {
-	debugMsg( classname() );
-	debugMsg( " (ID %i) at (", id() );
-	debugMsg( "%.f, ", pos().x ); 
-	debugMsg( "%.f, ", pos().y ); 
-	debugMsg( "%.f)", pos().z );
+	debugMsg( "%s (ID %i) at (%.f, %.f, %.f)", classname(), id(), pos().x, pos().y, pos().z );
 }
-
+#endif
 
 void PB_Navpoint::reportVisit( edict_t *player, float time ) 
 // reports a visit to the navpoint
@@ -543,7 +538,7 @@ bool PB_Navpoint::offersArmor()
 }
 
 
-char* PB_Navpoint::classname()
+const char* PB_Navpoint::classname()
 {
 	assert( data.type >= 0 );
 	assert( data.type < MAX_NAV_TYPES );
@@ -551,7 +546,7 @@ char* PB_Navpoint::classname()
 }
 
 
-char* PB_Navpoint::classname( int code )
+const char* PB_Navpoint::classname( int code )
 {
 	assert( code >= 0 );
 	assert( code < MAX_NAV_TYPES );

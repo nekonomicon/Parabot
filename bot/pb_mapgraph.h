@@ -6,7 +6,7 @@
 #include <cassert>
 #include <map>
 #include <stack>
-#include "pbt_dynarray.cpp"
+#include "pbt_dynarray.h"
 #include "pb_journey.h"
 class PB_Needs;
 

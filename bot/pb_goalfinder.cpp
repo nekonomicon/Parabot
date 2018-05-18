@@ -20,11 +20,9 @@ void PB_GoalFinder::init( CParabot *pb )
 	bot->goalView[0] = 0;
 	bot->goalAct[0] = 0;
 #endif
-	for (int i=0; i<MAX_GOALS; i++) { 
-		bestGoalFunction[i] = 0;
-		responsiblePercept[i] = 0;
-		bestWeight[i] = 0;
-	}
+	memset( &bestGoalFunction, 0, sizeof bestGoalFunction );
+	memset( &responsiblePercept, 0, sizeof responsiblePercept );
+	memset( &bestWeight, 0, sizeof bestWeight );
 }
 
 

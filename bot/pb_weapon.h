@@ -7,7 +7,7 @@
 
 // weapon structure
 typedef struct {
-	char	name[64];
+	const char	*name;
 	float	bestDist;
 	float	cone;
 	float	highAimProb;
@@ -17,7 +17,7 @@ typedef struct {
 	float	visAttack1;
 	float	visAttack2;
 	float	fireDelay;
-	char	shortName[32];
+	const char	*shortName;
 } tWeaponRec;
 
 

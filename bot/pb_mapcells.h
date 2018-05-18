@@ -4,7 +4,7 @@
 #include "pb_cell.h"
 #include "pb_vistable.h"
 #include "pbt_priorityqueue.h"
-#include "pbt_dynarray.cpp"
+#include "pbt_dynarray.h"
 
 
 class PBT_FoundCell
@@ -73,7 +73,7 @@ private:
 		
 	PBT_FoundCell	cellFound[256];	// holds all WPs found by getCellId()
 	int			numCellsFound;		// number of elements in cellSearch
-	int			lastCellFound;		// last passed element
+	//int			lastCellFound;		// last passed element
 
 	PB_VisTable vis;
 

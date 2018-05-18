@@ -10,7 +10,7 @@ extern PB_MapCells map;
 extern int mod_id;
 
 extern char mod_name[32];
-char actualMapname[100] = "";
+char actualMapname[100];
 
 
 
@@ -25,12 +25,12 @@ void saveLevelData()
 
 	strcat( fileName, actualMapname );
 	strcat( fileName, ".pnf" );
-	infoMsg( "\nSaving level data to ", fileName, "\n" );
+	infoMsg( "\nSaving level data to %s\n", fileName );
 	mapGraph.save( fileName );
 
 	fileName[strlen(fileName) - 4] = '\0'; // cut file extention
 	strcat( fileName, ".pcf" );
-	infoMsg( "\nSaving cell data to ", fileName, "\n" );
+	infoMsg( "\nSaving cell data to %s\n", fileName );
 	map.save( fileName );
 	return;
 }
@@ -59,7 +59,7 @@ void importNav( int code, const char *modelName )
 	PB_Navpoint n;
 	Vector pos;
 	
-	char *classname = PB_Navpoint::classname( code ); 
+	const char *classname = PB_Navpoint::classname( code ); 
 
 	while ( !FNullEnt(pOther = FIND_ENTITY_BY_CLASSNAME(pOther, classname))) {
 		if (!FStrEq( STRING(pOther->v.model), modelName )) continue;

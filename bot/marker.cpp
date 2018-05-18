@@ -4,7 +4,6 @@
 extern int wpSpriteTexture;
 extern int wpSprite2Texture;
 extern int wpBeamTexture;
-extern edict_t *playerEnt;
 
 void WaypointDrawBeam(edict_t *pEntity, Vector start, Vector end, int width,
         int noise, int red, int green, int blue, int brightness, int speed)
@@ -200,6 +199,7 @@ void CMarker::deleteAll()
 
 void CMarker::drawMarkers()
 {
+/*
 	//return;
 	if (!playerEnt) return;
 
@@ -207,6 +207,6 @@ void CMarker::drawMarkers()
 	while (m != marker.end()) {
 		drawSprite( playerEnt, m->second.pos, m->second.type );
 		m++;
-	}
+	*/
 }
 #endif

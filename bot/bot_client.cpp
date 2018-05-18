@@ -352,7 +352,6 @@ void HumanClient_CurrentWeapon( void *p, int clientIndex )
 	static int state = 0;   // current state machine state
 	static int iState;
 	static int iId;
-	static int iClip;
 	
 	if (state == 0) {
 		state++;

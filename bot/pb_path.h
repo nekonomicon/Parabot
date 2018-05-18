@@ -231,12 +231,13 @@ public:
 	void save( FILE *fp );
 	// save path to file if not readyToDelete
 
+#ifdef _DEBUG
 	void print();
 	// print path info using debugMsg()
 
 	void mark();
 	// mark all waypoints
-
+#endif
 	//--------------------------------------------------------------------
 	//  DATA ACCESS METHODS
 

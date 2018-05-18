@@ -16,10 +16,6 @@ extern char mod_name[32];
 int gmsgParabot2dMsg = 0;
 int gmsgParabot3dMsg = 0;
 
-bool dbgFile = true;
-
-
-
 void pfnEmitSound( edict_t *entity, int channel, const char *sample, /*int*/float volume, float attenuation, int fFlags, int pitch );
 // from engine.h
 
@@ -102,15 +98,21 @@ void checkForBreakpoint( int reason )
 		botHalt = 0;
 	}
 }
-#endif
 
-void pb2dMsg( int x, int y, const char *msg )
+void pb2dMsg( int x, int y, const char *szFmt, ... )
 {
 /*#ifdef _DEBUG
 	if (gmsgParabot2dMsg == 0)
 		gmsgParabot2dMsg = REG_USER_MSG( "Pb2dMsg", -1 );
 	
 	if (gmsgParabot2dMsg > 0) {
+		va_list argptr;
+		char msg[1024];
+
+		va_start (argptr, szFmt);
+		vsprintf (msg, szFmt, argptr);
+		va_end (argptr);
+
 		edict_t *player = INDEXENT( 1 );
 		entvars_t *client = &(player->v);
 
@@ -125,14 +127,20 @@ void pb2dMsg( int x, int y, const char *msg )
 #endif*/
 }
 
-
-void pb3dMsg( Vector pos, const char *msg )
+void pb3dMsg( Vector pos, const char *szFmt, ... )
 {
 /*#ifdef _DEBUG
 	if (gmsgParabot3dMsg == 0)
 		gmsgParabot3dMsg = REG_USER_MSG( "Pb3dMsg", -1 );
 	
 	if (gmsgParabot3dMsg > 0) {
+		va_list argptr;
+		char msg[1024];
+
+		va_start (argptr, szFmt);
+		vsprintf (msg, szFmt, argptr);
+		va_end (argptr);
+
 		edict_t *player = INDEXENT( 1 );
 		entvars_t *client = &(player->v);
 
@@ -148,8 +156,55 @@ void pb3dMsg( Vector pos, const char *msg )
 #endif*/
 }
 
+bool isOnScreen( edict_t *ent, edict_t *player )
+{
+	TraceResult tr;
+
+	// check if in visible distance
+	Vector playerpos = player->v.origin + player->v.view_ofs;
+	Vector pos = ent->v.origin + ent->v.view_ofs;
+	float dist = (pos - playerpos).Length();
+	if (dist > 1500) return false;
+
+	// check if in viewcone
+	Vector dir = (pos - playerpos).Normalize();
+	float dot = DotProduct( gpGlobals->v_forward, dir );
+	if (  dot > 0.7 ) {
+		UTIL_TraceLine( playerpos, pos, dont_ignore_monsters, ignore_glass, player, &tr);	
+		if ( (tr.flFraction == 1.0) || (tr.pHit == ent) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void print3dDebugInfo()
+{
+/*#ifdef _DEBUG
+	// draw 3d msg
+	edict_t *player = INDEXENT( 1 );
+	UTIL_MakeVectors( player->v.v_angle );
+	for (int i=0; i < gpGlobals->maxClients; i++) {
+		if (bots[i].is_used && bots[i].respawn_state==RESPAWN_IDLE) {
+			if (isOnScreen( bots[i].pEdict, player )) {
+				char buffer[256];
+				strcpy( buffer, STRING(bots[i].pEdict->v.netname) );
+				strcat( buffer, "\n" );
+				strcat( buffer, bots[i].parabot->goalMove );
+				strcat( buffer, "\n" );
+				strcat( buffer, bots[i].parabot->goalView );
+				strcat( buffer, "\n" );
+				strcat( buffer, bots[i].parabot->goalAct );
+				pb3dMsg( bots[i].pEdict->v.origin+bots[i].pEdict->v.view_ofs, buffer );
+			}
+		}
+	}
+#endif*/
+}
+#endif
 
 extern int wpBeamTexture;
+
 #ifdef _DEBUG
 void debugBeam( Vector start, Vector end, int life, int color )
 {
@@ -202,85 +257,69 @@ void debugMarker( Vector pos, int life )
 	MESSAGE_END();
 }
 
-void debugFile( char *msg )
+void debugFile( const char *szFmt, ... )
 {
 	char logfile[64];
-	if (!dbgFile) return;
+	va_list argptr;
+	char string[1024];
+
+	if (!FBitSet(g_uiGameFlags, GAME_DEBUG)) return;
 	sprintf( logfile, "%s/addons/parabot/log/debug.txt", mod_name );
-	FILE *fp=fopen( logfile, "a" ); 
-	fprintf( fp, msg ); 
+	FILE *fp = fopen( logfile, "a" ); 
+      
+	va_start (argptr, szFmt);
+	vsprintf (string, szFmt, argptr);
+	va_end (argptr);
+
+	fprintf( fp, "%s", string );
 	fclose( fp );
 }
 
-void debugMsg( const char *str1, const char *str2, const char *str3, const char *str4 )
+void debugMsg( const char *szFmt, ... )
 {
+	va_list argptr;
+	char string[1024];
+
 	if (botNr != activeBot) return;
-	char buffer[256];
-	
-	strcpy( buffer, str1 );
-	if (str2) {
-		strcat( buffer, str2 );
-		if (str3) {
-			strcat( buffer, str3 );
-			if (str4) strcat( buffer, str4 );
-		}
-	}
-	if (IS_DEDICATED_SERVER()) printf( "%s", buffer );
-	else ALERT( at_console, buffer );
+
+	va_start (argptr, szFmt);
+	vsprintf (string, szFmt, argptr);
+	va_end (argptr);
+
+	if (IS_DEDICATED_SERVER()) printf( "%s", string );
+	else ALERT( at_console, string );
 }
 #endif
 
-void errorMsg( const char *str1, const char *str2, const char *str3, const char *str4 )
+void errorMsg( const char *szFmt, ... )
 {
-	char buffer[256];
-	
-	//strcpy( buffer, "Parabot - " );
-	strcpy( buffer, str1 );
-	if (str2) {
-		strcat( buffer, str2 );
-		if (str3) {
-			strcat( buffer, str3 );
-			if (str4) strcat( buffer, str4 );
-		}
-	}
+	va_list argptr;
+	char string[1024];
+
+	va_start (argptr, szFmt);
+	vsprintf (string, szFmt, argptr);
+	va_end (argptr);
 #ifdef _WIN32
-	MessageBox( NULL, buffer, "Parabot", MB_OK );
+	MessageBox( NULL, string, "Parabot", MB_OK );
 #else
-	ALERT( at_error, buffer );
+	ALERT( at_error, string );
 #endif
-	//PostQuitMessage(0);	
 }
 
-
-void infoMsg( const char *str1, const char *str2, const char *str3, const char *str4 ) 
+void infoMsg( const char *szFmt, ... ) 
 {
-	char buffer[256];
-	
-	strcpy( buffer, str1 );
-	if (str2) {
-		strcat( buffer, str2 );
-		if (str3) {
-			strcat( buffer, str3 );
-			if (str4) strcat( buffer, str4 );
-		}
-	}
-	if (IS_DEDICATED_SERVER()) printf( "%s", buffer );
-	else ALERT( at_console, buffer );
+	va_list argptr;
+	char string[1024];
+
+	va_start (argptr, szFmt);
+	vsprintf (string, szFmt, argptr);
+	va_end (argptr);
+
+	if (IS_DEDICATED_SERVER()) printf( "%s", string );
+	else ALERT( at_console, string );
 }
 
 #ifdef _DEBUG
-void debugMsg( const char *str1, int data1, int data2, int data3 )
-{
-	if (botNr != activeBot) return;
-	ALERT ( at_console, str1, data1, data2, data3 );
-}
-
-void debugMsg( const char *str1, float data1, float data2, float data3 )
-{
-	if (botNr != activeBot) return;
-	ALERT ( at_console, str1, data1, data2, data3 );
-}
-
 void debugSound( edict_t *recipient, const char *sample )
 {
 	pfnEmitSound( recipient, CHAN_BODY, sample, 1.0, ATTN_NORM, 0, 100 );

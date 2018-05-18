@@ -13,6 +13,8 @@
 #define STEP_WADE		7		// wading in liquid
 #define STEP_LADDER		8		// climbing ladder
 
+#define CBTEXTURENAMEMAX	13		// only load first n chars of name
+
 typedef char TextureName[CBTEXTURENAMEMAX];
 
 class Sounds

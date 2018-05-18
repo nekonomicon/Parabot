@@ -146,7 +146,6 @@ typedef struct
 
    //edict_t *pBotEnemy;
 
-   float f_max_speed;
    float prev_speed;
    Vector v_prev_origin;
    float f_pause_time;

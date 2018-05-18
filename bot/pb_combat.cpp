@@ -22,12 +22,12 @@ void PB_Combat::init( int slot, edict_t *ent, PB_Action *act, PB_Roaming *pFinde
 	nextJump = 0;
 }
 
-
+#if 0
 void PB_Combat::classifyDistance( float dist )
 {
-	
-}
 
+}
+#endif
 
 Vector UTIL_GetRight( const Vector &vec );
 

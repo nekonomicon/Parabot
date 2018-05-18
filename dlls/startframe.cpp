@@ -27,39 +27,30 @@
 Sounds playerSounds;
 PB_Observer observer;
 float observerUpdate;
-bool fatalParabotError = false;
-extern bool g_meta_init;
+bool fatalParabotError;
 
 
 extern bot_t			bots[32];
-extern edict_t			*clients[32];
 extern int				welcome_index;			// client to welcome
 extern float			bot_check_time;			// for checking if new bots should be created
 extern DLL_FUNCTIONS	other_gFunctionTable;
-extern bool				g_GameRules;
-//extern int				min_bots;
 extern bool				pb_pause;
 extern PB_Configuration pbConfig;
 extern PB_Chat			chat;
 extern int				numberOfClients;
 
-extern int debug_engine;
-
-static char		cmd_line[80];
-static float	respawn_time = 0.0;
-static float	client_update_time = 0.0;
-//extern int max_bots;
+static float	respawn_time;
+static float	client_update_time;
 
 // TheFatal's method for calculating the msecval
 int msecnum;
 float msecdel;
 float msecval;
 
-
 Vector playerPos;
 
-int mod_id = 0;			// the MOD in which the bot runs
-float roundStartTime = 0;
+int mod_id;			// the MOD in which the bot runs
+float roundStartTime;
 
 extern float nextAirstrikeTime;
 
@@ -73,11 +64,11 @@ extern edict_t *camPlayerLaser;
 
 
 
-float welcome_time = 0.0;
+float welcome_time;
 #ifdef _DEBUG
-	char welcome_msg[] = "You are playing a debug version of Parabot 0.92.1\n";
+	const char *welcome_msg = "You are playing a debug version of Parabot 0.92.1\n";
 #else
-	char welcome_msg[] = "Welcome to Parabot 0.92.1\n";
+	const char *welcome_msg = "Welcome to Parabot 0.92.1\n";
 #endif
 
 
@@ -99,11 +90,9 @@ void saveLevelData();
 bool loadLevelData();
 // implemented in pb_mapimport.cpp
 
-float srvMaxSpeed = 270;
-
 float serverMaxSpeed()
 {
-	return srvMaxSpeed;
+	return maxspeed->value;
 }
 
 #include "parabot.h"
@@ -112,7 +101,6 @@ void checkForMapChange()
 {
 	static float previous_time = 1000000; 
 	static bool roundNotStarted = false;
-	
 
 	// if a new map has started then...
 	if( previous_time > gpGlobals->time + 0.1 )
@@ -121,7 +109,6 @@ void checkForMapChange()
 		msecdel = 0;
 		msecval = 0;
 
-		srvMaxSpeed = CVAR_GET_FLOAT("sv_maxspeed");
 #ifdef _DEBUG
 		glMarker.deleteAll();
 #endif
@@ -129,9 +116,7 @@ void checkForMapChange()
 		camPlayerLaser = 0;
 		fatalParabotError = !loadLevelData();
 		if (fatalParabotError) {
-			char buffer[256];
-			sprintf( buffer, "The map %s is corrupt and cannot be played with bots!\nPlease exit and pick another one.", STRING(gpGlobals->mapname) );
-			errorMsg( buffer );
+			errorMsg( "The map %s is corrupt and cannot be played with bots!\nPlease exit and pick another one.", STRING(gpGlobals->mapname) );
 		}
 		observer.init();
 		observerUpdate = worldTime() + 0.5;
@@ -197,6 +182,7 @@ void checkForMapChange()
 	}
 }
 
+#if 0
 unsigned short FixedUnsigned16( float value, float scale )
 {
 	int output;
@@ -270,26 +256,29 @@ void UTIL_HudMessage( edict_t *pEntity, const hudtextparms_t &textparms, const c
 		}
 	MESSAGE_END();
 }
-
+#endif
 int gmsgHudText = 0;
 
 void sendWelcomeToNewClients()
 {
 	if (welcome_index != -1) {
-		
+		edict_t *pPlayer;
 		if (welcome_time == 0) {
+			pPlayer = INDEXENT(welcome_index);
+
 			// are they out of observer mode yet?
-			if (isAlive( clients[welcome_index] )) {
+			if (isAlive( pPlayer )) {
 				welcome_time = worldTime() + 5.0;  // welcome in 5 seconds
 			}
 		}
 		else if (worldTime() > welcome_time) {
+			pPlayer = INDEXENT(welcome_index);
 			if (worldTime() > 30.0)		// if game has already started
-				chat.parseMessage( clients[welcome_index], " Hi " );	// make bots chat
+				chat.parseMessage( pPlayer, " Hi " );	// make bots chat
 			if (!pbConfig.onTouringMode()) {
 				if (gmsgHudText==0)	gmsgHudText = REG_USER_MSG("HudText", -1);
-				MESSAGE_BEGIN( MSG_ONE, gmsgHudText, NULL, clients[welcome_index] );
-				WRITE_STRING( welcome_msg );
+				MESSAGE_BEGIN( MSG_ONE, gmsgHudText, NULL, pPlayer );
+					WRITE_STRING( welcome_msg );
 				MESSAGE_END();
 			}
 			welcome_time = 0;
@@ -425,7 +414,7 @@ void updateBotCam()
 	if (endCam==1) {
 		// show all hud
 		char hudState = 0;
-		if (CVAR_GET_FLOAT( "mp_flashlight" ) == 0) hudState = HIDEHUD_FLASHLIGHT;
+		if ( !flashlight->value ) hudState = HIDEHUD_FLASHLIGHT;
 		if (gmsgHideWeapon==0) gmsgHideWeapon = REG_USER_MSG( "HideWeapon", 1 );
 		MESSAGE_BEGIN( MSG_ONE, gmsgHideWeapon, NULL, camPlayer );
 			WRITE_BYTE( hudState );
@@ -515,10 +504,9 @@ void checkForAirStrike()
 		bot_t *bot = UTIL_GetBotPointer( pPlayer );
 		if ( bot == 0 ) continue;
 		if ( (worldTime() - bot->parabot->lastRespawn) < 1.0 ) continue;
-#ifdef _DEBUG
-		const char *name = STRING(pPlayer->v.netname);
-		debugMsg( name, " was save at airstrike!\n" );
-#endif
+
+		debugMsg( "%s was save at airstrike!\n", STRING( pPlayer->v.netname ) );
+
 		Vector pos = pPlayer->v.origin;
 		PB_Navpoint *nearest = mapGraph.getNearestNavpoint( pos, NAV_S_AIRSTRIKE_COVER );
 		if ( nearest && ((nearest->pos()-pos).Length() < 256) ) {
@@ -541,62 +529,12 @@ void checkForAirStrike()
 
 
 extern int activeBot;
-void pb2dMsg( int x, int y, const char *msg );
-void pb3dMsg( Vector pos, const char *msg );
-
-bool isOnScreen( edict_t *ent, edict_t *player )
-{
-	TraceResult tr;
-
-	// check if in visible distance
-	Vector playerpos = player->v.origin + player->v.view_ofs;
-	Vector pos = ent->v.origin + ent->v.view_ofs;
-	float dist = (pos - playerpos).Length();
-	if (dist > 1500) return false;
-
-	// check if in viewcone
-	Vector dir = (pos - playerpos).Normalize();
-	float dot = DotProduct( gpGlobals->v_forward, dir );
-	if (  dot > 0.7 ) {
-		UTIL_TraceLine( playerpos, pos, dont_ignore_monsters, ignore_glass, player, &tr);	
-		if ( (tr.flFraction == 1.0) || (tr.pHit == ent) ) {
-			return true;
-		}
-	}
-	return false;
-}
-
-
-void print3dDebugInfo()
-{
-	// draw 3d msg
-	edict_t *player = INDEXENT( 1 );
-	UTIL_MakeVectors( player->v.v_angle );
-	for (int i=0; i < gpGlobals->maxClients; i++) {
-		if (bots[i].is_used && bots[i].respawn_state==RESPAWN_IDLE) {
-			if (isOnScreen( bots[i].pEdict, player )) {
-				char buffer[256];
-				strcpy( buffer, STRING(bots[i].pEdict->v.netname) );
-				strcat( buffer, "\n" );
-				strcat( buffer, bots[i].parabot->goalMove );
-				strcat( buffer, "\n" );
-				strcat( buffer, bots[i].parabot->goalView );
-				strcat( buffer, "\n" );
-				strcat( buffer, bots[i].parabot->goalAct );
-				pb3dMsg( bots[i].pEdict->v.origin+bots[i].pEdict->v.view_ofs, buffer );
-			}
-		}
-	}
-}
-
 
 void updateVisTable()
 {
 	int trCount = map.updateVisibility( 128 );
 	if (trCount > 0) {
-		char buffer[80];
-		sprintf( buffer, "Tracing Visibility (%i/%i)...", map.lastVisUpdate(), map.numberOfCells() );
-		pb2dMsg( 20, 100, buffer );
+		pb2dMsg( 20, 100, "Tracing Visibility (%i/%i)...", map.lastVisUpdate(), map.numberOfCells() );
 	}
 }
 
@@ -629,27 +567,18 @@ PB_Navpoint* getNearestNavpoint( edict_t *pEdict )
 }
 
 
-extern edict_t *playerEnt;
-
-//HL_Game game( HL_Game::DM );
-
-
 void StartFrame( void )
 {
 	if (gpGlobals->deathmatch) {
 
 		cachePlayerData();
 						
-		/*CBaseEntity *wpn = getActiveItem( playerEnt );
-		if (wpn) debugMsg( "carrying ", STRING( wpn->pev->classname ), "\n" );
-		else debugMsg( "no weapon!\n" );*/
-		
 		checkForMapChange();
 
 		if (!fatalParabotError) {
 			playerSounds.getAllClientSounds();
 			
-			//print3dDebugInfo();
+			print3dDebugInfo();
 			
 			// call BotThink for each active bot
 			for (int b=0; b < 32; b++) {
@@ -669,8 +598,8 @@ void StartFrame( void )
 					if ( dmp->isValid() && !(dmp->isBot()) ) {
 						PIA_Weapon *pw = dmp->firstWeapon();
 						if (pw) {
-							debugMsg( pw->name(), "\n" );
-							while (pw=dmp->nextWeapon()) debugMsg( pw->name(), "\n" );
+							debugMsg( "%s\n", pw->name() );
+							while (pw=dmp->nextWeapon()) debugMsg( "%s\n",pw->name() );
 						}
 						break;
 					}
@@ -689,8 +618,8 @@ void StartFrame( void )
 #endif //_DEBUG
 		}
 	}
-	if( !g_meta_init )
-		(*other_gFunctionTable.pfnStartFrame)();
+	if( FBitSet( g_uiGameFlags, GAME_METAMOD ) )
+		RETURN_META(MRES_IGNORED);
 
-	RETURN_META(MRES_IGNORED);
+	(*other_gFunctionTable.pfnStartFrame)();
 }

@@ -3,8 +3,8 @@
 
 PB_Focus::PB_Focus()
 {
+	memset( &numCellsInSector, 0, sizeof numCellsInSector );
 	for (int i=0; i<NUM_SECTORS; i++) {
-		numCellsInSector[i] = 0;
 		focusValue[i] = 1;
 	}
 }

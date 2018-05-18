@@ -24,7 +24,7 @@ PB_Configuration pbConfig;
 PB_Chat chat;
 HINSTANCE h_Library = NULL;
 char mod_name[32];
-extern bool g_meta_init;
+unsigned int g_uiGameFlags;
 enginefuncs_t g_engfuncs;
 globalvars_t  *gpGlobals;
 GETENTITYAPI other_GetEntityAPI;
@@ -53,7 +53,7 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved )
 	}
 	else if (fdwReason == DLL_PROCESS_DETACH)
 	{
-		if( !g_meta_init )
+		if( !FBitSet( g_uiGameFlags, GAME_METAMOD ) )
 		{
 			if (h_Library)
 				FreeLibrary( h_Library );
@@ -152,7 +152,7 @@ extern "C" void DLLEXPORT WINAPI GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 	chat.load( filePath );
 	initSineTable();
 
-	if( !g_meta_init )
+	if( !FBitSet( g_uiGameFlags, GAME_METAMOD ) )
 	{
 #if defined(__ANDROID__)
 #ifdef LOAD_HARDFP

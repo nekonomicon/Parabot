@@ -2,16 +2,13 @@
 #include "pb_global.h"
 #include "parabot.h"
 #include "pb_mapgraph.h"
-
+#include "bot.h"
 
 extern int mod_id;
 extern PB_MapGraph mapGraph;
 extern bool haloOnBase;
 extern bool headToBunker;
 extern float nextAirstrikeTime;
-extern int g_hldm_mod;
-extern char ag_gamemode[8];
-
 
 void PB_Needs::init( CParabot *botClass )
 {
@@ -21,7 +18,7 @@ void PB_Needs::init( CParabot *botClass )
 	maxWish = 0;
 	newItemPriorities = false;
 	weaponWish = 0;
-	for (int i=0; i<MAX_NAV_TYPES; i++) wish[i] = 0;
+	memset( &wish, 0, sizeof wish );
 	wishUpdate = -100;
 }
 
@@ -69,13 +66,18 @@ float PB_Needs::wishForCombat()
 	switch (mod_id) {
 	case AG_DLL:
 	case VALVE_DLL:
-			if( bot->combat.hasWeapon( VALVE_WEAPON_EGON ) && g_hldm_mod == HLDM ) weapon = 1;
-			else if( bot->combat.hasWeapon( VALVE_WEAPON_EGON ) && g_hldm_mod == BMOD )
+			if( bot->combat.hasWeapon( VALVE_WEAPON_EGON ) 
+				&& !FBitSet( g_uiGameFlags, GAME_BMOD | GAME_SEVS ) )
 			{
-				if( !CVAR_GET_FLOAT( "bm_gluon_mod" ) )
+				 weapon = 1;
+			}
+			else if( bot->combat.hasWeapon( VALVE_WEAPON_EGON ) 
+				&& bm_gluon
+				&& !bm_gluon->value )
+			{
 					weapon = 1;					
 			}
-			if( bot->combat.hasWeapon( VALVE_WEAPON_GAUSS ) ) weapon = 1;
+			else if( bot->combat.hasWeapon( VALVE_WEAPON_GAUSS ) ) weapon = 1;
 		else if ( bot->combat.hasWeapon( VALVE_WEAPON_MP5       ) || 
 				  bot->combat.hasWeapon( VALVE_WEAPON_RPG       )    )  weapon = 0.8;
 		else if ( bot->combat.hasWeapon( VALVE_WEAPON_SHOTGUN   )    )  weapon = 0.6;
@@ -159,7 +161,6 @@ float PB_Needs::wishForSniping( bool weaponCheck )
 void PB_Needs::valveWishList()
 {
 	int i;
-	for (i=0; i<MAX_NAV_TYPES; i++) wish[i] = 0;
 
 	if (headToBunker) {
 		wish[NAV_S_AIRSTRIKE_COVER] = 20;
@@ -217,7 +218,7 @@ void PB_Needs::valveWishList()
 	if (!bot->combat.hasWeapon( VALVE_WEAPON_RPG			)) wish[NAV_W_RPG]			= 4.5;
 	if (!bot->combat.hasWeapon( VALVE_WEAPON_TRIPMINE	)) wish[NAV_W_TRIPMINE]		= 2;
 
-	if( g_hldm_mod == BMOD )
+	if( FBitSet( g_uiGameFlags, GAME_BMOD ) )
 	{
 		if( !bot->combat.hasWeapon( VALVE_WEAPON_CROWBAR ) )
 			wish[NAV_W_CROWBAR] = 9;
@@ -261,7 +262,6 @@ void PB_Needs::valveWishList()
 void PB_Needs::hwWishList()
 {
 	int i;
-	for (i=0; i<MAX_NAV_TYPES; i++) wish[i] = 0;
 
 	if ( haloOnBase ) {
 		wish[NAV_HW_HALOBASE] = 20;
@@ -310,7 +310,6 @@ void PB_Needs::dmcWishList()
 {
 	float need;
 	int i;
-	for (i=0; i<MAX_NAV_TYPES; i++) wish[i] = 0;
 
 	wish[NAV_DMCI_HEALTH_NORM]  = needForHealth();
 	wish[NAV_DMCI_HEALTH_SMALL] = wish[NAV_DMCI_HEALTH_NORM]*0.6;
@@ -365,7 +364,6 @@ void PB_Needs::dmcWishList()
 void PB_Needs::gearboxWishList()
 {
 	int i;
-	for (i=0; i<MAX_NAV_TYPES; i++) wish[i] = 0;
 
 	wish[NAV_I_HEALTHKIT]     = needForHealth();
 	wish[NAV_F_HEALTHCHARGER] = needForHealth();
@@ -463,7 +461,6 @@ void PB_Needs::gearboxWishList()
 void PB_Needs::hungerWishList()
 {
 	int i;
-	for (i=0; i<MAX_NAV_TYPES; i++) wish[i] = 0;
 
 	wish[NAV_I_HEALTHKIT]     = needForHealth();
 	wish[NAV_F_HEALTHCHARGER] = needForHealth();
@@ -552,7 +549,6 @@ void PB_Needs::agWishList()
 {
 	edict_t *pent = NULL;
 	int i;
-	for (i=0; i<MAX_NAV_TYPES; i++) wish[i] = 0;
 
 	if (headToBunker) {
 		wish[NAV_S_AIRSTRIKE_COVER] = 20;
@@ -635,10 +631,11 @@ void PB_Needs::agWishList()
 	wish[NAV_A_GAUSSCLIP]	= wish[NAV_A_EGONCLIP];
 
 	// DOM
-	wish[NAV_AGI_DOM_CONTROLPOINT] = 20;
+	if( FBitSet( g_uiGameFlags, GAME_DOM ) )
+		wish[NAV_AGI_DOM_CONTROLPOINT] = 20;
 
 	// CTF
-	if( FStrEq( ag_gamemode, "ctf" ) )
+	if( FBitSet( g_uiGameFlags, GAME_CTF ) )
 	{
 		if( UTIL_GetTeam( bot->ent ) )
 		{
@@ -707,6 +704,7 @@ void PB_Needs::getWishList()
 void PB_Needs::updateWishList()
 {
 	if (worldTime() > wishUpdate) {
+		memset( &wish, 0, sizeof wish );
 		getWishList();
 		wishUpdate = worldTime() + 1.0;
 	}

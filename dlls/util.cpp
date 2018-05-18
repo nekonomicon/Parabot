@@ -29,20 +29,10 @@
 extern char mod_name[32];
 extern int mod_id;
 extern bot_t bots[32];
-extern bool gearbox_ctf;
 
 int gmsgTextMsg = 0;
 int gmsgSayText = 0;
 int gmsgShowMenu = 0;
-
-
-
-
-///////////////////////////////////////////////////////////////////////////////////////
-//
-//  EHANDLE FUNCTIONS
-//
-///////////////////////////////////////////////////////////////////////////////////////
 
 Vector UTIL_VecToAngles( const Vector &vec )
 {
@@ -107,7 +97,7 @@ void ClientPrint( entvars_t *client, int msg_dest, const char *msg_name, const c
    if (gmsgTextMsg == 0)
       gmsgTextMsg = REG_USER_MSG( "TextMsg", -1 );
 
-   MESSAGE_BEGIN( MSG_ONE, gmsgTextMsg, NULL, client );
+   MESSAGE_BEGIN( client ? MSG_ONE : MSG_ALL , gmsgTextMsg, NULL, client );
 
    WRITE_BYTE( msg_dest );
    WRITE_STRING( msg_name );
@@ -126,23 +116,7 @@ void ClientPrint( entvars_t *client, int msg_dest, const char *msg_name, const c
 
 void UTIL_ClientPrintAll( int msg_dest, const char *msg_name, const char *param1, const char *param2, const char *param3, const char *param4 )
 {
-   if (gmsgTextMsg == 0)
-      gmsgTextMsg = REG_USER_MSG( "TextMsg", -1 );
-
-   MESSAGE_BEGIN( MSG_ALL, gmsgTextMsg );
-      WRITE_BYTE( msg_dest );
-      WRITE_STRING( msg_name );
-
-      if ( param1 )
-         WRITE_STRING( param1 );
-      if ( param2 )
-         WRITE_STRING( param2 );
-      if ( param3 )
-         WRITE_STRING( param3 );
-      if ( param4 )
-         WRITE_STRING( param4 );
-
-   MESSAGE_END();
+	ClientPrint( 0, msg_dest, msg_name, param1, param2, param3, param4 );
 }
 
 void UTIL_SayText( const char *pText, edict_t *pEdict )
@@ -177,7 +151,7 @@ int UTIL_GetTeam(edict_t *pEntity)
 	case GEARBOX_DLL:
 		infobuffer = (*g_engfuncs.pfnGetInfoKeyBuffer)( pEntity );
 
-		if(gearbox_ctf)
+		if(FBitSet( g_uiGameFlags, GAME_CTF ))
 		{
 			strcpy( modelName, (g_engfuncs.pfnInfoKeyValue( infobuffer, "model" )) );
 			if ((FStrEq(modelName, "ctf_barney") ) ||
@@ -232,8 +206,8 @@ int UTIL_GetTeam(edict_t *pEntity)
 		{
 			return 1;
 		}
-		
-		debugMsg( "UTIL_GetTeam: Unknown model = " );  debugMsg( modelName );  debugMsg( "\n" );
+
+		debugMsg( "UTIL_GetTeam: Unknown model = %s\n", modelName );
 		return -1;  // return -1 if team is unknown
 	
 	default:
@@ -310,18 +284,6 @@ void UTIL_ShowMenu( edict_t *pEdict, int slots, int displaytime, bool needmore, 
 }
 
 #ifdef DEBUG
-
-FILE *UTIL_OpenDebugLog( void )
-{
-	char logfile[64];
-	FILE *fp;
-
-	sprintf( logfile,"%s/addons/parabot/log/debug.txt", mod_name );
-	fp = fopen( logfile, "a" );
-	return fp;
-}
-
-
 	edict_t *DBG_EntOfVars( const entvars_t *pev )
 	{
 		if (pev->pContainingEntity != NULL)	return pev->pContainingEntity;

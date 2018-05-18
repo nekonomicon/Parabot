@@ -30,12 +30,7 @@ extern edict_t *playerEnt;
 void botChatMessage( edict_t *speaker, const char *msg, bool speechSynthesis )
 // prints the message to everybody
 {
-	int j;
-
-	if ( speaker == 0 || msg == 0 ) return;
-
-	if( !speaker->v.netname )
-		return;
+	if( FNullEnt( speaker ) || msg == 0 ) return;
 /*
 	// speech start
 	WCHAR wszSpeak[1024];
@@ -68,12 +63,10 @@ void botChatMessage( edict_t *speaker, const char *msg, bool speechSynthesis )
 		if (IS_DEDICATED_SERVER()) printf( "%s", sayText );
 	}
 	else {
-		debugMsg( "Speaking ", msg, "\n" );
+		debugMsg( "Speaking %s\n", msg );
 		pfnEmitSound( speaker, CHAN_VOICE, msg, 1.0, ATTN_IDLE, 0, RANDOM_LONG( 90, 120 ) );
 	}
 }
-
-
 
 
 PB_Chat::PB_Chat()
@@ -98,13 +91,13 @@ bool PB_Chat::load( const char *chatFile )
 
 	FILE *file = fopen( chatFile, "rt" );
 	if (!file) {
-		errorMsg( "Missing ", chatFile, "\n" );
+		errorMsg( "Missing %s\n", chatFile );
 		return false;
 	}
 
 	if (chatFileLoaded) free();
 
-	infoMsg( "Reading ", chatFile, "... " );
+	infoMsg( "Reading %s... ", chatFile );
 	currentCodeBlock = 0;
 		
 	while (!feof(file)) {

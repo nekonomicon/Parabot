@@ -18,7 +18,7 @@ PB_MapCells::~PB_MapCells()
 void PB_MapCells::clear()
 {
 	numCells = 0;
-	for (int i=0; i<4096; i++) cellHash[i] = NO_CELL_REGISTERED;
+	memset( &cellHash, NO_CELL_REGISTERED, sizeof cellHash );
 	vis.clear();
 }
 
@@ -251,9 +251,9 @@ int PB_MapCells::initNeighbours( int cellIndex, int firstNb )
  * - penalty:	  additional costs
  */
 #define GET_PATH( goalReached, failed, avoid, heuristic, penalty )					\
-																					\
+														\
 	short pre[MAX_CELLS];															\
-	for (int i=0; i<MAX_CELLS; i++) pre[i] = -1;									\
+	memset( pre, NO_CELL_REGISTERED, sizeof pre );										\
 	pre[startId] = startId;															\
 																					\
 	PBT_PriorityQueue queue;														\
@@ -287,7 +287,6 @@ TargetFailed:																		\
 	return -1;																		\
 																					\
 TargetReached:																		\
-	float tw = 0;																	\
 	int pathLength = 0;																\
 	while (pre[currentCell] != currentCell) {										\
 		pathNodes[pathLength++] = currentCell;										\

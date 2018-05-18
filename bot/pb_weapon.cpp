@@ -7,8 +7,6 @@
 extern bot_t bots[32];
 extern int mod_id;
 extern bot_weapon_t weapon_defs[MAX_WEAPONS];
-extern int g_hldm_mod;
-
 
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -310,9 +308,9 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 	case VALVE_WEAPON_CROWBAR:
 		if ( flags & WF_NEED_GRENADE ) break;
 		
-		if( g_hldm_mod == BMOD )
+		if( bm_cbar )
 		{
-                        if( CVAR_GET_FLOAT( "bm_cbar_mod" ) )
+                        if( bm_cbar->value )
                         {
 				if( distance < 55 )
 				{
@@ -462,13 +460,11 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 		break;
 
 	case VALVE_WEAPON_EGON:
-		if(g_hldm_mod==BMOD)
+		if( ( bm_gluon && bm_gluon->value )
+			|| FBitSet( g_uiGameFlags, GAME_SEVS ))
 		{
-			if(CVAR_GET_FLOAT("bm_gluon_mod"))
 				return 0;
 		}
-		else if(g_hldm_mod==SEVS)
-			return 0;
 		if ( flags & (WF_UNDERWATER | WF_NEED_GRENADE) ) break;
 				
 		if (distance < 250) {
@@ -500,12 +496,9 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 		break;
 
 	case VALVE_WEAPON_TRIPMINE:
-		if( g_hldm_mod == BMOD )
+		if( bm_trip && bm_trip->value )
 		{
-                        if( CVAR_GET_FLOAT( "bm_trip_mod" ) )
-			{
-				bestMode[currentWeapon] = RANDOM_FLOAT( 1.5, 2.0 );
-			}
+			bestMode[currentWeapon] = RANDOM_FLOAT( 1.5, 2.0 );
 		}
 		return 0;		// never arm for combat
 

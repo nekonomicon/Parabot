@@ -19,6 +19,7 @@
 #include "pb_chat.h"
 #include "pb_configuration.h"
 
+extern HINSTANCE h_Library;
 extern int mod_id;
 extern float roundStartTime;
 extern PB_Configuration pbConfig;
@@ -26,8 +27,6 @@ extern PB_Chat chat;
 //extern int maxPers;
 //extern PB_Personality personality[MAX_PERS];	// stores different bot personalities
 //extern bool personalityUsed[MAX_PERS];			// true if bot exists using this personality
-extern bool gearbox_ctf;
-extern char ag_gamemode[8];
 extern int numberOfClients;
 
 // TheFatal's method for calculating the msecval
@@ -39,6 +38,22 @@ bot_t bots[32];   // max of 32 bots in a game
 
 void adjustAimSkills();
 
+// this is the LINK_ENTITY_TO_CLASS function that creates a player (bot)
+void player( entvars_t *pev )
+{
+	static LINK_ENTITY_FUNC otherClassName = NULL;
+	if (otherClassName == NULL)
+		otherClassName = (LINK_ENTITY_FUNC)GetProcAddress(h_Library, "player");
+	if (otherClassName != NULL){
+		(*otherClassName)( pev );
+	}
+	else {
+		errorMsg( "Can't get player() function from MOD!" );
+		printf("Parabot - Can't get player() function from MOD!\n" );
+		Sleep(5000);
+		exit(0);
+	}
+}
 // init variables for spawning here!
 void BotSpawnInit( bot_t *pBot )
 {
@@ -112,11 +127,9 @@ void BotCreate( int fixedPersNr )
 		infoMsg( "Max. Players reached. Can't create bot!\n");
 		return;
 	}
-#ifdef _DEBUG
-	char dbgBuffer[256];
-	sprintf( dbgBuffer, "%.f: BotCreate() fixedPersNr = %i, persNr = %i, botname = %s\n", worldTime(), fixedPersNr, persNr, botName );
-	debugFile( dbgBuffer );
-#endif
+
+	debugFile( "%.f: BotCreate() fixedPersNr = %i, persNr = %i, botname = %s\n", worldTime(), fixedPersNr, persNr, botName );
+
 	pbConfig.personalityJoins( persNr, worldTime() );	// now we know the bot can be created
 
 	char ptr[128];  // allocate space for message from ClientConnect
@@ -131,7 +144,10 @@ void BotCreate( int fixedPersNr )
                  
 	// create the player entity by calling MOD's player function
 	// (from LINK_ENTITY_TO_CLASS for player object)
-	CALL_GAME_ENTITY(PLID, "player", &botEnt->v);
+	if( !FBitSet( g_uiGameFlags, GAME_METAMOD ) )
+		player( VARS(botEnt) );
+	else
+		CALL_GAME_ENTITY(PLID, "player", &botEnt->v);
 
 	infobuffer = GET_INFOKEYBUFFER( botEnt );
 
@@ -177,7 +193,7 @@ void BotCreate( int fixedPersNr )
 		pBot->start_action = MSG_TFC_IDLE;
 	else if (mod_id == CSTRIKE_DLL)
 		pBot->start_action = MSG_CS_IDLE;
-	else if ((mod_id == GEARBOX_DLL) && (gearbox_ctf))
+	else if ((mod_id == GEARBOX_DLL) && FBitSet( g_uiGameFlags, GAME_CTF ))
 		pBot->start_action = MSG_OPFOR_IDLE;
 	/*else if (mod_id == FRONTLINE_DLL)
 		pBot->start_action = MSG_FLF_IDLE;*/
@@ -231,7 +247,7 @@ void BotCreate( int fixedPersNr )
 	pBot->parabot->goalFinder.addGoal( G_MOVE,
 		PI_FRIEND, goalMakeRoom, weightMakeRoom );
 
-	if ( (mod_id == CSTRIKE_DLL) || (mod_id == TFC_DLL) || gearbox_ctf || ( mod_id == AG_DLL && FStrEq( ag_gamemode, "ctf" ) ) ) {
+	if( FBitSet( g_uiGameFlags, GAME_TEAMPLAY ) ) {
 		pBot->parabot->goalFinder.addGoal( G_ACTION,
 			PI_FRIEND, goalAssistFire, weightAssistFire );
 		pBot->parabot->goalFinder.addGoal( G_MOVE,
@@ -309,8 +325,8 @@ void BotCreate( int fixedPersNr )
 // if ==CLASS_SELECT selects class bot->bot_class and sets bot->not_started = 0
 void BotStartGame( bot_t *pBot )
 {
-   char c_team[32];
-   char c_class[32];
+   const char *c_team;
+   const char *c_class;
 
 	assert( pBot != 0 );
    edict_t *pEdict = pBot->pEdict;
@@ -333,9 +349,18 @@ void BotStartGame( bot_t *pBot )
          if (pBot->bot_team == -1) pBot->bot_team = RANDOM_LONG(1, 2);
 
          // select the team the bot wishes to join...
-         if (pBot->bot_team == 1)      strcpy(c_team, "1");
-         else if (pBot->bot_team == 2) strcpy(c_team, "2");
-         else						   strcpy(c_team, "5");
+	switch( pBot->bot_team )
+	{
+	case 1:
+		c_team = "1";
+		break;
+	case 2:
+		c_team = "2";
+		break;
+	default:
+		c_team = "5";
+		break;
+	}
 
          FakeClientCommand(pEdict, "jointeam", c_team, NULL);
          return;
@@ -355,23 +380,47 @@ void BotStartGame( bot_t *pBot )
             pBot->bot_class = -1;
 
          if (pBot->bot_class == -1) pBot->bot_class = RANDOM_LONG(1, 10);
-		 pBot->bot_class = 3;
+		// pBot->bot_class = 3;
 
          // select the class the bot wishes to use...
-         if (pBot->bot_class == 0)      strcpy(c_class, "civilian");
-         else if (pBot->bot_class == 1) strcpy(c_class, "scout");
-         else if (pBot->bot_class == 2) strcpy(c_class, "sniper");
-         else if (pBot->bot_class == 3) strcpy(c_class, "soldier");
-         else if (pBot->bot_class == 4) strcpy(c_class, "demoman");
-         else if (pBot->bot_class == 5) strcpy(c_class, "medic");
-         else if (pBot->bot_class == 6) strcpy(c_class, "hwguy");
-         else if (pBot->bot_class == 7) strcpy(c_class, "pyro");
-         else if (pBot->bot_class == 8) strcpy(c_class, "spy");
-         else if (pBot->bot_class == 9) strcpy(c_class, "engineer");
-         else							strcpy(c_class, "randompc");
+	switch( pBot->bot_class )
+	{
+		case 0:
+			c_class = "civilian";
+			break;
+		case 1:
+			c_class = "scout";
+			break;
+		case 2:
+			c_class = "sniper";
+			break;
+		case 3:
+			c_class = "soldier";
+			break;
+		case 4:
+			c_class = "demoman";
+			break;
+		case 5:
+			c_class = "medic";
+			break;
+		case 6:
+			c_class = "hwguy";
+			break;
+		case 7:
+			c_class = "pyro";
+			break;
+		case 8:
+			c_class = "spy";
+			break;
+		case 9:
+			c_class = "engineer";
+			break;
+		default:
+			c_class = "randompc";
+			break;
+	}
 
-		 debugMsg( "Choosen Class %i: ", pBot->bot_class );
-		 debugMsg( c_class );  debugMsg( "\n" );
+		 debugMsg( "Choosen Class %i: %s\n", pBot->bot_class, c_class );
 		 FakeClientCommand(pEdict, c_class, NULL, NULL);
 		 debugMsg( "Started!\n" );
 		 pBot->not_started = 0;	// bot has now joined the game (doesn't need to be started)
@@ -393,15 +442,25 @@ void BotStartGame( bot_t *pBot )
          if (pBot->bot_team == -1) pBot->bot_team = RANDOM_LONG(1, 2);
 
          // select the team the bot wishes to join...
-         if (pBot->bot_team == 1)      strcpy(c_team, "1");
-         else if (pBot->bot_team == 2) strcpy(c_team, "2");
-         else						   strcpy(c_team, "5");
+	switch( pBot->bot_team )
+        {
+        case 1:
+                c_team = "1";
+                break;
+        case 2:
+                c_team = "2";
+                break;
+        default:
+                c_team = "5";
+                break;
+        }
 
          FakeClientCommand(pEdict, "menuselect", c_team, NULL);
          return;
       }
 
-      if (pBot->start_action == MSG_CS_CT_SELECT)  // counter terrorist
+      if (pBot->start_action == MSG_CS_CT_SELECT // counter terrorist
+	|| pBot->start_action == MSG_CS_T_SELECT )  // terrorist select
       {
          pBot->start_action = MSG_CS_IDLE;  // switch back to idle
 
@@ -411,39 +470,31 @@ void BotStartGame( bot_t *pBot )
          if (pBot->bot_class == -1) pBot->bot_class = RANDOM_LONG(1, 4);
 
          // select the class the bot wishes to use...
-         if (pBot->bot_class == 1)      strcpy(c_class, "1");
-         else if (pBot->bot_class == 2) strcpy(c_class, "2");
-         else if (pBot->bot_class == 3) strcpy(c_class, "3");
-         else if (pBot->bot_class == 4) strcpy(c_class, "4");
-         else							strcpy(c_class, "5");  // random
-
-         FakeClientCommand(pEdict, "menuselect", c_class, NULL);
-         pBot->not_started = 0;	// bot has now joined the game (doesn't need to be started)
-         return;
-      }
-
-      if (pBot->start_action == MSG_CS_T_SELECT)  // terrorist select
-      {
-         pBot->start_action = MSG_CS_IDLE;  // switch back to idle
-
-         if ((pBot->bot_class < 1) || (pBot->bot_class > 4))
-            pBot->bot_class = -1;  // use random if invalid
-
-         if (pBot->bot_class == -1) pBot->bot_class = RANDOM_LONG(1, 4);
-
-         // select the class the bot wishes to use...
-         if (pBot->bot_class == 1)      strcpy(c_class, "1");
-         else if (pBot->bot_class == 2) strcpy(c_class, "2");
-         else if (pBot->bot_class == 3) strcpy(c_class, "3");
-         else if (pBot->bot_class == 4) strcpy(c_class, "4");
-         else							strcpy(c_class, "5");  // random
+	switch( pBot->bot_class )
+	{
+	case 1:
+		c_class = "1";
+		break;
+	case 2:
+		c_class = "2";
+		break;
+	case 3:
+		c_class = "3";
+		break;
+	case 4:
+		c_class = "4";
+		break;
+	default:
+		c_class = "5";
+		break;
+	}
 
          FakeClientCommand(pEdict, "menuselect", c_class, NULL);
          pBot->not_started = 0;	// bot has now joined the game (doesn't need to be started)
          return;
       }
    }
-   else if (gearbox_ctf)
+   else if (mod_id == GEARBOX_DLL && FBitSet( g_uiGameFlags, GAME_CTF ))
    {
       // handle Opposing Force CTF stuff here...
 
@@ -459,12 +510,18 @@ void BotStartGame( bot_t *pBot )
             pBot->bot_team = RANDOM_LONG(1, 2);
 
          // select the team the bot wishes to join...
-         if (pBot->bot_team == 1)
-            strcpy(c_team, "1");
-         else if (pBot->bot_team == 2)
-            strcpy(c_team, "2");
-         else
-            strcpy(c_team, "3");
+	switch( pBot->bot_team )
+        {
+        case 1:
+                c_team = "1";
+                break;
+        case 2:
+                c_team = "2";
+                break;
+        default:
+                c_team = "3";
+                break;
+        }
 
          FakeClientCommand(pEdict, "jointeam", c_team, NULL);
 
@@ -480,21 +537,30 @@ void BotStartGame( bot_t *pBot )
          if (pBot->bot_class == -1)
             pBot->bot_class = RANDOM_LONG(1, 10);
 
-         // select the class the bot wishes to use...
-         if (pBot->bot_class == 1)
-            strcpy(c_class, "1");
-         else if (pBot->bot_class == 2)
-            strcpy(c_class, "2");
-         else if (pBot->bot_class == 3)
-            strcpy(c_class, "3");
-         else if (pBot->bot_class == 4)
-            strcpy(c_class, "4");
-         else if (pBot->bot_class == 5)
-            strcpy(c_class, "5");
-         else if (pBot->bot_class == 6)
-            strcpy(c_class, "6");
-         else
-            strcpy(c_class, "7");
+	switch( pBot->bot_class )
+        {
+        case 1:
+                c_class = "1";
+                break;
+        case 2:
+                c_class = "2";
+                break;
+        case 3:
+                c_class = "3";
+                break;
+        case 4:
+                c_class = "4";
+                break;
+	case 5:
+                c_class = "5";
+                break;
+	case 6:
+                c_class = "6";
+                break;
+        default:
+                c_class = "7";
+                break;
+        }
 
          FakeClientCommand(pEdict, "selectchar", c_class, NULL);
 
@@ -515,7 +581,7 @@ void BotStartGame( bot_t *pBot )
       pBot->not_started = 0;
    }
 }
-
+#if 0
 int BotInFieldOfView(bot_t *pBot, Vector dest)
 {
 	assert( pBot != 0 );
@@ -649,14 +715,13 @@ float BotChangeYaw( bot_t *pBot, float speed )
 
    return speed;  // return number of degrees turned
 }
-
+#endif
 bool pb_pause = false;
 
 void fixAngle( Vector &angle );
 
 void BotThink( bot_t *pBot )
 {
-   int index = 0;
    Vector v_diff;             // vector from previous to current location
    TraceResult tr;
    
@@ -668,11 +733,6 @@ void BotThink( bot_t *pBot )
 
    if (pBot->name[0] == 0)  // name filled in yet?
       strcpy(pBot->name, STRING(pBot->pEdict->v.netname));
-
-	if (mod_id == CSTRIKE_DLL)
-		pBot->f_max_speed = pEdict->v.maxspeed;
-	else
-		pBot->f_max_speed = CVAR_GET_FLOAT("sv_maxspeed");
 
    pEdict->v.button = 0;
    pBot->f_move_speed = 0.0;

@@ -1,7 +1,7 @@
 #include <float.h>
 #include <stdio.h>
 #include "pbt_priorityqueue.h"
-
+#include "string.h"
 
 
 
@@ -16,10 +16,7 @@ void PBT_PriorityQueue::init()
 {
 	numElements = 0;
 	numFree = 0;
-	for (int i=0; i<MAX_QUEUE_ELEMENTS; i++) {
-		heapPos[i] = NOT_IN_HEAP;
-	//	heap[i] = EMPTY_KEY;
-	}
+	memset( &heapPos, NOT_IN_HEAP, sizeof heapPos );
 }
 
 

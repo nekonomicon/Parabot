@@ -65,7 +65,7 @@ private:
 
 	bool closeUp, gainDistance;
 
-	void classifyDistance( float dist );
+	// void classifyDistance( float dist );
 
 };
 

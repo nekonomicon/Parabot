@@ -675,11 +675,7 @@ bool PB_Roaming::targetNotReachable()
 
 float UTIL_AngleDiff( float destAngle, float srcAngle )
 {
-	if (destAngle < -360) {
-		debugMsg( "FATAL ERROR at UTIL_AngleDiff: destAngle = %.f\n", destAngle );
-		destAngle = srcAngle;
-	}
-	else if (destAngle > 360) {
+	if (destAngle < -360 || destAngle > 360) {
 		debugMsg( "FATAL ERROR at UTIL_AngleDiff: destAngle = %.f\n", destAngle );
 		destAngle = srcAngle;
 	}

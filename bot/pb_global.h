@@ -8,16 +8,9 @@
 #include "dllapi.h"
 #include "meta_api.h"
 #include "entity_state.h"
-#include "hl_classes.h"
 #include "pb_path.h"
 #include "assert.h"
 #include "utilityfuncs.h"
-
-// Half-Life: Deathmatch MODs
-#define HLDM	0
-#define SEVS	1	//Severians
-#define BMOD	2	//BubbleMOD
-#define ZXC	3	//ZxC-MOD
 
 // define constants used to identify the MOD we are playing...
 #define VALVE_DLL	1
@@ -53,6 +46,27 @@
 #define NO_I_VALUE -123456789
 #define NO_F_VALUE -0.123456789
 
+extern unsigned int g_uiGameFlags;
+
+#define GAME_METAMOD		BIT(0) // Bot library loaded as metamod plugin
+#define GAME_DEBUG		BIT(1) // Debug log
+#define GAME_TEAMPLAY		BIT(2) // Teamplay gamemode
+#define GAME_DOM		BIT(3) // Domination gamemode
+#define GAME_CTF		BIT(4) // Capture The Flag gamemode
+#define GAME_BMOD		BIT(5) // Bubblemod game library
+#define GAME_SEVS		BIT(6) // Severians mod
+
+extern const cvar_t *flashlight;
+extern const cvar_t *footsteps;
+extern const cvar_t *freezetime;
+extern const cvar_t *gamemode;
+extern const cvar_t *teamplay;
+extern const cvar_t *maxspeed;
+
+extern const cvar_t *bm_cbar;
+extern const cvar_t *bm_gluon;
+extern const cvar_t *bm_trip;
+
 float worldTime();
 // returns the game time
 
@@ -72,44 +86,40 @@ PB_Path* getPath( int pathId );
 int getTotalAttempts();
 void incTotalAttempts();
 
+extern void infoMsg( const char *szFmt, ... );
+extern void errorMsg( const char *szFmt, ... );
+
 #ifdef _DEBUG
 void checkForBreakpoint( int reason );
 // for debugging
 
-void debugFile( char *msg );
+void pb2dMsg( int x, int y, const char *szFmt, ... );
+void pb3dMsg( int x, int y, const char *szFmt, ... );
+void print3dDebugInfo();
 
-void debugMsg( const char *str1, const char *str2=0, const char *str3=0, const char *str4=0 );
-void debugMsg( const char *str1, int data1, int data2=NO_I_VALUE, int data3=NO_I_VALUE );
-void debugMsg( const char *str1, float data1, float data2=NO_F_VALUE, float data3=NO_F_VALUE );
-#else
-#if _MSC_VER == 1200
-#define checkForBreakpoint(reason)
-#define debugMsg(str1, data1, data2, data3)
-#define debugFile(msg)
-#else
-#define checkForBreakpoint(...)
-#define debugMsg(...)
-#define debugFile(...)
-#endif
-#endif
+void debugFile( const char *szFmt, ... );
+void debugMsg( const char *szFmt, ... );
 
-void infoMsg( const char *str1, const char *str2=0, const char *str3=0, const char *str4=0 );
-
-void errorMsg( const char *str1, const char *str2=0, const char *str3=0, const char *str4=0 );
-#ifdef _DEBUG
 void debugSound( edict_t *recipient, const char *sample );
-
 void debugBeam( Vector start, Vector end, int life, int color=1 );
 void debugMarker( Vector pos, int life );
-#else
+#else // _DEBUG
+#define checkForBreakpoint( reason )
+#define debugSound( recipient, sample )
+#define debugMarker( pos, life )
+#define print3dDebugInfo()
 #if _MSC_VER == 1200
-#define debugSound(recipient, sample)
-#define debugBeam(start, end, life)
-#define debugMarker(pos, life)
-#else
-#define debugSound(...)
+#define pb2dMsg( x )
+#define pb3dMsg( x )
+#define debugFile( szFmt )
+#define debugMsg( szFmt )
+#define debugBeam( szFmt )
+#else // _MSC_VER
+#define pb2dMsg( x, y, szFmt, ... )
+#define pb3dMsg( x, y, szFmt, ... )
+#define debugFile( szFmt, ... )
+#define debugMsg( szFmt, ... )
 #define debugBeam(...)
-#define debugMarker(...)
-#endif
-#endif
-#endif
+#endif // _MSC_VER
+#endif // _DEBUG
+#endif // PB_GLOBAL_H

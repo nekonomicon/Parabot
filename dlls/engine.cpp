@@ -25,13 +25,9 @@ extern bot_t bots[32];
 extern int mod_id;
 extern float roundStartTime;
 extern Sounds playerSounds;
-extern bool g_meta_init;
 
-bool valveTeamPlayMode = false;
 char valveTeamList[MAX_TEAMS][32] = { "","","","","","","","","","","","","","","","" };
 int  valveTeamNumber = 0;
-
-int debug_engine = 0;
 
 void (*botMsgFunction)(void *, int) = NULL;
 int botMsgIndex;
@@ -50,9 +46,8 @@ int message_HLTV = 0;
 
 void pfnChangeLevel(const char *s1, const char *s2)
 {
-#ifdef _DEBUG
-   if (debug_engine) { FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnChangeLevel:\n"); fclose(fp); }
-#endif
+   debugFile("pfnChangeLevel:\n");
+
    // kick any bot off of the server after time/frag limit...
    for (int index = 0; index < 32; index++)
    {
@@ -68,10 +63,10 @@ void pfnChangeLevel(const char *s1, const char *s2)
          SERVER_COMMAND(cmd);  // kick the bot using (kick "name")
       }
    }
-	if(!g_meta_init)
-		(*g_engfuncs.pfnChangeLevel)(s1, s2);
+	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
+		RETURN_META(MRES_IGNORED);
 
-	RETURN_META(MRES_IGNORED);
+	(*g_engfuncs.pfnChangeLevel)(s1, s2);
 }
 
 
@@ -80,9 +75,9 @@ void pfnMessageBegin(int msg_dest, int msg_type, const float *pOrigin, edict_t *
    if (gpGlobals->deathmatch)
    {
       int index = -1;
-#ifdef _DEBUG
-      if (debug_engine) { FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnMessageBegin: edict=%p dest=%d type=%d\n",ed,msg_dest,msg_type); fclose(fp); }
-#endif
+
+      debugFile("pfnMessageBegin: edict=%p dest=%d type=%d\n",ed,msg_dest,msg_type);
+
 	  if (msg_type == message_Death) {
 		  botMsgFunction = Client_Valve_DeathMsg;
 	  }
@@ -254,10 +249,10 @@ void pfnMessageBegin(int msg_dest, int msg_type, const float *pOrigin, edict_t *
          }*/
       }
 }
-	if(!g_meta_init)
-		(*g_engfuncs.pfnMessageBegin)(msg_dest, msg_type, pOrigin, ed);
+	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
+		RETURN_META(MRES_IGNORED);
 
-	RETURN_META(MRES_IGNORED);
+	(*g_engfuncs.pfnMessageBegin)(msg_dest, msg_type, pOrigin, ed);
 }
 
 int pfnRegUserMsg(const char *pszName, int iSize)
@@ -266,8 +261,8 @@ int pfnRegUserMsg(const char *pszName, int iSize)
 	
 	if (gpGlobals->deathmatch)
 	{
-		//FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnRegUserMsg: pszName=%s msg=%d\n",pszName,msg); fclose(fp);
-				
+		//debugFile("pfnRegUserMsg: pszName=%s msg=%d\n",pszName,msg);
+
 			 if (FStrEq( pszName, "WeaponList" ) )	message_WeaponList = msg;
 		else if (FStrEq( pszName, "CurWeapon"	) )	message_CurWeapon = msg;
 		else if (FStrEq( pszName, "AmmoX"       ) )	message_AmmoX = msg;
@@ -280,8 +275,9 @@ int pfnRegUserMsg(const char *pszName, int iSize)
 		else if (FStrEq(pszName, "ShowMenu"	) ) message_ShowMenu = msg;
 		else if (FStrEq(pszName, "Money"	) ) message_Money = msg;         		
 	}
-	if(!g_meta_init)
+	if(!FBitSet( g_uiGameFlags, GAME_METAMOD ))
 		return msg;
+
 	RETURN_META_VALUE(MRES_SUPERCEDE, msg);
 }
 
@@ -289,16 +285,15 @@ void pfnMessageEnd(void)
 {
    if (gpGlobals->deathmatch)
    {
-#ifdef _DEBUG
-      if (debug_engine) { FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnMessageEnd:\n"); fclose(fp); }
-#endif
+      debugFile("pfnMessageEnd:\n");
+
       // clear out the bot message function pointer...
       botMsgFunction = NULL;
    }
-	if(!g_meta_init)
-		(*g_engfuncs.pfnMessageEnd)();
+	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
+		RETURN_META(MRES_IGNORED);
 
-	RETURN_META(MRES_IGNORED);
+	(*g_engfuncs.pfnMessageEnd)();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -308,16 +303,16 @@ void pfnMessageEnd(void)
 ///////////////////////////////////////////////////////////////////////////////////
 edict_t* pfnFindEntityByString(edict_t *pEdictStartSearchAfter, const char *pszField, const char *pszValue)
 {
-#ifdef _DEBUG
-	//   if (debug_engine) { FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnFindEntityByString: %s\n",pszValue); fclose(fp); }
-#endif
+	debugFile("pfnFindEntityByString: %s\n",pszValue);
+
 	if (( mod_id == CSTRIKE_DLL ) &&
 		( FStrEq( pszField, "classname" ) ) && 
 		( FStrEq( pszValue, "info_map_parameters" ) ) ) {
 		//debugMsg( "NEW CS-ROUND!\n" );
-		roundStartTime = worldTime() + CVAR_GET_FLOAT("mp_freezetime");	// 5 seconds until round starts
+		roundStartTime = worldTime() + freezetime->value;	// 5 seconds until round starts
 	}
-	if(!g_meta_init)
+
+	if(!FBitSet( g_uiGameFlags, GAME_METAMOD ))
 		return (*g_engfuncs.pfnFindEntityByString)(pEdictStartSearchAfter, pszField, pszValue);
 
 	RETURN_META_VALUE(MRES_IGNORED, 0);
@@ -326,49 +321,44 @@ edict_t* pfnFindEntityByString(edict_t *pEdictStartSearchAfter, const char *pszF
 void pfnEmitSound(edict_t *entity, int channel, const char *sample, /*int*/float volume, float attenuation, int fFlags, int pitch)
 {
 	playerSounds.parseSound( entity, sample, volume );
-#ifdef _DEBUG
-	if (debug_engine) { FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnEmitSound:\n"); fclose(fp); }
-#endif
-	if(!g_meta_init)
-		(*g_engfuncs.pfnEmitSound)(entity, channel, sample, volume, attenuation, fFlags, pitch);
 
-	RETURN_META(MRES_IGNORED);
+	debugFile("pfnEmitSound:\n");
+
+	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
+		RETURN_META(MRES_IGNORED);
+
+	(*g_engfuncs.pfnEmitSound)(entity, channel, sample, volume, attenuation, fFlags, pitch);
 }
 
 void pfnEmitAmbientSound(edict_t *entity, float *pos, const char *samp, float vol, float attenuation, int fFlags, int pitch)
 {
 	playerSounds.parseAmbientSound( entity, samp, vol );
-#ifdef _DEBUG
-	if (debug_engine) { FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnEmitAmbientSound:\n"); fclose(fp); }
-#endif
-	if(!g_meta_init)
-		(*g_engfuncs.pfnEmitAmbientSound)(entity, pos, samp, vol, attenuation, fFlags, pitch);
 
-	RETURN_META(MRES_IGNORED);
+	debugFile("pfnEmitAmbientSound:\n");
+
+	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
+		RETURN_META(MRES_IGNORED);
+
+	(*g_engfuncs.pfnEmitAmbientSound)(entity, pos, samp, vol, attenuation, fFlags, pitch);
 }
 
 void pfnServerCommand(const char* str)
 {
-	infoMsg( "ServerCommand: ", str, "\n" );
-#ifdef _DEBUG
-    if (debug_engine) { FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnServerCommand: %s\n",str); fclose(fp); }
-#endif
-/*    if (FStrEq(str, "addbot")) {	// we've got this is DSaddbot
-		BotCreate();
-		return;
-	}*/
-	if(!g_meta_init)
-		(*g_engfuncs.pfnServerCommand)(str);
+	infoMsg( "ServerCommand: %s\n", str );
 
-	RETURN_META(MRES_IGNORED);
+	debugFile("pfnServerCommand: %s\n",str);
+
+	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
+		RETURN_META(MRES_IGNORED);
+
+	(*g_engfuncs.pfnServerCommand)(str);
 }
 
 void pfnClientCommand(edict_t* pEdict, const char* szFmt, ...)
 {
-#ifdef _DEBUG
-	if (debug_engine) { FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnClientCommand=%s\n",szFmt); fclose(fp); }
-#endif
-	if(!g_meta_init)
+	debugFile( "pfnClientCommand=%s\n",szFmt);
+
+	if(!FBitSet( g_uiGameFlags, GAME_METAMOD ))
 	{
 		if (!(pEdict->v.flags & FL_FAKECLIENT))
 		{
@@ -394,102 +384,96 @@ void pfnWriteByte(int iValue)
 {
    if (gpGlobals->deathmatch)
    {
-#ifdef _DEBUG
-      if (debug_engine) { FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnWriteByte: %d\n",iValue); fclose(fp); }
-#endif
+      debugFile("pfnWriteByte: %d\n",iValue);
+
       // if this message is for a bot, call the client message function...
       if (botMsgFunction)
          (*botMsgFunction)((void *)&iValue, botMsgIndex);
    }
-	if(!g_meta_init)
-		(*g_engfuncs.pfnWriteByte)(iValue);
+	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
+		RETURN_META(MRES_IGNORED);
 
-	RETURN_META(MRES_IGNORED);
+	(*g_engfuncs.pfnWriteByte)(iValue);
 }
 
 void pfnWriteChar(int iValue)
 {
    if (gpGlobals->deathmatch)
    {
-#ifdef _DEBUG
-      if (debug_engine) { FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnWriteChar: %d\n",iValue); fclose(fp); }
-#endif
+      debugFile("pfnWriteChar: %d\n",iValue);
+
       // if this message is for a bot, call the client message function...
       if (botMsgFunction)
          (*botMsgFunction)((void *)&iValue, botMsgIndex);
    }
-	if(!g_meta_init)
-		(*g_engfuncs.pfnWriteChar)(iValue);
+	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
+		RETURN_META(MRES_IGNORED);
 
-	RETURN_META(MRES_IGNORED);
+	(*g_engfuncs.pfnWriteChar)(iValue);
 }
 
 void pfnWriteShort(int iValue)
 {
    if (gpGlobals->deathmatch)
    {
-#ifdef _DEBUG
-      if (debug_engine) { FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"prnWriteShort: %d\n",iValue); fclose(fp); }
-#endif
+      debugFile("prnWriteShort: %d\n",iValue);
+
       // if this message is for a bot, call the client message function...
       if (botMsgFunction)
          (*botMsgFunction)((void *)&iValue, botMsgIndex);
    }
-	if(!g_meta_init)
-		(*g_engfuncs.pfnWriteShort)(iValue);
+	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
+		RETURN_META(MRES_IGNORED);
 
-	RETURN_META(MRES_IGNORED);
+	(*g_engfuncs.pfnWriteShort)(iValue);
 }
 
 void pfnWriteLong(int iValue)
 {
    if (gpGlobals->deathmatch)
    {
-#ifdef _DEBUG
-      if (debug_engine) { FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnWriteLong: %d\n",iValue); fclose(fp); }
-#endif
+      debugFile("pfnWriteLong: %d\n",iValue);
+
       // if this message is for a bot, call the client message function...
       if (botMsgFunction)
          (*botMsgFunction)((void *)&iValue, botMsgIndex);
    }
-	if(!g_meta_init)
-		(*g_engfuncs.pfnWriteLong)(iValue);
+	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
+		RETURN_META(MRES_IGNORED);
 
-	RETURN_META(MRES_IGNORED);
+	(*g_engfuncs.pfnWriteLong)(iValue);
 }
 
 void pfnWriteAngle(float flValue)
 {
    if (gpGlobals->deathmatch)
    {
-#ifdef _DEBUG
-      if (debug_engine) { FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnWriteAngle: %f\n",flValue); fclose(fp); }
-#endif
+      debugFile("pfnWriteAngle: %f\n",flValue);
+
       // if this message is for a bot, call the client message function...
       if (botMsgFunction)
          (*botMsgFunction)((void *)&flValue, botMsgIndex);
    }
-	if(!g_meta_init)
-		(*g_engfuncs.pfnWriteAngle)(flValue);
+	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
+		RETURN_META(MRES_IGNORED);
 
-	RETURN_META(MRES_IGNORED);
+	(*g_engfuncs.pfnWriteAngle)(flValue);
 }
 
 void pfnWriteCoord(float flValue)
 {
    if (gpGlobals->deathmatch)
    {
-#ifdef _DEBUG
-      if (debug_engine) { FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnWriteCoord: %f\n",flValue); fclose(fp); }
-#endif
+      debugFile("pfnWriteCoord: %f\n",flValue);
+
       // if this message is for a bot, call the client message function...
       if (botMsgFunction)
          (*botMsgFunction)((void *)&flValue, botMsgIndex);
    }
-	if(!g_meta_init)
-		(*g_engfuncs.pfnWriteCoord)(flValue);
+	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
+		RETURN_META(MRES_IGNORED);
 
-	RETURN_META(MRES_IGNORED);
+	(*g_engfuncs.pfnWriteCoord)(flValue);
 }
 
 void pfnWriteString(const char *sz)
@@ -506,41 +490,40 @@ void pfnWriteString(const char *sz)
 			   haloOnBase = false;
 		   }
 	   }
-	   //debugMsg( "MSG: ", sz, "\n" );
-#ifdef _DEBUG
-      if (debug_engine) { FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnWriteString: %s\n",sz); fclose(fp); }
-#endif
+	   //debugMsg( "MSG: %s\n", sz );
+      debugFile("pfnWriteString: %s\n",sz);
+
       // if this message is for a bot, call the client message function...
       if (botMsgFunction)
          (*botMsgFunction)((void *)sz, botMsgIndex);
    }
-	if(!g_meta_init)
-		(*g_engfuncs.pfnWriteString)(sz);
+	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
+		RETURN_META(MRES_IGNORED);
 
-	RETURN_META(MRES_IGNORED);
+	(*g_engfuncs.pfnWriteString)(sz);
 }
 
 void pfnWriteEntity(int iValue)
 {
    if (gpGlobals->deathmatch)
    {
-#ifdef _DEBUG
-      if (debug_engine) { FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnWriteEntity: %d\n",iValue); fclose(fp); }
-#endif
+	debugFile("pfnWriteEntity: %d\n",iValue);
+
       // if this message is for a bot, call the client message function...
       if (botMsgFunction)
          (*botMsgFunction)((void *)&iValue, botMsgIndex);
    }
-	if(!g_meta_init)
-		(*g_engfuncs.pfnWriteEntity)(iValue);
+	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
+		RETURN_META(MRES_IGNORED);
 
-	RETURN_META(MRES_IGNORED);
+	(*g_engfuncs.pfnWriteEntity)(iValue);
 }
 
 void pfnSetClientKeyValue( int clientIndex, const char *infobuffer, const char *key, const char *value )
 {
 	if ((mod_id == VALVE_DLL || mod_id == DMC_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) && (FStrEq( key, "team" ) ) ) {	// init teamlist
-		valveTeamPlayMode = true;
+		if( !FBitSet( g_uiGameFlags, GAME_TEAMPLAY ))
+			SetBits( g_uiGameFlags, GAME_TEAMPLAY );
 
 		bool teamKnown = false;
 		for (int team=0; team<valveTeamNumber; team++) 
@@ -550,21 +533,16 @@ void pfnSetClientKeyValue( int clientIndex, const char *infobuffer, const char *
 			}
 		if (!teamKnown && valveTeamNumber<MAX_TEAMS) {
 			strcpy( valveTeamList[valveTeamNumber], value );
-			debugMsg( "Registered team ", value, "\n" );
+			debugMsg( "Registered team %s\n", value );
 			valveTeamNumber++;
 		}
 	}
-	else if( mod_id == AG_DLL )
-	{
-		valveTeamPlayMode = true;
-	}
-#ifdef _DEBUG
-	if (debug_engine) { FILE *fp = UTIL_OpenDebugLog(); fprintf(fp,"pfnSetClientKeyValue: %s %s\n",key,value); fclose(fp); }
-#endif
-	if(!g_meta_init)
-		(*g_engfuncs.pfnSetClientKeyValue)(clientIndex, infobuffer, key, value);
+	debugFile("pfnSetClientKeyValue: %s %s\n",key,value);
 
-	RETURN_META(MRES_IGNORED);
+	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
+		RETURN_META(MRES_IGNORED);
+
+	(*g_engfuncs.pfnSetClientKeyValue)(clientIndex, infobuffer, key, value);
 }
 
 extern "C" int EXPORT GetEngineFunctions(enginefuncs_t *pengfuncsFromEngine, int *interfaceVersion)

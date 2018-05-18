@@ -185,7 +185,7 @@ void PB_Path::clear()
 	readyToDelete = true;	// just in case...
 }
 
-
+#ifdef _DEBUG
 void PB_Path::print()
 {
 	debugMsg( "path from " );
@@ -193,15 +193,15 @@ void PB_Path::print()
 	debugMsg( " to " );
 	endNav().print();
 }
-
+#endif
 
 #include "marker.h"
 #include <queue>
 
+#ifdef _DEBUG
 void PB_Path::mark()
 // mark all waypoints
 {
-#ifdef _DEBUG
 	WaypointList::iterator wpi = waypoint->begin();
 	PB_Path_Waypoint wp;
 	while (wpi != waypoint->end()) {
@@ -216,9 +216,8 @@ void PB_Path::mark()
 		glMarker.newMarker( Vector(0,0,10)+lastReachedWaypoint->pos(), 2 );
 	}
 	else debugMsg( "Last reached wp = end\n" );
-#endif //_DEBUG
 }
-
+#endif //_DEBUG
 
 void PB_Path::load( FILE *fp )
 // init path from file
@@ -487,14 +486,15 @@ void PB_Path::reportTargetFailed()
 	// check new certainty
 	if (certainty < 0.5) {
 		markForDelete();
+#ifdef _DEBUG
 		debugMsg( "Auto-deleted " );  print();  debugMsg( "\n" );
 		//debugMsg( "%i attempts, ", data.attempts );  
 		//debugMsg( "%i succesful\n", data.successful );
 		//mark();
+#endif
 		//pb_pause = true;
 	}
-	debugMsg( "%i attempts, ", data.attempts );  
-	debugMsg( "%i succesful\n", data.successful );
+	debugMsg( "%i attempts, %i succesful\n", data.attempts, data.successful );  
 	//mark();
 	//pb_pause = true;
 }

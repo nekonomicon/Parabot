@@ -185,7 +185,7 @@ class PB_Navpoint
 
 public:	
 
-	static char* classname( int code );
+	static const char* classname( int code );
 	
 	void init( const Vector &pos, int type, int special );
 	void setId( int id ) { data.privateId = id; }
@@ -194,7 +194,7 @@ public:
 
 	int id() { return data.privateId; }
 	int type() { return data.type; }
-	char* classname();
+	const char* classname();
 	int special() { return data.special; }
 	edict_t* entity() { return ent; }
 	
@@ -226,9 +226,10 @@ public:
 	
 	void load( FILE *fp );
 	void save( FILE *fp );
+#ifdef _DEBUG
 	void print();	// debugMsg navName
 	void printPos();	// debugMsg navName
-
+#endif
 
 	// operators for graph algorithms:
 	bool operator==(const PB_Navpoint& O) const  {  return data.privateId == O.data.privateId; }

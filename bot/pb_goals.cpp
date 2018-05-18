@@ -19,12 +19,12 @@ extern float sineTable[256];
 float lookAroundAngle = DEFAULT_LOOKAROUND_ANGLE;
 
 
-
+#if 0
 void goalDoNothing( CParabot *pb, PB_Percept*item )
 {
 	//debugMsg( "DoNothing\n" );
 }
-
+#endif
 
 
 //---------------------------------------------------------------------------------------

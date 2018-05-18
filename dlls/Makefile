@@ -7,14 +7,26 @@ CPPFLAGS =	-std=gnu++98
 
 SYS =		$(shell $(CXX) -dumpmachine)
 
-ifneq ($(PB_64BIT),1)
 MODULE =	parabot
+
+ifneq ($(PB_64BIT),1)
 ifneq (, $(findstring x86_64, $(SYS)))
 CFLAGS +=	-m32
 LDFLAGS +=	-m32
 endif
 else
+ifneq (, $(findstring x86_64, $(SYS)))
+ifneq (, $(findstring mingw, $(SYS)))
 MODULE =	parabot64
+endif
+ifneq (, $(findstring linux, $(SYS)))
+MODULE =	parabot64
+endif
+ifneq (, $(findstring darwin, $(SYS)))
+MODULE =	parabot64
+endif
+endif
+CFLAGS +=       -fPIC
 endif
 
 ifneq ($(DEBUG),1)
@@ -32,7 +44,7 @@ endif
 
 ifeq ($(AGGR_OPT),1)
 CPPFLAGS +=	-fvisibility-inlines-hidden -fno-rtti
-CFLAGS +=	-O3 -fvisibility=hidden -ffast-math -funroll-loops -ftree-vectorize
+CFLAGS +=	-O3 -fvisibility=hidden -ffast-math -funroll-loops -ftree-vectorize -fno-common
 endif
 
 ifeq ($(SIZE_OPT),1)
@@ -63,7 +75,6 @@ ifneq (, $(findstring mingw, $(SYS)))
 LDFLAGS +=	-Wl,--add-stdcall-alias -static-libgcc -static-libstdc++ -Wl,--no-undefined
 OSLIB =		dll
 else
-CFLAGS +=	-fPIC
 ifneq (, $(findstring darwin, $(SYS)))
 OSLIB =		dylib
 else
@@ -122,7 +133,6 @@ SRC =		../bot/bot.cpp \
 		../bot/pb_vistable.cpp \
 		../bot/pb_weapon.cpp \
 		../bot/pb_weaponhandling.cpp \
-		../bot/pbt_dynarray.cpp \
 		../bot/pbt_priorityqueue.cpp \
 		../bot/sounds.cpp \
 		../bot/utilityfuncs.cpp \

@@ -177,7 +177,6 @@ int PB_WeaponHandling::getBestWeapon( float distance, float hitProb, int flags )
 {
 	float score, bestScore = -10;
 	int   bestWeapon = defaultWeapon;
-	
 			
 	for (int wId=minModWeapon; wId<maxModWeapon; wId++) {
 		if (available( wId )) {
@@ -195,8 +194,6 @@ int PB_WeaponHandling::getBestWeapon( float distance, float hitProb, int flags )
 	
 	return bestWeapon;
 }
-
-extern int debug_engine;
 
 void PB_WeaponHandling::switchToWeapon( int wId )
 {

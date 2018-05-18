@@ -3,9 +3,7 @@
 
 PB_Kills::PB_Kills()
 {
-	for (int i=0; i<NUM_SECTORS; i++) {
-		numKillsInSector[i] = 0;
-	}
+	memset(&numKillsInSector, 0, sizeof numKillsInSector );
 }
 
 

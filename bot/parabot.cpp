@@ -95,30 +95,24 @@ void CParabot::initAfterRespawn()
 	//debugMsg( "initAfterRespawn called\n" );
 }
 
-
+#ifdef DEBUG
 void CParabot::setGoalViewDescr( const char *descr )
 {
-#ifdef DEBUG
 	strcpy( goalView, descr );
-#endif
 }
 
 
 void CParabot::setGoalMoveDescr( const char *descr )
 {
-#ifdef DEBUG
 	strcpy( goalMove, descr );
-#endif
 }
 
 
 void CParabot::setGoalActDescr( const char *descr )
 {
-#ifdef DEBUG
 	strcpy( goalAct, descr );
-#endif
 }
-
+#endif
 
 // types of damage to ignore...
 #define IGNORE_DAMAGE ( DMG_CRUSH | DMG_FREEZE | DMG_FALL | DMG_SHOCK | DMG_DROWN | \
@@ -149,7 +143,7 @@ void CParabot::registerDamage( int amount, Vector origin, int type )
 			}
 			else if ( FStrEq(diname, "bodyque") ) {
 			}
-			else debugMsg( "DAMAGE BY ", diname, "\n" );
+			else debugMsg( "DAMAGE BY %s\n", diname );
 		}
 		else {
 			if (di->v.origin == botPos()) debugMsg( "SELF-DAMAGE\n" );
@@ -227,7 +221,7 @@ void CParabot::registerDamage( int amount, Vector origin, int type )
 #ifdef _DEBUG
 		const char *botName = STRING(ent->v.netname);
 		const char *inflictorName = STRING(pPlayer->v.netname);
-		debugMsg( botName, " hurt by ", inflictorName );	debugMsg( "\n" );
+		debugMsg( "%s hurt by %s\n", botName, inflictorName );
 #endif
 		senses.addAttack( pPlayer, amount );
 	}
@@ -461,7 +455,9 @@ void CParabot::pathFailed()
 // called when path is *NOT* finished
 {
 	assert( actualPath != 0 );
+#ifdef _DEBUG
 	actualPath->print();	debugMsg( " failed\n" );
+#endif
 	actualPath->reportTargetFailed();
 	actualJourney.savePathData();
 	actualNavpoint = 0;
@@ -650,7 +646,9 @@ void CParabot::followActualPath()
 			Vector wpos = waypoint.pos( ent );
 			action.add( actualPath->getNextAction(), &wpos );	// if there's something to do...
 			actualPath->reportWaypointReached();		// confirm waypoint
+#ifdef _DEBUG
 			Vector oldWP = waypoint.pos( ent );
+#endif
 			waypoint = actualPath->getNextWaypoint();	// get next one
 #ifdef _DEBUG
 			debugBeam( waypoint.pos( ent ), oldWP, 50, 1 );
@@ -691,7 +689,6 @@ void CParabot::followActualPath()
 
 void CParabot::followActualRoute()
 {
-
 	short botCell = map.getCellId( ent );
 	if (botCell < 0 ) return;
 	short targetCell = roamingRoute[roamingIndex];
@@ -733,7 +730,7 @@ void CParabot::followActualRoute()
 		float normDist = (target-map.cell( roamingRoute[roamingIndex+1] ).pos()).Length();
 		if (dist2target > (normDist+250)) {
 			//botNr = slot;
-			debugMsg( "ROUTE ERROR in ", goalMove, "!\n" );
+			debugMsg( "ROUTE ERROR in %s!\n", goalMove );
 			debugBeam( target, map.cell( botCell ).pos(), 250, 0 );
 			setRoamingIndex( -1 );
 			return;
@@ -766,13 +763,16 @@ void CParabot::followActualRoute()
 			// bisherigen traffic auf Teilstrecke auswerten, falls <3 Verbindung löschen
 			if ( map.cell( botCell ).getTraffic( targetCell ) < 3 ) {
 				if ( map.cell( botCell ).delNeighbour( targetCell ) ) {
+#ifdef _DEBUG
 					debugMsg( "Deleted cell neighbour.\n" );
 					Vector c1 = map.cell( botCell ).pos() +Vector(0,0,8);
 					Vector c2 = map.cell( targetCell ).pos();
 					debugBeam( c1, c2, 250, 0 );
 					debugMarker( c2, 250 );
+#endif
 				}
 				else {
+#ifdef _DEBUG
 					debugMsg( "Could not delete cell neighbour.\n" );
 					Vector c0 = map.cell( botCell ).pos() -Vector(0,0,8);
 					Vector c1 = map.cell( roamingRoute[roamingIndex+1] ).pos() +Vector(0,0,8);
@@ -780,6 +780,7 @@ void CParabot::followActualRoute()
 					debugBeam( c1, c2, 250, 0 );	// rot vom Vorgänger
 					debugBeam( c0, c2, 250, 1 );	// grün vom bot aus
 					debugMarker( c2, 250 );
+#endif
 					map.cell( roamingRoute[roamingIndex+1] ).delNeighbour( targetCell );
 				}
 			}

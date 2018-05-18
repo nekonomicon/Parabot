@@ -10,6 +10,7 @@
 #ifdef _DEBUG
 #include "extdll.h"
 #include "enginecallback.h"
+#include "usercmd.h"
 #include "dllapi.h"
 #include "meta_api.h"
 #include "bot.h"
@@ -77,17 +78,13 @@ void ResetGlobalState( void )
 
 void ClientKill( edict_t *pEntity )
 {
-#ifdef _DEBUG
-   if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp, "ClientKill: %p\n",pEntity); fclose(fp); }
-#endif
+   debugFile("ClientKill: %p\n",pEntity);
    (*other_gFunctionTable.pfnClientKill)(pEntity);
 }
 
 void ClientUserInfoChanged( edict_t *pEntity, char *infobuffer )
 {
-#ifdef _DEBUG
-   if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp, "ClientUserInfoChanged: pEntity=%p infobuffer=%s\n", pEntity, infobuffer); fclose(fp); }
-#endif
+   debugFile("ClientUserInfoChanged: pEntity=%p infobuffer=%s\n", pEntity, infobuffer);
    (*other_gFunctionTable.pfnClientUserInfoChanged)(pEntity, infobuffer);
 }
 
@@ -123,9 +120,7 @@ const char *GetGameDescription( void )
 
 void PlayerCustomization( edict_t *pEntity, customization_t *pCust )
 {
-#ifdef _DEBUG
-   if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp, "PlayerCustomization: %p\n",pEntity); fclose(fp); }
-#endif
+   debugFile( "PlayerCustomization: %p\n",pEntity);
    (*other_gFunctionTable.pfnPlayerCustomization)(pEntity, pCust);
 }
 
@@ -146,9 +141,7 @@ void SpectatorThink( edict_t *pEntity )
 
 void Sys_Error( const char *error_string )
 {
-#ifdef _DEBUG
-	if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp, "Sys_Error: %s\n", error_string); fclose(fp); }
-#endif
+	debugFile( "Sys_Error: %s\n", error_string);
 	(*other_gFunctionTable.pfnSys_Error)(error_string);
 }
 
@@ -199,14 +192,8 @@ int GetWeaponData( struct edict_s *player, struct weapon_data_s *info )
 
 void CmdStart( const edict_t *player, const struct usercmd_s *cmd, unsigned int random_seed )
 {
-#ifdef _DEBUG
-	/*if (debug_engine) { 
-		fp = UTIL_OpenDebugLog(); 
-		fprintf(fp, "CmdStart: ed=%p, lms=%i, msec=%i, bts=%i, imp=%i, wps=%i\n",
+		debugFile("CmdStart: ed=%p, lms=%i, msec=%i, bts=%i, imp=%i, wps=%i\n",
 			player, cmd->lerp_msec, cmd->msec, cmd->buttons, cmd->impulse, cmd->weaponselect ); 
-		fclose(fp); 
-	}*/
-#endif
 /*	short	lerp_msec;      // Interpolation time on client
 	byte	msec;           // Duration in ms of command
 	vec3_t	viewangles;     // Command view angles.
@@ -225,13 +212,8 @@ void CmdStart( const edict_t *player, const struct usercmd_s *cmd, unsigned int 
 
 void CmdEnd ( const edict_t *player )
 {
-#ifdef _DEBUG
-	/*if (debug_engine) { 
-		fp = UTIL_OpenDebugLog(); 
-		fprintf(fp, "CmdEnd: ed=%p\n", player ); 
-		fclose(fp); 
-	}*/
-#endif
+	debugFile( "CmdEnd: ed=%p\n", player ); 
+
 	//debugMsg( "CmdEnd\n" );
    (*other_gFunctionTable.pfnCmdEnd)(player);
 }
@@ -253,9 +235,7 @@ void CreateInstancedBaselines( void )
 
 int InconsistentFile( const edict_t *player, const char *filename, char *disconnect_message )
 {
-#ifdef _DEBUG
-   if (debug_engine) { fp = UTIL_OpenDebugLog(); fprintf(fp, "InconsistentFile: %p filename=%s\n",player,filename); fclose(fp); }
-#endif
+	debugFile( "InconsistentFile: %p filename=%s\n",player,filename);
    return (*other_gFunctionTable.pfnInconsistentFile)(player, filename, disconnect_message);
 }
 

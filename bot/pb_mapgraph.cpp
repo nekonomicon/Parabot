@@ -20,7 +20,7 @@ PB_MapGraph::PB_MapGraph() :
 	nextId = 0;
 	nextPathId = 0;	// Path ID
 	passCount = 0;
-	for (int i=0; i<MAX_NAV_TYPES; i++) availableItems[i] = false;
+	memset( &availableItems, false, sizeof availableItems );
 }
 
 
@@ -33,7 +33,7 @@ PB_MapGraph::~PB_MapGraph()
 void PB_MapGraph::clear()
 // delete all data
 {
-	int numPaths;
+	//int numPaths;
 
 	for (int i=0; i<graph.size(); i++) {
 		//numPaths = graph[i].second.size();
@@ -271,9 +271,7 @@ void PB_MapGraph::addIfImprovement( PB_Path &path, bool addReturn )
 		path.endNav().print();*/
 	}
 /*	else {
-		debugMsg( "Discarded path to " );
-		debugMsg( cname );
-		debugMsg( "\n" );
+		debugMsg( "Discarded path to %s\n", cname );
 	}*/
 	if (addReturn) {
 		PB_Path rp;
@@ -487,7 +485,7 @@ int PB_MapGraph::getWishJourney( int start, PB_Needs &needs, int mode, PB_Journe
 void PB_MapGraph::initBackwardPaths()
 // called after load(), initializes data structures of backward paths
 {
-	int numPaths;
+	//int numPaths;
 	PB_Path p;
 	AdjPtr rp;
 	bool ok;
@@ -634,5 +632,3 @@ bool PB_MapGraph::save( char *mapname )
 	fclose( fp );
 	return true;
 }
-
-

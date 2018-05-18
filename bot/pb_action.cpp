@@ -41,7 +41,7 @@ void PB_Action::init( edict_t *botEnt )
 	maxTurn = 0;
 	fineJump = false;
 	longJumpState = 0;
-	maxSpeed = CVAR_GET_FLOAT("sv_maxspeed");
+	maxSpeed = serverMaxSpeed();
 	viewAngle = g_vecZero;
 	currentView = g_vecZero;
 	targetPos = g_vecZero;
@@ -52,8 +52,7 @@ void PB_Action::init( edict_t *botEnt )
 	lastMoveCheck = worldTime();
 	vupdTime = 0.1;
 	weaponCone = 0.1;	// 5°
-	int i;
-	for (i=0; i<MAX_VDELAY; i++) targetDiff[i] = 0;
+	memset( &targetDiff, 0, sizeof targetDiff );
 }
 
 
@@ -272,9 +271,7 @@ void PB_Action::setAimSkill( int skill )
 	aimSkill = skill;
 	vupdTime = updateTimes[10-skill];
 	aimAccuracy = accuracies[10-skill];
-//	char buf[80];
-//	sprintf( buf, "Set Aim to %i\n", skill );
-//	infoMsg( buf );
+//	infoMsg( "Set Aim to %i\n", skill );
 }
 
 

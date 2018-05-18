@@ -10,10 +10,8 @@ ifeq ($(TARGET_ARCH_ABI),armeabi-v7a-hard)
 LOCAL_MODULE_FILENAME = libparabot_hardfp
 endif
 
-LOCAL_CPPFLAGS := $(LOCAL_CFLAGS) -fno-exceptions -fno-rtti -ffunction-sections -fdata-sections \
-			-fno-asynchronous-unwind-tables -fno-unwind-tables
-
-LOCAL_LDFLAGS += -Wl,--gc-sections
+LOCAL_CPPFLAGS := $(LOCAL_CFLAGS) -fno-exceptions -fno-rtti  \
+			-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-common
 
 LOCAL_C_INCLUDES := \
 		$(LOCAL_PATH)/. \
@@ -65,7 +63,6 @@ LOCAL_SRC_FILES := \
 		../bot/pb_vistable.cpp \
 		../bot/pb_weapon.cpp \
 		../bot/pb_weaponhandling.cpp \
-		../bot/pbt_dynarray.cpp \
 		../bot/pbt_priorityqueue.cpp \
 		../bot/sounds.cpp \
 		../bot/utilityfuncs.cpp \

@@ -23,7 +23,6 @@ extern float globalFrameTime;	// set by the bots in action.msec()
 extern Sounds playerSounds;
 extern bool visualizeCellConnections;
 extern bot_t bots[32];
-extern int g_hldm_mod;
 
 PB_Navpoint* getNearestNavpoint( edict_t *pEdict );
 
@@ -112,7 +111,7 @@ int PB_Observer::registerPlayer( edict_t *player )
 	if ( obs[i].player != 0 ) {
 		// init vars:
 		startObservation( i );
-		debugMsg( "PB_Observer registered ", STRING(obs[i].player->v.netname), "\n" );
+		debugMsg( "PB_Observer registered %s\n", STRING(obs[i].player->v.netname) );
 		return i;
 	}
 	return -1;
@@ -172,7 +171,7 @@ int PB_Observer::checkGround( int oId, edict_t **plat )
 				}
 				if ( sId < 0 ) sId = getNavpointIndex( ground );
 				if (sId<0) {
-					debugMsg( "ERROR: Couldn't find navpoint for func ", STRING( ground->v.classname ), " !\n" );
+					debugMsg( "ERROR: Couldn't find navpoint for func %s!\n", STRING( ground->v.classname ) );
 				}
 				else {
 					// navpoint found, adding necessary information to path:
@@ -187,6 +186,7 @@ int PB_Observer::checkGround( int oId, edict_t **plat )
 					PB_Navpoint platNav = getNavpoint( sId );
 					if (platNav.needsTriggering() && platNav.isTriggered()) {
 						flags |= WP_PLAT_NEEDS_TRIGGER;
+#ifdef _DEBUG
 						debugSound( ENT(obs[oId].player), "weapons/mine_activate.wav" );
 						debugMsg( "Plat needs triggering by " );
 						for (int ni=0; ni<mapGraph.numberOfNavpoints(); ni++) {
@@ -196,13 +196,13 @@ int PB_Observer::checkGround( int oId, edict_t **plat )
 								debugMsg( "\n" );
 							}
 						}
+#endif
 					}
 				}
 				obs[oId].platform = ground;
 			}
 			/*else {
-				debugMsg( "Walking unknown ground ");
-				debugMsg( groundName ); debugMsg( "\n" );
+				debugMsg( "Walking unknown ground %s", groundName );
 			}*/
 		}
 		else {
@@ -215,7 +215,7 @@ int PB_Observer::checkGround( int oId, edict_t **plat )
 				}
 				if ( sId < 0 ) sId = getNavpointIndex( obs[oId].platform );
 				if (sId<0) {
-					debugMsg( "ERROR: Couldn't find navpoint for func ", STRING( obs[oId].platform->v.classname ), " !\n" );
+					debugMsg( "ERROR: Couldn't find navpoint for func %s!\n", STRING( obs[oId].platform->v.classname ) );
 				}
 				else {
 					// navpoint found, setting flag for waiting
@@ -230,7 +230,6 @@ int PB_Observer::checkGround( int oId, edict_t **plat )
 	
 	return flags;
 }
-
 
 
 bool PB_Observer::shouldObservePlayer( int oId )
@@ -281,12 +280,8 @@ int PB_Observer::getStartIndex( int oId, PB_Navpoint *endNav )
 	int foundIndex = -1;
 
 	int triggerCount = 0;
-	PB_Navpoint *trigger[MAX_TRIGGERS];
-	bool triggerOk[MAX_TRIGGERS];
-	for (int i=0; i<MAX_TRIGGERS; i++) {
-		trigger[i] = 0;
-		triggerOk[i] = true;
-	}
+	PB_Navpoint *trigger[MAX_TRIGGERS] = {0,};
+	bool triggerOk[MAX_TRIGGERS] = {false,};
 	if (endNav->needsTriggering()) {
 		debugSound( ENT(obs[oId].player), "weapons/mine_activate.wav" );
 		trigger[triggerCount] = endNav;	
@@ -540,7 +535,7 @@ void PB_Observer::checkForTripmines( int oId, Vector &pos )
 
 		if ( ( (obs[oId].player->v.button & IN_ATTACK) && 
 			 (playerWeapon==VALVE_WEAPON_TRIPMINE)) ||
-			(g_hldm_mod==BMOD &&(obs[oId].player->v.button & IN_ATTACK2) &&
+			(FBitSet( g_uiGameFlags, GAME_BMOD ) &&(obs[oId].player->v.button & IN_ATTACK2) &&
                          (playerWeapon==VALVE_WEAPON_TRIPMINE || playerWeapon==VALVE_WEAPON_SNARK ) ) )
 		{	// player is trying set up a tripmine, check if possible:
 			UTIL_MakeVectors( obs[oId].player->v.v_angle );
@@ -787,7 +782,7 @@ void PB_Observer::observeAll()
 		/*	if (obs[i].player->v.groundentity) {
 				const char *ground = STRING(obs[i].player->v.groundentity->v.classname);
 				if ( !FStrEq( ground, "world_spawn" ) ) {
-					debugMsg( "Ground entity = ", ground, "\n" );
+					debugMsg( "Ground entity = %s\n", ground );
 				}
 			}				 
 			trail[i].drawMarkers();
@@ -819,8 +814,7 @@ void PB_Observer::addWaypoint( int oId, Vector pos, int action, int col )
 	PB_Path_Waypoint wp( pos, (action | flags), worldTime() );
 	obs[oId].leadWaypoint++;
 	if (obs[oId].leadWaypoint==MAX_WPTS) obs[oId].leadWaypoint = 0;
-	//debugMsg( "Added WP %i", obs[oId].leadWaypoint );
-	//debugMsg( " at (%.f, %.f)\n", pos.x, pos.y );
+	//debugMsg( "Added WP %i at (%.f, %.f)\n", obs[oId].leadWaypoint, pos.x, pos.y );
 	waypoint[oId][obs[oId].leadWaypoint] = wp;
 	if( wp.isOnPlatform() && plat )
 	{

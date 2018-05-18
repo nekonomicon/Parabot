@@ -35,9 +35,7 @@ PB_Configuration::PB_Configuration()
 
 PB_Personality PB_Configuration::personality( int index )
 { 
-/*	char dbgBuffer[256];
-	sprintf( dbgBuffer, "  %i: %s  ", index, character[index].name );
-	debugFile( dbgBuffer );*/
+	debugFile( "  %i: %s  ", index, character[index].name );
 	return character[index]; 
 }
 
@@ -69,20 +67,20 @@ bool PB_Configuration::varSet( const char *srcName, const char *srcValue, const 
 {
 	if ( _stricmp( srcName, varName ) == 0 ) {
 		if (srcValue == 0) {
-			if (var) infoMsg( varName, " is on.\n" );
-			else	 infoMsg( varName, " is off.\n" );
+			if (var) infoMsg( "%s is on.\n", varName );
+			else	 infoMsg( "%s  is off.\n", varName );
 		}
 		else {
 			if ( _stricmp( srcValue, "ON" ) == 0 ) {
 				var = true;
-				infoMsg( varName, " activated.\n" );
+				infoMsg( "%s activated.\n", varName );
 			}
 			else if ( _stricmp( srcValue, "OFF" ) == 0 ) {
 				var = false;
-				infoMsg( varName, " deactivated.\n" );
+				infoMsg( "%s deactivated.\n", varName );
 			}
 			else {
-				infoMsg( "Usage: ", varName, " on/off\n"	);
+				infoMsg( "Usage: %s on/off\n", varName );
 			}
 		}
 		return true;
@@ -93,11 +91,9 @@ bool PB_Configuration::varSet( const char *srcName, const char *srcValue, const 
 
 bool PB_Configuration::varSet( const char *srcName, int srcValue, const char *varName, int &var )
 {
-	char buffer[64];
 	if ( _stricmp( srcName, varName ) == 0 ) {
 		var = srcValue;
-		sprintf( buffer, "%s set to %i\n", varName, srcValue );
-		infoMsg( buffer );
+		infoMsg( "%s set to %i\n", varName, srcValue );
 		return true;
 	}
 	else return false;
@@ -141,14 +137,14 @@ bool PB_Configuration::initConfiguration( const char *configPath )
 
 	FILE *file = fopen( str, "rt" );
 	if (!file) {
-		infoMsg( "Missing ", str, "\n" );
+		infoMsg( "Missing %s\n", str );
 
 		CreateDirectory( configPath, NULL );
 		if( !createConfiguration( str ) )
 			return false;
 		file = fopen( str, "rt" );
 	}
-	infoMsg( "Reading ", str, "... " );
+	infoMsg( "Reading %s... ", str );
 	
 	while (!feof(file)) {
 		fscanf( file, "%1s", str );			// read first char
@@ -204,7 +200,7 @@ bool PB_Configuration::initConfiguration( const char *configPath )
 				if (!varSet( str, file, "RestrictedWeapons",	restrictedWeaponMode	))
 				if (!varSet( str, file, "HideWelcome",			touringMode				))
 				if (!varSet( str, file, "ServerMode",			serverMode				)) {
-					debugMsg( "Unknown variable ", str, "\n" );
+					debugMsg( "Unknown variable %s\n", str );
 					fscanf( file, "%[^\n]", str );	//   ignore entire line
 				}
 			}
@@ -223,13 +219,13 @@ bool PB_Configuration::initPersonalities( const char *personalityPath )
 
 	FILE *file = fopen( str, "rt" );
 	if (!file) {
-		infoMsg( "Missing ", str, "\n" );
+		infoMsg( "Missing %s\n", str );
 
 		if( !createPersonalities( str ) )
 			return false;
 		file = fopen( str, "rt" );
 	}
-	infoMsg( "Reading ", str, "... " );
+	infoMsg( "Reading %s... ", str );
 
 	int nr = 0;
 	while (!feof(file)) {
@@ -273,7 +269,7 @@ bool PB_Configuration::createConfiguration( const char *configFile )
 {
 	FILE *file;
 
-	infoMsg( "Creating ", configFile, "... " );
+	infoMsg( "Creating %s... ", configFile  );
 	file = fopen( configFile, "wt" );
 
 	if( !file )
@@ -342,7 +338,7 @@ bool PB_Configuration::createPersonalities( const char *PersonalitityFile )
 {
 	FILE *file;
 
-	infoMsg( "Creating ", PersonalitityFile, "... " );
+	infoMsg( "Creating %s... ", PersonalitityFile );
 	file = fopen( PersonalitityFile, "wt" );
 
 	if( !file )

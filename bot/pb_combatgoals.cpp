@@ -32,8 +32,8 @@ void goalHuntEnemy( CParabot *pb, PB_Percept*item )
 			if ( (pl = map.getPathToAttack( start, enemyId, pb->roamingRoute )) > 0 ) {
 				pb->setRoamingIndex( pl );
 				pb->huntingFor = item->entity;
-				Vector startV = map.cell( start ).pos();
-				Vector endV;
+				// Vector startV = map.cell( start ).pos();
+				// Vector endV;
 				debugMsg( "HuntLength = %i", pl );				
 			}
 		}
@@ -282,11 +282,11 @@ void goalSilentAttack( CParabot *pb, PB_Percept*item )
 			case AG_DLL:
 			case HUNGER_DLL:
 			case GEARBOX_DLL:
-			case VALVE_DLL:		pb->combat.weapon.setPreferredWeapon( VALVE_WEAPON_SHOTGUN, 2 );	
+			case VALVE_DLL:		pb->combat.weapon.setPreferredWeapon( VALVE_WEAPON_SHOTGUN, 2 );
 								break;
-			case HOLYWARS_DLL:	pb->combat.weapon.setPreferredWeapon( HW_WEAPON_DOUBLESHOTGUN, 1 );	
+			case HOLYWARS_DLL:	pb->combat.weapon.setPreferredWeapon( HW_WEAPON_DOUBLESHOTGUN, 1 );
 								break;
-			case DMC_DLL:		pb->combat.weapon.setPreferredWeapon( DMC_WEAPON_SUPERSHOTGUN, 1 );	
+			case DMC_DLL:		pb->combat.weapon.setPreferredWeapon( DMC_WEAPON_SUPERSHOTGUN, 1 );
 								break;
 		}
 		if (item->distance > 50) {
@@ -308,7 +308,6 @@ void goalSilentAttack( CParabot *pb, PB_Percept*item )
 	item->flags |= PI_FOCUS1;
 }
 
-
 float weightSilentAttack( CParabot *pb, PB_Percept*item )
 {
 	assert( item != 0 );
@@ -322,8 +321,7 @@ float weightSilentAttack( CParabot *pb, PB_Percept*item )
 	return weight;
 }
 
-
-
+#if 0
 void goalPrepareAmbush( CParabot *pb, PB_Percept*item )
 // move to ambush position and wait
 {
@@ -334,7 +332,7 @@ float weightPrepareAmbush( CParabot *pb, PB_Percept*item )
 {
 	return 0;
 }
-
+#endif
 
 
 void goalShootAtEnemy( CParabot *pb, PB_Percept*item )
@@ -489,7 +487,7 @@ float weightShootAtSnark( CParabot *pb, PB_Percept*item )
 
 void goalBunnyHop( CParabot *pb, PB_Percept*item )
 {
-	static float nextHop[32] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+	static float nextHop[32] = { 0,};
 
 	int i = pb->slot;
 	if (worldTime() >= nextHop[i]) {

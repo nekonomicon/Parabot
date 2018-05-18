@@ -9,11 +9,9 @@
 extern int mod_id;
 extern int clientWeapon[32];
 extern bool haloOnBase;
-extern bool valveTeamPlayMode;
 extern PB_Configuration pbConfig;	// from configfiles.cpp
 extern Sounds playerSounds;
 extern PB_MapCells map;
-extern char ag_gamemode[8];
 
 int globalPerceptionId = 0;
 
@@ -239,12 +237,7 @@ bool PB_Perception::classify( PB_Percept &perc )
 		return true;
 	}
 
-	if ((mod_id==VALVE_DLL || mod_id==HUNGER_DLL || mod_id==GEARBOX_DLL || mod_id==DMC_DLL) && !valveTeamPlayMode) {
-		perc.pClass = PI_FOE;	// no friends in deathmatch...
-		return true;
-	}
-	else if (mod_id==AG_DLL && ( FStrEq( ag_gamemode, "ffa" ) || FStrEq( ag_gamemode, "lms" ) ) )
-	{
+	if ((mod_id==VALVE_DLL || mod_id==HUNGER_DLL || mod_id==GEARBOX_DLL || mod_id==DMC_DLL) && !FBitSet( g_uiGameFlags, GAME_TEAMPLAY )) {
 		perc.pClass = PI_FOE;	// no friends in deathmatch...
 		return true;
 	}
@@ -655,9 +648,7 @@ void PB_Perception::collectData()
 		else if (cdi->pClass == PI_PLAYER) numUnidentified++;
 		cdi++;
 	}
-	char buf[32];
-	sprintf( buf, "E=%i  U=%i\n", numEnemies, numUnidentified );
-	//debugMsg( buf );
+	//debugMsg( "E=%i  U=%i\n", numEnemies, numUnidentified );
 }
 
 
