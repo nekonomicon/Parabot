@@ -42,11 +42,6 @@ extern int				numberOfClients;
 static float	respawn_time;
 static float	client_update_time;
 
-// TheFatal's method for calculating the msecval
-int msecnum;
-float msecdel;
-float msecval;
-
 Vector playerPos;
 
 int mod_id;			// the MOD in which the bot runs
@@ -95,6 +90,12 @@ float serverMaxSpeed()
 	return maxspeed->value;
 }
 
+int GetFrameRateInterval()
+{
+	// Jumbot 2.4 has same code 
+	return static_cast<int>( gpGlobals->frametime * 1000.0f );
+}
+
 #include "parabot.h"
 
 void checkForMapChange()
@@ -105,10 +106,6 @@ void checkForMapChange()
 	// if a new map has started then...
 	if( previous_time > gpGlobals->time + 0.1 )
 	{
-		msecnum = 0;
-		msecdel = 0;
-		msecval = 0;
-
 #ifdef _DEBUG
 		glMarker.deleteAll();
 #endif
@@ -143,25 +140,6 @@ void checkForMapChange()
 		}
 	}
 	previous_time = gpGlobals->time;
-
-	// adjust the millisecond delay based on the frame rate interval...
-	if( msecdel <= gpGlobals->time )
-	{
-		msecdel = gpGlobals->time + 0.5;
-
-		if( msecnum > 0 )
-			msecval = 450.0 / msecnum;
-
-		msecnum = 0;
-	}
-	else
-		msecnum++;
-
-	if( msecval < 1 )	// don't allow msec to be less than 1...
-		msecval = 1;
-
-	if( msecval > 100 )	// ...or greater than 100
-		msecval = 100;
 
 	if (mod_id==CSTRIKE_DLL) {
 		// detect CS-roundstart

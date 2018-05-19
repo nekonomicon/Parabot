@@ -29,11 +29,6 @@ extern PB_Chat chat;
 //extern bool personalityUsed[MAX_PERS];			// true if bot exists using this personality
 extern int numberOfClients;
 
-// TheFatal's method for calculating the msecval
-extern int msecnum;
-extern float msecdel;
-extern float msecval;
-
 bot_t bots[32];   // max of 32 bots in a game
 
 void adjustAimSkills();
@@ -742,7 +737,7 @@ void BotThink( bot_t *pBot )
       BotStartGame( pBot );
 	  fixAngle( pEdict->v.v_angle );
       g_engfuncs.pfnRunPlayerMove( pEdict, pEdict->v.v_angle, 0.0,
-                                   0, 0, pEdict->v.button, 0, msecval);
+                                   0, 0, pEdict->v.button, 0, GetFrameRateInterval());
 	  pEdict->v.flags |= FL_FAKECLIENT;
       return;
    }
@@ -759,7 +754,7 @@ void BotThink( bot_t *pBot )
 
 	  fixAngle( pEdict->v.v_angle );
       g_engfuncs.pfnRunPlayerMove( pEdict, pEdict->v.v_angle, 0.0,
-                                   0, 0, pEdict->v.button, 0, msecval);
+                                   0, 0, pEdict->v.button, 0, GetFrameRateInterval());
 	  pEdict->v.flags |= FL_FAKECLIENT;
 	  return;
    }
@@ -775,7 +770,7 @@ void BotThink( bot_t *pBot )
    }
    else {	// prevent crashes...???
 	   g_engfuncs.pfnRunPlayerMove( pEdict, g_vecZero, 0,
-		   0, 0, 0, 0, msecval);
+		   0, 0, 0, 0, GetFrameRateInterval());
    }
 
    pEdict->v.flags |= FL_FAKECLIENT;

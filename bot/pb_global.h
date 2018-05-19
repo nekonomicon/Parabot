@@ -73,6 +73,9 @@ float worldTime();
 float serverMaxSpeed();
 // returns the maximum speed clients can reach
 
+int GetFrameRateInterval();
+// returns frame rate interval for new clients
+
 bool LOSExists( Vector v1, Vector v2 );
 // traces line with ignore monster from v1 to v2
 
