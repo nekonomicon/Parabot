@@ -278,7 +278,7 @@ public:
 	
 	void registerArmedWeapon( int wId );
 
-	char* name() {  return ( (char*)&modWeapon[currentWeapon].name );  }
+	const char* name() {  return modWeapon[currentWeapon].name;  }
 	// returns the weapon-name
 
 	float cone()	{ return modWeapon[currentWeapon].cone; }

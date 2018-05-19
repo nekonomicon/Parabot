@@ -162,7 +162,7 @@ void UTIL_SayText( const char *pText, edict_t *pEdict );
 int UTIL_GetTeam(edict_t *pEntity);
 int UTIL_GetBotIndex(edict_t *pEdict);
 bot_t *UTIL_GetBotPointer(edict_t *pEdict);
-void UTIL_SelectItem(edict_t *pEdict, char *item_name);
+void UTIL_SelectItem(edict_t *pEdict, const char *item_name);
 void UTIL_ShowMenu( edict_t *pEdict, int slots, int displaytime, bool needmore, const char *pText );
 
 #endif // BOT_H
