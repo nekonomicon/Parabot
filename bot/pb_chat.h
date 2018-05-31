@@ -49,7 +49,7 @@ public:
 	PB_Chat();
 	~PB_Chat();
 
-	bool load( const char *chatFile );
+	bool load();
 	bool free();
 
 	void registerGotKilled( edict_t *victim, edict_t *killer, const char *wpnName );

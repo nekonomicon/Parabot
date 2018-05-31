@@ -1,33 +1,42 @@
 #if !defined( PB_CONFIGURATION_H )
 #define PB_CONFIGURATION_H
 
-
+#include "extdll.h"
+#include "bot.h"
+#include "pb_global.h"
 #include <stdio.h>
 
-
-
-#define MAX_PERS 128	// different personalities
-
+extern cvar_t bot_num;
+extern cvar_t bot_minnum;
+extern cvar_t bot_maxnum;
+extern cvar_t bot_realgame;
+extern cvar_t bot_staytime;
+extern cvar_t bot_chatenabled;
+extern cvar_t bot_chatlang;
+extern cvar_t bot_chatlog;
+extern cvar_t bot_chatrespond;
+extern cvar_t bot_peacemode;
+extern cvar_t bot_restrictedweapons;
+extern cvar_t bot_touringmode;
+extern cvar_t bot_maxaimskill;
+extern cvar_t bot_minaimskill;
+extern cvar_t bot_menukey;
 
 typedef struct {
-	char name[32];
-	char model[32];
-	int  aimSkill;
-	int  aggression;
-	int  sensitivity;
-	int  communication;
+	char name[BOT_NAME_LEN];
+	char model[BOT_SKIN_LEN];
+	int aimSkill;
+	int aggression;
+	int sensitivity;
+	int communication;
+	char topColor[4];
+	char bottomColor[4];
 	bool inUse;
 } PB_Personality;
 
-
-
-
 class PB_Configuration
 {
-
-
 public:
-
 	PB_Configuration();
 
 	bool initConfiguration( const char *configPath );
@@ -38,77 +47,63 @@ public:
 
 	bool createPersonalities( const char *personalityFile );
 
-	bool setBoolVar( const char *name, const char *value );
+	bool savePersonalities( const char *personalityFile );
 
-	bool setIntVar( const char *name, int value, int min, int max );
+	void registerVars();
 
 	PB_Personality personality( int index );
 
-	const char* getColor( int persNr, int modulo );
+	const char *getColor( int persNr, int modulo );
 
-	void personalityJoins( int index, float time ) { character[index].inUse = true; }
+	const char *getTopColor( int index ) { return character[index].topColor; }
 
-	void personalityLeaves( int index, float time ) { character[index].inUse = false; }
+	const char *getBottomColor( int index ) { return character[index].bottomColor; }
 
-	int	numberOfPersonalities()		{ return maxPers;				}
+	void personalityJoins( int index ) { character[index].inUse = true; }
 
-	int minSkill()					{ return minAimSkill;			}
+	void personalityLeaves( int index ) { character[index].inUse = false; }
 
-	int maxSkill()					{ return maxAimSkill;			}
+	int numberOfPersonalities()		{ return character.size(); }
 
-	int numBots()					{ return myNumBots;				}
+	int minSkill()					{ return bot_minaimskill.value;	}
 
-	int minBots()					{ return myMinBots;				}
+	int maxSkill()					{ return bot_maxaimskill.value;	}
 
-	int maxBots()					{ return myMaxBots;				}
+	int numBots()					{ return bot_num.value;	}
 
-	float stayTime()				{ return myStayTime;			}
+	int minBots()					{ return bot_minnum.value;	}
 
-	char* chatFile()				{ return chatFileName;			}
+	int maxBots()					{ return bot_maxnum.value;	}
 
-	char* menuActivation()			{ return menuKey;				}
+	float stayTime()				{ return bot_staytime.value * 60; }
 
-	bool usingChat()				{ return botChat;				}
+	const char *chatFile()				{ return bot_chatlang.string;	}
 
-	bool onAlwaysRespond()			{ return chatAlwaysRespond;		}
+	bool usingChat()				{ return bot_chatenabled.value;	}
 
-	bool onServerMode()				{ return serverMode;			}
+	bool onAlwaysRespond()			{ return bot_chatrespond.value;	}
 
-	bool onPeaceMode()				{ return peaceMode;				}
+	bool onServerMode()				{ return bot_realgame.value;	}
 
-	bool onRestrictedWeaponMode()	{ return restrictedWeaponMode;	}
+	bool onPeaceMode()				{ return bot_peacemode.value;	}
 
-	bool onTouringMode()			{ return touringMode;			}
+	bool onRestrictedWeaponMode()	{ return bot_restrictedweapons.value;	}
 
-	bool onChatLog()				{ return chatLog;				}
+	bool onTouringMode()			{ return bot_touringmode.value;	}
 
+	bool onChatLog()			{ return bot_chatlog.value;	}
 
+	void setFloatVar( const char *name, float value = 0, int max = 1, int min = 0 )
+	{
+		CVAR_SET_FLOAT( name, clamp( value, max, min ) );
+	}
 
-protected:
+	bool loadModelList( const char *gamedir );
 
-	int clampInt( const char *str, int min, int max );
-
-	bool varSet( const char *srcName, const char *srcValue, const char *varName, bool &var );
-
-	bool varSet( const char *srcName, int srcValue, const char *varName, int &var );
-
-	bool varSet( const char *srcName, FILE *file, const char *varName, bool &var );
-
-
-
+	void clearModelList();
 private:
-
-	int myNumBots, myMinBots, myMaxBots;
-	float myStayTime;
-	int minAimSkill, maxAimSkill;
-	bool botChat, chatAlwaysRespond;
-	char chatFileName[64];
-	char menuKey[16];
-	bool peaceMode, restrictedWeaponMode, serverMode, touringMode, chatLog;
-
-	int maxPers;							// max. personlities
-	PB_Personality character[MAX_PERS];	// stores different bot personalities
-	
+	std::vector<PB_Personality> character;
+	std::vector<char*> playerModelList;
 };
 
 #endif

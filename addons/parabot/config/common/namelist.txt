@@ -1,0 +1,56 @@
+// This file contains default names and models for bots
+// in different mods and uses to generate characters.cfg.
+// If you want you can add new entries.
+// Format:
+// [MODFOLDER]
+// "name" "model"
+// DON'T REMOVE IT!!!
+
+[VALVE]
+"[PAS]Detonator"
+"Charming"
+"Quantum Neuromancer"
+"Renaissance"
+"Arnie"
+"Alien Hunter"
+"Lord Helmchen"
+"Cool J."
+"Paranoid"
+"Blastaway"
+"Afterburner"
+"Dark Avenger"
+"[RDZ]Pain"
+"[POD]Headshot Deluxe"
+"[CGF]Event Horizon"
+"[HPB]Roots"
+"Desperado"
+"Don Juan"
+"[PAS]Bladerunner"
+"Mad Max"
+
+[GEARBOX]
+"Adrian Shepard"	"shepard"
+"Otis Laurey"		"otis"
+"Tower"			"tower"
+"Sharpe"		"drill"
+"Eugene"		"beret"
+"John Smith"		"grunt"
+"Charlie Root"		"recruit"
+"Silent Assassin"	"massn"
+"Sinister"		"fassn"
+"Biohazard"		"cl_suit"
+
+[HUNGER]
+"[BWG]Dave Waters"	"dave"
+"[BWG]Einar Saukas"	"einar"
+"[BWG]Einar Saukas"	"einarhev"
+"Dr. Franklin"		"franklin"
+"[BWG]Jack Cooper"	"jack"
+"[BWG]Magnus Bernekarr"	"magnus"
+"[BWG]Neil Manke"	"neil"
+"[BWG]Paul Taylor"	"paul"
+"Chester Rockwood"	"sheriff"
+
+[AG]
+"BLUE BYTE"	"blue"
+"RED BYTE"	"red"

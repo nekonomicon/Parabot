@@ -1,37 +1,29 @@
 #include "pb_configuration.h"
 #include "pb_global.h"
 #include "bot.h"
+#include <dirent.h>
 
 extern int mod_id;
 extern char mod_name[32];
 
+cvar_t bot_num = { "bot_num", "5" };
+cvar_t bot_minnum = { "bot_minnum", "4" };
+cvar_t bot_maxnum = { "bot_maxnum", "6" };
+cvar_t bot_realgame = { "bot_realgame", "1" };
+cvar_t bot_staytime = { "bot_staytime", "20" };
+cvar_t bot_chatenabled = { "bot_chat_enabled", "1" };
+cvar_t bot_chatlang = { "bot_chatlang", "en_US" };
+cvar_t bot_chatlog = { "bot_chatlog", "0" };
+cvar_t bot_chatrespond = { "bot_chatrespond", "1" };
+cvar_t bot_peacemode = { "bot_peacemode", "0" };
+cvar_t bot_restrictedweapons = { "bot_restrictedweapons", "0" };
+cvar_t bot_touringmode = { "bot_touringmode", "0" };
+cvar_t bot_maxaimskill = { "bot_maxaimskill", "10" };
+cvar_t bot_minaimskill = { "bot_minaimskill", "1" };
+
 PB_Configuration::PB_Configuration()
 {
-	// number of bots
-	myNumBots = 5;
-	myMinBots = 4;
-	myMaxBots = 6;
-
-	// skills
-	minAimSkill = 1;
-	maxAimSkill = 10;
-
-	// chat
-	botChat = true;
-	strcpy( chatFileName, "ChatEnglish.txt" );
-	strcpy( menuKey, "=" );
-	chatAlwaysRespond = false;
-	
-	// game modes:
-	peaceMode = false;
-	restrictedWeaponMode = false;
-	serverMode = false;
-	myStayTime = 20.0 * 60;
-
-	// personalities:
-	maxPers = 0;
 }
-
 
 PB_Personality PB_Configuration::personality( int index )
 { 
@@ -39,228 +31,119 @@ PB_Personality PB_Configuration::personality( int index )
 	return character[index]; 
 }
 
-
-int PB_Configuration::clampInt( const char *str, int min, int max )
-{
-	int val = atoi( str );
-	if (val<min) val=min;
-	else if (val>max) val=max;
-	return val;
-}
-
-
-bool PB_Configuration::varSet( const char *srcName, FILE *file, const char *varName, bool &var )
-{
-	char buffer[1024];
-
-	if ( _stricmp( srcName, varName ) == 0 ) {
-		fscanf( file, " = %s ", buffer );
-		if ( _stricmp( buffer, "ON" ) == 0 ) var = true;
-		else if ( _stricmp( buffer, "OFF" ) == 0 ) var = false;
-		return true;
-	}
-	else return false;
-}
-
-
-bool PB_Configuration::varSet( const char *srcName, const char *srcValue, const char *varName, bool &var )
-{
-	if ( _stricmp( srcName, varName ) == 0 ) {
-		if (srcValue == 0) {
-			if (var) infoMsg( "%s is on.\n", varName );
-			else	 infoMsg( "%s  is off.\n", varName );
-		}
-		else {
-			if ( _stricmp( srcValue, "ON" ) == 0 ) {
-				var = true;
-				infoMsg( "%s activated.\n", varName );
-			}
-			else if ( _stricmp( srcValue, "OFF" ) == 0 ) {
-				var = false;
-				infoMsg( "%s deactivated.\n", varName );
-			}
-			else {
-				infoMsg( "Usage: %s on/off\n", varName );
-			}
-		}
-		return true;
-	}
-	else return false;
-}
-
-
-bool PB_Configuration::varSet( const char *srcName, int srcValue, const char *varName, int &var )
-{
-	if ( _stricmp( srcName, varName ) == 0 ) {
-		var = srcValue;
-		infoMsg( "%s set to %i\n", varName, srcValue );
-		return true;
-	}
-	else return false;
-}
-
-
-bool PB_Configuration::setBoolVar( const char *name, const char *value )
-{
-	if (!varSet( name, value, "BotChat",			botChat					)) 
-	if (!varSet( name, value, "AlwaysRespond",		chatAlwaysRespond		))
-	if (!varSet( name, value, "ChatLog",			chatLog					))
-	if (!varSet( name, value, "PeaceMode",			peaceMode				))
-	if (!varSet( name, value, "RestrictedWeapons",	restrictedWeaponMode	))
-	if (!varSet( name, value, "HideWelcome",		touringMode				))
-	if (!varSet( name, value, "ServerMode",			serverMode				))
-		return false;
-	return true;
-}
-
-
-bool PB_Configuration::setIntVar( const char *name, int value, int min, int max )
-{
-	if (value < min) value = min;
-	if (value > max) value = max;
-
-	if (!varSet( name, value, "MinBots",		myMinBots	)) 
-	if (!varSet( name, value, "MaxBots",		myMaxBots	)) 
-	if (!varSet( name, value, "NumBots",		myNumBots	)) 
-//	if (!varSet( name, value, "StayTime",		myStayTime	)) 
-	if (!varSet( name, value, "MinAimSkill",	minAimSkill	)) 
-	if (!varSet( name, value, "MaxAimSkill",	maxAimSkill	)) 
-		return false;
-	return true;
-}
-
 bool PB_Configuration::initConfiguration( const char *configPath )
 {
-	char str[256];
-	strcpy( str, configPath );
-	strcat( str, "parabot.cfg" );
+	char filename[64], cmd[64];
 
-	FILE *file = fopen( str, "rt" );
-	if (!file) {
-		infoMsg( "Missing %s\n", str );
+	registerVars();
+
+	strcpy( filename, configPath );
+	strcat( filename, "parabot.cfg" );
+
+	if( !UTIL_FileExists( filename ) )
+	{
+		infoMsg( "Missing %s\n", filename );
 
 		CreateDirectory( configPath, NULL );
-		if( !createConfiguration( str ) )
-			return false;
-		file = fopen( str, "rt" );
+		return createConfiguration( filename );
 	}
-	infoMsg( "Reading %s... ", str );
-	
-	while (!feof(file)) {
-		fscanf( file, "%1s", str );			// read first char
-		if (feof(file)) break;
 
-		while (str[0]=='#') {				// Comments:
-			fscanf( file, "%[^\n]", str );	//   read entire line
-			fscanf( file, "%1s", str );		//   read first char
-		}
-		if ( !feof(file) ) {
-			
-			fseek( file, -1, SEEK_CUR );	// reset filepointer
-			fscanf( file, "%[a-zA-Z]", str);// now we've got a complete word
-			
-			if ( _stricmp( str, "NumBots" ) == 0 ) {
-				fscanf( file, " = %[0-9] ", str );		// read number of bots
-				myNumBots = clampInt( str, 0, 32 );
-			}
-			else if ( _stricmp( str, "MinBots" ) == 0 ) {
-				fscanf( file, " = %[0-9] ", str );		// read min. number of bots
-				myMinBots = clampInt( str, 0, 32 );
-			}
-			else if ( _stricmp( str, "MaxBots" ) == 0 ) {
-				fscanf( file, " = %[0-9] ", str );		// read max. number of bots
-				myMaxBots = clampInt( str, myMinBots, 32 );
-			}
-			else if ( _stricmp( str, "AverageStay" ) == 0 ) {
-				fscanf( file, " = %[0-9] ", str );		// read staytime
-				myStayTime = 60.0 * (float)clampInt( str, 2, 180 );
-			}
-			else if ( _stricmp( str, "MinAimSkill" ) == 0 ) {
-				fscanf( file, " = %[0-9] ", str );		// read min aim skill
-				minAimSkill = clampInt( str, 1, 10 );
-			}
-			else if ( _stricmp( str, "MaxAimSkill" ) == 0 ) {
-				fscanf( file, " = %[0-9] ", str );		// read max aim skill
-				maxAimSkill = clampInt( str, minAimSkill, 10 );
-			}
-			else if ( _stricmp( str, "ChatFile" ) == 0 ) {
-				fscanf( file, " = \"%[^\"]\" ", str );		// read chat file
-				strcpy( chatFileName, str );
-			}
-			else if ( _stricmp( str, "MenuKey" ) == 0 ) {
-				fscanf( file, " = \"%[^\"]\" ", str );		// read menu key
-				strcpy( menuKey, str );
-			}
-			else {
-				// simple on/off switches:
-				if (!varSet( str, file, "BotChat",				botChat					))
-				if (!varSet( str, file, "AlwaysRespond",		chatAlwaysRespond		))
-				if (!varSet( str, file, "ChatLog",				chatLog					))
-				if (!varSet( str, file, "PeaceMode",			peaceMode				))
-				if (!varSet( str, file, "RestrictedWeapons",	restrictedWeaponMode	))
-				if (!varSet( str, file, "HideWelcome",			touringMode				))
-				if (!varSet( str, file, "ServerMode",			serverMode				)) {
-					debugMsg( "Unknown variable %s\n", str );
-					fscanf( file, "%[^\n]", str );	//   ignore entire line
-				}
-			}
-		}
-	}
-	fclose(	file );
-	infoMsg( "OK!\n" );
+	strcpy( cmd, "exec ");
+	strcat( cmd, &filename[strlen( mod_name ) + 1] );
+	strcat( cmd, "\n" );
+
+	SERVER_COMMAND( cmd );
+//	SERVER_EXECUTE;
+
 	return true;
+}
+
+void PB_Configuration::registerVars()
+{
+	CVAR_REGISTER( &bot_num );
+        CVAR_REGISTER( &bot_minnum );
+        CVAR_REGISTER( &bot_maxnum );
+        CVAR_REGISTER( &bot_realgame );
+        CVAR_REGISTER( &bot_staytime );
+        CVAR_REGISTER( &bot_chatenabled );
+        CVAR_REGISTER( &bot_chatlang );
+        CVAR_REGISTER( &bot_chatlog );
+        CVAR_REGISTER( &bot_chatrespond );
+        CVAR_REGISTER( &bot_peacemode );
+        CVAR_REGISTER( &bot_restrictedweapons );
+        CVAR_REGISTER( &bot_touringmode );
+        CVAR_REGISTER( &bot_maxaimskill );
+        CVAR_REGISTER( &bot_minaimskill );
 }
 
 bool PB_Configuration::initPersonalities( const char *personalityPath )
 {
-	char str[256];
-	strcpy( str, personalityPath );
-	strcat( str, "characters.cfg" );
+	byte *pMemFile;
+	int fileSize, filePos = 0;
+	const char *pBuffer;
+	char filename[64];
 
-	FILE *file = fopen( str, "rt" );
-	if (!file) {
-		infoMsg( "Missing %s\n", str );
+	strcpy( filename, personalityPath );
+	strcat( filename, "characters.cfg" );
+	
+	infoMsg( "Reading %s... ", filename );
 
-		if( !createPersonalities( str ) )
-			return false;
-		file = fopen( str, "rt" );
+	pMemFile = LOAD_FILE_FOR_ME( &filename[strlen( mod_name ) + 1], &fileSize );
+	if( !pMemFile )
+	{
+		infoMsg( "failed\n" );
+		return createPersonalities( filename );
 	}
-	infoMsg( "Reading %s... ", str );
 
-	int nr = 0;
-	while (!feof(file)) {
-		fscanf( file, "%1s", str );						// supposed name start '"'
-		if (feof(file)) break;
+	while( ( pBuffer = UTIL_memfgets( pMemFile, fileSize, filePos ) ) )
+	{
+		int iTopColor = 0, iBottomColor = 0;
+		char name[256], model[256]; 
+		PB_Personality newPers = {0};
 
-		while (str[0]=='#') {							// Comments
-			fscanf( file, "%[^\n]", str );				// read entire line
-			fscanf( file, "%1s", str );					// supposed name start '"'
-		}
-		if ( !feof(file) ) {
-			
-			fscanf( file, "%[^\"]\"", character[nr].name );		// read entire name
-						
-			fscanf( file, " \"%[^\"]\" ", character[nr].model );	// read entire model
-						
-			fscanf( file, "%s", str );						// aim skill
-			character[nr].aimSkill = clampInt( str, 1, 10 );
-			
-			fscanf( file, "%s", str );						// aggression
-			character[nr].aggression = clampInt( str, 1, 10 );
-			
-			fscanf( file, "%s", str );						// sensitivity
-			character[nr].sensitivity = clampInt( str, 1, 10 );
+		// skip whitespace
+		while( *pBuffer && isspace( *pBuffer ) )
+			pBuffer++;
 
-			fscanf( file, "%s", str );						// communication
-			character[nr].communication = clampInt( str, 1, 10 );
-			
-			nr++;
-			if (nr==MAX_PERS) break;
-		}
+		if( !*pBuffer )
+			continue;
+
+		// skip comment lines
+		if( *pBuffer == '/' )
+			continue;
+
+		if( 8 > sscanf( pBuffer, "\"%[^\"]\" \"%[^\"]\" %i%i%i%i%i%i", name,	// read entire name
+								model,		// read entire model
+								&newPers.aimSkill,		// aim skill
+								&newPers.aggression,	// aggression
+								&newPers.sensitivity,	// sensitivity
+								&newPers.communication,	// communication
+								&iTopColor,	// top color
+								&iBottomColor ) ) 	// bottom color
+			continue;
+
+		strcpy_s( newPers.name, BOT_NAME_LEN, name );
+		strcpy_s( newPers.model, BOT_SKIN_LEN, model );
+		newPers.aimSkill = clamp( newPers.aimSkill, 1, 10 );
+		newPers.aggression = clamp( newPers.aggression, 1, 10 );
+		newPers.sensitivity = clamp( newPers.sensitivity, 1, 10 );
+		newPers.communication = clamp( newPers.communication, 1, 10 );
+		iTopColor = clamp( iTopColor, 0, 255 );
+		iBottomColor = clamp( iBottomColor, 0, 255 );
+		sprintf( newPers.topColor,"%i", iTopColor );
+		sprintf( newPers.bottomColor,"%i", iBottomColor );
+		character.push_back( newPers );
 	}
-	maxPers = nr;
-	fclose(	file );
-	for (nr=0; nr<MAX_PERS; nr++) character[nr].inUse = false;
+
+	FREE_FILE( pMemFile );
+
+	if( !character.size() )
+	{
+		infoMsg( "failed\n" );
+		errorMsg( "Empty or broken %s\n", filename );
+		return createPersonalities( filename );
+	}
+
 	infoMsg( "OK!\n" );
 	return true;
 }
@@ -268,7 +151,7 @@ bool PB_Configuration::initPersonalities( const char *personalityPath )
 bool PB_Configuration::createConfiguration( const char *configFile )
 {
 	FILE *file;
-
+	cvar_t *list;
 	infoMsg( "Creating %s... ", configFile  );
 	file = fopen( configFile, "wt" );
 
@@ -278,55 +161,19 @@ bool PB_Configuration::createConfiguration( const char *configFile )
 		return false;
 	}
 
-	fprintf( file, "############################################################################################\n" );
-	fprintf( file, "#                                     PARABOT.CFG                                          #\n" );
-	fprintf( file, "#                                                                                          #\n" );
-	fprintf( file, "#  This is the main configuration file for the Parabot. There are three main sections to   #\n" );
-	fprintf( file, "#  configure basic game options, global botskill values and the chat-and-response system.  #\n" );
-	fprintf( file, "#                                                                                          #\n" );
-	fprintf( file, "#                                                                                          #\n" );
-	fprintf( file, "############################################################################################\n\n\n" );
-	fprintf( file, "#-------------------------------------------------------------------------------------------\n" );
-	fprintf( file, "# GAME CONFIGURATION\n" );
-	fprintf( file, "#-------------------------------------------------------------------------------------------\n\n\n" );
-	fprintf( file, "# When \"ServerMode\" is turned on, bots will join and leave the server randomly, staying\n" );
-	fprintf( file, "# approximately \"AverageStay\" minutes. There will be at least \"MinBots\" on the server but\n" );
-	fprintf( file, "# not more than \"MaxBots\".\n\n" );
-	fprintf( file, "ServerMode = On\n" );
-	fprintf( file, "MinBots = 4\n" );
-	fprintf( file, "MaxBots = 8\n" );
-	fprintf( file, "AverageStay = 10\n\n" );
-	fprintf( file, "# \"NumBots\" specifies the number of bots that should play the game when \"ServerMode\" is off.\n" );
-	fprintf( file, "# When \"ServerMode\" is on this number has no effect.\n\n" );
-	fprintf( file, "NumBots = 6\n\n\n" );
-	fprintf( file, "# PeaceMode = On/Off (Default=Off)\n" );
-	fprintf( file, "# If enabled bots won't shoot at you (nor at each other) while they are not attacked\n\n" );
-	fprintf( file, "PeaceMode = Off\n\n\n" );
-	fprintf( file, "# RestrictedWeapons = On/Off (Default=Off)\n" );
-	fprintf( file, "# If enabled bots can't use the more powerful weapons (MP5, crossbow, shotgun, rpg, gauss\n" );
-	fprintf( file, "# and egon). No restrictions for you.\n\n" );
-	fprintf( file, "RestrictedWeapons = Off\n\n\n" );
-	fprintf( file, "#-------------------------------------------------------------------------------------------\n" );
-	fprintf( file, "# SKILL CONFIGURATION\n" );
-	fprintf( file, "#-------------------------------------------------------------------------------------------\n\n\n" );
-	fprintf( file, "# MinAimSkill sets a minimum AimSkill that overrides lower values in characters.cfg, i.e.\n" );
-	fprintf( file, "# all bots will have at least this minimum value\n\n" );
-	fprintf( file, "MinAimSkill = 3\n\n\n" );
-	fprintf( file, "# MaxAimSkill sets a maximum AimSkill that overrides higher values in characters.cfg, i.e.\n" );
-	fprintf( file, "# all bots will have at most this maximum value\n\n" );
-	fprintf( file, "MaxAimSkill = 8\n\n\n" );
-	fprintf( file, "#-------------------------------------------------------------------------------------------\n" );
-	fprintf( file, "# CHAT CONFIGURATION\n" );
-	fprintf( file, "#-------------------------------------------------------------------------------------------\n\n\n" );
-	fprintf( file, "# BotChat = On/Off (Default=On)\n" );
-	fprintf( file, "# If enabled bots will chat as much as their communication-value permits.\n\n" );
-	fprintf( file, "BotChat = On\n\n\n" );
-	fprintf( file, "# ChatFile determines the language the bots use for chatting (Default=\"ChatEnglish.txt\")\n\n" );
-	fprintf( file, "ChatFile = \"ChatEnglish.txt\"\n\n\n" );
-	fprintf( file, "# AlwaysRespond = On/Off (Default=On)\n" );
-	fprintf( file, "# If enabled bots will always respond to things you say, never mind their comm-value.\n\n" );
-	fprintf( file, "AlwaysRespond = On\n\n" );
-	fprintf( file, "#-------------------------------------------------------------------------------------------" );
+#define PARABOT_PREAMBULA "//=======================================================================\n" \
+			"//\t\tparabot.cfg - the main configuration file for the Parabot.\n" \
+			"//=======================================================================\n"
+
+	fputs( PARABOT_PREAMBULA, file );
+
+	for( list = &bot_chatenabled; list; list = list->next )
+	{
+		if( strncmp( list->name, "bot_", 4 ) )
+			break;
+
+		fprintf( file,"%s \"%s\"\n", list->name, list->string );
+	}
 
 	fclose( file );
 
@@ -334,12 +181,107 @@ bool PB_Configuration::createConfiguration( const char *configFile )
 	return true;
 }
 
-bool PB_Configuration::createPersonalities( const char *PersonalitityFile )
+bool PB_Configuration::createPersonalities( const char *personalityFile )
 {
+	byte *pMemFile;
+	int fileSize, filePos = 0;
+	const char *pBuffer;
+	char filename[64];
+
+	strcpy( filename, mod_name );
+	strcat( filename, "/addons/parabot/config/common/namelist.txt" );
+
+	if( !UTIL_FileExists( filename ) )
+	{
+		infoMsg( "Missing %s\n", filename );
+		return false;
+	}
+
+	if( !loadModelList( mod_name ) )
+		return false;
+
+	infoMsg( "Reading %s... ", filename );
+
+	pMemFile = LOAD_FILE_FOR_ME( &filename[strlen( mod_name ) + 1], &fileSize );
+	if( !pMemFile )
+	{
+		infoMsg( "failed\n" );
+		clearModelList();
+		return false;
+	}
+
+	while( ( pBuffer = UTIL_memfgets( pMemFile, fileSize, filePos ) ) )
+	{
+		char gamedir[256], name[256], model[256];
+		const char *pszModel;
+		PB_Personality newPers = {0};
+		int args;
+		static bool readNextLine = false;
+
+		// skip whitespace
+		while( *pBuffer && isspace( *pBuffer ) )
+			pBuffer++;
+
+		if( !*pBuffer )
+			continue;
+
+		// skip comment lines
+		if( *pBuffer == '/' )
+			continue;
+
+		if( *pBuffer == '[' )
+		{
+			if( 1 != sscanf( pBuffer,"[%[^]]]", gamedir ) )
+				continue;
+
+			if( FStriEq( gamedir, mod_name )
+				|| FStriEq( gamedir, "valve" ))
+				readNextLine = true;
+			else
+				readNextLine = false;
+			continue;
+		}
+		else if( !readNextLine )
+			continue;
+
+		args = sscanf( pBuffer, "\"%[^\"]\" \"%[^\"]\"", name,	// read entire name
+								model );	// read entire model
+
+		if( args == 0 )
+			continue;
+		else if( args < 2 )
+			pszModel = playerModelList[RANDOM_LONG( 0, playerModelList.size() - 1 )];
+		else
+			pszModel = model;
+
+		strcpy_s( newPers.name, BOT_NAME_LEN, name );
+		strcpy_s( newPers.model, BOT_SKIN_LEN, pszModel );
+
+		newPers.aimSkill = RANDOM_LONG( 1, 10 );
+		newPers.aggression = RANDOM_LONG( 1, 10 );
+		newPers.sensitivity = RANDOM_LONG( 1, 10 );
+		newPers.communication = RANDOM_LONG( 1, 10 );
+		character.push_back( newPers );
+		strcpy( character[character.size() - 1].topColor, getColor( character.size() - 1, 371 ) );
+		strcpy( character[character.size() - 1].bottomColor, getColor( character.size() - 1, 97 ) );
+	}
+	
+	FREE_FILE( pMemFile );
+
+	infoMsg( "OK!\n" );
+
+	clearModelList();
+
+	return savePersonalities( personalityFile );
+}
+
+bool PB_Configuration::savePersonalities( const char *personalityFile )
+{
+	int i;
 	FILE *file;
 
-	infoMsg( "Creating %s... ", PersonalitityFile );
-	file = fopen( PersonalitityFile, "wt" );
+	infoMsg( "Creating %s... ", personalityFile );
+	file = fopen( personalityFile, "wt" );
 
 	if( !file )
 	{
@@ -347,125 +289,97 @@ bool PB_Configuration::createPersonalities( const char *PersonalitityFile )
 		return false;
 	}
 
-	fprintf( file, "############################################################################################\n" );
-	fprintf( file, "#                                   CHARACTERS.CFG                                         #\n" );
-	fprintf( file, "#                                                                                          #\n" );
-	fprintf( file, "#  This file allows you to configure the individual PARABOT characters.                    #\n" );
-	fprintf( file, "#  Change these settings or add new entries as you like, using the following parameters:   #\n" );
-	fprintf( file, "#                                                                                          #\n" );
-	fprintf( file, "#  1) Name:         String (using \"...\") of the playername                                 #\n" );
-	fprintf( file, "#  2) Model:        String (using \"...\") of a standard model (e.g. \"gordon\") or a valid    #\n" );
-	fprintf( file, "#                   custom model in the <modfolder>/models/player directory                #\n" );
-	fprintf( file, "#  3) Aimskill:     Sets the aiming capability, ranging from 1 (lame) to 10 (deadly)       #\n" );
-	fprintf( file, "#  4) Aggressivity: Sets the combat behaviour, ranging from 1 (camper) to 10 (berzerk)     #\n" );
-	fprintf( file, "#  5) Sensitivity:  Controls the perceptions (seeing & hearing) of the bot, ranging from   #\n" );
-	fprintf( file, "#                   1 (nearly blind & deaf) to 10 (capturing everything)                   #\n" );
-	fprintf( file, "#  6) Chatrate:     Adjustable from 1 (doesn't chat) to 10 (blablabla... :-) )             #\n" );
-	fprintf( file, "#                                                                                          #\n" );
-	fprintf( file, "#  Be careful with adding new entries: if the format does not exactly match the above      #\n" );
-	fprintf( file, "#  specifications, the game will probably be hanging at startup.                           #\n" );
-	fprintf( file, "#  This file must contain at least one entry, the maximum limit is 128.                    #\n" );
-	fprintf( file, "#                                                                                          #\n" );
-	fprintf( file, "############################################################################################\n\n\n" );
-	fprintf( file, "# Botname\t\tBotmodel\t\tAiming\tAggres.\tSensing\tChat\n" );
-	fprintf( file, "# -----------------------------------------------------------------------------\n" );
+#define CHARACTERS_PREAMBULA "//==========================================================================================\n" \
+				"//  characters.cfg - uses to configure the individual PARABOT characters.\n" \
+				"//  Change these settings or add new entries as you like, using the following parameters:\n" \
+				"//\n" \
+				"//  1) Name:         String (using \"...\") of the playername\n" \
+				"//  2) Model:        String (using \"...\") of a standard model (e.g. \"gordon\") or a valid\n" \
+				"//                   custom model in the <modfolder>/models/player directory\n" \
+				"//  3) Aimskill:     Sets the aiming capability, ranging from 1 (lame) to 10 (deadly)\n" \
+				"//  4) Aggressivity: Sets the combat behavior, ranging from 1 (camper) to 10 (berzerk)\n" \
+				"//  5) Sensitivity:  Controls the perceptions (seeing & hearing) of the bot, ranging from\n" \
+				"//                   1 (nearly blind & deaf) to 10 (capturing everything)\n" \
+				"//  6) Chatrate:     Adjustable from 1 (doesn't chat) to 10 (blablabla... :-) )\n" \
+				"//  7) Topcolor:     Sets color of model top.\n" \
+				"//  8) Bottomcolor:  Sets color of model bottom.\n" \
+				"//\n" \
+				"//  Be careful with adding new entries: if the format does not exactly match the above\n" \
+				"//  specifications, the game will probably be hanging at startup.\n" \
+				"//  This file must contain at least one entry, no limits on entries count.\n" \
+				"//==========================================================================================\n" \
+				"// Botname\tBotmodel\tAiming\tAggres.\tSensing\tChat\tTopcolor\tBottomcolor\n" \
+				"//------------------------------------------------------------------------------------------\n"
 
-	switch( mod_id )
-	{
-		case GEARBOX_DLL:
-			fprintf( file, "\"Adrian Shepard\"\t\"shepard\"\t\t9\t8\t8\t6\n" );
-			fprintf( file, "\"Otis Laurey\"\t\t\"otis\"\t\t\t6\t3\t5\t8\n" );
-			fprintf( file, "\"Tower\"\t\t\t\"tower\"\t\t\t8\t6\t8\t5\n" );
-			fprintf( file, "\"Sharpe\"\t\t\"drill\"\t\t\t8\t4\t6\t10\n" );
-			fprintf( file, "\"Eugene\"\t\t\"beret\"\t\t\t6\t7\t9\t5\n" );
-			fprintf( file, "\"John Smith\"\t\t\"grunt\"\t\t\t7\t8\t6\t4\n" );
-			fprintf( file, "\"Charlie Root\"\t\t\"recruit\"\t\t7\t7\t7\t7\n" );
-			fprintf( file, "\"Silent Assassin\"\t\"massn\"\t\t\t10\t1\t10\t1\n" );
-			fprintf( file, "\"Sinister\"\t\t\"fassn\"\t\t\t10\t1\t10\t1\n" );
-			fprintf( file, "\"Biohazard\"\t\t\"cl_suit\"\t\t4\t1\t4\t2\n" );
-		case AG_DLL:
-		case DMC_DLL:
-		case VALVE_DLL:
-			fprintf( file, "\"[PAS]Detonator\"\t\"scientist\"\t\t10\t10\t10\t8\n" );
-			fprintf( file, "\"Charming\"\t\t\"gina\"\t\t\t9\t5\t8\t4\n" );
-			fprintf( file, "\"Quantum Neuromancer\"\t\"helmet\"\t\t3\t3\t6\t5\n" );
-			fprintf( file, "\"Renaissance\"\t\t\"recon\"\t\t\t4\t1\t8\t10\n" );
-			fprintf( file, "\"Arnie\"\t\t\t\"hgrunt\"\t\t1\t7\t3\t2\n" );
-			fprintf( file, "\"Alien Hunter\"\t\t\"zombie\"\t\t6\t5\t5\t6\n" );
-			fprintf( file, "\"Lord Helmchen\"\t\t\"helmet\"\t\t7\t2\t6\t1\n" );
-			fprintf( file, "\"Cool J.\"\t\t\"gordon\"\t\t8\t6\t9\t3\n" );
-			fprintf( file, "\"Paranoid\"\t\t\"gman\"\t\t\t3\t9\t7\t9\n" );
-			fprintf( file, "\"Blastaway\"\t\t\"gman\"\t\t\t10\t6\t3\t7\n" );
-			fprintf( file, "\"Afterburner\"\t\t\"hgrunt\"\t\t1\t8\t7\t4\n" );
-			fprintf( file, "\"Dark Avenger\"\t\t\"scientist\"\t\t2\t5\t2\t6\n" );
-			fprintf( file, "\"[RDZ]Pain\"\t\t\"hgrunt\"\t\t8\t7\t6\t2\n" );
-			fprintf( file, "\"[POD]Headshot Deluxe\"\t\"robo\"\t\t\t8\t3\t9\t8\n" );
-			fprintf( file, "\"[CGF]Event Horizon\"\t\"robo\"\t\t\t9\t4\t7\t5\n" );
-			fprintf( file, "\"[HPB]Roots\"\t\t\"robo\"\t\t\t6\t8\t6\t9\n" );
-			fprintf( file, "\"Desperado\"\t\t\"recon\"\t\t\t4\t10\t5\t7\n" );
-			fprintf( file, "\"Don Juan\"\t\t\"barney\"\t\t2\t4\t4\t10\n" );
-			fprintf( file, "\"[PAS]Bladerunner\"\t\"gordon\"\t\t7\t5\t10\t3\n" );
-			fprintf( file, "\"Mad Max\"\t\t\"zombie\"\t\t4\t6\t5\t1\n" );
-			break;
-		case HOLYWARS_DLL:
-			fprintf( file, "\"[PAS]Detonator\"\t\"bad\"\t\t\t10\t10\t10\t8\n" );
-			fprintf( file, "\"Charming\"\t\t\"bad\"\t\t\t9\t5\t8\t4\n" );
-			fprintf( file, "\"Quantum Neuromancer\"\t\"akedo\"\t\t\t3\t3\t6\t5\n" );
-			fprintf( file, "\"Renaissance\"\t\t\"gordon\"\t\t4\t1\t8\t10\n" );
-			fprintf( file, "\"Arnie\"\t\t\t\"akedo\"\t\t\t1\t7\t3\t2\n" );
-			fprintf( file, "\"Alien Hunter\"\t\t\"bad\"\t\t\t6\t5\t5\t6\n" );
-			fprintf( file, "\"Lord Helmchen\"\t\t\"helmet\"\t\t7\t2\t6\t1\n" );
-			fprintf( file, "\"Cool J.\"\t\t\"gordon\"\t\t8\t6\t9\t3\n" );
-			fprintf( file, "\"Paranoid\"\t\t\"helmet\"\t\t3\t9\t7\t9\n" );
-			fprintf( file, "\"Blastaway\"\t\t\"gordon\"\t\t10\t6\t3\t7\n" );
-			fprintf( file, "\"Afterburner\"\t\t\"gordon\"\t\t1\t8\t7\t4\n" );
-			fprintf( file, "\"Dark Avenger\"\t\t\"akedo\"\t\t\t2\t5\t2\t6\n" );
-			fprintf( file, "\"[RDZ]Pain\"\t\t\"akedo\"\t\t\t8\t7\t6\t2\n" );
-			fprintf( file, "\"[POD]Headshot Deluxe\"\t\"robo\"\t\t\t8\t3\t9\t8\n" );
-			fprintf( file, "\"[CGF]Event Horizon\"\t\"robo\"\t\t\t9\t4\t7\t5\n" );
-			fprintf( file, "\"[HPB]Roots\"\t\t\"robo\"\t\t\t6\t8\t6\t9\n" );
-			fprintf( file, "\"Desperado\"\t\t\"bad\"\t\t\t4\t10\t5\t7\n" );
-			fprintf( file, "\"Don Juan\"\t\t\"bad\"\t\t\t2\t4\t4\t10\n" );
-			fprintf( file, "\"[PAS]Bladerunner\"\t\"gordon\"\t\t7\t5\t10\t3\n" );
-			fprintf( file, "\"Mad Max\"\t\t\"akedo\"\t\t\t4\t6\t5\t1" );
-			break;
-		case HUNGER_DLL:
-			fprintf( file, "\"Don Juan\"\t\t\"civie\"\t\t\t2\t4\t4\t10\n" );
-			fprintf( file, "\"[BWG]Dave Waters\"\t\"dave\"\t\t\t7\t6\t8\t6\n" );
-			fprintf( file, "\"[BWG]Einar Saukas\"\t\"einar\"\t\t\t8\t3\t8\t5\n" );
-			fprintf( file, "\"[BWG]Einar Saukas\"\t\"einarhev\"\t\t8\t3\t8\t5\n" );
-			fprintf( file, "\"Dr. Franklin\"\t\t\"franklin\"\t\t1\t5\t3\t3\n" );
-			fprintf( file, "\"Alien Hunter\"\t\t\"gangster\"\t\t6\t5\t5\t6\n" );
-			fprintf( file, "\"[BWG]Jack Cooper\"\t\"jack\"\t\t\t7\t2\t6\t5\n" );
-			fprintf( file, "\"[BWG]Magnus Bernekarr\"\t\"magnus\"\t\t8\t6\t9\t3\n" );
-			fprintf( file, "\"[BWG]Neil Manke\"\t\"neil\"\t\t\t8\t7\t8\t9\n" );
-			fprintf( file, "\"Nohead Zombie\"\t\t\"nohead\"\t\t1\t1\t1\t1\n" );
-			fprintf( file, "\"Blastaway\"\t\t\"nypdcop\"\t\t10\t6\t3\t7\n" );
-			fprintf( file, "\"[RDZ]Pain\"\t\t\"orderly\"\t\t8\t7\t6\t2\n" );
-			fprintf( file, "\"Paranoid\"\t\t\"patient\"\t\t3\t9\t7\t9\n" );
-			fprintf( file, "\"[BWG]Paul Taylor\"\t\"paul\"\t\t\t6\t5\t7\t5\n" );
-			fprintf( file, "\"Chester Rockwood\"\t\"sheriff\"\t\t6\t5\t4\t9\n" );
-			fprintf( file, "\"Desperado\"\t\t\"worker\"\t\t6\t4\t6\t7\n" );
-			fprintf( file, "\"Zombie Ork\"\t\t\"zork\"\t\t\t10\t10\t10\t8\n" );
-			fprintf( file, "\"[HPB]Roots\"\t\t\"civie\"\t\t\t6\t8\t6\t9\n" );
-			fprintf( file, "\"[POD]Headshot Deluxe\"\t\"gangster\"\t\t8\t3\t9\t8\n" );
-			fprintf( file, "\"Renaissance\"\t\t\"patient\"\t\t4\t1\t8\t10\n" );
-			break;
-	}
+	fputs( CHARACTERS_PREAMBULA, file );
 
-	switch( mod_id )
-	{
-		case AG_DLL:
-			fprintf( file, "\"Red Byte\"\t\t\"red\"\t\t\t8\t8\t8\t8\n" );
-			fprintf( file, "\"Blue Byte\"\t\t\"blue\"\t\t\t8\t8\t8\t8\n" );
-			break;
-		default:
-			break;
-	}
+	for( i = 0; i < character.size(); i++ )
+		fprintf( file, "\"%s\"\t\"%s\"\t%i\t%i\t%i\t%i\t%s\t%s\n", character[i].name,
+									character[i].model,
+									character[i].aimSkill,
+									character[i].aggression,
+									character[i].sensitivity,
+									character[i].communication,
+									character[i].topColor,
+									character[i].bottomColor );
+
 	fclose( file );
 
 	infoMsg( "OK!\n" );
 	return true;
+}
+
+bool PB_Configuration::loadModelList( const char *gamedir )
+{
+	char filePath[64];
+	DIR *dfd;
+	struct dirent *model;
+	static bool bGamedirIsEmpty = false;
+
+	strcpy( filePath, gamedir );
+	strcat( filePath, "/models/player" );
+
+	infoMsg( "Loading list of models from %s... ", filePath );
+
+	dfd = opendir( filePath );
+
+	while( ( model = readdir( dfd ) ) )
+	{
+		if( FStrEq( model->d_name, ".") )
+			continue;
+
+		if( FStrEq( model->d_name, "..") )
+			continue;
+
+		playerModelList.push_back( strdup( model->d_name ) );
+	}
+	closedir( dfd );
+
+	if( !playerModelList.size() )
+	{
+		infoMsg( "failed!\n" );
+
+		if( bGamedirIsEmpty )
+			return false;
+
+		bGamedirIsEmpty = true;
+		return loadModelList( "valve" ); // TODO: add check for fallback_dir
+	}
+
+	infoMsg( "OK!\n" );
+	return true;
+}
+
+void PB_Configuration::clearModelList()
+{
+	int i;
+
+	for( i = 0; i < playerModelList.size(); i++ )
+	{
+		free( playerModelList[i] );
+	}
+
+	playerModelList.clear();
 }
 
 const char* PB_Configuration::getColor( int persNr, int modulo )

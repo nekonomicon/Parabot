@@ -18,7 +18,7 @@ else
 ifneq (, $(findstring x86_64, $(SYS)))
 ifneq (, $(findstring mingw, $(SYS)))
 MODULE =	parabot64
-endif
+else
 ifneq (, $(findstring linux, $(SYS)))
 MODULE =	parabot64
 endif
@@ -27,6 +27,7 @@ MODULE =	parabot64
 endif
 endif
 CFLAGS +=       -fPIC
+endif
 endif
 
 ifneq ($(DEBUG),1)

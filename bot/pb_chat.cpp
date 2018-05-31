@@ -84,80 +84,102 @@ PB_Chat::~PB_Chat()
 }
 
 
-bool PB_Chat::load( const char *chatFile )
+bool PB_Chat::load()
 {
-	char str[256];
+	char str[256], filename[64];
+	int fileSize, filePos = 0;
+	const char *pBuffer;
+	byte *pMemFile;
 	ChatList *currentCodeBlock;
 
-	FILE *file = fopen( chatFile, "rt" );
-	if (!file) {
-		errorMsg( "Missing %s\n", chatFile );
+	strcpy( filename, "addons/parabot/config/lang/chat/" );
+	strcat( filename, pbConfig.chatFile() );
+	strcat( filename, ".txt" );
+
+	infoMsg( "Reading %s... ", filename );
+
+	pMemFile = LOAD_FILE_FOR_ME( filename, &fileSize );
+	if( !pMemFile )
+	{
+		infoMsg( "failed\n" );
 		return false;
 	}
 
-	if (chatFileLoaded) free();
+	if( chatFileLoaded )
+		free();
 
-	infoMsg( "Reading %s... ", chatFile );
 	currentCodeBlock = 0;
-		
-	while (!feof(file)) {
-		fscanf( file, "%1s", str );			// read first char
-		if (feof(file)) break;
 
-		while (str[0]=='#') {				// Comments:
-			fscanf( file, "%[^\n]", str );	//   read entire line
-			fscanf( file, "%1s", str );		//   read first char
+	while( ( pBuffer = UTIL_memfgets( pMemFile, fileSize, filePos ) ) )
+	{
+		// skip whitespace
+		while( *pBuffer && isspace( *pBuffer ) )
+			pBuffer++;
+
+		if( !*pBuffer )
+			continue;
+
+		// skip comment lines
+		if( *pBuffer == '#' )
+			continue;
+
+		if (*pBuffer=='@')		// new codeblock
+		{
+			sscanf( pBuffer, "@%s", str );
+			if ( FStriEq( str, "USE_SPEECH_SYNTHESIS" ) ) speechSynthesis = true;
+			else if ( FStriEq( str, "GOT_KILLED"    ) ) currentCodeBlock = &chatGotKilled;
+			else if ( FStriEq( str, "KILLED_PLAYER" ) ) currentCodeBlock = &chatKilledPlayer;
+			else if ( FStriEq( str, "GOT_WEAPON"    ) ) currentCodeBlock = &chatGotWeapon;
+			else if ( FStriEq( str, "JOINED_SERVER" ) ) currentCodeBlock = &chatJoin;
+			else if ( FStriEq( str, "REPLY_UNKNOWN" ) ) currentCodeBlock = &chatReplyUnknown;
+			else if ( FStriEq( str, "REPLY"         ) )
+			{
+				pBuffer += 6; // skip @REPLY
+
+				// skip whitespace
+				while( *pBuffer && isspace( *pBuffer ) )
+					pBuffer++;
+
+				if( !*pBuffer )
+					continue;
+
+				sscanf( pBuffer, " \"%[^\"]\" ", str );
+				ReplyList *newReplyList = new ReplyList;
+				strcpy_s( newReplyList->code, MAX_CODE_LEN, str );
+				UTF8_strupr( newReplyList->code );			// convert to upper case
+				newReplyList->reply = new ChatList;
+				chatReplies.push_back( newReplyList );
+				currentCodeBlock = newReplyList->reply;
+				do {
+					while( *pBuffer && *pBuffer != ',' )
+						pBuffer++;
+
+					if( !*pBuffer )
+                                                break;
+
+					sscanf( pBuffer, ", \"%[^\"]\" ", str );
+					ReplyList *addReplyList = new ReplyList;
+					strcpy_s( addReplyList->code, MAX_CODE_LEN, str );
+					UTF8_strupr( addReplyList->code );			// convert to upper case
+					addReplyList->reply = currentCodeBlock;
+					chatReplies.push_back( addReplyList );
+					pBuffer++;
+				} while (true);
+			}
 		}
-		if ( !feof(file) ) {
-			
-			if (str[0]=='@') {						// new codeblock
-				fscanf( file, "%[a-zA-Z_]", str);
-					 if ( _stricmp( str, "USE_SPEECH_SYNTHESIS" ) == 0 ) speechSynthesis = true;
-				else if ( _stricmp( str, "GOT_KILLED"    ) == 0 ) currentCodeBlock = &chatGotKilled;
-				else if ( _stricmp( str, "KILLED_PLAYER" ) == 0 ) currentCodeBlock = &chatKilledPlayer;
-				else if ( _stricmp( str, "GOT_WEAPON"    ) == 0 ) currentCodeBlock = &chatGotWeapon;
-				else if ( _stricmp( str, "JOINED_SERVER" ) == 0 ) currentCodeBlock = &chatJoin;
-				else if ( _stricmp( str, "REPLY_UNKNOWN" ) == 0 ) currentCodeBlock = &chatReplyUnknown;
-				else if ( _stricmp( str, "REPLY"         ) == 0 ) {
-					fscanf( file, " \"%[^\"]\" ", str );
-					str[MAX_CODE_LEN-1] = 0;			// make sure that codeword isn't too long
-					UTF8_strupr( str );						// convert to upper case
-					ReplyList *newReplyList = new ReplyList;
-					strcpy( newReplyList->code, str );
-					newReplyList->reply = new ChatList;
-					chatReplies.push_back( newReplyList );
-					currentCodeBlock = newReplyList->reply;
-					bool moreKeywords = true;
-					do {
-						fscanf( file, "%1s", str );
-						if (str[0]==',') {				// next keyword following?
-							fscanf( file, " \"%[^\"]\" ", str );
-							ReplyList *addReplyList = new ReplyList;
-							strcpy( addReplyList->code, str );
-							addReplyList->reply = currentCodeBlock;
-							chatReplies.push_back( addReplyList );
-						}
-						else moreKeywords = false;
-					} while (moreKeywords);
-					fseek( file, -1, SEEK_CUR );	// reset filepointer
-				}
-			}
-			else {
-				fseek( file, -1, SEEK_CUR );	// reset filepointer
-				fscanf( file, "%[^\n]", str);	// read entire line
-				if( !currentCodeBlock )
-                                        continue;
-				if (speechSynthesis) strcat( str, ".wav" );
-				PB_ChatMessage cm;
-				cm.text = new char[strlen(str)+1];  
-				strcpy( cm.text, str );  
-				cm.time = -1000; 
-				currentCodeBlock->push_back( cm );	// add to current block
-			}
-			
+		else
+		{
+			sscanf( pBuffer, "%[^\n]", str );	// read entire line
+			if( !currentCodeBlock )
+				continue;
+			if (speechSynthesis) strcat( str, ".wav" );
+			PB_ChatMessage cm;
+			cm.text = strdup( str );
+			cm.time = -1000; 
+			currentCodeBlock->push_back( cm );	// add to current block
 		}
 	}
-	fclose(	file );
+	FREE_FILE( pMemFile );
 	chatFileLoaded = true;
 	infoMsg( "OK!\n" );
 	return true;
@@ -280,7 +302,7 @@ const char* PB_Chat::checkMessageForWeapon( const char *msg, const char *wpnName
 		wpnPos[1] = 'w';
 		namePos[0] = '%';
 		namePos = strstr( weaponMsg, "!s" );
-		 namePos[0] = '%';
+		namePos[0] = '%';
 	}
 
 	return &weaponMsg[0];
@@ -303,7 +325,7 @@ const char* PB_Chat::getName( edict_t *player )
 	char *space = (char *)strchr( fullName, ' ' );
 	if (space) {
 		int rand = RANDOM_LONG( 0, 2 );
-		if (rand==1) {  *space = 0;  return fullName;  }	// return first part
+		if (rand==1) {  *space = 0;}	// return first part
 		else if (rand==2) { return (space+1); }				// return second part
 	}
 	return fullName;
@@ -313,21 +335,25 @@ const char* PB_Chat::getName( edict_t *player )
 edict_t* PB_Chat::getRandomResponder( edict_t *excluding, bool forceReply )
 // choses a random bot to respond, but not the excluding one
 {
-	int numCandidates = 0;
-	int replyCandidate[32];
+	edict_t *pEdict;
+	std::vector<int> replyCandidate;
 
 	for (int i=0; i<32; i++) if (bots[i].is_used && bots[i].pEdict!=excluding) {
 		int chatRate = pbConfig.personality( bots[i].personality ).communication;
 		int rand = RANDOM_LONG( 1, REPLY_CHAT );
 		if ( (rand < chatRate) || forceReply ) {
-			replyCandidate[numCandidates] = i;
-			numCandidates++;
+			replyCandidate.push_back(i);
 		}
 	}
-	if (numCandidates==0) return 0;
-	
-	int chosen = RANDOM_LONG( 0, numCandidates-1 );
-	return bots[replyCandidate[chosen]].pEdict;
+	if (!replyCandidate.size()) return 0;
+
+	int chosen = RANDOM_LONG( 0, replyCandidate.size()-1 );
+
+	pEdict = bots[replyCandidate[chosen]].pEdict;	
+
+	replyCandidate.clear();
+
+	return pEdict;
 }
 
 
@@ -361,10 +387,7 @@ void PB_Chat::parseMessage( edict_t *speaker, const char *msg )
 		sprintf( logfile, "%s/addons/parabot/log/chat.txt", mod_name );
 		FILE *fp=fopen( logfile, "a" );
 		if (!FBitSet( speaker->v.flags, FL_FAKECLIENT)) fprintf( fp, "[HUMAN]" );
-		fprintf( fp, "%s", STRING( speaker->v.netname ) );
-		fprintf( fp, ": " );
-		fprintf( fp, "%s", msg );
-		fprintf( fp, "\n" );
+		fprintf( fp, "%s: %s\n", STRING( speaker->v.netname ), msg );
 		fclose( fp );
 	}
 	if (!pbConfig.usingChat()) return;

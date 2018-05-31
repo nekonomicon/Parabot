@@ -186,10 +186,26 @@ typedef enum
 	TS_GOING_DOWN
 } TOGGLE_STATE;
 
+
 // Misc useful
 inline BOOL FStrEq(const char*sz1, const char*sz2)
 {
 	return (strcmp(sz1, sz2) == 0);
+}
+
+inline BOOL FStrEq(const char*sz1, const char*sz2, size_t size )
+{    
+        return (strncmp(sz1, sz2, size) == 0);
+}
+
+inline BOOL FStriEq(const char*sz1, const char*sz2 )
+{
+	return (_stricmp(sz1, sz2) == 0);
+}
+
+inline BOOL FStriEq(const char*sz1, const char*sz2, size_t size )
+{
+	return (_strnicmp(sz1, sz2, size) == 0);
 }
 
 inline BOOL FClassnameIs(edict_t* pent, const char* szClassname)
@@ -245,11 +261,13 @@ enum
 	head_hull = 3
 };
 
-extern void			UTIL_TraceHull			(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t *pentIgnore, TraceResult *ptr);
-extern TraceResult	UTIL_GetGlobalTrace		(void);
-extern void			UTIL_TraceModel			(const Vector &vecStart, const Vector &vecEnd, int hullNumber, edict_t *pentModel, TraceResult *ptr);
-extern Vector		UTIL_GetAimVector		(edict_t* pent, float flSpeed);
-extern int			UTIL_PointContents		(const Vector &vec);
+extern bool UTIL_FileExists( const char *filename );
+extern char *UTIL_memfgets( byte *pMemFile, int fileSize, int &filePos );
+extern void UTIL_TraceHull( const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t *pentIgnore, TraceResult *ptr );
+extern TraceResult UTIL_GetGlobalTrace();
+extern void UTIL_TraceModel( const Vector &vecStart, const Vector &vecEnd, int hullNumber, edict_t *pentModel, TraceResult *ptr );
+extern Vector UTIL_GetAimVectors( edict_t* pent, float flSpeed );
+extern int UTIL_PointContents( const Vector &vec );
 
 extern char			*UTIL_VarArgs( char *format, ... );
 extern BOOL			UTIL_IsValidEntity( edict_t *pent );

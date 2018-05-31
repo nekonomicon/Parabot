@@ -113,9 +113,8 @@ void BotCreate( int fixedPersNr )
 	}
 	
 	// try to create entity
-	char botName[32];
-	strncpy( botName, pbConfig.personality( persNr ).name, 31 );
-	botName[31] = '\0';
+	char botName[BOT_NAME_LEN];
+	strcpy_s( botName, BOT_NAME_LEN, pbConfig.personality( persNr ).name );
 	botEnt = CREATE_FAKE_CLIENT( botName );
 
 	if (FNullEnt( botEnt )) {	// if NULL entity return
@@ -125,7 +124,7 @@ void BotCreate( int fixedPersNr )
 
 	debugFile( "%.f: BotCreate() fixedPersNr = %i, persNr = %i, botname = %s\n", worldTime(), fixedPersNr, persNr, botName );
 
-	pbConfig.personalityJoins( persNr, worldTime() );	// now we know the bot can be created
+	pbConfig.personalityJoins( persNr );	// now we know the bot can be created
 
 	char ptr[128];  // allocate space for message from ClientConnect
 	const char *infobuffer;
@@ -151,8 +150,8 @@ void BotCreate( int fixedPersNr )
 	SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "model", pbConfig.personality( persNr ).model );
 	
 	if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == DMC_DLL || mod_id == GEARBOX_DLL) {	// set colors
-		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "topcolor", pbConfig.getColor( persNr, 371 ) );
-		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "bottomcolor", pbConfig.getColor( persNr, 97 ) );
+		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "topcolor", pbConfig.getTopColor( persNr ) );
+		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "bottomcolor", pbConfig.getBottomColor( persNr )  );
 	}
 	else if (mod_id == CSTRIKE_DLL)	{
 		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "rate", "3500.000000");

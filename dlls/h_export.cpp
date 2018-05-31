@@ -122,10 +122,10 @@ extern "C" void DLLEXPORT WINAPI GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 	else
 		mod_id = VALVE_DLL;
 
-	sprintf( filePath, "%s/addons/parabot/config/", mod_name );
+	strcpy( filePath, mod_name );
+	strcat( filePath, "/addons/parabot/config/" );
 #if defined(__ANDROID__)
-	struct stat checkdir;
-	if( 0 > stat( filePath, &checkdir ) )
+	if( UTIL_FileExists( filePath ) )
 	{
 		FILE *pfile = fopen( getenv( "PARABOT_EXTRAS_PAK" ), "rb" );
 		if( pfile )
@@ -138,7 +138,11 @@ extern "C" void DLLEXPORT WINAPI GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 	strcat( filePath, mod_name );
 	strcat( filePath, "/" );
 	pbConfig.initConfiguration( filePath );
-	pbConfig.initPersonalities( filePath );
+	if( !pbConfig.initPersonalities( filePath ) )
+	{
+		errorMsg( "Couldn't read/write configuration files correctly. Check your write permissions and/or file contents.");
+		exit(0);
+	}
 
 	pos = strlen( mod_name );
 	filePath[pos] = '\0';
@@ -146,10 +150,7 @@ extern "C" void DLLEXPORT WINAPI GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 	CreateDirectory( filePath, NULL );
 
 	// always load chatfile, might be enabled ingame:
-	filePath[pos] = '\0';
-	strcat( filePath, "/addons/parabot/config/lang/" );
-	strcat( filePath, pbConfig.chatFile() );
-	chat.load( filePath );
+	chat.load();
 	initSineTable();
 
 	if( !FBitSet( g_uiGameFlags, GAME_METAMOD ) )
@@ -191,8 +192,9 @@ extern "C" void DLLEXPORT WINAPI GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 		h_Library = LoadLibrary( filePath );
 
 		if (h_Library == NULL) {	// Directory error or Unsupported MOD!
-			errorMsg( "MOD Dll not found (or unsupported MOD)!" );
+			errorMsg( "MOD gamedll %s not found (or unsupported MOD)!\n", filePath );
 			debugFile( "Library = 0\n" );
+			exit(0);
 		}
 
 		GetEngineFunctions( pengfuncsFromEngine, NULL );

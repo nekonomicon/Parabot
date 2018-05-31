@@ -62,10 +62,6 @@ gamedll_funcs_t gGameDLLFunc;
 void StartFrame();	// in startframe.cpp
 void saveLevelData();	// in pb_mapimport.cpp
 void DSaddbot();
-void DSsimulate();
-void DSlogChat();
-void DSrestrictedWeapons();
-void DSpeace();
 
 void GameDLLInit()
 {
@@ -102,11 +98,7 @@ void GameDLLInit()
 		break;
 	}
 
-	(*g_engfuncs.pfnAddServerCommand)("addbot", DSaddbot );
-	(*g_engfuncs.pfnAddServerCommand)("hidewelcome", DSsimulate );
-	(*g_engfuncs.pfnAddServerCommand)("chatlog", DSlogChat );
-	(*g_engfuncs.pfnAddServerCommand)("restrictedweapons", DSrestrictedWeapons );
-	(*g_engfuncs.pfnAddServerCommand)("peacemode", DSpeace );
+	(*g_engfuncs.pfnAddServerCommand)("add_bot", DSaddbot );
 
 	if( FBitSet( g_uiGameFlags, GAME_METAMOD ) )
 		 RETURN_META( MRES_IGNORED );
@@ -124,6 +116,7 @@ int DispatchSpawn( edict_t *pent )
 
          if (pent->v.model != 0)
             debugFile(" model=%s\n",STRING(pent->v.model));
+
       if( FStrEq( pClassname, "worldspawn" ) )
       {
          // do level initialization stuff here...
@@ -255,7 +248,7 @@ void ClientDisconnect( edict_t *pEntity )
 
 			bots[index].is_used = FALSE;  // this slot is now free to use
 			bots[index].pEdict = 0;
-			pbConfig.personalityLeaves( bots[index].personality, worldTime() );
+			pbConfig.personalityLeaves( bots[index].personality );
 			delete (bots[index].parabot);	bots[index].parabot = 0;			
 		}
 	}

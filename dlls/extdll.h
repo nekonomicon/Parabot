@@ -19,41 +19,7 @@
 // Global header file for extension DLLs
 //
 
-// Allow "DEBUG" in addition to default "_DEBUG"
-#ifdef _DEBUG
-#define DEBUG 1
-#endif
-
-// Silence certain warnings
-#pragma warning(disable : 4244)		// int or float down-conversion
-#pragma warning(disable : 4305)		// int or float data truncation
-#pragma warning(disable : 4201)		// nameless struct/union
-#pragma warning(disable : 4514)		// unreferenced inline function removed
-#pragma warning(disable : 4100)		// unreferenced formal parameter
-
-// Prevent tons of unused windows definitions
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#define NOWINRES
-#define NOSERVICE
-#define NOMCX
-#define NOIME
-#define HSPRITE HSPRITE_win32
-#include "windows.h"
-#undef HSPRITE
-#else // _WIN32
-#define FALSE 0
-#define TRUE (!FALSE)
-typedef unsigned long ULONG;
-typedef unsigned char BYTE;
-typedef int BOOL;
-#define MAX_PATH PATH_MAX
-#include <stdarg.h>
-#endif //_WIN32
-
-// Misc C-runtime library headers
-#include "stdlib.h"
-#include <cmath>
+#include "platform.h"
 
 // Header file containing definition of globalvars_t and entvars_t
 typedef unsigned int func_t;
@@ -75,16 +41,4 @@ typedef float vec_t;				// needed before including progdefs.h
 
 // Shared header between the client DLL and the game DLLs
 #include "cdll_dll.h"
-
-#ifndef BIT
-#define BIT(X) (1U<<X)
-#endif // BIT
-
-#ifndef Q_min
-#define Q_min(a,b)  (((a) < (b)) ? (a) : (b))
-#endif // Q_min
-#ifndef Q_max
-#define Q_max(a,b)  (((a) > (b)) ? (a) : (b))
-#endif // Q_max
-
 #endif // EXTDLL_H

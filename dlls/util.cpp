@@ -49,6 +49,63 @@ Vector UTIL_GetRight( const Vector &vec )
 	return gpGlobals->v_right;
 }
 
+bool UTIL_FileExists( const char* filename )
+{
+	struct stat checkfile;
+	if( 0 > stat( filename, &checkfile ) )
+		return false;
+
+	return true;
+}
+
+char *UTIL_memfgets( byte *pMemFile, int fileSize, int &filePos )
+{
+	static char buffer[512];
+
+	// Bullet-proofing
+	if( !pMemFile )
+		return NULL;
+
+	if( filePos >= fileSize )
+		return NULL;
+
+	int i = filePos;
+	int last = fileSize;
+
+	// fgets always NULL terminates, so only read buffer size - 1 characters
+	if( last - filePos > ( sizeof( buffer ) - 1 ) )
+		last = filePos + ( sizeof( buffer ) - 1 );
+
+	// Stop at the next newline (inclusive) or end of buffer
+	while( i < last )
+	{
+		if( pMemFile[i] == '\n' )
+		{
+			i++;
+			break;
+		}
+		i++;
+	}
+
+	// If we actually advanced the pointer, copy it over
+	if( i != filePos )
+	{
+		// We read in size bytes
+		int size = i - filePos;
+		// copy it out
+		memcpy( buffer, pMemFile + filePos, sizeof(byte) * size );
+
+		// null terminate
+		buffer[size] = 0;
+
+		// Update file pointer
+		filePos = i;
+		return buffer;
+	}
+
+	// No data read, bail
+	return NULL;
+}
 
 // Overloaded to add IGNORE_GLASS
 void UTIL_TraceLine( const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, edict_t *pentIgnore, TraceResult *ptr )
