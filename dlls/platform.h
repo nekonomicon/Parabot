@@ -59,14 +59,6 @@ typedef void* HINSTANCE;
 #define _strnicmp strncasecmp
 #define FAR
 #define WINAPI
-
-#ifdef strlcpy
-#define strcpy_s(src, size, dst) strlcpy(src, dst, size)
-#else // strlcpy
-#define strcpy_s(src, size, dst) strncpy(src, dst, size-1); \
-					src[size-1] = '\0'
-#endif // strlcpy
-
 #define FALSE 0
 #define TRUE (!FALSE)
 typedef unsigned long ULONG;
@@ -75,6 +67,15 @@ typedef int BOOL;
 #define MAX_PATH PATH_MAX
 #include <stdarg.h>
 #endif //_WIN32
+
+#ifndef strcpy_s
+#ifdef strlcpy
+#define strcpy_s(src, size, dst) strlcpy(src, dst, size)
+#else // strlcpy
+#define strcpy_s(src, size, dst) strncpy(src, dst, size-1); \
+					src[size-1] = '\0'
+#endif // strlcpy
+#endif // strcpy_s
 
 // Misc C-runtime library headers
 #include <stdlib.h>
