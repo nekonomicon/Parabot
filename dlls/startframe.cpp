@@ -547,54 +547,51 @@ PB_Navpoint* getNearestNavpoint( edict_t *pEdict )
 
 void StartFrame( void )
 {
-	if (gpGlobals->deathmatch) {
+	cachePlayerData();
+					
+	checkForMapChange();
 
-		cachePlayerData();
-						
-		checkForMapChange();
-
-		if (!fatalParabotError) {
-			playerSounds.getAllClientSounds();
-			
-			print3dDebugInfo();
-			
-			// call BotThink for each active bot
-			for (int b=0; b < 32; b++) {
-				if (bots[b].is_used && bots[b].respawn_state==RESPAWN_IDLE) BotThink(&bots[b]);	
-			}
-			
-			activeBot = botNr;	// print out global debug messages
-			
-			updateBotCam();
-			if (worldTime() > observerUpdate) {
-				observer.registerClients();
-				observerUpdate = worldTime() + 3.0;//0.5;
-				/*
-				// PIA Test
-				for (int pi=0; pi<game.world()->numberOfPlayers(); pi++) {
-					PIA_Player *dmp = game.world()->player( pi );
-					if ( dmp->isValid() && !(dmp->isBot()) ) {
-						PIA_Weapon *pw = dmp->firstWeapon();
-						if (pw) {
-							debugMsg( "%s\n", pw->name() );
-							while (pw=dmp->nextWeapon()) debugMsg( "%s\n",pw->name() );
-						}
-						break;
-					}
-				}
-				*/
-			}
-			observer.observeAll();
-			updateVisTable();
-			checkForAirStrike();
-			sendWelcomeToNewClients();
-			checkForBotRespawn();
-			checkForBotCreation();
-			if (!pb_pause) chat.check();
-#ifdef _DEBUG
-			glMarker.drawMarkers();
-#endif //_DEBUG
+	if (!fatalParabotError) {
+		playerSounds.getAllClientSounds();
+		
+		print3dDebugInfo();
+		
+		// call BotThink for each active bot
+		for (int b=0; b < 32; b++) {
+			if (bots[b].is_used && bots[b].respawn_state==RESPAWN_IDLE) BotThink(&bots[b]);	
 		}
+		
+		activeBot = botNr;	// print out global debug messages
+		
+		updateBotCam();
+		if (worldTime() > observerUpdate) {
+			observer.registerClients();
+			observerUpdate = worldTime() + 3.0;//0.5;
+			/*
+			// PIA Test
+			for (int pi=0; pi<game.world()->numberOfPlayers(); pi++) {
+				PIA_Player *dmp = game.world()->player( pi );
+				if ( dmp->isValid() && !(dmp->isBot()) ) {
+					PIA_Weapon *pw = dmp->firstWeapon();
+					if (pw) {
+						debugMsg( "%s\n", pw->name() );
+						while (pw=dmp->nextWeapon()) debugMsg( "%s\n",pw->name() );
+					}
+					break;
+				}
+			}
+			*/
+		}
+		observer.observeAll();
+		updateVisTable();
+		checkForAirStrike();
+		sendWelcomeToNewClients();
+		checkForBotRespawn();
+		checkForBotCreation();
+		if (!pb_pause) chat.check();
+#ifdef _DEBUG
+		glMarker.drawMarkers();
+#endif //_DEBUG
 	}
 	if( FBitSet( g_uiGameFlags, GAME_METAMOD ) )
 		RETURN_META(MRES_IGNORED);

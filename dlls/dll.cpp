@@ -108,8 +108,6 @@ void GameDLLInit()
 
 int DispatchSpawn( edict_t *pent )
 {
-   if (gpGlobals->deathmatch)
-   {
 	const char *pClassname = STRING(pent->v.classname);
 
          debugFile( "%f: DispatchSpawn: %s\n",worldTime(), pClassname );
@@ -169,7 +167,6 @@ int DispatchSpawn( edict_t *pent )
 //	  else if (FStrEq( pClassname, "env_sound" ) ) debugMsg( "DISPATCH env_sound\n" );
 //	  else if (FStrEq( pClassname, "env_shake" ) ) debugMsg( "DISPATCH env_shake\n" );
 //	  else if (FStrEq( pClassname, "env_explosion" ) ) debugMsg( "DISPATCH env_explosion\n" );
-   }
 	if(!FBitSet( g_uiGameFlags, GAME_METAMOD ))
 		return (*other_gFunctionTable.pfnSpawn)(pent);
 
@@ -207,15 +204,12 @@ BOOL ClientConnect( edict_t *pEntity, const char *pszName, const char *pszAddres
 
 	debugFile( "%.f: ClientConnect: %s (%s)", worldTime(), STRING(pEntity->v.netname), pszName );
 
-	if (gpGlobals->deathmatch)
-	{
-		debugFile( "ClientConnect: pent=%p name=%s\n", pEntity, pszName );
+	debugFile( "ClientConnect: pent=%p name=%s\n", pEntity, pszName );
 
-		// check if this is NOT a bot joining the server...
-		if ( !FBitSet( pEntity->v.flags, FL_FAKECLIENT ) ) {
-			// don't try to add bots for 10 seconds, give client time to get added
-			if (bot_check_time < gpGlobals->time + 10.0) bot_check_time = gpGlobals->time + 10.0;
-		}
+	// check if this is NOT a bot joining the server...
+	if ( !FBitSet( pEntity->v.flags, FL_FAKECLIENT ) ) {
+		// don't try to add bots for 10 seconds, give client time to get added
+		if (bot_check_time < gpGlobals->time + 10.0) bot_check_time = gpGlobals->time + 10.0;
 	}
 
 	connected = MDLL_ClientConnect(pEntity, pszName, pszAddress, szRejectReason);
@@ -233,24 +227,22 @@ void ClientDisconnect( edict_t *pEntity )
 
 	debugFile( "%.f: ClientDisconnect: %s ", worldTime(), STRING(pEntity->v.netname) );
 
-	if (gpGlobals->deathmatch) {
-		debugFile( "ClientDisconnect: %p\n", pEntity );
+	debugFile( "ClientDisconnect: %p\n", pEntity );
 
-		for (i=0; i < 32; i++) {
-			if (bots[i].pEdict == pEntity) {
-				index = i;
-				break;
-			}
+	for (i=0; i < 32; i++) {
+		if (bots[i].pEdict == pEntity) {
+			index = i;
+			break;
 		}
+	}
 		
-		if (index != -1) {	// bot is disconnecting
-			debugMsg( "BOT DISCONNECT.\n" );
+	if (index != -1) {	// bot is disconnecting
+		debugMsg( "BOT DISCONNECT.\n" );
 
-			bots[index].is_used = FALSE;  // this slot is now free to use
-			bots[index].pEdict = 0;
-			pbConfig.personalityLeaves( bots[index].personality );
-			delete (bots[index].parabot);	bots[index].parabot = 0;			
-		}
+		bots[index].is_used = FALSE;  // this slot is now free to use
+		bots[index].pEdict = 0;
+		pbConfig.personalityLeaves( bots[index].personality );
+		delete (bots[index].parabot);	bots[index].parabot = 0;			
 	}
 
 	debugFile( "...freeing bot" );

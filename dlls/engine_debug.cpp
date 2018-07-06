@@ -587,10 +587,7 @@ int pfnPrecacheGeneric(const char* s)
 
 int pfnGetPlayerUserId(edict_t *e )
 {
-   if (gpGlobals->deathmatch)
-   {
       debugFile( "pfnGetPlayerUserId: %p\n",e);
-   }
 
    return (*g_engfuncs.pfnGetPlayerUserId)(e);
 }

@@ -49,6 +49,14 @@ Vector UTIL_GetRight( const Vector &vec )
 	return gpGlobals->v_right;
 }
 
+bool UTIL_IsHostOwner()
+{
+	if( pEntity == INDEXENT(1) )
+		return true;
+
+	return false;
+}
+
 bool UTIL_FileExists( const char* filename )
 {
 	struct stat checkfile;

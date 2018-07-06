@@ -507,4 +507,5 @@ float UTIL_SharedRandomFloat( unsigned int seed, float low, float high );
 
 float UTIL_WeaponTimeBase( void );
 FILE *UTIL_OpenDebugLog( void );
+bool UTIL_IsHostOwner( edict_t *pEnt );
 #endif // UTIL_H

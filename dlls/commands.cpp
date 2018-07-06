@@ -402,22 +402,29 @@ void startBotCam( edict_t *pEntity )
 {
 	assert( pEntity != 0 );
 
-	if (mod_id==VALVE_DLL || mod_id==AG_DLL || mod_id==HUNGER_DLL || mod_id==GEARBOX_DLL) {
-		int clientIndex = ENTINDEX( pEntity ) - 1;
-		assert( clientIndex >= 0 );
-		assert( clientIndex < 32 );
-		if ( clientWeapon[clientIndex]==VALVE_WEAPON_RPG     ||
-			 (mod_id==GEARBOX_DLL && clientWeapon[clientIndex]==GEARBOX_WEAPON_EAGLE ) ) 
-		{	// kill laserspot
-			edict_t *dot = NULL;
-			while ( !FNullEnt(dot = FIND_ENTITY_BY_CLASSNAME(dot, "laser_spot") )) {
-				if ( laserdotOwner( dot ) == pEntity ) {
-					dot->v.effects |= EF_NODRAW;
-					camPlayerLaser = dot;
-					break;
-				}
+	edict_t *dot = NULL;
+
+	int clientIndex = ENTINDEX( pEntity ) - 1;
+	// TODO: add weapon flag HAS_LASER
+	if ( clientWeapon[clientIndex]==VALVE_WEAPON_RPG )
+	{	// kill laserspot
+		while ( !FNullEnt(dot = FIND_ENTITY_BY_CLASSNAME(dot, "laser_spot") )) {
+			if ( laserdotOwner( dot ) == pEntity ) {
+				dot->v.effects |= EF_NODRAW;
+				camPlayerLaser = dot;
+				break;
 			}
 		}
+	}
+	else if( clientWeapon[clientIndex]==GEARBOX_WEAPON_EAGLE )
+	{
+		while ( !FNullEnt(dot = FIND_ENTITY_BY_CLASSNAME(dot, "eagle_laser") )) {
+                        if ( laserdotOwner( dot ) == pEntity ) {
+                                dot->v.effects |= EF_NODRAW;
+                                camPlayerLaser = dot;
+                                break;
+                        }
+                }
 	}
 
 	camPlayerPos = pEntity->v.origin;
@@ -490,9 +497,9 @@ void ClientCommand( edict_t *pEntity )
 		chat.parseMessage( pEntity, (char*)arg1 );	// no return!!!
 	}
 
-	// these client commands aren't allow in single player mode or
-	// on dedicated servers
-	else if ((gpGlobals->deathmatch) && (!IS_DEDICATED_SERVER()))
+	// these client commands aren't allow
+	// on dedicated servers and for not host owner
+	else if ((!IS_DEDICATED_SERVER()) && UTIL_IsHostOwner(pEntity))
 	{
 #ifdef _DEBUG
 		CParabot *pb = bots[botNr].parabot;

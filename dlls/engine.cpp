@@ -72,8 +72,6 @@ void pfnChangeLevel(const char *s1, const char *s2)
 
 void pfnMessageBegin(int msg_dest, int msg_type, const float *pOrigin, edict_t *ed)
 {
-   if (gpGlobals->deathmatch)
-   {
       int index = -1;
 
       debugFile("pfnMessageBegin: edict=%p dest=%d type=%d\n",ed,msg_dest,msg_type);
@@ -248,7 +246,6 @@ void pfnMessageBegin(int msg_dest, int msg_type, const float *pOrigin, edict_t *
                botMsgFunction = BotClient_FLF_WeaponList;
          }*/
       }
-}
 	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
 		RETURN_META(MRES_IGNORED);
 
@@ -259,8 +256,6 @@ int pfnRegUserMsg(const char *pszName, int iSize)
 {
 	int msg = (*g_engfuncs.pfnRegUserMsg)(pszName, iSize);
 	
-	if (gpGlobals->deathmatch)
-	{
 		//debugFile("pfnRegUserMsg: pszName=%s msg=%d\n",pszName,msg);
 
 			 if (FStrEq( pszName, "WeaponList" ) )	message_WeaponList = msg;
@@ -274,7 +269,6 @@ int pfnRegUserMsg(const char *pszName, int iSize)
 		// CS only			
 		else if (FStrEq(pszName, "ShowMenu"	) ) message_ShowMenu = msg;
 		else if (FStrEq(pszName, "Money"	) ) message_Money = msg;         		
-	}
 	if(!FBitSet( g_uiGameFlags, GAME_METAMOD ))
 		return msg;
 
@@ -283,13 +277,10 @@ int pfnRegUserMsg(const char *pszName, int iSize)
 
 void pfnMessageEnd(void)
 {
-   if (gpGlobals->deathmatch)
-   {
       debugFile("pfnMessageEnd:\n");
 
       // clear out the bot message function pointer...
       botMsgFunction = NULL;
-   }
 	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
 		RETURN_META(MRES_IGNORED);
 
@@ -382,14 +373,11 @@ void pfnClientCommand(edict_t* pEdict, const char* szFmt, ...)
 
 void pfnWriteByte(int iValue)
 {
-   if (gpGlobals->deathmatch)
-   {
       debugFile("pfnWriteByte: %d\n",iValue);
 
       // if this message is for a bot, call the client message function...
       if (botMsgFunction)
          (*botMsgFunction)((void *)&iValue, botMsgIndex);
-   }
 	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
 		RETURN_META(MRES_IGNORED);
 
@@ -398,14 +386,11 @@ void pfnWriteByte(int iValue)
 
 void pfnWriteChar(int iValue)
 {
-   if (gpGlobals->deathmatch)
-   {
       debugFile("pfnWriteChar: %d\n",iValue);
 
       // if this message is for a bot, call the client message function...
       if (botMsgFunction)
          (*botMsgFunction)((void *)&iValue, botMsgIndex);
-   }
 	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
 		RETURN_META(MRES_IGNORED);
 
@@ -414,14 +399,11 @@ void pfnWriteChar(int iValue)
 
 void pfnWriteShort(int iValue)
 {
-   if (gpGlobals->deathmatch)
-   {
       debugFile("prnWriteShort: %d\n",iValue);
 
       // if this message is for a bot, call the client message function...
       if (botMsgFunction)
          (*botMsgFunction)((void *)&iValue, botMsgIndex);
-   }
 	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
 		RETURN_META(MRES_IGNORED);
 
@@ -430,14 +412,11 @@ void pfnWriteShort(int iValue)
 
 void pfnWriteLong(int iValue)
 {
-   if (gpGlobals->deathmatch)
-   {
       debugFile("pfnWriteLong: %d\n",iValue);
 
       // if this message is for a bot, call the client message function...
       if (botMsgFunction)
          (*botMsgFunction)((void *)&iValue, botMsgIndex);
-   }
 	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
 		RETURN_META(MRES_IGNORED);
 
@@ -446,14 +425,11 @@ void pfnWriteLong(int iValue)
 
 void pfnWriteAngle(float flValue)
 {
-   if (gpGlobals->deathmatch)
-   {
       debugFile("pfnWriteAngle: %f\n",flValue);
 
       // if this message is for a bot, call the client message function...
       if (botMsgFunction)
          (*botMsgFunction)((void *)&flValue, botMsgIndex);
-   }
 	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
 		RETURN_META(MRES_IGNORED);
 
@@ -462,14 +438,11 @@ void pfnWriteAngle(float flValue)
 
 void pfnWriteCoord(float flValue)
 {
-   if (gpGlobals->deathmatch)
-   {
       debugFile("pfnWriteCoord: %f\n",flValue);
 
       // if this message is for a bot, call the client message function...
       if (botMsgFunction)
          (*botMsgFunction)((void *)&flValue, botMsgIndex);
-   }
 	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
 		RETURN_META(MRES_IGNORED);
 
@@ -478,8 +451,6 @@ void pfnWriteCoord(float flValue)
 
 void pfnWriteString(const char *sz)
 {
-   if (gpGlobals->deathmatch)
-   {
 	   if (mod_id==HOLYWARS_DLL) {
 		   if ( strncmp(sz, "The halo disappeared", 10)==0 ) {
 			   //debugMsg( "HALO ON BASE!\n" );
@@ -496,7 +467,6 @@ void pfnWriteString(const char *sz)
       // if this message is for a bot, call the client message function...
       if (botMsgFunction)
          (*botMsgFunction)((void *)sz, botMsgIndex);
-   }
 	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
 		RETURN_META(MRES_IGNORED);
 
@@ -505,14 +475,11 @@ void pfnWriteString(const char *sz)
 
 void pfnWriteEntity(int iValue)
 {
-   if (gpGlobals->deathmatch)
-   {
 	debugFile("pfnWriteEntity: %d\n",iValue);
 
       // if this message is for a bot, call the client message function...
       if (botMsgFunction)
          (*botMsgFunction)((void *)&iValue, botMsgIndex);
-   }
 	if(FBitSet( g_uiGameFlags, GAME_METAMOD ))
 		RETURN_META(MRES_IGNORED);
 
@@ -521,8 +488,7 @@ void pfnWriteEntity(int iValue)
 
 void pfnSetClientKeyValue( int clientIndex, const char *infobuffer, const char *key, const char *value )
 {
-	if ((mod_id == VALVE_DLL || mod_id == DMC_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) && (FStrEq( key, "team" ) ) ) {	// init teamlist
-		if( !FBitSet( g_uiGameFlags, GAME_TEAMPLAY ))
+	if ( !FBitSet( g_uiGameFlags, GAME_TEAMPLAY ) && FStrEq( key, "team" ) ) {	// init teamlist
 			SetBits( g_uiGameFlags, GAME_TEAMPLAY );
 
 		bool teamKnown = false;
