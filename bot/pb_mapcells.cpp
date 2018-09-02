@@ -131,6 +131,12 @@ int PB_MapCells::getCellId( const Vector &pos, float maxDist )
 		}
 	}
 	if (xStride != 0 && yStride != 0) {	// chance that better WP in diagonal bucket?
+		
+		// Prevent crash
+		float TestResult = ( xbDist*xbDist + ybDist*ybDist );
+		if(TestResult<0)  
+			return NO_CELL_FOUND;
+		
 		float diagonalDist = sqrt( xbDist*xbDist + ybDist*ybDist );
 		if (closestDist > diagonalDist)	CHECK_BUCKET( hashcode+xStride+yStride )
 	}
