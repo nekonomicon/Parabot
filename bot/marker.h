@@ -1,4 +1,4 @@
-#ifdef _DEBUG
+#if _DEBUG
 #if !defined( MARKER_H )
 #define MARKER_H
 

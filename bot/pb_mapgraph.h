@@ -1,7 +1,6 @@
+#pragma once
 #if !defined( PB_MAPGRAPH_H )
 #define PB_MAPGRAPH_H
-
-#pragma warning( disable : 4786 )	// disable warnings
 
 #include <cassert>
 #include <map>
@@ -59,17 +58,17 @@ public:
 	// deleting existing (slower) path
 	// if path is not used, all path data get deleted!
 	
-	PB_Navpoint* getNearestNavpoint( const Vector &pos );
+	PB_Navpoint* getNearestNavpoint( const Vec3D *pos );
 	// returns the nearest navpoint to pos existing in the graph, NULL if graph is empty
 	
-	PB_Navpoint* getNearestNavpoint( const Vector &pos, int type );
+	PB_Navpoint* getNearestNavpoint( const Vec3D *pos, int type );
 	// returns the nearest navpoint with given type to pos existing in the graph, 
 	// NULL if graph doesn't contain navpoints of the given type
 
 	int linkedNavpointsFrom( PB_Navpoint *nav );
 	// returns the number of other nodes linked to nav in the graph
 
-	PB_Navpoint* getNearestRoamingNavpoint( edict_t *traveller, PB_Navpoint *ignore=0 );
+	PB_Navpoint* getNearestRoamingNavpoint( EDICT *traveller, PB_Navpoint *ignore=0 );
 	// returns a navpoint to approach in roaming mode, prefers linked navpoints and the ones
 	// that are z-reachable, nextVisit-Time is required to be reached
 	// should never return zero
@@ -77,7 +76,7 @@ public:
 	bool getJourney( int start, int target, int mode, PB_Journey &journey );
 	// returns a journey from start to target or false if none available in mode
 
-	int getWishJourney( int start, PB_Needs &needs, int mode, PB_Journey &journey, edict_t *traveller );
+	int getWishJourney( int start, PB_Needs &needs, int mode, PB_Journey &journey, EDICT *traveller );
 	// returns the nav-id that according to wishList is the best to head for and the best
 	// journey to get there if possible in mode, if not returns -1 and an empty journey
 
@@ -116,7 +115,7 @@ private:
 	// classic Dijkstra algo
 
 	int DijkstraToWish( std::vector<float>& dist, std::vector<int>& path, 
-						    int start, PB_Needs &needs, int searchMode, edict_t *traveller );
+						    int start, PB_Needs &needs, int searchMode, EDICT *traveller );
 
 	
 };

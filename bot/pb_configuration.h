@@ -1,28 +1,28 @@
-#if !defined( PB_CONFIGURATION_H )
+#pragma once
+#if !defined(PB_CONFIGURATION_H)
 #define PB_CONFIGURATION_H
 
-#include "extdll.h"
 #include "bot.h"
 #include "pb_global.h"
 #include <stdio.h>
 
-extern cvar_t bot_num;
-extern cvar_t bot_minnum;
-extern cvar_t bot_maxnum;
-extern cvar_t bot_realgame;
-extern cvar_t bot_staytime;
-extern cvar_t bot_chatenabled;
-extern cvar_t bot_chatlang;
-extern cvar_t bot_chatlog;
-extern cvar_t bot_chatrespond;
-extern cvar_t bot_peacemode;
-extern cvar_t bot_restrictedweapons;
-extern cvar_t bot_touringmode;
-extern cvar_t bot_maxaimskill;
-extern cvar_t bot_minaimskill;
-extern cvar_t bot_menukey;
+extern CVAR bot_num;
+extern CVAR bot_minnum;
+extern CVAR bot_maxnum;
+extern CVAR bot_realgame;
+extern CVAR bot_staytime;
+extern CVAR bot_chatenabled;
+extern CVAR bot_chatlang;
+extern CVAR bot_chatlog;
+extern CVAR bot_chatrespond;
+extern CVAR bot_peacemode;
+extern CVAR bot_restrictedweapons;
+extern CVAR bot_touringmode;
+extern CVAR bot_maxaimskill;
+extern CVAR bot_minaimskill;
+extern CVAR bot_menukey;
 
-typedef struct {
+typedef struct personality {
 	char name[BOT_NAME_LEN];
 	char model[BOT_SKIN_LEN];
 	int aimSkill;
@@ -32,7 +32,7 @@ typedef struct {
 	char topColor[4];
 	char bottomColor[4];
 	bool inUse;
-} PB_Personality;
+} PERSONALITY;
 
 class PB_Configuration
 {
@@ -51,7 +51,7 @@ public:
 
 	void registerVars();
 
-	PB_Personality personality( int index );
+	PERSONALITY personality( int index );
 
 	const char *getColor( int persNr, int modulo );
 
@@ -95,14 +95,14 @@ public:
 
 	void setFloatVar( const char *name, float value = 0, int max = 1, int min = 0 )
 	{
-		CVAR_SET_FLOAT( name, clamp( value, max, min ) );
+		cvar_setfloat( name, clamp( value, max, min ) );
 	}
 
 	bool loadModelList( const char *gamedir );
 
 	void clearModelList();
 private:
-	std::vector<PB_Personality> character;
+	std::vector<PERSONALITY> character;
 	std::vector<char*> playerModelList;
 };
 

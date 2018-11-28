@@ -1,9 +1,10 @@
 # Makefile for parabot
 # Copyright © nekonomicon 2016
 
+CC ?=		gcc
 CXX ?=		g++
 
-CPPFLAGS =	-std=gnu++98
+CPPFLAGS =	
 
 SYS =		$(shell $(CXX) -dumpmachine)
 
@@ -98,29 +99,25 @@ INCLUDES =	-I. \
 
 SRC =		../bot/bot.cpp \
 		../bot/bot_client.cpp \
-		commands.cpp \
-		dll.cpp \
-		dll_debug.cpp \
-		engine.cpp \
-		engine_debug.cpp \
-		h_export.cpp \
+		dllwrap.cpp \
+		../engine/engwrap.cpp \
+		mathlib.cpp \
 		physint.cpp \
-		startframe.cpp \
-		util.cpp \
 		../bot/marker.cpp \
 		../bot/parabot.cpp \
 		../bot/pb_action.cpp \
 		../bot/pb_cell.cpp \
-		../bot/pb_chat.cpp \
+		../bot/menu.cpp \
+		../bot/chat.cpp \
 		../bot/pb_combat.cpp \
 		../bot/pb_combatgoals.cpp \
 		../bot/pb_configuration.cpp \
-		../bot/pb_focus.cpp \
+		../bot/focus.cpp \
 		../bot/pb_global.cpp \
 		../bot/pb_goalfinder.cpp \
 		../bot/pb_goals.cpp \
 		../bot/pb_journey.cpp \
-		../bot/pb_kills.cpp \
+		../bot/kills.cpp \
 		../bot/pb_mapcells.cpp \
 		../bot/pb_mapgraph.cpp \
 		../bot/pb_mapimport.cpp \
@@ -130,7 +127,7 @@ SRC =		../bot/bot.cpp \
 		../bot/pb_path.cpp \
 		../bot/pb_perception.cpp \
 		../bot/pb_roaming.cpp \
-		../bot/pb_sectors.cpp \
+		../bot/sectors.cpp \
 		../bot/pb_vistable.cpp \
 		../bot/pb_weapon.cpp \
 		../bot/pb_weaponhandling.cpp \
@@ -138,6 +135,7 @@ SRC =		../bot/bot.cpp \
 		../bot/sounds.cpp \
 		../bot/utilityfuncs.cpp \
 		../metamod/meta_api.cpp
+
 
 LDFLAGS +=	-shared
 LIBNAME =	$(MODULE).$(OSLIB)

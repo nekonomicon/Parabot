@@ -1,4 +1,5 @@
-#ifndef PB_OBSERVER_H
+#pragma once
+#if !defined(PB_OBSERVER_H)
 #define PB_OBSERVER_H
 
 
@@ -8,7 +9,7 @@
 
 
 // max. observed players
-#define MAX_OBS		32
+#define MAX_OBS		32 // TODO: To remove stupid limits.
 // max. bots
 #define MAX_BOTS	32
 // max. stored waypoints for following
@@ -35,13 +36,13 @@ public:
 	void observeAll();
 	// observes all human clients currently registered
 
-	int playerId( edict_t *player );
+	int playerId( EDICT *player );
 	// returns the observer id of player
 
 	void reportPartner( int botId, int observerId );
 	// links botId with observerId
 
-	void addWaypoint( int observerId, Vector pos, int action = 0, int col = 1 );
+	void addWaypoint( int observerId, Vec3D *pos, int action = 0, int col = 1 );
 	// adds a waypoint for followers
 
 	PB_Path_Waypoint getNextWaypoint( int botId );
@@ -49,7 +50,7 @@ public:
 
 	void reportWaypointReached( int botId );
 
-	bool shouldFollow( int botId, edict_t *bot );
+	bool shouldFollow( int botId, EDICT *bot );
 	// returns true if bot should move towards partner
 
 	bool canNotFollow( int botId );
@@ -64,17 +65,17 @@ public:
 private:
 
 	typedef struct {
-		edict_t		*player;				// pointer to observed players
+		EDICT		*player;				// pointer to observed players
 		bool		active;				// true if observation runs
 		int			leadWaypoint;		// latest waypoint and plat of observed
 		int			lastPlatId;			//   player, indices in waypoint-table
-		edict_t		*platform;
+		EDICT		*platform;
 		PB_Navpoint *lastReachedNav;
-		Vector		lastWpPos;			// position where last waypoint was stored
+		Vec3D		lastWpPos;			// position where last waypoint was stored
 		float		lastWpTime;
 		float		lastWpYaw;
-		Vector		lastFramePos;		// position (for teleporters)
-		Vector		lastFrameVel;		// velocity (for teleporters)
+		Vec3D		lastFramePos;		// position (for teleporters)
+		Vec3D		lastFrameVel;		// velocity (for teleporters)
 		float		health;
 		int			frags;
 		bool		jumpPressed;
@@ -95,12 +96,12 @@ private:
 	int			partner[MAX_BOTS];			// stores botpartner
 	int			currentWaypoint[MAX_BOTS];	// index in waypoint-table
 
-#ifdef _DEBUG
+#if _DEBUG
 	CMarker		trail[MAX_OBS];
 	std::queue<int>	markerId[MAX_OBS];
 #endif //_DEBUG
 
-	int registerPlayer( edict_t *player );	
+	int registerPlayer( EDICT *player );	
 	// registers the player for observation, observerId is returned
 
 	void clear( int oId );
@@ -108,28 +109,28 @@ private:
 
 	void startObservation( int oId );
 
-	int checkGround( int oId, edict_t **plat );
+	int checkGround( int oId, EDICT **plat );
 	// returns WP_ON_LADDER and WP_ON_PLATFORM if necessary
 
 	bool shouldObservePlayer( int oId );
 
-	void checkForJump( int oId, Vector &pos );
+	void checkForJump( int oId, Vec3D *pos );
 
-	void checkForUse( int oId, Vector &pos );
+	void checkForUse( int oId, Vec3D *pos );
 
-	void checkForMove( int oId, Vector &pos );
+	void checkForMove( int oId, Vec3D *pos );
 
-	void checkForCamping( int oId, Vector &pos );
+	void checkForCamping( int oId, Vec3D *pos );
 
-	void checkForTripmines( int oId, Vector &pos );
+	void checkForTripmines( int oId, Vec3D *pos );
 
-	void checkForButtonShot( int oId, Vector &pos );
+	void checkForButtonShot( int oId, Vec3D *pos );
 
 	void checkPlayerHealth( int oId );
 
 	int getStartIndex( int oId, PB_Navpoint *endNav );
 
-	void newNavpointReached( int oId, Vector &pos, PB_Navpoint *endNav );
+	void newNavpointReached( int oId, Vec3D *pos, PB_Navpoint *endNav );
 
 	void updateCellInfo( int i );
 	

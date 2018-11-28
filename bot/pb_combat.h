@@ -24,23 +24,23 @@ class PB_Combat
 
 public:
 
-	void init( int slot, edict_t *ent, PB_Action *act, PB_Roaming *pFinder );
+	void init( int slot, EDICT *ent, PB_Action *act, PB_Roaming *pFinder );
 	// initializes all necessary variables
 
 	float getRating( PB_Percept &perceipt );
 	// rates importance of enemy
 
-	bool shootAtEnemy( Vector enemyOrigin, float accuracy );
+	bool shootAtEnemy( Vec3D *enemyOrigin, float accuracy );
 	// picks best place to shoot at and fires
 
-	bool shootAtEnemy( edict_t *enemy, float accuracy );
+	bool shootAtEnemy( EDICT *enemy, float accuracy );
 	// picks best place to shoot at and fires
 
 	void closeCombatMovement( PB_Percept &perceipt );
 
-	Vector evade( PB_Percept &perceipt );
+	void evade(PB_Percept &perceipt, Vec3D *right);
 
-	void retreat( edict_t *enemy );
+	void retreat( EDICT *enemy );
 	// flees from the enemy
 	
 	void idleActions();
@@ -49,13 +49,12 @@ public:
 	bool hasWeapon( int wId ) { return weapon.available( wId ); }
 
 	
-	float nextWeaponCheck;	// worldTime next armBestWeapon should be called
+	float nextWeaponCheck;	// worldtime next armBestWeapon should be called
 	PB_WeaponHandling	weapon;
 
 
 private:
-		
-	edict_t	 *botEnt;
+	EDICT	 *botEnt;
 	PB_Action *action;
 	PB_Roaming *pathfinder;
 	float		enemyContact;		// worldtime enemy has been registered

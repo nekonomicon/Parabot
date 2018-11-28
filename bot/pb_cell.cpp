@@ -1,24 +1,27 @@
 #include <float.h>
+#include "parabot.h"
+#include "sectors.h"
+#include "focus.h"
+#include "kills.h"
 #include "pb_cell.h"
 #include "pb_mapgraph.h"
 #include "pb_mapcells.h"
 
-
 extern PB_MapGraph mapGraph;
 
-PB_Navpoint* getNearestNavpoint( edict_t *pEdict );
+PB_Navpoint* getNearestNavpoint( EDICT *pEdict );
 
 
 
-PB_Cell::PB_Cell( edict_t *pEdict ) 
+PB_Cell::PB_Cell(EDICT *e) 
 {
-	data.position = makePos( pEdict );
+	eyepos(e, &data.position);
 	data.visits = 0;
 	data.flags = 0;
 	data.envDamage = 0;
 	data.navpoint = -1;
 	data.ground = -1;
-	for (int i=0; i<MAX_NBS; i++) {
+	for (int i = 0; i < MAX_NBS; i++) {
 		data.neighbour[i] = NO_CELL_REGISTERED;
 		data.weight[i] = FLT_MAX;
 		data.traffic[i] = 0;
@@ -26,18 +29,21 @@ PB_Cell::PB_Cell( edict_t *pEdict )
 	next = NO_CELL_REGISTERED;
 
 	// find navpoint:
-	PB_Navpoint *np = getNearestNavpoint( pEdict );
+	PB_Navpoint *np = getNearestNavpoint(e);
 	if ( np ) {
-		if ( (np->pos() - data.position).Length() <= CELL_SIZE  &&
-			 LOSExists( np->pos(), data.position )				&&
-			 (np->pos().z - data.position.z) <= 45 				   ) 
-			 data.navpoint = np->id();
+		Vec3D dir;
+
+		vsub(np->pos(), &data.position, &dir);
+		if (vlen(&dir) <= CELL_SIZE
+		    && LOSExists( np->pos(), &data.position)
+		    && (np->pos()->z - data.position.z) <= 45) 
+			data.navpoint = np->id();
 	}
 	// find ground:
-	edict_t *ground = pEdict->v.groundentity;
+	EDICT *ground = e->v.groundentity;
 	if (ground) {
 		const char *groundName = STRING( ground->v.classname );
-		if ( !FStrEq( groundName, "worldspawn" ) ) {
+		if ( !Q_STREQ( groundName, "worldspawn" ) ) {
 			data.ground = getNavpointIndex( ground );
 			if (data.ground < 0) data.ground = -1;
 		}
@@ -48,8 +54,6 @@ PB_Cell::PB_Cell( edict_t *pEdict )
 PB_Cell::PB_Cell( FILE *fp )
 {
 	fread( &data, sizeof(TSaveData), 1, fp );
-	focus.load( fp );
-	kills.load( fp );
 	next = NO_CELL_REGISTERED;
 }
 
@@ -57,8 +61,6 @@ PB_Cell::PB_Cell( FILE *fp )
 bool PB_Cell::save( FILE *fp )
 {
 	fwrite( &data, sizeof(TSaveData), 1, fp );
-	focus.save( fp );
-	kills.save( fp );
 	return true;
 }
 
@@ -87,7 +89,7 @@ bool PB_Cell::addTraffic( short nbId, float nbWeight )
 				float wFactor = 1 / ((float)(data.traffic[i]+1));
 				data.weight[i] = (1-wFactor)*data.weight[i] + wFactor*nbWeight;
 			}
-			//else debugMsg( "Player stopped\n" );
+			//else DEBUG_MSG( "Player stopped\n" );
 			return true;
 		}
 		else if (data.neighbour[i] == NO_CELL_REGISTERED) {
@@ -114,10 +116,10 @@ float PB_Cell::getEnvDamage()
 }
 
 
-bool PB_Cell::isSuitableRoamingTarget( edict_t *traveller )
+bool PB_Cell::isSuitableRoamingTarget( EDICT *traveller )
 { 
 	if (data.navpoint < 0) return false;
-	if ( worldTime() >= mapGraph[data.navpoint].first.nextVisit( traveller ) ) return true;
+	if ( worldtime() >= mapGraph[data.navpoint].first.nextVisit( traveller ) ) return true;
 	return false;
 }
 

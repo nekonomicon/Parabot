@@ -1,36 +1,20 @@
 #pragma once
-#ifndef PLATFORM_H
+#if !defined(PLATFORM_H)
 #define PLATFORM_H
 
 // Allow "DEBUG" in addition to default "_DEBUG"
-#ifdef _DEBUG
+#if _DEBUG
 #define DEBUG 1
 #endif
 
-// Silence certain warnings
-#pragma warning(disable : 4244)		// int or float down-conversion
-#pragma warning(disable : 4305)		// int or float data truncation
-#pragma warning(disable : 4201)		// nameless struct/union
-#pragma warning(disable : 4514)		// unreferenced inline function removed
-#pragma warning(disable : 4100)		// unreferenced formal parameter
-
-// Prevent tons of unused windows definitions
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#define NOWINRES
-#define NOSERVICE
-#define NOMCX
-#define NOIME
-#define HSPRITE HSPRITE_win32
-#include <windows.h>
-#undef HSPRITE
+#if _WIN32
 #define ARCH_SUFFIX
 #define OS_LIB_EXT "dll"
 #undef CreateDirectory
 #define CreateDirectory(p, n) CreateDirectoryA(p, n)
 #else // _WIN32
 
-#ifdef __APPLE__
+#if __APPLE__
 #define ARCH_SUFFIX
 #define OS_LIB_EXT "dylib"
 #else // __APPLE__
@@ -48,34 +32,21 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <stdio.h>
 #define CreateDirectory(p, n) mkdir(p, 0777)
 #define GetProcAddress dlsym
 #define LoadLibrary(x) dlopen(x, RTLD_NOW)
 #define Sleep(x) usleep(x * 1000)
 typedef void* HINSTANCE;
+
 #define stricmp strcasecmp
 #define _stricmp strcasecmp
 #define strnicmp strncasecmp
 #define _strnicmp strncasecmp
-#define FAR
 #define WINAPI
-#define FALSE 0
-#define TRUE (!FALSE)
-typedef unsigned long ULONG;
-typedef unsigned char BYTE;
-typedef int BOOL;
 #define MAX_PATH PATH_MAX
 #include <stdarg.h>
-#endif //_WIN32
-
-#ifndef strcpy_s
-#ifdef strlcpy
-#define strcpy_s(src, size, dst) strlcpy(src, dst, size)
-#else // strlcpy
-#define strcpy_s(src, size, dst) strncpy(src, dst, size-1); \
-					src[size-1] = '\0'
-#endif // strlcpy
-#endif // strcpy_s
+#endif // _WIN32
 
 // Misc C-runtime library headers
 #include <stdlib.h>
@@ -84,18 +55,23 @@ typedef int BOOL;
 // Exports
 #include "exportdef.h"
 
-#ifndef BIT
+#if !defined(BIT)
 #define BIT(X) (1U<<X)
 #endif // BIT
 
-#ifndef Q_min
+#define Q_STREQ(s1,s2)		(strcmp(s1, s2) == 0)
+#define Q_STRIEQ(s1,s2)		(_stricmp(s1, s2) == 0)
+#define Q_STRNEQ(s1,s2,size)	(strncmp(s1, s2, size) == 0)
+#define Q_STRNIEQ(s1,s2,size)	(_strnicmp(s1, s2, size) == 0)
+
+#if !defined(Q_min)
 #define Q_min(a,b)  (((a) < (b)) ? (a) : (b))
 #endif // Q_min
-#ifndef Q_max
+#if !defined(Q_max)
 #define Q_max(a,b)  (((a) > (b)) ? (a) : (b))
 #endif // Q_max
 
-#ifndef clamp
+#if !defined(clamp)
 #define clamp( val, min, max ) ( Q_max( max, Q_min( val, min )))
 #endif // clamp
 

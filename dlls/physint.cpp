@@ -15,11 +15,9 @@ GNU General Public License for more details.
 
 #include <string.h>
 #include "exportdef.h"
-#include "extdll.h"
+#include "parabot.h"
 #include "bot.h"
 #include "physint.h"
-
-extern HINSTANCE h_Library;
 
 //
 // Xash3D physics interface
@@ -29,44 +27,32 @@ extern HINSTANCE h_Library;
 // attempt to create custom entity when default method is failed
 // 0 - attempt to create, -1 - reject to create
 //
-int DispatchCreateEntity( edict_t *pent, const char *szName )
+static int dispatch_createentity(EDICT *e, const char *name)
 {
-	LINK_ENTITY_FUNC SpawnEdict = (LINK_ENTITY_FUNC)GetProcAddress( h_Library, szName );
+	LINK_ENTITY_FUNC spawnedict = (LINK_ENTITY_FUNC)GetProcAddress(com.gamedll_handle, name);
 
-	if( SpawnEdict )	// found the valid spawn
-	{
-		SpawnEdict( &pent->v );
+	if(spawnedict) {	// found the valid spawn
+		spawnedict(&e->v);
 		return 0;	// handled
 	}
 
-	return -1; // failed
-}
-//
-//
-// run custom physics for each entity
-// return 0 to use built-in engine physic
-//
+	if(com.physfuncs->SV_CreateEntity)
+		return com.physfuncs->SV_CreateEntity(e, name);
 
-int DispatchPhysicsEntity( edict_t *pEdict )
-{
-	return 0;
+	return -1;
 }
 
-static physics_interface_t gPhysicsInterface =
+extern "C" bool EXPORT Server_GetPhysicsInterface( int version, void *engfuncs, PHYSICS_INTERFACE *functiontable )
 {
-	SV_PHYSICS_INTERFACE_VERSION,
-	DispatchCreateEntity,
-	DispatchPhysicsEntity,
-};
+	SERVER_GETPHYSICSINTERFACE other_Server_GetPhysicsInterface = (SERVER_GETPHYSICSINTERFACE)GetProcAddress(com.gamedll_handle, "Server_GetPhysicsInterface");
 
-extern "C" int EXPORT Server_GetPhysicsInterface( int iVersion, server_physics_api_t *pfuncsFromEngine, physics_interface_t *pFunctionTable )
-{
-	if( !pFunctionTable || !pfuncsFromEngine || iVersion != SV_PHYSICS_INTERFACE_VERSION )
-	{
-		return FALSE;
-	}
+	if(other_Server_GetPhysicsInterface)
+		other_Server_GetPhysicsInterface(version, engfuncs, functiontable);
 
-	memcpy( pFunctionTable, &gPhysicsInterface, sizeof(physics_interface_t) );
+	com.physfuncs = (PHYSICS_INTERFACE *)malloc(sizeof(PHYSICS_INTERFACE));
+	com.physfuncs->SV_CreateEntity = functiontable->SV_CreateEntity;
+	functiontable->version = version;
+	functiontable->SV_CreateEntity = dispatch_createentity;
 
-	return TRUE;
+	return true;
 }

@@ -1,4 +1,5 @@
-#if !defined( PB_WEAPON_H )
+#pragma once
+#if !defined(PB_WEAPON_H)
 #define PB_WEAPON_H
 
 
@@ -237,7 +238,7 @@ public:
 	PB_Weapon( int wId );
 	// directly initializing currentWeapon
 	
-	void init( int slot, edict_t *ent, PB_Action *action );
+	void init( int slot, EDICT *ent, PB_Action *action );
 	// has to be called with the botSlot before all other methods
 
 	float getScore( float distance, float hitProb, int flags, bool checkAmmo );
@@ -246,7 +247,7 @@ public:
 	float getAudibleDistance( int attackFlags );
 	// returns the audible distance
 
-	bool attack( Vector target, float accuracy, Vector relVel = g_vecZero );
+	bool attack( Vec3D *target, float accuracy, Vec3D *relVel );
 	// attacks in best mode at best time the given position when accuracy is reached
 
 	bool hasToFinishAttack() { return grenadePrepared; }
@@ -296,11 +297,11 @@ private:
 	int armedWeapon;			// weapon the player has armed
 
 	int			botSlot;		// slot the bot is using
-	edict_t		*botEnt;
+	EDICT		*botEnt;
 	PB_Action	*botAction;		// pointer to action-instace the bot is using
 
-	float	nextAttackTime;		// worldTime next attack can occur
-	float	lastAttackTime;		// worldTime last attack was executed
+	float	nextAttackTime;		// worldtime next attack can occur
+	float	lastAttackTime;		// worldtime last attack was executed
 	bool	reloading;			// true if current weapon is being reloaded
 
 	int bestMode[MAX_WEAPONS];	// if weapons have several modes, the best get
@@ -312,7 +313,7 @@ private:
 
 	bool grenadePrepared;		// for handgrenades and satchels
 	float grenadeLaunchTime;	// when to throw/bomb
-	Vector grenadeTarget;		// for handgrenades to remember where to throw if forced to
+	Vec3D grenadeTarget;		// for handgrenades to remember where to throw if forced to
 	int grenadeWId;				// holds wid if grenadePrepared
 
 	bool loadingGauss;
@@ -329,8 +330,8 @@ private:
 	float gearboxWeaponScore( float distance, float hitProb, int flags, bool checkAmmo );
 	float hungerWeaponScore( float distance, float hitProb, int flags, bool checkAmmo );	
 
-	bool attackValveHandgrenade( Vector &target );
-	bool attackValveSatchel( Vector &target );
+	bool attackValveHandgrenade( Vec3D *target );
+	bool attackValveSatchel( Vec3D *target );
 };
 
 #endif

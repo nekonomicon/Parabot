@@ -1,4 +1,5 @@
-#ifndef SOUNDS_H
+#pragma once
+#if !defined(SOUNDS_H)
 #define SOUNDS_H
 
 #include "pb_global.h"
@@ -17,31 +18,24 @@
 
 typedef char TextureName[CBTEXTURENAMEMAX];
 
-class Sounds
-{
-public:
-	void init();
-	void getAllClientSounds();
-	void parseSound( edict_t *ent, const char *sample, float vol );
-	void parseAmbientSound( edict_t *ent, const char *sample, float vol );
+void	sounds_getAllClientSounds();
+void	sounds_parseSound( EDICT *ent, const char *sample, float vol );
+void	sounds_parseAmbientSound( EDICT *ent, const char *sample, float vol );
 
-	float getSensableDist( int clientIndex );
-	float getTrackableDist( int clientIndex );
-private:
-	typedef struct
-	{
-		float stepSensableDist;
-		float stepTrackableDist;
-		float itemSensableDist;
-		float itemTrackableDist;
-		float timeItemSound;
-		float timeStepSound;
-		float oldTimeStepSound;
-		TextureName textureName;
-		char textureType;
-	} stepsounds_t;
+float	sounds_getSensableDist( int clientIndex );
+float	sounds_getTrackableDist( int clientIndex );
+typedef struct stepsounds {
+	float stepSensableDist;
+	float stepTrackableDist;
+	float itemSensableDist;
+	float itemTrackableDist;
+	float timeItemSound;
+	float timeStepSound;
+	float oldTimeStepSound;
+	TextureName textureName;
+	char textureType;
+} STEPSOUNDS;
 
-	void calcStepSound( int clientIndex, edict_t *ent, bool writeResult );
-	std::vector<stepsounds_t> player;
-};
+void	sounds_calcStepSound( int clientIndex, EDICT *ent, bool writeResult );
+
 #endif

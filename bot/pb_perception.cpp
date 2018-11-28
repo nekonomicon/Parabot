@@ -1,8 +1,10 @@
+#include "parabot.h"
 #include "pb_perception.h"
 #include "bot.h"
 #include "pb_weapon.h"
 #include "pb_configuration.h"
 #include "sounds.h"
+#include "sectors.h"
 #include "pb_mapcells.h"
 
 
@@ -10,14 +12,14 @@ extern int mod_id;
 extern int clientWeapon[32];
 extern bool haloOnBase;
 extern PB_Configuration pbConfig;	// from configfiles.cpp
-extern Sounds playerSounds;
+// extern Sounds playerSounds;
 extern PB_MapCells map;
 
 int globalPerceptionId = 0;
 
 
 // maximum perception distances for different items
-static float perceptionDist[MAX_PERCEPTION+1] = { 0,
+static float perceptionDist[MAX_PERCEPTION + 1] = { 0,
 MAX_DIST_VP,	// player
 MAX_DIST_VP,	// friend
 MAX_DIST_VP,	// foe
@@ -28,55 +30,53 @@ MAX_DIST_VI,	// explosive
 MAX_DIST_VI,	// laserdot
 MAX_DIST_VI,	// tripmine
 MAX_DIST_VI,	// halo
-0,				// damage
-MAX_DIST_VI		// snark
+0,		// damage
+MAX_DIST_VI	// snark
 };
 
 
-float PB_Percept::getReactionTime( edict_t *ent, short state, short realClass, float dist )
+float PB_Percept::getReactionTime( EDICT *ent, short state, short realClass, float dist )
 // returns the time needed to react to the item (time to enter goal-queue)
 {
 	float time;
 
 	if (realClass <= PI_HOSTAGE) {
 		// players
-		time = (0.4 / botSensitivity) - 0.2;
-		if (state==PI_VISIBLE && isInvisible( ent )) time *= 15;	// DMC
-	}
-	else if (realClass == PI_DAMAGE) {
+		time = (0.4f / botSensitivity) - 0.2f;
+		if (state == PI_VISIBLE && is_invisible( ent ))
+			time *= 15.0f;	// DMC
+	} else if (realClass == PI_DAMAGE) {
 		// damage
-		time = (0.2 / botSensitivity) - 0.1;
-	}
-	else if (realClass == PI_TRIPMINE) {
+		time = (0.2f / botSensitivity) - 0.1f;
+	} else if (realClass == PI_TRIPMINE) {
 		// bots run into them too often anyway...
-		time = 0.0;
-	}
-	else {
+		time = 0.0f;
+	} else {
 		// items
-		time = (0.4 / botSensitivity) - 0.2;
+		time = (0.4f / botSensitivity) - 0.2f;
 	}
 		
 	return time;
 }
 
 
-PB_Percept::PB_Percept( float botSens, edict_t *ent, short state, short realClass, float dist )
+PB_Percept::PB_Percept( float botSens, EDICT *ent, short state, short realClass, float dist )
 {
 	id = globalPerceptionId++;
 	botSensitivity = botSens;
 	distance = dist;
 	entity = ent;
-	firstDetection = worldTime();
+	firstDetection = worldtime();
 	flags = 0;
-	lastDetection = worldTime();
-	lastPos = UNKNOWN_POS;
-	lastSeenPos = UNKNOWN_POS;
+	lastDetection = worldtime();
+	vcopy(UNKNOWN_POS, &lastPos);
+	vcopy(UNKNOWN_POS, &lastSeenPos);
 	lastSeenTime = -100;
-	lastSeenVelocity = UNKNOWN_POS;	
-
-	predTarget = UNKNOWN_POS;	
+	vcopy(UNKNOWN_POS, &lastSeenVelocity);
+	
 	lastCalcTarget = 0;
-	predAppearance = UNKNOWN_POS;	
+	vcopy(UNKNOWN_POS, &predTarget);
+	vcopy(UNKNOWN_POS, &predAppearance);
 	lastCalcAppearance = 0;
 
 	model = PI_UNKNOWN;					// else mark as unknown
@@ -84,86 +84,97 @@ PB_Percept::PB_Percept( float botSens, edict_t *ent, short state, short realClas
 	pClass = realClass;
 	pState = state;
 	rating = 0;
-	update = worldTime() + getReactionTime( ent, state, realClass, dist );	
+	update = worldtime() + getReactionTime(ent, state, realClass, dist);	
 	if (ent) {
 		lastPos = ent->v.origin;
-		if (state==PI_VISIBLE) {
-			lastSeenPos = ent->v.origin;		// if visible, store position
-			lastSeenTime = worldTime();			// ...time
-			lastSeenVelocity = ent->v.velocity;	// ...velocity
+		if (state == PI_VISIBLE) {
+			vcopy(&ent->v.origin, &lastSeenPos);	// if visible, store position
+			lastSeenTime = worldtime();			// ...time
+			vcopy(&ent->v.velocity, &lastSeenVelocity);	// ...velocity
 			model = ent->v.modelindex;			// ...and model
 		}
 	}
 }
 
 
-Vector PB_Percept::predictedPosition( const Vector &botPos )
+void PB_Percept::predictedPosition(const Vec3D *botPos, Vec3D *lastPos)
 // returns a predicted position for an enemy that is not perceived anymore
 {
 	// not implemented yet!
-	return lastPos;
+	vcopy(botPos, lastPos);
 }
 
 
-Vector PB_Percept::predictedAppearance( const Vector &botPos )
+Vec3D *PB_Percept::predictedAppearance( const Vec3D *botPos )
 // returns the position where a not visible enemy is most likely to get into line-of-sight
 {
-	if (isVisible() || entity==0 ) return lastPos;
-	
-	// update prediction every second:
-	if (worldTime()-lastCalcAppearance > 1) predAppearance = UNKNOWN_POS;
+	if (isVisible() || entity == 0 ) return &lastPos;
 
-	if (predAppearance == UNKNOWN_POS) {
+	// update prediction every second:
+	if (worldtime() - lastCalcAppearance > 1)
+		vcopy(UNKNOWN_POS, &predAppearance);
+
+	if (vcomp(&predAppearance, UNKNOWN_POS)) {
 		short predictedPath[128];	// contains cell indices to target
-		short origin = map.getCellId( lastSeenPos );
-		short start = map.getCellId( lastPos );
-		short target = map.getCellId( botPos );
-		if ( start==NO_CELL_FOUND || target==NO_CELL_FOUND ) return predAppearance;
+		short origin = map.getCellId(&lastSeenPos);
+		short start = map.getCellId(&lastPos);
+		short target = map.getCellId(botPos);
+		if (start == NO_CELL_FOUND || target == NO_CELL_FOUND) return &predAppearance;
 
 		if (hasBeenVisible() && map.lineOfSight( origin, target )) {
 			// bot is maintaining LOS -> probably enemy is searching cover!
 			// first check if he might run through...
-			if ( map.getDirectedPathToAttack( start, target, lastSeenVelocity, predictedPath ) > 0 )
-				predAppearance = map.cell( predictedPath[0] ).pos();
+			if (map.getDirectedPathToAttack(start, target, &lastSeenVelocity, predictedPath) > 0)
+				vcopy(map.cell(predictedPath[0]).pos(), &predAppearance);
 			// if not, just pick shortest path
-			else if ( map.getPathToAttack( start, target, predictedPath ) > 0 )
-				predAppearance = map.cell( predictedPath[0] ).pos();
-			else predAppearance = lastPos;
-		}
-		else {
+			else if (map.getPathToAttack( start, target, predictedPath) > 0)
+				vcopy(map.cell(predictedPath[0]).pos(), &predAppearance);
+			else
+				vcopy(&lastPos, &predAppearance);
+		} else {
 			// either enemy was never visible or bot has moved and lost LOS...
 			// assume enemy is heading towards bot:
-			if ( map.getPathToAttack( start, target, predictedPath ) > 0 )
-				predAppearance = map.cell( predictedPath[0] ).pos();
-			else predAppearance = lastPos;
+			if (map.getPathToAttack(start, target, predictedPath) > 0 )
+				vcopy(map.cell(predictedPath[0]).pos(), &predAppearance);
+			else
+				vcopy(&lastPos, &predAppearance);
 		}
-		
-		lastCalcAppearance = worldTime();
+
+		lastCalcAppearance = worldtime();
 	}
-	
-	return predAppearance;
+
+	return &predAppearance;
 }
 
 
 float PB_Percept::targetAccuracy()
 {
-	if ( orientation < 0.5 ) return 0;
-	float x = distance * (1-orientation);
-	if (x >= 5.48) return 0.2;
-	if (x >= 0.77) return 0.4;
-	if (x >= 0.152) return 0.6;
-	if (x >= 0.021) return 0.8;
-	return 1.0;
+	if (orientation < 0.5f)
+		return 0.0f;
+	float x = distance * (1.0f - orientation);
+	if (x >= 5.48f)
+		return 0.2f;
+
+	if (x >= 0.77f)
+		return 0.4f;
+
+	if (x >= 0.152f)
+		return 0.6f;
+
+	if (x >= 0.021f)
+		return 0.8f;
+
+	return 1.0f;
 }
 
 
 bool PB_Percept::isAimingAtBot()
-{ 
+{
 	// only notices aiming after a certain time according to distance (dist->time):
 	// 200->0	400->1	600->2	800->3
 	float recTime = (distance - 200.0) / (botSensitivity*200);
-		
-	if (worldTime() >= (firstDetection+recTime)) return (orientation > 0.95);
+
+	if (worldtime() >= (firstDetection+recTime)) return (orientation > 0.95);
 	else return false;
 }
 
@@ -187,11 +198,11 @@ PB_Perception::~PB_Perception()
 }
 
 
-void PB_Perception::init( edict_t *ent )
+void PB_Perception::init( EDICT *ent )
 // initializes all necessary variables
 {
 	botEnt = ent;
-	maxSpeed = serverMaxSpeed();
+	maxSpeed = servermaxspeed();
 	detections[0].clear();
 	detections[1].clear();
 	tactileDetections.clear();
@@ -200,30 +211,31 @@ void PB_Perception::init( edict_t *ent )
 	numEnemies = 0;
 }
 
-
 void PB_Perception::setSensitivity( int skill )
 {
-	//sensitivity = ((float)skill+3.5)/9.0;
-	sensitivity =  30.0 / ((float)(20-skill)) - 1.0;	// worst=0.58 .. best=2.0
+	//sensitivity = ((float)skill + 3.5f) / 9.0f ;
+	sensitivity =  30.0f / ((float)(20 - skill)) - 1.0f;	// worst=0.58 .. best=2.0
 }
 
-
-void PB_Perception::addAttack( edict_t *inflictor, int dmg )
+void PB_Perception::addAttack( EDICT *inflictor, int dmg )
 {
+	Vec3D dir;
+
 	// distance means amount of damage done!
-	tactileDetections.push_back( PB_Percept( sensitivity, inflictor, PI_TACTILE, PI_DAMAGE, (float)dmg ) );
+	tactileDetections.push_back(PB_Percept(sensitivity, inflictor, PI_TACTILE, PI_DAMAGE, (float)dmg));
 	if (inflictor) {
 		// hack for raising skill:
-		float dist = (inflictor->v.origin - botEnt->v.origin).Length();
-		detections[cdet].push_back( PB_Percept( sensitivity, inflictor, PI_VISIBLE, PI_FOE, dist) );
+		vsub(&inflictor->v.origin, &botEnt->v.origin, &dir);
+		float dist = vlen(&dir);
+		detections[cdet].push_back(PB_Percept(sensitivity, inflictor, PI_VISIBLE, PI_FOE, dist));
 	}
 }
 
 
-void PB_Perception::addNewArea( Vector viewDir )
+void PB_Perception::addNewArea( Vec3D *viewDir )
 {
-	PB_Percept newArea( sensitivity, 0, PI_PREDICTED, PI_NEWAREA, 0);
-	newArea.lastPos = viewDir;
+	PB_Percept newArea(sensitivity, 0, PI_PREDICTED, PI_NEWAREA, 0);
+	vcopy(viewDir, &newArea.lastPos);
 	detections[cdet].push_back( newArea );
 }
 
@@ -232,16 +244,17 @@ void PB_Perception::addNewArea( Vector viewDir )
 bool PB_Perception::classify( PB_Percept &perc )
 // identifies a PI_PLAYER perception as friend or foe if possible
 {
+	Vec3D dir;
+
 	if (pbConfig.onPeaceMode()) {	
 		perc.pClass = PI_FRIEND;	// yeah, we love everybody (until he hurts us)
 		return true;
 	}
 
-	if ((mod_id==VALVE_DLL || mod_id==HUNGER_DLL || mod_id==GEARBOX_DLL || mod_id==DMC_DLL) && !FBitSet( g_uiGameFlags, GAME_TEAMPLAY )) {
+	if ((mod_id==VALVE_DLL || mod_id==HUNGER_DLL || mod_id==GEARBOX_DLL || mod_id==DMC_DLL) && !(com.gamedll_flags & GAMEDLL_TEAMPLAY)) {
 		perc.pClass = PI_FOE;	// no friends in deathmatch...
 		return true;
-	}
-	else if (mod_id==HOLYWARS_DLL) {
+	} else if (mod_id==HOLYWARS_DLL) {
 		perc.pClass = PI_FOE;	// no friends in deathmatch...
 		return true;
 /*		if (isTheSaint( botEnt ) || haloOnBase) {
@@ -254,20 +267,23 @@ bool PB_Perception::classify( PB_Percept &perc )
 			perc.pClass = PI_FOE;
 			perc.flags |= PI_HIGH_PRIORITY;
 		}
-		else if (isHeretic( perc.entity )) perc.pClass = PI_FOE;
+		else if (isHeretic(perc.entity)) perc.pClass = PI_FOE;
 		else perc.pClass = PI_FRIEND;
 		return true;*/
-	}
-	else {
+	} else {
 		if (!(perc.pState & PI_VISIBLE)) return false;	
 		// calculate time needed for identification:
-		float distance = (botEnt->v.origin - perc.entity->v.origin).Length();
+		vsub(&botEnt->v.origin, &perc.entity->v.origin, &dir);
+		float distance = vlen(&dir);
 		assert( sensitivity != 0 );
-		float recTime = (distance - MAX_DIST_VPR) / (sensitivity*1000);
-		
-		if (worldTime() >= (perc.firstDetection+recTime)) {	
-			if (UTIL_GetTeam( perc.entity ) != UTIL_GetTeam( botEnt )) perc.pClass = PI_FOE;
-			else perc.pClass = PI_FRIEND;
+		float recTime = (distance - MAX_DIST_VPR) / (sensitivity * 1000);
+
+		if (worldtime() >= (perc.firstDetection + recTime)) {
+			if (getteam(perc.entity) != getteam(botEnt))
+				perc.pClass = PI_FOE;
+			else
+				perc.pClass = PI_FRIEND;
+
 			return true;
 		}
 	}
@@ -278,6 +294,8 @@ bool PB_Perception::classify( PB_Percept &perc )
 bool PB_Perception::isNewPerception( tPerceptionList &oldList, PB_Percept &perc )
 // if perc exists in old perception list, delete it there, update perc and return false
 {
+	Vec3D dir;
+
 	// new damages are in tactile list -> no check necessary:
 	if (perc.pClass == PI_DAMAGE) return false;
 
@@ -286,12 +304,14 @@ bool PB_Perception::isNewPerception( tPerceptionList &oldList, PB_Percept &perc 
 
 	// special check for areas:
 	if (perc.pClass == PI_NEWAREA) {
-		while ( pli != oldList.end() ) {
+		while (pli != oldList.end()) {
 			// only check for other areas:
 			if (pli->pClass != PI_NEWAREA) {	
-				pli++;  continue; 
+				pli++;
+				continue; 
 			}
-			if ((perc.lastPos - pli->lastPos).Length() < 16.0) {
+			vsub(&perc.lastPos, &pli->lastPos, &dir);
+			if (vlen(&dir) < 16.0f) {
 				perc.id = pli->id;
 				perc.lastPos = pli->lastPos;
 				return false;
@@ -303,10 +323,11 @@ bool PB_Perception::isNewPerception( tPerceptionList &oldList, PB_Percept &perc 
 
 	// normal case:
 	float bestDist = 10000;
-	while ( pli != oldList.end() ) {
+	while (pli != oldList.end()) {
 		// don't confuse different models!
-		if (perc.model!=PI_UNKNOWN && pli->model!=PI_UNKNOWN && perc.model!=pli->model) {
-			pli++;  continue; 
+		if (perc.model != PI_UNKNOWN && pli->model != PI_UNKNOWN && perc.model != pli->model) {
+			pli++;
+			continue;
 		}
 
 		// memorize every new damage:
@@ -317,11 +338,14 @@ bool PB_Perception::isNewPerception( tPerceptionList &oldList, PB_Percept &perc 
 		
 		// predicted position ok?
 		float passedTime = perc.lastDetection - pli->lastDetection;
-		if ( (perc.lastPos - pli->lastPos).Length() > ((passedTime+0.2) * maxSpeed) ) {
-			pli++;  continue;
+		vsub(&perc.lastPos, &pli->lastPos, &dir);
+		if (vlen(&dir) > ((passedTime + 0.2f) * maxSpeed)) {
+			pli++;
+			continue;
 		}
 		// calculate deviation from predicted position
-		float dev = ( pli->lastSeenPos - perc.lastPos ).Length();
+		vsub(&pli->lastSeenPos, &perc.lastPos, &dir);
+		float dev = vlen(&dir);
 		if (dev < bestDist) {
 			match = pli;
 			bestDist = dev;
@@ -329,19 +353,18 @@ bool PB_Perception::isNewPerception( tPerceptionList &oldList, PB_Percept &perc 
 		pli++;
 	}
 
-	if ( match != oldList.end() ) {	// match found?
+	if (match != oldList.end()) {	// match found?
 		perc.id = match->id;
 		// copy timings:
 		perc.update = match->update;
 		perc.firstDetection = match->firstDetection;
-		perc.flags = match->flags & ~(PI_FOCUS1|PI_FOCUS2|PI_DISAPPEARED);
+		perc.flags = match->flags & ~(PI_FOCUS1 | PI_FOCUS2 | PI_DISAPPEARED);
 		if (match->flags & PI_FOCUS1) perc.flags |= PI_FOCUS2;	// remember focus once
 		
-		if ( perc.isVisible() ) {
+		if (perc.isVisible()) {
 			perc.pState |= PI_PREDICTED;	// add PREDICTED-flag
 			perc.flags &= ~PI_PREEMPTIVE;	// stop preemptive fire
-		}
-		else {	// not visible:
+		} else {	// not visible:
 			perc.lastSeenTime = match->lastSeenTime;
 			perc.lastSeenPos = match->lastSeenPos;
 			perc.lastSeenVelocity = match->lastSeenVelocity;
@@ -351,17 +374,16 @@ bool PB_Perception::isNewPerception( tPerceptionList &oldList, PB_Percept &perc 
 			perc.lastCalcAppearance = match->lastCalcAppearance;
 			if (match->pState & PI_VISIBLE) {	// check if just disappeared
 				perc.flags |= PI_DISAPPEARED;
-			}
-			else if (worldTime() > (perc.lastSeenTime+2.0)) {
+			} else if (worldtime() > (perc.lastSeenTime+2.0)) {
 				perc.flags &= ~PI_PREEMPTIVE;	// stop preemptive fire (only 2 secs!)
 			}
 		}
 
 		// remember attacks and visual contact:
-		perc.pState |= (match->pState & (PI_TACTILE|PI_PREDICTED)); 
+		perc.pState |= (match->pState & (PI_TACTILE | PI_PREDICTED)); 
 
-		if (perc.model==PI_UNKNOWN) perc.model = match->model;	// remember model 
-		if (perc.pClass==PI_PLAYER) {					// unidentified player:
+		if (perc.model == PI_UNKNOWN) perc.model = match->model;	// remember model 
+		if (perc.pClass == PI_PLAYER) {					// unidentified player:
 			classify( perc );
 			/*if (match->pClass!=PI_PLAYER) {				// if formerly known
 				perc.pClass = match->pClass;			// ...remember class
@@ -371,7 +393,7 @@ bool PB_Perception::isNewPerception( tPerceptionList &oldList, PB_Percept &perc 
 		return false;
 	}
 
-	//debugMsg( "New perception: %i!\n", perc.pClass );
+	// DEBUG_MSG( "New perception: %i!\n", perc.pClass );
 	return true;
 }
 
@@ -381,84 +403,67 @@ bool PB_Perception::isNewTactilePerception( tPerceptionList &pList, PB_Percept &
 {
 	tPerceptionList::iterator pli = pList.begin();
 	tPerceptionList::iterator match = pList.end();
-	while ( pli != pList.end() ) {
-		
+	while (pli != pList.end()) {
 		// only damages!
 		if (pli->pClass != PI_DAMAGE) {
-			pli++;  continue; 
+			pli++;
+			continue;
 		}
 		
 		// same entity?
 		if (perc.entity != pli->entity) {
-			pli++;  continue;
+			pli++;
+			continue;
 		}
 		match = pli;
 		break;	
 	}
 
-	if ( match != pList.end() ) {	// match found?
+	if (match != pList.end()) {	// match found?
 		perc.id = match->id;
 		// copy timings:	-> don't copy update since that is used for underFire() !
 		perc.firstDetection = match->firstDetection;
 		perc.distance += match->distance;	// add damages
 		perc.pState = match->pState;	// origin known flag!
-		pList.erase( match );
+		pList.erase(match);
 		//debugFile( "INFLICTOR KNOWN.\n" );
 		return false;
 	}
 
-	//debugMsg( "New damage-perception!" );
+	// DEBUG_MSG( "New damage-perception!" );
 	return true;
 }
 
-
-bool PB_Perception::addIfVisible( Vector pos, edict_t *ent, int pClass )
+bool PB_Perception::addIfVisible( Vec3D *pos, EDICT *ent, int pClass )
 {
-	TraceResult tr;
+	Vec3D botpos, dir;
+	TRACERESULT tr;
+	bool isvisible = false;
+
+	if(!pos) {
+                isvisible = true;
+                pos = &ent->v.origin; //+ ent->v.view_ofs;
+        }
 
 	// check if in visible distance
-	Vector botpos = botEnt->v.origin + botEnt->v.view_ofs;
-	float dist = (pos - botpos).Length();
-	if (dist > (sensitivity*perceptionDist[pClass])) return false;
+	vadd(&botEnt->v.origin, &botEnt->v.view_ofs, &botpos);
+	vsub(pos, &botpos, &dir);
+	float dist = vlen(&dir);
+	if (dist > (sensitivity * perceptionDist[pClass])) return false;
 
 	// check if in viewcone
-	Vector dir = (pos - botpos).Normalize();
-	float dot = DotProduct( gpGlobals->v_forward, dir );
-	if (  dot > 0.6 ) {
-		UTIL_TraceLine( pos, botpos, dont_ignore_monsters, ignore_glass, botEnt, &tr);	
-		if ( tr.flFraction == 1.0 ) {
-			detections[cdet].push_back( PB_Percept( sensitivity, ent, PI_PREDICTED, pClass, dist) );
+	normalize(&dir);
+	float dot = dotproduct(&com.globals->fwd, &dir);
+	if (dot > 0.6) {
+		trace_line(pos, &botpos, false, true, botEnt, &tr);
+		if ((tr.fraction == 1.0f) || (isvisible && tr.hit == ent)) {
+			detections[cdet].push_back(PB_Percept(sensitivity, ent, isvisible ? PI_VISIBLE : PI_PREDICTED, pClass, dist));
 			// entity itself is not supposed to be visible, therefore PI_PREDICTED
 			return true;
 		}
 	}
 	return false;
 }
-
-
-bool PB_Perception::addIfVisible( edict_t *ent, int pClass )
-{
-	TraceResult tr;
-
-	// check if in visible distance
-	Vector botpos = botEnt->v.origin + botEnt->v.view_ofs;
-	Vector pos = ent->v.origin; //+ ent->v.view_ofs;
-	float dist = (pos - botpos).Length();
-	if (dist > (sensitivity*perceptionDist[pClass])) return false;
-
-	// check if in viewcone
-	Vector dir = (pos - botpos).Normalize();
-	float dot = DotProduct( gpGlobals->v_forward, dir );
-	if (  dot > 0.6 ) {
-		UTIL_TraceLine( botpos, pos, dont_ignore_monsters, ignore_glass, botEnt, &tr);	
-		if ( (tr.flFraction == 1.0) || (tr.pHit == ent) ) {
-			detections[cdet].push_back( PB_Percept( sensitivity, ent, PI_VISIBLE, pClass, dist) );
-			return true;
-		}
-	}
-	return false;
-}
-
 
 void PB_Perception::checkDamageFor( PB_Percept &player ) 
 {
@@ -495,146 +500,148 @@ void PB_Perception::checkInflictorFor( PB_Percept &dmg )
 
 void PB_Perception::collectData()
 {
-	edict_t *ent = 0;
+	Vec3D dir;
+	EDICT *ent = 0;
+	TRACERESULT tr;
 	bool detected;
 
-	UTIL_MakeVectors( botEnt->v.v_angle );
-	// for (not) detecting own laserspot:
-	Vector vecSrc = botEnt->v.origin + botEnt->v.view_ofs;
-	Vector vecAiming = gpGlobals->v_forward;
-	TraceResult tr;
-	UTIL_TraceLine ( vecSrc, vecSrc + vecAiming * 8192, dont_ignore_monsters, botEnt, &tr );
-	Vector aimingPos = tr.vecEndPos;
+	makevectors(&botEnt->v.v_angle);
 
-	int h=cdet;  cdet=odet;  odet=h;	// switch lists
+	int h = cdet;
+	cdet = odet;
+	odet = h;	// switch lists
 	detections[cdet].clear();
 
-	while( !FNullEnt( ent = FIND_ENTITY_IN_SPHERE( ent, botEnt->v.origin, sensitivity * MAX_DIST_VP ) ) ) 
-	{
+	while((ent = find_entityinsphere(ent, &botEnt->v.origin, sensitivity * MAX_DIST_VP))) {
 		const char *pClassname = STRING(ent->v.classname);
-		
+
 		// detect players
-		if ( FStrEq( pClassname, "player" ) ) {
+		if (Q_STREQ(pClassname, "player")) {
 			// check if valid
-			if (ent == botEnt) continue;		// skip self
-			if (!isAlive( ENT(ent) )) continue;	// skip player if not alive
-			if (ent->v.solid == SOLID_NOT) continue;	// skip player if observer
+			if (!is_alive(ent)		// skip player if not alive
+			    || ent == botEnt			// skip self
+			    || ent->v.solid == SOLID_NOT)
+				continue;	// skip player if observer
 			
-			detected = addIfVisible( ent, PI_PLAYER );
-			if (!detected) detected = addIfVisible( ent->v.absmin, ent, PI_PLAYER );
-			if (!detected) detected = addIfVisible( ent->v.absmax, ent, PI_PLAYER );
+			detected = addIfVisible(NULL, ent, PI_PLAYER);
+			if (!detected)
+				detected = addIfVisible(&ent->v.absmin, ent, PI_PLAYER);
+
+			if (!detected)
+				detected = addIfVisible(&ent->v.absmax, ent, PI_PLAYER);
 
 			// if not detected check if audible by shooting
-			if ( !detected ) {
-				int clientIndex = ENTINDEX( ent );
-				float dist = (ent->v.origin - botEnt->v.origin).Length();
-				float audibleDist = playerSounds.getSensableDist( clientIndex );
-				if (dist < audibleDist*sensitivity) {
+			if (!detected) {
+				int clientIndex = indexofedict(ent);
+				vsub(&ent->v.origin, &botEnt->v.origin, &dir);
+				float dist = vlen(&dir);
+				float audibleDist = sounds_getSensableDist( clientIndex );
+				if (dist < audibleDist * sensitivity) {
 					detected = true;
-					float trackableDist = playerSounds.getTrackableDist( clientIndex );
-					if (dist < trackableDist*sensitivity) {
-						//debugMsg( "Player trackable\n" );
+					float trackableDist = sounds_getTrackableDist( clientIndex );
+					if (dist < trackableDist * sensitivity) {
+						// DEBUG_MSG("Player trackable\n");
 						detections[cdet].push_back( PB_Percept( sensitivity, ent, PI_TRACKABLE, PI_PLAYER, dist) );
-					}
-					else {
-						//debugMsg( "Player audible\n" );
+					} else {
+						// DEBUG_MSG( "Player audible\n" );
 						detections[cdet].push_back( PB_Percept( sensitivity, ent, PI_AUDIBLE, PI_PLAYER, dist) );
 					}
 				}
 			}	
-   		}
-		else if ( ( mod_id != DMC_DLL && FStrEq( pClassname, "weaponbox" ) ) ||
-				  ( mod_id == DMC_DLL && FStrEq( pClassname, "item_backpack" ) ) )	{
-			addIfVisible( ent, PI_WEAPONBOX );
-		}
-		else if ( FStrEq( pClassname, "halo" ) ) {
-			addIfVisible( ent, PI_HALO );
-		}
-		else if ( FStrEq( pClassname, "hostage_entity" ) ) {
-			addIfVisible( ent, PI_HOSTAGE );
-		}
-		else if ( FStrEq( pClassname, "weapon_c4" ) ) {
-			addIfVisible( ent, PI_BOMB );
-		}
-		else if ( FStrEq( pClassname, "laser_spot" ) ) {
-			if ((ent->v.origin != aimingPos) && !(ent->v.effects & EF_NODRAW)) {
-				addIfVisible( ent, PI_LASERDOT );
+   		} else if ((mod_id != DMC_DLL && Q_STREQ( pClassname, "weaponbox")) ||
+				  (mod_id == DMC_DLL && Q_STREQ( pClassname, "item_backpack")))	{
+			addIfVisible(NULL, ent, PI_WEAPONBOX);
+		} else if (Q_STREQ(pClassname, "halo")) {
+			addIfVisible(NULL, ent, PI_HALO);
+		} else if (Q_STREQ(pClassname, "hostage_entity")) {
+			addIfVisible(NULL, ent, PI_HOSTAGE);
+		} else if (Q_STREQ(pClassname, "weapon_c4")) {
+			addIfVisible(NULL, ent, PI_BOMB);
+		} else if (Q_STREQ(pClassname, "laser_spot")) {
+			// for (not) detecting own laserspot:
+			Vec3D vecSrc;
+
+			eyepos(botEnt, &vecSrc);
+			vma(&vecSrc, 8192.0f, &com.globals->fwd, &dir);
+			trace_line(&vecSrc, &dir, false, false, botEnt, &tr );
+			if (!vcomp(&ent->v.origin, &tr.endpos) && !(ent->v.effects & EF_NODRAW)) {
+				addIfVisible( NULL, ent, PI_LASERDOT );
 			}
-		}
-		else if ( FStrEq( pClassname, "monster_satchel" ) ) {
-			addIfVisible( ent, PI_EXPLOSIVE );
-		}
-		else if ( FStrEq( pClassname, "grenade" ) ) {
-			if (!addIfVisible( ent, PI_EXPLOSIVE )) {
-				float dist = (ent->v.origin - botEnt->v.origin).Length();
-				if (dist < 200*sensitivity) {
+		} else if (Q_STREQ(pClassname, "monster_satchel")) {
+			addIfVisible( NULL, ent, PI_EXPLOSIVE );
+		} else if (Q_STREQ(pClassname, "grenade")) {
+			if (!addIfVisible( NULL, ent, PI_EXPLOSIVE )) {
+				vsub(&ent->v.origin, &botEnt->v.origin, &dir);
+				float dist = vlen(&dir);
+				if (dist < 200.0f * sensitivity) {
 					detections[cdet].push_back( PB_Percept( sensitivity, ent, PI_AUDIBLE, PI_EXPLOSIVE, dist) );
 				}
 			}
-		}
-		else if ( FStrEq( pClassname, "monster_snark" ) ) {
-			addIfVisible( ent, PI_SNARK );
-		}
-		else if ( FStrEq( pClassname, "monster_tripmine" ) || FStrEq( pClassname, "monster_tripsnark" ) ) {
+		} else if (Q_STREQ(pClassname, "monster_snark")) {
+			addIfVisible(NULL, ent, PI_SNARK);
+		} else if (Q_STREQ(pClassname, "monster_tripmine") || Q_STREQ(pClassname, "monster_tripsnark")) {
 			if (ent->v.owner == botEnt) {
 				// remember own tripmines even without seeing them:
-				float dist = (ent->v.origin - botEnt->v.origin).Length();
+				vsub(&ent->v.origin, &botEnt->v.origin, &dir);
+				float dist = vlen(&dir);
 				detections[cdet].push_back( PB_Percept( sensitivity, ent, PI_TRACKABLE, PI_TRIPMINE, dist) );
-			}
-			else if ( !addIfVisible( ent, PI_TRIPMINE ) ) {		// check beamstart
-				Vector mine_vecEnd = ent->v.origin + gpGlobals->v_forward * 2048;
-				UTIL_TraceLine( ent->v.origin, mine_vecEnd, dont_ignore_monsters, ENT( ent ), &tr );
-				float mine_flBeamLength = tr.flFraction;
-				Vector beamEnd = mine_vecEnd * mine_flBeamLength;
-				Vector beamCenter = (ent->v.origin + beamEnd) / 2;
-				if ( !addIfVisible( beamEnd, ent, PI_TRIPMINE ) )	// check beamend
-					addIfVisible( beamCenter, ent, PI_TRIPMINE );	// check beamcenter
+			} else if (!addIfVisible(NULL, ent, PI_TRIPMINE)) {		// check beamstart
+				Vec3D mine_vecEnd, beamEnd, beamCenter;
+
+				vma(&ent->v.origin, 2048.0f, &com.globals->fwd, &mine_vecEnd);
+				trace_line(&ent->v.origin, &mine_vecEnd, false, false, ent, &tr );
+				float mine_flBeamLength = tr.fraction;
+				vscale(&mine_vecEnd, mine_flBeamLength, &beamEnd);
+				if (!addIfVisible(&beamEnd, ent, PI_TRIPMINE)) {	// check beamend
+					vadd(&ent->v.origin, &beamEnd, &beamCenter);
+					addIfVisible(&beamCenter, ent, PI_TRIPMINE);	// check beamcenter
+				}
 			}
 		}
-		
 	}
 
 	// determine new perceptions
 	tPerceptionList::iterator cdi = detections[cdet].begin();
-	while ( cdi != detections[cdet].end() ) {
+	while (cdi != detections[cdet].end()) {
 		// update values if perceipt is known:
-		if ( isNewPerception( detections[odet], *cdi ) ) checkDamageFor( *cdi );
+		if (isNewPerception(detections[odet], *cdi)) checkDamageFor(*cdi);
 		// try to identify as friend or foe if not sure:
-		if (cdi->pClass==PI_PLAYER) classify( *cdi );
+		if (cdi->pClass == PI_PLAYER) classify(*cdi);
 		cdi++;
 	}
 
 	// if we lost some perceptions, don't forget these for a while
 	tPerceptionList::iterator odi = detections[odet].begin();
-	while ( odi != detections[odet].end() ) {
-		if ( (worldTime()-odi->lastDetection) < 5 ) {
-			odi->distance = ((Vector)(odi->lastPos-botEnt->v.origin)).Length();
-			if ( (odi->pClass <= PI_HOSTAGE) && (odi->entity->v.health < 1) ) {
-				odi++;	continue; }	// only living persons
-			if ( (odi->pClass==PI_HALO || odi->pClass==PI_WEAPONBOX) && (odi->distance < 50) ) {
-				odi++;	continue; }	// no items that have already been picked up
-
-			// set disappeared and visible flags...
-			if ( odi->isVisible() ) {
+	while (odi != detections[odet].end()) {
+		if ((worldtime() - odi->lastDetection) < 5) {
+			vsub(&odi->lastPos, &botEnt->v.origin, &dir);
+			odi->distance = vlen(&dir);
+			if ((odi->pClass <= PI_HOSTAGE) && (odi->entity->v.health < 1)) {
+				odi++;	// only living persons
+				continue;
+			} else if ((odi->pClass == PI_HALO || odi->pClass == PI_WEAPONBOX) && (odi->distance < 50)) {
+				odi++;	// no items that have already been picked up
+				continue;
+			} else if (odi->isVisible()) { // set disappeared and visible flags...
 				odi->pState &= ~PI_VISIBLE;	
 				odi->flags |= PI_DISAPPEARED;
-			}
-			else {
+			} else {
 				odi->flags &= ~PI_DISAPPEARED;
 			}
-			detections[cdet].push_back( *odi );
+			detections[cdet].push_back(*odi);
 		}
 		odi++;
 	}
 
 	// add tactile perceptions
 	tPerceptionList::iterator tdi = tactileDetections.begin();
-	while ( tdi != tactileDetections.end() ) {
-		if ( isNewTactilePerception( detections[cdet], *tdi ) ) 
-			checkInflictorFor( *tdi );
-		//tdi->update = worldTime();	// no delay -> accounted for in getReactionTime() !
-		//debugMsg( "New tactile perception!\n" );
-		detections[cdet].push_back( *tdi );
+	while (tdi != tactileDetections.end()) {
+		if (isNewTactilePerception(detections[cdet], *tdi)) 
+			checkInflictorFor(*tdi);
+
+		//tdi->update = worldtime();	// no delay -> accounted for in getReactionTime() !
+		// DEBUG_MSG("New tactile perception!\n");
+		detections[cdet].push_back(*tdi);
 		tdi++;
 	}
 	tactileDetections.clear();
@@ -643,22 +650,22 @@ void PB_Perception::collectData()
 	numEnemies = 0;
 	numUnidentified = 0;
 	cdi = detections[cdet].begin();
-	while ( cdi != detections[cdet].end() ) {
+	while (cdi != detections[cdet].end()) {
 		if (cdi->pClass == PI_FOE) numEnemies++;
 		else if (cdi->pClass == PI_PLAYER) numUnidentified++;
 		cdi++;
 	}
-	//debugMsg( "E=%i  U=%i\n", numEnemies, numUnidentified );
+	// DEBUG_MSG( "E=%i  U=%i\n", numEnemies, numUnidentified );
 }
 
 
 void PB_Perception::resetPlayerClassifications()
 {
-	debugMsg( "Resetting classifications...\n" );
+	DEBUG_MSG("Resetting classifications...\n");
 	tPerceptionList::iterator di;
-	for (int list=0; list<2; list++) {
+	for (int list = 0; list < 2; list++) {
 		di = detections[list].begin();
-		while ( di != detections[list].end() ) {
+		while (di != detections[list].end()) {
 			if (di->pClass <= PI_FOE) di->pClass = PI_PLAYER;
 			di++;
 		}
@@ -666,16 +673,18 @@ void PB_Perception::resetPlayerClassifications()
 }
 
 
-edict_t* PB_Perception::getNearestTripmine()
+EDICT* PB_Perception::getNearestTripmine()
 // returns nearest tripmine or 0 if no tripmine seen
 {
-	edict_t *mine = 0;
+	Vec3D dir;
+	EDICT *mine = 0;
 	float closest = 8000;
 
 	tPerceptionList::iterator cdi = detections[cdet].begin();
-	while ( cdi != detections[cdet].end() ) {
+	while (cdi != detections[cdet].end()) {
 		if (cdi->pClass == PI_TRIPMINE) {
-			float dist = ((Vector)(botEnt->v.origin - cdi->lastPos)).Length();
+			vsub(&botEnt->v.origin, &cdi->lastPos, &dir);
+			float dist = vlen(&dir);
 			if (dist < closest) {
 				mine = cdi->entity;
 				closest = dist;
@@ -693,19 +702,19 @@ bool PB_Perception::underFire()
 	static bool lastReturn = false;
 	static float lastCall = 0;
 
-	if ( worldTime() < (lastCall+0.1) ) return lastReturn;	//	10 updates/sec. ok
+	if (worldtime() < (lastCall + 0.1f)) return lastReturn;	//	10 updates/sec. ok
 	
 	bool attacked = false;
 	tPerceptionList::iterator cdi = detections[cdet].begin();
-	while ( cdi != detections[cdet].end() ) {
-		if ((cdi->pClass == PI_DAMAGE) && ((cdi->update+1.0) > worldTime())) {
+	while (cdi != detections[cdet].end()) {
+		if ((cdi->pClass == PI_DAMAGE) && ((cdi->update + 1.0f) > worldtime())) {
 			attacked = true;
 			break;
-		}	
+		}
 		cdi++;
 	}
 
 	lastReturn = attacked;
-	lastCall = worldTime();
+	lastCall = worldtime();
 	return attacked;
 }

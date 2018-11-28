@@ -1,18 +1,18 @@
-#ifdef _DEBUG
+#if _DEBUG
 #include "marker.h"
 
 extern int wpSpriteTexture;
 extern int wpSprite2Texture;
 extern int wpBeamTexture;
 
-void WaypointDrawBeam(edict_t *pEntity, Vector start, Vector end, int width,
+void WaypointDrawBeam(EDICT *pEntity, Vector start, Vector end, int width,
         int noise, int red, int green, int blue, int brightness, int speed)
 {
 	static int frameStart = 0;
 	static int frameRate = 40;
 	static int life = 1;
 
-   MESSAGE_BEGIN(MSG_ONE, SVC_TEMPENTITY, NULL, pEntity);
+   MESSAGE_BEGIN(MSG_ONE, SVC_TEMPITY, NULL, pEntity);
    WRITE_BYTE( TE_BEAMPOINTS);
    WRITE_COORD(start.x);
    WRITE_COORD(start.y);
@@ -38,7 +38,7 @@ void WaypointDrawBeam(edict_t *pEntity, Vector start, Vector end, int width,
 }
 
 
-void drawCube( edict_t *ent, Vector pos, float size )
+void drawCube( EDICT *ent, Vector pos, float size )
 {
 	int red = 0;
 	int green = 0;
@@ -61,9 +61,9 @@ void drawCube( edict_t *ent, Vector pos, float size )
 }
 
 
-void drawParticles( edict_t *pEntity, Vector start, int color )
+void drawParticles( EDICT *pEntity, Vector start, int color )
 {
-   MESSAGE_BEGIN(MSG_ONE, SVC_TEMPENTITY, NULL, pEntity);
+   MESSAGE_BEGIN(MSG_ONE, SVC_TEMPITY, NULL, pEntity);
    WRITE_BYTE( TE_PARTICLEBURST);
    
    WRITE_COORD(start.x);
@@ -80,9 +80,9 @@ void drawParticles( edict_t *pEntity, Vector start, int color )
 }
 
 
-void drawMarker( edict_t *pEntity, Vector start, Vector end )
+void drawMarker( EDICT *pEntity, Vector start, Vector end )
 {
-   MESSAGE_BEGIN(MSG_ONE, SVC_TEMPENTITY, NULL, pEntity);
+   MESSAGE_BEGIN(MSG_ONE, SVC_TEMPITY, NULL, pEntity);
    WRITE_BYTE( TE_BEAMTORUS);
    
    WRITE_COORD(start.x);
@@ -110,9 +110,9 @@ void drawMarker( edict_t *pEntity, Vector start, Vector end )
 }
 
 
-void drawSprite( edict_t *pEntity, Vector start, int type )
+void drawSprite( EDICT *pEntity, Vector start, int type )
 {
-   MESSAGE_BEGIN(MSG_ONE, SVC_TEMPENTITY, NULL, pEntity);
+   MESSAGE_BEGIN(MSG_ONE, SVC_TEMPITY, NULL, pEntity);
    WRITE_BYTE( TE_SPRITE);
    
    WRITE_COORD(start.x);
@@ -150,7 +150,7 @@ int CMarker::newMarker( Vector pos, int type )
 		//drawParticles( playerEnt, pos, color );
 		//drawMarker( playerEnt, pos, pos+Vector(0,0,30), color );
 	//	WaypointDrawBeam( playerEnt, pos, pos+Vector(0,0,30), 20, 0, 0, 0, 255, 250, 5 );
-	//else debugMsg( "Marker: no playerEnt!\n" );
+	//else DEBUG_MSG( "Marker: no playerEnt!\n" );
 	return markerId;
 }
 

@@ -1,6 +1,6 @@
+#include "parabot.h"
 #include "pb_needs.h"
 #include "pb_global.h"
-#include "parabot.h"
 #include "pb_mapgraph.h"
 #include "bot.h"
 
@@ -31,8 +31,8 @@ float PB_Needs::needForHealth()
 	float need = (100.0 - bot->ent->v.health) * (10.0/(100.0-MIN_HEALTH));
 	if (need < 0) need = 0;
 	else if (need > 10) need = 10;
-	//debugMsg( "VHealth=%.1f   ", ent->v.health );
-	//debugMsg( "Health=%.1f\n", need );
+	// DEBUG_MSG( "VHealth=%.1f   ", ent->v.health );
+	// DEBUG_MSG( "Health=%.1f\n", need );
 	return need;
 };
 
@@ -45,7 +45,7 @@ float PB_Needs::needForArmor()
 
 	float need = (100.0 - bot->ent->v.armorvalue) * (0.01*MAX_ARMOR_WISH);
 	if (need < 0) need = 0;
-	//debugMsg( "Armor=%.1f\n", need );
+	// DEBUG_MSG( "Armor=%.1f\n", need );
 	return need;
 };
 
@@ -67,7 +67,7 @@ float PB_Needs::wishForCombat()
 	case AG_DLL:
 	case VALVE_DLL:
 			if( bot->combat.hasWeapon( VALVE_WEAPON_EGON ) 
-				&& !FBitSet( g_uiGameFlags, GAME_BMOD | GAME_SEVS ) )
+				&& !(com.gamedll_flags & (GAMEDLL_BMOD | GAMEDLL_SEVS)))
 			{
 				 weapon = 1;
 			}
@@ -144,7 +144,7 @@ float PB_Needs::wishForSniping( bool weaponCheck )
 	float wish_s = health*weapon*5 + (5-bot->aggression);
 	
 	const float outTime = 40;// time after which camping gives 0 points
-	float x = outTime + (worldTime() - bot->lastCamp) - bot->campTime;
+	float x = outTime + (worldtime() - bot->lastCamp) - bot->campTime;
 	// while camping x=outTime-campTime, else x increasing
 	if (x>outTime) {
 		if (bot->aggression < 2.5) x = outTime + (x-outTime)/(10*bot->aggression);
@@ -170,7 +170,7 @@ void PB_Needs::valveWishList()
 			airstrikeKnown = true;
 		}
 
-		if (mapGraph.getNearestNavpoint( g_vecZero, NAV_S_AIRSTRIKE_COVER ))
+		if (mapGraph.getNearestNavpoint(&zerovector, NAV_S_AIRSTRIKE_COVER ))
 			return;	// only head for bunker if cover exists!
 	}
 	else if (airstrikeKnown) {
@@ -178,7 +178,7 @@ void PB_Needs::valveWishList()
 		airstrikeKnown = false;
 	}
 
-	if (worldTime() > nextAirstrikeTime) wish[NAV_S_AIRSTRIKE_BUTTON] = 2;
+	if (worldtime() > nextAirstrikeTime) wish[NAV_S_AIRSTRIKE_BUTTON] = 2;
 
 	wish[NAV_I_HEALTHKIT]     = needForHealth();
 	wish[NAV_F_HEALTHCHARGER] = needForHealth();
@@ -218,8 +218,7 @@ void PB_Needs::valveWishList()
 	if (!bot->combat.hasWeapon( VALVE_WEAPON_RPG			)) wish[NAV_W_RPG]			= 4.5;
 	if (!bot->combat.hasWeapon( VALVE_WEAPON_TRIPMINE	)) wish[NAV_W_TRIPMINE]		= 2;
 
-	if( FBitSet( g_uiGameFlags, GAME_BMOD ) )
-	{
+	if(com.gamedll_flags & GAMEDLL_BMOD) {
 		if( !bot->combat.hasWeapon( VALVE_WEAPON_CROWBAR ) )
 			wish[NAV_W_CROWBAR] = 9;
 	}
@@ -547,7 +546,7 @@ void PB_Needs::hungerWishList()
 
 void PB_Needs::agWishList()
 {
-	edict_t *pent = NULL;
+	EDICT *pent = NULL;
 	int i;
 
 	if (headToBunker) {
@@ -557,7 +556,7 @@ void PB_Needs::agWishList()
 			newItemPriorities = true;
 			airstrikeKnown = true;
 		}
-		if (mapGraph.getNearestNavpoint( g_vecZero, NAV_S_AIRSTRIKE_COVER ))
+		if (mapGraph.getNearestNavpoint(&zerovector, NAV_S_AIRSTRIKE_COVER ))
 			return;	// only head for bunker if cover exists!
 	}
 	else if (airstrikeKnown) {
@@ -565,7 +564,7 @@ void PB_Needs::agWishList()
 		airstrikeKnown = false;
 	}
 
-	if (worldTime() > nextAirstrikeTime) wish[NAV_S_AIRSTRIKE_BUTTON] = 2;
+	if (worldtime() > nextAirstrikeTime) wish[NAV_S_AIRSTRIKE_BUTTON] = 2;
 
 	wish[NAV_I_HEALTHKIT]     = needForHealth();
 	wish[NAV_F_HEALTHCHARGER] = needForHealth();
@@ -631,15 +630,15 @@ void PB_Needs::agWishList()
 	wish[NAV_A_GAUSSCLIP]	= wish[NAV_A_EGONCLIP];
 
 	// DOM
-	if( FBitSet( g_uiGameFlags, GAME_DOM ) )
+	if(com.gamedll_flags & GAMEDLL_DOM)
 		wish[NAV_AGI_DOM_CONTROLPOINT] = 20;
 
 	// CTF
-	if( FBitSet( g_uiGameFlags, GAME_CTF ) )
+	if(com.gamedll_flags & GAMEDLL_CTF)
 	{
-		if( UTIL_GetTeam( bot->ent ) )
+		if( getteam( bot->ent ) )
 		{
-			while( !FNullEnt( pent = FIND_ENTITY_BY_CLASSNAME( pent, "carried_flag_team1" ) ) )
+			while((pent = find_entitybyclassname( pent, "carried_flag_team1" ) ) )
 			{
 				if( pent->v.owner == bot->ent )
 				{
@@ -659,7 +658,7 @@ void PB_Needs::agWishList()
 		}
 		else
 		{
-			while( !FNullEnt( pent = FIND_ENTITY_BY_CLASSNAME( pent, "carried_flag_team2" ) ) )
+			while((pent = find_entitybyclassname( pent, "carried_flag_team2" ) ) )
 			{
 				if( pent->v.owner == bot->ent ) 
 				{
@@ -703,9 +702,9 @@ void PB_Needs::getWishList()
 
 void PB_Needs::updateWishList()
 {
-	if (worldTime() > wishUpdate) {
+	if (worldtime() > wishUpdate) {
 		memset( &wish, 0, sizeof wish );
 		getWishList();
-		wishUpdate = worldTime() + 1.0;
+		wishUpdate = worldtime() + 1.0;
 	}
 }

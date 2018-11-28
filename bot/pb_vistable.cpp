@@ -2,22 +2,34 @@
 //
 //////////////////////////////////////////////////////////////////////
 #include <assert.h>
-#ifdef HAVE_MALLOC_H
+#if HAVE_MALLOC_H
 #include <malloc.h>
 #else
 #include <stdlib.h>
 #endif
+#include "parabot.h"
+#include "sectors.h"
+#include "pb_mapcells.h"
 #include "pb_vistable.h"
+class PB_MapCells;
+extern PB_MapCells map;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
+void updateVisTable()
+{
+	int trCount = map.updateVisibility( 128 );
+	if (trCount > 0) {
+		pb2dMsg( 20, 100, "Tracing Visibility (%i/%i)...", map.lastVisUpdate(), map.numberOfCells() );
+	}
+}
 
 PB_VisTable::PB_VisTable()
 {
 	// init bitMask table
-	for (int i=0; i<32; i++) {
+	for (int i = 0; i < 32; i++) {
 		int bm = 1 << i;
 		bitMask[i] = bm;
 	}
@@ -25,16 +37,15 @@ PB_VisTable::PB_VisTable()
 	clear();
 }
 
-
 PB_VisTable::~PB_VisTable()
 {
 	clear();
 }
 
-
 void PB_VisTable::clear()
 {
-	for (int i=0; i<numCells; i++) free( visTable[i] );
+	for (int i = 0; i < numCells; i++)
+		free( visTable[i] );
 	numCells = 0;
 	traceCell = 0;
 	traceBit = 0;
@@ -55,7 +66,6 @@ void PB_VisTable::addCell()
 	numCells++;
 }
 
-
 bool PB_VisTable::needTrace( int &cell1, int &cell2 )
 {
 	if ((traceBit == traceCell) && (traceCell < numCells)) addTrace( true );
@@ -67,7 +77,6 @@ bool PB_VisTable::needTrace( int &cell1, int &cell2 )
 	}
 	return false;
 }
-
 
 void PB_VisTable::addTrace( bool visible )
 {
@@ -92,7 +101,6 @@ bool PB_VisTable::isVisible( int cell1, int cell2 )
 
 }
 
-
 void PB_VisTable::setVisibility( int cell1, int cell2, bool visible )
 {
 	assert( cell1 >= cell2 );
@@ -101,7 +109,6 @@ void PB_VisTable::setVisibility( int cell1, int cell2, bool visible )
 	if (visible) visTable[cell1][ofs] |= bitMask[bit];
 	else		 visTable[cell1][ofs] &= ~(bitMask[bit]);
 }
-
 
 void PB_VisTable::load( FILE *fp )
 {
@@ -114,7 +121,6 @@ void PB_VisTable::load( FILE *fp )
 		fread( visTable[i], sizeof(int), numInts, fp );
 	}
 }
-
 
 void PB_VisTable::save( FILE *fp )
 {

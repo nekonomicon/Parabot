@@ -1,12 +1,6 @@
-#if !defined( PBT_DYNARRAY_H )
-#define PBT_DYNARRAY_H
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-
-
-
+#if !defined(PBT_DYNARRAY_H)
+#define PBT_DYNARRAY_H
 
 template <class T>
 class PBT_DynArray  

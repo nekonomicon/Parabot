@@ -1,7 +1,6 @@
-#if !defined( PB_WEAPON_HANDLING_H )
+#pragma once
+#if !defined(PB_WEAPON_HANDLING_H)
 #define PB_WEAPON_HANDLING_H
-
-
 #include "pb_weapon.h"
 
 
@@ -16,7 +15,7 @@ public:
 	
 	PB_WeaponHandling();
 	
-	void init( int slot, edict_t *ent, PB_Action *action );
+	void init( int slot, EDICT *ent, PB_Action *action );
 	// has to be called with the botSlot before all other methods
 
 	void initCurrentWeapon();
@@ -28,7 +27,7 @@ public:
 	bool available( int wId );
 	// returns true if bot can use weapon wId
 
-	bool attack( Vector target, float accuracy, Vector relVel = g_vecZero );
+	bool attack( Vec3D *target, float accuracy, Vec3D *relVel );
 	// attacks in best mode at best time the given position when accuracy is reached
 
 	void checkForForcedAttack();
@@ -56,7 +55,7 @@ public:
 private:
 
 	int			botSlot;				// slot the bot is using
-	edict_t		*botEnt;
+	EDICT		*botEnt;
 	PB_Action	*botAction;				// pointer to action-instace the bot is using
 
 	PB_Weapon	weapon;
@@ -65,7 +64,7 @@ private:
 	int			preferredWeapon;
 	int			preferredMode;
 	float		preferredWeaponTimeOut;
-	float		lastModeSwitch;			// worldTime last change (zoom in/out) had ocurred
+	float		lastModeSwitch;			// worldtime last change (zoom in/out) had ocurred
 	
 	bool		weaponUsable;
 

@@ -1,8 +1,6 @@
-#ifndef PB_GOALFINDER_H
+#pragma once
+#if !defined(PB_GOALFINDER_H)
 #define PB_GOALFINDER_H
-
-#pragma warning( disable : 4786 )	// disable stl warnings
-
 
 #include "pb_global.h"
 #include "pb_perception.h"

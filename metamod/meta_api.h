@@ -22,46 +22,65 @@
  *    along with Metamod; if not, write to the Free Software Foundation,
  *    Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *    In addition, as a special exception, the author gives permission to
- *    link the code of this program with the Half-Life Game Engine ("HL
- *    Engine") and Modified Game Libraries ("MODs") developed by Valve,
- *    L.L.C ("Valve").  You must obey the GNU General Public License in all
- *    respects for all of the code used other than the HL Engine and MODs
- *    from Valve.  If you modify this file, you may extend this exception
- *    to your version of the file, but you are not obligated to do so.  If
- *    you do not wish to do so, delete this exception statement from your
- *    version.
- *
  */
-
+#pragma once
 #ifndef META_API_H
 #define META_API_H
 
-#include "dllapi.h"				// GETENTITYAPI_FN, etc
-#include "engine_api.h"			// GET_ENGINE_FUNCTIONS_FN, etc
-#include "plinfo.h"				// plugin_info_t, etc
-#include "mutil.h"
-
-// Version consists of "major:minor", two separate integer numbers.
-// Version 1	original
-// Version 2	added plugin_info_t **pinfo
-// Version 3	init split into query and attach, added detach
-// Version 4	added (PLUG_LOADTIME now) to attach
-// Version 5	changed mm ifvers int* to string, moved pl ifvers to info
-// Version 5:1	added link support for entity "adminmod_timer" (adminmod)
-// Version 5:2	added gamedll_funcs to meta_attach() [v1.0-rc2]
-// Version 5:3	added mutil_funcs to meta_query() [v1.05]
-// Version 5:4	added centersay utility functions [v1.06]
-// Version 5:5	added Meta_Init to plugin API [v1.08]
-// Version 5:6	added CallGameEntity utility function [v1.09]
-// Version 5:7	added GetUserMsgID, GetUserMsgName util funcs [v1.11]
-// Version 5:8	added GetPluginPath [v1.11]
-// Version 5:9	added GetGameInfo [v1.14]
-// Version 5:10 added GINFO_REALDLL_FULLPATH for GetGameInfo [v1.17]
-// Version 5:11 added plugin loading and unloading API [v1.18]
-// Version 5:12 added IS_QUERYING_CLIENT_CVAR to mutils [v1.18]
-// Version 5:13 added MAKE_REQUESTID and GET_HOOK_TABLES to mutils [v1.19]
 #define META_INTERFACE_VERSION "5:13"
+
+// Flags for plugin to indicate when it can be be loaded/unloaded.
+// NOTE: order is crucial, as greater/less comparisons are made.
+typedef enum {
+	PT_NEVER,
+	PT_STARTUP,		// should only be loaded/unloaded at initial hlds execution
+	PT_CHANGELEVEL,		// can be loaded/unloaded between maps
+	PT_ANYTIME,		// can be loaded/unloaded at any time
+	PT_ANYPAUSE		// can be loaded/unloaded at any time, and can be "paused" during a map
+} PLUG_LOADTIME;
+
+// Information plugin provides about itself.
+typedef struct plugin_info {
+	const char	*ifvers;	// meta_interface version
+	const char	*name;		// full name of plugin
+	const char	*version;	// version
+	const char	*date;		// date
+	const char	*author;	// author name/email
+	const char	*url;		// URL
+	const char	*logtag;	// log message prefix (unused right now)
+	PLUG_LOADTIME	 loadable;	// when loadable
+	PLUG_LOADTIME	 unloadable;	// when unloadable
+} PLUGIN_INFO;
+
+// Plugin identifier, passed to all Meta Utility Functions.
+typedef PLUGIN_INFO* plid_t;
+#define PLID	com.metamod.plugin_info
+
+// Meta Utility Function table type.
+typedef struct meta_util_funcs {
+	void		 (*pfnLogConsole)		(plid_t, const char *, ...);
+	void		 (*pfnLogMessage)		(plid_t, const char *, ...);
+	void		 (*pfnLogError)			(plid_t, const char *, ...);
+	void		 (*pfnLogDeveloper)		(plid_t, const char *, ...);
+	void		 (*pfnCenterSay)		(plid_t, const char *, ...);
+	void		 (*pfnCenterSayParms)		(plid_t, void *, const char *, ...);
+	void		 (*pfnCenterSayVarargs)		(plid_t, void *, const char *, va_list);
+	qboolean	 (*pfnCallGameEntity)		(plid_t, const char *, ENTVARS *);
+	int		 (*pfnGetUserMsgID)		(plid_t, const char *, int *);
+	const char	*(*pfnGetUserMsgName)		(plid_t, int, int *);
+	const char	*(*pfnGetPluginPath)		(plid_t);
+	const char	*(*pfnGetGameInfo)		(plid_t, void *);
+
+	int		 (*pfnLoadPlugin)		(plid_t, const char *, PLUG_LOADTIME, void **);
+	int		 (*pfnUnloadPlugin)		(plid_t, const char *, PLUG_LOADTIME, void *);
+	int		 (*pfnUnloadPluginByHandle)	(plid_t, void *, PLUG_LOADTIME, void *);
+
+	const char	*(*pfnIsQueryingClientCvar)	(plid_t, const EDICT *);
+
+	int		 (*pfnMakeRequestID)		(plid_t);
+
+	void		 (*pfnGetHookTables)		(plid_t, ENGINEAPI **, SERVERFUNCS **, SERVERFUNCS2 **);
+} META_UTIL_FUNCS;
 
 // Flags returned by a plugin's api function.
 // NOTE: order is crucial, as greater/less comparisons are made.
@@ -70,163 +89,56 @@ typedef enum {
 	MRES_IGNORED,		// plugin didn't take any action
 	MRES_HANDLED,		// plugin did something, but real function should still be called
 	MRES_OVERRIDE,		// call real function, but use my return value
-	MRES_SUPERCEDE,		// skip real function; use my return value
+	MRES_SUPERCEDE		// skip real function; use my return value
 } META_RES;
 
 // Variables provided to plugins.
-typedef struct meta_globals_s {
-	META_RES mres;			// writable; plugin's return flag
-	META_RES prev_mres;		// readable; return flag of the previous plugin called
-	META_RES status;		// readable; "highest" return flag so far
-	void *orig_ret;			// readable; return value from "real" function
-	void *override_ret;		// readable; return value from overriding/superceding plugin
-} meta_globals_t;
-
-extern meta_globals_t *gpMetaGlobals;
-#define SET_META_RESULT(result)			gpMetaGlobals->mres=result
-#define RETURN_META(result) \
-	do { gpMetaGlobals->mres=result; return; } while(0)
-#define RETURN_META_VALUE(result, value) \
-	do { gpMetaGlobals->mres=result; return(value); } while(0)
-#define META_RESULT_STATUS				gpMetaGlobals->status
-#define META_RESULT_PREVIOUS			gpMetaGlobals->prev_mres
-#define META_RESULT_ORIG_RET(type)		*(type *)gpMetaGlobals->orig_ret
-#define META_RESULT_OVERRIDE_RET(type)	*(type *)gpMetaGlobals->override_ret
+typedef struct meta_globals {
+	META_RES	 mres;			// writable; plugin's return flag
+	META_RES	 prev_mres;		// readable; return flag of the previous plugin called
+	META_RES	 status;		// readable; "highest" return flag so far
+	void		*orig_ret;		// readable; return value from "real" function
+	void		*override_ret;		// readable; return value from overriding/superceding plugin
+} META_GLOBALS;
 
 // Table of getapi functions, retrieved from each plugin.
-typedef struct {
-	GETENTITYAPI_FN         pfnGetEntityAPI;
-	GETENTITYAPI_FN         pfnGetEntityAPI_Post;
-	GETENTITYAPI2_FN        pfnGetEntityAPI2;
-	GETENTITYAPI2_FN        pfnGetEntityAPI2_Post;
-	GETNEWDLLFUNCTIONS_FN   pfnGetNewDLLFunctions;
-	GETNEWDLLFUNCTIONS_FN   pfnGetNewDLLFunctions_Post;
-	GET_ENGINE_FUNCTIONS_FN pfnGetEngineFunctions;
-	GET_ENGINE_FUNCTIONS_FN pfnGetEngineFunctions_Post;
-} META_FUNCTIONS;
+typedef struct meta_funcs {
+	int (*pfnGetEntityAPI)(SERVERFUNCS *, int);
+	int (*pfnGetEntityAPI_Post)(SERVERFUNCS *, int);
+	int (*pfnGetEntityAPI2)(SERVERFUNCS *, int *);
+	int (*pfnGetEntityAPI2_Post)(SERVERFUNCS *, int *);
+	int (*pfnGetNewDLLFunctions)(SERVERFUNCS2 *, int *);
+	int (*pfnGetNewDLLFunctions_Post)(SERVERFUNCS2 *, int *);
+	int (*pfnGetEngineFunctions)(ENGINEAPI *, int *);
+	int (*pfnGetEngineFunctions_Post)(ENGINEAPI *, int *);
+} META_FUNCS;
+
+extern "C" EXPORT int	GetEntityAPI(SERVERFUNCS *functiontable, int interfaceversion);
+extern "C" EXPORT int	GetNewDLLFunctions(SERVERFUNCS2 *functiontable, int *interfaceversion);
+extern "C" EXPORT int	GetEngineFunctions(ENGINEAPI *engfuncs, int *interfaceVersion);
 
 // Pair of function tables provided by game DLL.
-typedef struct {
-	DLL_FUNCTIONS *dllapi_table;
-	NEW_DLL_FUNCTIONS *newapi_table;
-} gamedll_funcs_t;
+typedef struct gamedllfuncs {
+	SERVERFUNCS	*funcs;
+	SERVERFUNCS2	*newfuncs;
+} GAMEDLLFUNCS;
 
-// Declared in plugin; referenced in macros.
-extern gamedll_funcs_t *gpGamedllFuncs;
-extern mutil_funcs_t *gpMetaUtilFuncs;
+typedef struct meta_api_funcs {
+	PLUGIN_INFO	*plugin_info;
+	META_GLOBALS	*globals;
+	META_UTIL_FUNCS	*utilfuncs;
+} META_API_FUNCS;
 
-// Tell the dll that we'll be loading it as a metamod plugin, in case it
-// needs to do something special prior to the standard query/attach
-// procedure.  In particular, this will allow for DLL's that can be used as
-// both standalone DLL's and metamod plugins. (optional; not required in
-// plugin)
-extern "C"
-{
-DLLEXPORT void Meta_Init(void);
-typedef void (*META_INIT_FN) (void);
+#define SET_META_RESULT(result)			com.metamod.globals->mres=result
+#define RETURN_META(result) \
+	do { com.metamod.globals->mres = result; return; } while(0)
+#define RETURN_META_VALUE(result, value) \
+	do { com.metamod.globals->mres = result; return(value); } while(0)
+#define META_RESULT_STATUS			com.metamod.globals->status
+#define META_RESULT_PREVIOUS			com.metamod.globals->prev_mres
+#define META_RESULT_ORIG_RET(type)		*(type *)com.metamod.globals->orig_ret
+#define META_RESULT_OVERRIDE_RET(type)		*(type *)com.metamod.globals->override_ret
 
-// Get info about plugin, compare meta_interface versions, provide meta
-// utility callback functions.
-DLLEXPORT int Meta_Query(char *interfaceVersion, 
-		plugin_info_t **plinfo, 
-		mutil_funcs_t *pMetaUtilFuncs);
-typedef int (*META_QUERY_FN) (char *interfaceVersion, 
-		plugin_info_t **plinfo, 
-		mutil_funcs_t *pMetaUtilFuncs);
-
-// Attach the plugin to the API; get the table of getapi functions; give 
-// meta_globals and gamedll_funcs.
-DLLEXPORT int Meta_Attach(PLUG_LOADTIME now, 
-		META_FUNCTIONS *pFunctionTable, 
-		meta_globals_t *pMGlobals, 
-		gamedll_funcs_t *pGamedllFuncs);
-typedef int (*META_ATTACH_FN) (PLUG_LOADTIME now, 
-		META_FUNCTIONS *pFunctionTable, 
-		meta_globals_t *pMGlobals, 
-		gamedll_funcs_t *pGamedllFuncs);
-
-// Detach the plugin; tell why and when.
-DLLEXPORT int Meta_Detach(PLUG_LOADTIME now, PL_UNLOAD_REASON reason);
-typedef int (*META_DETACH_FN) (PLUG_LOADTIME now, PL_UNLOAD_REASON reason);
-
-// Standard HL SDK interface function prototypes.
-DLLEXPORT int GetEntityAPI_Post(DLL_FUNCTIONS *pFunctionTable, 
-		int interfaceVersion );
-DLLEXPORT int GetEntityAPI2_Post(DLL_FUNCTIONS *pFunctionTable, 
-		int *interfaceVersion );
-
-// Additional SDK-like interface function prototypes.
-DLLEXPORT int GetNewDLLFunctions_Post(NEW_DLL_FUNCTIONS *pNewFunctionTable, 
-		int *interfaceVersion );
-DLLEXPORT int GetEngineFunctions(enginefuncs_t *pengfuncsFromEngine, 
-		int *interfaceVersion);
-DLLEXPORT int GetEngineFunctions_Post(enginefuncs_t *pengfuncsFromEngine, 
-		int *interfaceVersion);
-}
-// Convenience macros for accessing GameDLL functions.  Note: these talk
-// _directly_ to the gamedll, and are not multiplexed through Metamod to
-// the other plugins.
-
-// DLL API functions:
-#define MDLL_FUNC	gpGamedllFuncs->dllapi_table
-
-#define MDLL_GameDLLInit				MDLL_FUNC->pfnGameInit
-#define MDLL_Spawn						MDLL_FUNC->pfnSpawn
-#define MDLL_Think						MDLL_FUNC->pfnThink
-#define MDLL_Use						MDLL_FUNC->pfnUse
-#define MDLL_Touch						MDLL_FUNC->pfnTouch
-#define MDLL_Blocked					MDLL_FUNC->pfnBlocked
-#define MDLL_KeyValue					MDLL_FUNC->pfnKeyValue
-#define MDLL_Save						MDLL_FUNC->pfnSave
-#define MDLL_Restore					MDLL_FUNC->pfnRestore
-#define MDLL_ObjectCollsionBox			MDLL_FUNC->pfnAbsBox
-#define MDLL_SaveWriteFields			MDLL_FUNC->pfnSaveWriteFields
-#define MDLL_SaveReadFields				MDLL_FUNC->pfnSaveReadFields
-#define MDLL_SaveGlobalState			MDLL_FUNC->pfnSaveGlobalState
-#define MDLL_RestoreGlobalState			MDLL_FUNC->pfnRestoreGlobalState
-#define MDLL_ResetGlobalState			MDLL_FUNC->pfnResetGlobalState
-#define MDLL_ClientConnect				MDLL_FUNC->pfnClientConnect
-#define MDLL_ClientDisconnect			MDLL_FUNC->pfnClientDisconnect
-#define MDLL_ClientKill					MDLL_FUNC->pfnClientKill
-#define MDLL_ClientPutInServer			MDLL_FUNC->pfnClientPutInServer
-#define MDLL_ClientCommand				MDLL_FUNC->pfnClientCommand
-#define MDLL_ClientUserInfoChanged		MDLL_FUNC->pfnClientUserInfoChanged
-#define MDLL_ServerActivate				MDLL_FUNC->pfnServerActivate
-#define MDLL_ServerDeactivate			MDLL_FUNC->pfnServerDeactivate
-#define MDLL_PlayerPreThink				MDLL_FUNC->pfnPlayerPreThink
-#define MDLL_PlayerPostThink			MDLL_FUNC->pfnPlayerPostThink
-#define MDLL_StartFrame					MDLL_FUNC->pfnStartFrame
-#define MDLL_ParmsNewLevel				MDLL_FUNC->pfnParmsNewLevel
-#define MDLL_ParmsChangeLevel			MDLL_FUNC->pfnParmsChangeLevel
-#define MDLL_GetGameDescription			MDLL_FUNC->pfnGetGameDescription
-#define MDLL_PlayerCustomization		MDLL_FUNC->pfnPlayerCustomization
-#define MDLL_SpectatorConnect			MDLL_FUNC->pfnSpectatorConnect
-#define MDLL_SpectatorDisconnect		MDLL_FUNC->pfnSpectatorDisconnect
-#define MDLL_SpectatorThink				MDLL_FUNC->pfnSpectatorThink
-#define MDLL_Sys_Error					MDLL_FUNC->pfnSys_Error
-#define MDLL_PM_Move					MDLL_FUNC->pfnPM_Move
-#define MDLL_PM_Init					MDLL_FUNC->pfnPM_Init
-#define MDLL_PM_FindTextureType			MDLL_FUNC->pfnPM_FindTextureType
-#define MDLL_SetupVisibility			MDLL_FUNC->pfnSetupVisibility
-#define MDLL_UpdateClientData			MDLL_FUNC->pfnUpdateClientData
-#define MDLL_AddToFullPack				MDLL_FUNC->pfnAddToFullPack
-#define MDLL_CreateBaseline				MDLL_FUNC->pfnCreateBaseline
-#define MDLL_RegisterEncoders			MDLL_FUNC->pfnRegisterEncoders
-#define MDLL_GetWeaponData				MDLL_FUNC->pfnGetWeaponData
-#define MDLL_CmdStart					MDLL_FUNC->pfnCmdStart
-#define MDLL_CmdEnd						MDLL_FUNC->pfnCmdEnd
-#define MDLL_ConnectionlessPacket		MDLL_FUNC->pfnConnectionlessPacket
-#define MDLL_GetHullBounds				MDLL_FUNC->pfnGetHullBounds
-#define MDLL_CreateInstancedBaselines	MDLL_FUNC->pfnCreateInstancedBaselines
-#define MDLL_InconsistentFile			MDLL_FUNC->pfnInconsistentFile
-#define MDLL_AllowLagCompensation		MDLL_FUNC->pfnAllowLagCompensation
-
-// NEW API functions:
-#define MNEW_FUNC	gpGamedllFuncs->newapi_table
-
-#define MNEW_OnFreeEntPrivateData		MNEW_FUNC->pfnOnFreeEntPrivateData
-#define MNEW_GameShutdown				MNEW_FUNC->pfnGameShutdown
-#define MNEW_ShouldCollide				MNEW_FUNC->pfnShouldCollide
-#define MNEW_CvarValue                                  MNEW_FUNC->pfnCvarValue
-
+// Convenience macros for MetaUtil functions
+#define CALL_GAME_ENTITY(entname, vars)	com.metamod.utilfuncs->pfnCallGameEntity(PLID, entname, vars)
 #endif /* META_API_H */

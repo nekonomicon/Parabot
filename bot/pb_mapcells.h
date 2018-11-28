@@ -1,3 +1,4 @@
+#pragma once
 #if !defined( PB_MapCells_H )
 #define PB_MapCells_H
 
@@ -35,8 +36,13 @@ public:
 	
 	PB_Cell& cell( int index ) {  return cellArray[index];  }
 
-	int getCellId( const Vector &pos, float maxDist=CELL_SIZE );
-	int getCellId( edict_t *pEdict ) {  return getCellId( PB_Cell::makePos( pEdict ) );  }
+	int getCellId(const Vec3D *pos, float maxDist=CELL_SIZE);
+	int getCellId(EDICT *pEdict) {
+		Vec3D pos;
+
+		eyepos(pEdict, &pos);
+		return getCellId(&pos);
+	}
 	
 	// returns index of newCell:
 	int addCell( PB_Cell newCell, bool initNbs, int addedFrom=NO_CELL_FOUND );	
@@ -54,10 +60,11 @@ public:
 	int getPathForSneakyEscape( short startId, short enemyId, short pathNodes[] );
 	int getPathToAttack( short startId, short enemyId, short pathNodes[] );
 	int getOffensivePath( short startId, short enemyId, float minDist, short pathNodes[] );
-	int getDirectedPathToAttack( short startId, short enemyId, Vector dir, short pathNodes[] );
-	int getPathToRoamingTarget( short startId, edict_t *botEnt, short pathNodes[] );
+	int getDirectedPathToAttack( short startId, short enemyId, Vec3D *dir, short pathNodes[] );
+	int getPathToRoamingTarget( short startId, EDICT *botEnt, short pathNodes[] );
 	int predictPlayerPos( short startId, short ownId, short pathNodes[] );
-		
+	void checkbucket(int hcode, const Vec3D *pos, float *closestDist, int *closestid, float maxdist);
+
 	bool load( char *mapname );
 	bool save( char *mapname );
 	void clear();
@@ -77,8 +84,8 @@ private:
 
 	PB_VisTable vis;
 
-	int getHashcode( const Vector &pos );
-	Vector getAllignedPos( const Vector &pos );
+	int getHashcode( const Vec3D *pos );
+	void getAllignedPos( const Vec3D *pos, Vec3D *apos);
 
 };
 

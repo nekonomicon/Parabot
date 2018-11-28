@@ -1,6 +1,8 @@
+#include "parabot.h"
+#include "sectors.h"
 #include "pb_navpoint.h"
 #include "pb_global.h"
-
+#include <stdio.h>
 
 extern int mod_id;
 
@@ -232,9 +234,9 @@ static const char *navpointClasses[MAX_NAV_TYPES] = { "unknown",
 
 
 
-void PB_Navpoint::init( const Vector &pos, int type, int special )
+void PB_Navpoint::init(Vec3D *pos, int type, int special )
 {
-	data.pos = pos;
+	vcopy(pos, &data.pos);
 	data.type = type;
 	data.visits = 0;
 	data.special = special;
@@ -244,10 +246,6 @@ void PB_Navpoint::init( const Vector &pos, int type, int special )
 	lastVisitedAt = -100;
 	nextVisitAt = 0;
 }
-
-
-bool UTIL_ButtonTriggers( edict_t *button, edict_t *target );
-
 
 void PB_Navpoint::initEntityPtr()
 // gets a pointer to the corresponding t_edict if possible and stores it
@@ -264,7 +262,7 @@ void PB_Navpoint::initEntityPtr()
 		   (type() == NAV_F_TRAIN)		   || 
 		   (type() == NAV_F_DOOR)             ) )
 	{
-		 debugMsg( "initEntityPtr() failed for %i\n", type() );
+		 DEBUG_MSG( "initEntityPtr() failed for %i\n", type() );
 	}*/
 	if ( (type() == NAV_F_BREAKABLE)	 ||
 	     (type() == NAV_F_HEALTHCHARGER) || 
@@ -275,16 +273,15 @@ void PB_Navpoint::initEntityPtr()
 		 (type() == NAV_F_DOOR)             ) 
 	{
 		const char *name = classname();
-		ent = getEntity( name, data.pos );
+		ent = getEntity( name, &data.pos );
 		if (ent==0) { 
-			debugMsg( "initEntityPtr() failed for %i\n", type() );
-		}
-		else {
-			if (!FStringNull( ent->v.targetname )) {
+			DEBUG_MSG( "initEntityPtr() failed for %i\n", type() );
+		} else {
+			if (ent->v.targetname) {
 				// we have a targetname, let's see if there are buttons for it...
-				edict_t *pButton = NULL;
-				while (!FNullEnt(pButton = FIND_ENTITY_BY_CLASSNAME( pButton, "func_button" ) )) {
-					if (UTIL_ButtonTriggers( pButton, ent )) {
+				EDICT *pButton = NULL;
+				while ((pButton = find_entitybyclassname(pButton, "func_button"))) {
+					if (buttontriggers( pButton, ent )) {
 						needsTrigger = true;
 						break;
 					}
@@ -293,8 +290,7 @@ void PB_Navpoint::initEntityPtr()
 			if ((type() == NAV_F_PLAT)	|| 
 				(type() == NAV_F_TRAIN)	|| 
 				(type() == NAV_F_DOOR)  || 
-				(type() == NAV_F_BUTTON)   ) 
-			{
+				(type() == NAV_F_BUTTON)) {
 				int toggle_state = *(int *)((char*)ent->pvPrivateData + 128);
 				normalState = toggle_state;
 			}
@@ -304,23 +300,28 @@ void PB_Navpoint::initEntityPtr()
 }
 
 
-Vector PB_Navpoint::pos( edict_t *playerEnt ) 
+void PB_Navpoint::pos( EDICT *player, Vec3D *pos)
 // adjusts positions if playerEnt is on ladder
-{ 
-	assert( playerEnt!=0 );
-	if ( playerEnt->v.movetype != MOVETYPE_FLY ) return data.pos; 
-	else return (data.pos + Vector( 0,0,20 ));
+{
+	assert(player != 0);
+	vcopy(&data.pos, pos);
+	if (!is_onladder(player))
+		return; 
+
+	pos->z += 20.0f;
 }
 
 
 bool PB_Navpoint::isTriggerFor( PB_Navpoint &wp )
 {
-	edict_t *targetEnt = wp.entity();
-	edict_t *triggerEnt = ent;
-	if (type()==NAV_S_BUTTON_SHOT) triggerEnt = getNavpoint( data.special ).entity();
+	EDICT *targetEnt = wp.entity();
+	EDICT *triggerEnt = ent;
+
+	if (type() == NAV_S_BUTTON_SHOT) triggerEnt = getNavpoint( data.special ).entity();
 	if (!targetEnt || !triggerEnt) return false;
-	if (FStringNull( targetEnt->v.targetname ) || FStringNull( triggerEnt->v.target )) return false;
-	if (UTIL_ButtonTriggers( triggerEnt, targetEnt )) return true;
+	if (!(targetEnt->v.targetname) || !(triggerEnt->v.target)) return false;
+	if (buttontriggers( triggerEnt, targetEnt )) return true;
+
 	return false;
 }
 
@@ -343,37 +344,38 @@ bool PB_Navpoint::isTriggered()
 	// for DMC:
 	if (type()==NAV_F_DOOR) {
 		if (ent->v.spawnflags & SF_DOOR_START_OPEN) {
-			if (toggle_state == TS_AT_BOTTOM) return false;
+			if (toggle_state == STATE_BOTTOM) return false;
+			else return true;
+		} else {
+			if (toggle_state == STATE_TOP) return false;
 			else return true;
 		}
-		else {
-			if (toggle_state == TS_AT_TOP) return false;
-			else return true;
-		}
-	}
-	else {
-		if (toggle_state == TS_AT_TOP) return false;
+	} else {
+		if (toggle_state == STATE_TOP) return false;
 		else return true;
 	}
 }
 
 
-bool PB_Navpoint::visible( edict_t *playerEnt )
+bool PB_Navpoint::visible( EDICT *player )
 // may not work for ladders since ent is not initialized
 {
-	TraceResult tr;
+	TRACERESULT tr;
 
-	assert( playerEnt != 0 );
-	Vector eyePos = playerEnt->v.origin + playerEnt->v.view_ofs;
+	assert( player != 0 );
+	Vec3D eyePos;
 
-	UTIL_TraceLine( pos(), eyePos, dont_ignore_monsters, ignore_glass, ent, &tr);	
+	eyepos(player, &eyePos);
+	trace_line( pos(), &eyePos, false, true, ent, &tr);	
 	
-	if ( tr.flFraction != 1.0 ) {
-		if ( tr.pHit == playerEnt ) return true;
+	if ( tr.fraction != 1.0 ) {
+		if ( tr.hit == player) return true;
 
-		if (tr.pHit) {	// maybe traceline hit object itself
-			const char *hitClass = STRING( tr.pHit->v.classname );
-			if ( FStrEq( hitClass, classname() ) ) return true;
+		if (tr.hit) {	// maybe traceline hit object itself
+			const char *hitClass = STRING( tr.hit->v.classname );
+			if ( Q_STREQ( hitClass, classname() ) )
+				return true;
+
 			return false;
 		}
 	}
@@ -381,23 +383,24 @@ bool PB_Navpoint::visible( edict_t *playerEnt )
 }
 
 
-bool PB_Navpoint::doorOpen( edict_t *playerEnt )
+bool PB_Navpoint::doorOpen( EDICT *playerEnt )
 // call only for NAV_F_DOOR and NAV_F_DOOR_ROTATING
 {
-	TraceResult tr;
+	TRACERESULT tr;
 
 	assert( playerEnt != 0 );
 
-	Vector passPos = pos();
+	Vec3D passPos;
+	vcopy(pos(), &passPos);
 	passPos.z = playerEnt->v.origin.z;
 
-	UTIL_TraceHull( playerEnt->v.origin, passPos, dont_ignore_monsters, head_hull, playerEnt, &tr);	
-	if (tr.flFraction != 1.0) {
-		/*if (tr.pHit) {
-			if (!FStringNull(tr.pHit->v.classname))
-				debugMsg( "Door blocked by %s\n", STRING(tr.pHit->v.classname) );
+	trace_hull( &playerEnt->v.origin, &passPos, false, 3, playerEnt, &tr);	
+	if (tr.fraction != 1.0) {
+		/*if (tr.hit) {
+			if (tr.hit->v.classname)
+				DEBUG_MSG( "Door blocked by %s\n", STRING(tr.hit->v.classname) );
 			else
-				debugMsg( "Door blocked by unknown class\n" );
+				DEBUG_MSG( "Door blocked by unknown class\n" );
 		}*/
 		return false;
 	}
@@ -405,27 +408,28 @@ bool PB_Navpoint::doorOpen( edict_t *playerEnt )
 }
 
 
-bool PB_Navpoint::reached( edict_t *playerEnt )
+bool PB_Navpoint::reached( EDICT *playerEnt )
 // maybe better because ignores bot entity?
 {
+	Vec3D _pos, dir;
 	#define SF_BUTTON_TOUCH_ONLY	256	// button only fires as a result of USE key.
 
 	assert( playerEnt != 0 );
-	if ((playerEnt->v.origin - pos(playerEnt)).Length()<55) {
+	pos(playerEnt, &_pos);
+	vsub(&playerEnt->v.origin, &_pos, &dir);
+	if (vlen(&dir) < 55) {
 		if (type()==NAV_F_DOOR || type()==NAV_F_DOOR_ROTATING) {
 			// doors are only reached if they are open
 			return doorOpen( playerEnt );
-		}
-		else if (type()==NAV_F_BUTTON) {
+		} else if (type()==NAV_F_BUTTON) {
 			assert( ent != 0 );
-			if ( FBitSet ( ent->v.spawnflags, SF_BUTTON_TOUCH_ONLY ) ) { // touchable button
+			if (ent->v.spawnflags & SF_BUTTON_TOUCH_ONLY) { // touchable button
 				//CBaseToggle *toggleClass = (CBaseToggle*)GET_PRIVATE( ent );
 				//if (toggleClass->m_toggle_state == normalState) return false;	// not pressed
-				if (((Vector)playerEnt->v.velocity).Length() > 20) return false;
+				if (vlen(&playerEnt->v.velocity) > 20) return false;
 			}
-		}
-		else if (type()==NAV_S_AIRSTRIKE_BUTTON) {
-			if (((Vector)playerEnt->v.velocity).Length() > 20) return false;
+		} else if (type()==NAV_S_AIRSTRIKE_BUTTON) {
+			if (vlen(&playerEnt->v.velocity) > 20) return false;
 		}
 		if (visible( playerEnt )) return true;
 	}
@@ -447,20 +451,20 @@ void PB_Navpoint::save( FILE *fp )
 	fwrite( &data, sizeof(TSaveData), 1, fp );
 }
 
-#ifdef _DEBUG
+#if _DEBUG
 void PB_Navpoint::print()
 {
-	debugMsg( "%s (ID %i)", classname(), id() );
+	DEBUG_MSG( "%s (ID %i)", classname(), id() );
 }
 
 
 void PB_Navpoint::printPos()
 {
-	debugMsg( "%s (ID %i) at (%.f, %.f, %.f)", classname(), id(), pos().x, pos().y, pos().z );
+	DEBUG_MSG( "%s (ID %i) at (%.f, %.f, %.f)", classname(), id(), pos().x, pos().y, pos().z );
 }
 #endif
 
-void PB_Navpoint::reportVisit( edict_t *player, float time ) 
+void PB_Navpoint::reportVisit( EDICT *player, float time ) 
 // reports a visit to the navpoint
 {
 	if ( (time > (lastVisitedAt+0.2)) || (time < lastVisitedAt) ) 
@@ -502,7 +506,7 @@ void PB_Navpoint::reportVisit( edict_t *player, float time )
 }
 
 
-void PB_Navpoint::doNotVisitBefore( edict_t *player, float time )
+void PB_Navpoint::doNotVisitBefore( EDICT *player, float time )
 // tells that player should not visit this navpoint before time
 {
 	lastVisitor = player;
@@ -510,8 +514,8 @@ void PB_Navpoint::doNotVisitBefore( edict_t *player, float time )
 }
 
 
-float PB_Navpoint::nextVisit( edict_t *player )
-// returns the worldTime after which navpoint can be visited again by player
+float PB_Navpoint::nextVisit( EDICT *player )
+// returns the worldtime after which navpoint can be visited again by player
 {
 	if (lastVisitor!=player)		// only memorize own visits
 		return 0;

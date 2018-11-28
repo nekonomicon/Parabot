@@ -1,10 +1,9 @@
+#include "parabot.h"
 #include "pb_weaponhandling.h"
 #include "pb_global.h"
 #include "bot.h"
 #include "bot_weapons.h"
-#include "usercmd.h"
 #include "pb_configuration.h"
-#include "parabot.h"
 
 extern bot_t bots[32];
 extern int mod_id;
@@ -47,7 +46,7 @@ PB_WeaponHandling::PB_WeaponHandling()
 }
 
 
-void PB_WeaponHandling::init( int slot, edict_t *ent, PB_Action *action )
+void PB_WeaponHandling::init( int slot, EDICT *ent, PB_Action *action )
 // has to be called with the botSlot before all other methods
 {
 	weapon.init( slot, ent, action );
@@ -68,23 +67,22 @@ void PB_WeaponHandling::initCurrentWeapon()
 	if( cwId >= minModWeapon && cwId < maxModWeapon ) {
 		armedWeapon = cwId;
 		weapon.registerArmedWeapon( armedWeapon );
-	}
-	else {
+	} else {
 		// strange values in weapon_id, check model:
 		if (botEnt->v.weaponmodel != 0) {
-			debugMsg( "CWBug" );
+			DEBUG_MSG( "CWBug" );
 		}
 	}
 	//int a = weapon.ammo1();
-	//debugMsg( "Ammo1 = %i\n", a );
+	// DEBUG_MSG( "Ammo1 = %i\n", a );
 }
 
 
-bool PB_WeaponHandling::attack( Vector target, float accuracy, Vector relVel )
+bool PB_WeaponHandling::attack( Vec3D *target, float accuracy, Vec3D *relVel )
 // attacks in best mode at best time the given position when accuracy is reached
 {
 	weapon.setCurrentWeapon( currentWeapon() );
-	return weapon.attack( target, accuracy, relVel );
+	return weapon.attack(target, accuracy, relVel );
 }
 
 
@@ -162,7 +160,7 @@ bool PB_WeaponHandling::available( int wId )
 	}
 
 	int mask = 1 << wId;
-	if (bots[botSlot].pEdict->v.weapons & mask) {
+	if (bots[botSlot].e->v.weapons & mask) {
 		// bot has this weapon - ammo as well?
 		PB_Weapon wpn( wId );
 		wpn.init( botSlot, botEnt, botAction );
@@ -178,10 +176,10 @@ int PB_WeaponHandling::getBestWeapon( float distance, float hitProb, int flags )
 	float score, bestScore = -10;
 	int   bestWeapon = defaultWeapon;
 			
-	for (int wId=minModWeapon; wId<maxModWeapon; wId++) {
-		if (available( wId )) {
-			weapon.setCurrentWeapon( wId );
-			score = weapon.getScore( distance, hitProb, flags, true );
+	for (int wId = minModWeapon; wId < maxModWeapon; wId++) {
+		if (available(wId)) {
+			weapon.setCurrentWeapon(wId);
+			score = weapon.getScore(distance, hitProb, flags, true);
 			if (score > bestScore) {
 				bestScore = score;
 				bestWeapon = wId;
@@ -189,39 +187,28 @@ int PB_WeaponHandling::getBestWeapon( float distance, float hitProb, int flags )
 		}
 	}
 
-	if (bestScore > 0) weaponUsable = true;
-	else			   weaponUsable = false;
+	if (bestScore > 0)
+		weaponUsable = true;
+	else
+		weaponUsable = false;
 	
 	return bestWeapon;
 }
 
 void PB_WeaponHandling::switchToWeapon( int wId )
 {
+	char cmd[32];
 	weapon.setCurrentWeapon( wId );
 
-	if (mod_id==DMC_DLL) {
-		usercmd_s cmd;
-		cmd.lerp_msec = 0;					// Interpolation time on client
-		cmd.msec = 30;						// Duration in ms of command
-		cmd.viewangles = botEnt->v.v_angle; // Command view angles.
-		// intended velocities
-		cmd.forwardmove = 0;				// Forward velocity.
-		cmd.sidemove = 0;					// Sideways velocity.
-		cmd.upmove = 0;						// Upward velocity.
-		cmd.lightlevel = 0;					// Light level at spot where we are standing.
-		cmd.buttons = 0;					// Attack buttons
-		cmd.impulse = 0;					// Impulse command issued.
-		cmd.weaponselect = wId+1;			// Current weapon id ( WEAPON SLOT! )
-
-		MDLL_CmdStart( botEnt, &cmd, 0 );
-		MDLL_CmdEnd( botEnt );
-	}
-	else { 
-		UTIL_SelectItem( bots[botSlot].pEdict, weapon.name() );
+	if (mod_id == DMC_DLL) {
+		sprintf(cmd, "slot%d", wId + 1);
+		FakeClientCommand(bots[botSlot].e, cmd, NULL, NULL);
+	} else {
+		FakeClientCommand(bots[botSlot].e, weapon.name(), NULL, NULL);
 	}
 
-	bots[botSlot].parabot->action.setWeaponCone( weapon.cone() );
-	weapon.setNextAttackTime( worldTime() + CHANGE_WEAPON_DELAY );
+	bots[botSlot].parabot->action.setWeaponCone(weapon.cone());
+	weapon.setNextAttackTime(worldtime() + CHANGE_WEAPON_DELAY);
 }
 
 
@@ -230,17 +217,16 @@ bool PB_WeaponHandling::armBestWeapon( float distance, float hitProb, int flags 
 	weapon.setCurrentWeapon( currentWeapon() );
 
 	if ( weapon.hasToFinishAttack() ) {
-		debugMsg( "Must use grenade!\n" );
+		DEBUG_MSG( "Must use grenade!\n" );
 		return true;
 	}
 	
 	int bestWeapon;
 
-	if (worldTime() < preferredWeaponTimeOut && available( preferredWeapon )) {
+	if (worldtime() < preferredWeaponTimeOut && available(preferredWeapon)) {
 		bestWeapon = preferredWeapon;
 		weapon.setAttackMode( preferredMode );
-	}
-	else {
+	} else {
 		bestWeapon = getBestWeapon( distance, hitProb, flags );
 	}
 
@@ -248,53 +234,45 @@ bool PB_WeaponHandling::armBestWeapon( float distance, float hitProb, int flags 
 		switchToWeapon( bestWeapon );
 		return false;
 	}
-	//debugMsg( "Current weapon id = %i, ", currentWeapon() );
-	//debugMsg( "clip=%i, ", bots[botSlot].current_weapon.iClip );
-	//debugMsg( "ammo1=%i, ", bots[botSlot].current_weapon.iAmmo1 );
-	//debugMsg( "ammo2=%i\n", bots[botSlot].current_weapon.iAmmo2 );
+//	DEBUG_MSG( "Current weapon id = %i, clip=%i, ammo1=%i, ammo2=%i\n",
+//	    currentWeapon, bots[botSlot].current_weapon.iClip, bots[botSlot].current_weapon.iAmmo1, bots[botSlot].current_weapon.iAmmo2 );
 
 	int bestMode = weapon.bestAttackMode();
 	
-	if (mod_id==VALVE_DLL || mod_id==AG_DLL || mod_id==HUNGER_DLL || mod_id==GEARBOX_DLL) {	// switch to correct weapon-mode
-		if ( bestWeapon==VALVE_WEAPON_CROSSBOW || bestWeapon==VALVE_WEAPON_PYTHON ) {	
+	if (mod_id == VALVE_DLL || mod_id==AG_DLL || mod_id==HUNGER_DLL || mod_id==GEARBOX_DLL) {	// switch to correct weapon-mode
+		if (bestWeapon == VALVE_WEAPON_CROSSBOW || bestWeapon==VALVE_WEAPON_PYTHON ) {	
 			if ( bestMode==1 && botEnt->v.fov!=90 && 
-				 (lastModeSwitch+0.5)<worldTime() ) {
-				botAction->add( BOT_FIRE_SEC );
-				lastModeSwitch = worldTime();
-				//debugMsg( "Using NORMAL MODE!\n" );
+				 (lastModeSwitch+0.5)<worldtime() ) {
+				botAction->add(BOT_FIRE_SEC, NULL);
+				lastModeSwitch = worldtime();
+				// DEBUG_MSG( "Using NORMAL MODE!\n" );
+			} else if ( bestMode == 2 && botEnt->v.fov == 90 &&
+					  (lastModeSwitch + 0.5f) < worldtime() ) {
+				botAction->add(BOT_FIRE_SEC, NULL);
+				// DEBUG_MSG( "Using ZOOM!\n" );
+				lastModeSwitch = worldtime();
 			}
-			else if ( bestMode==2 && botEnt->v.fov==90 &&
-					  (lastModeSwitch+0.5)<worldTime() ) {
-				botAction->add( BOT_FIRE_SEC );
-				//debugMsg( "Using ZOOM!\n" );
-				lastModeSwitch = worldTime();
-			}
-		}
-		else if ( bestWeapon==VALVE_WEAPON_RPG ) {
-			edict_t *pent = NULL;
+		} else if ( bestWeapon == VALVE_WEAPON_RPG ) {
+			EDICT *pent = NULL;
 			bool spotActive = false;
-			while( !FNullEnt( pent = FIND_ENTITY_IN_SPHERE( pent, botEnt->v.origin, MAX_DIST_VP ) ) )
-			{
-				if( FStrEq( STRING( pent->v.classname ), "laser_spot" ) )
-				{
-					if( laserdotOwner( pent ) == botEnt )
-					{
+			while((pent = find_entityinsphere(pent, &botEnt->v.origin, MAX_DIST_VP))) {
+				if( Q_STREQ(STRING(pent->v.classname), "laser_spot")) {
+					if(laserdotowner(pent) == botEnt) {
 						spotActive = true;
 						break;
 					}
 				}
 			}
-			if( bestMode==1 && !spotActive && 
-				(lastModeSwitch+0.5)<worldTime() ) {
-				botAction->add( BOT_FIRE_SEC );
-				lastModeSwitch = worldTime();
-				debugMsg( "Using RPG laser mode!\n" );
-			}
-			else if ( bestMode==2 && spotActive &&
-				(lastModeSwitch+0.5)<worldTime() ) {
-				botAction->add( BOT_FIRE_SEC );
-				debugMsg( "Using RPG sneak mode!\n" );
-				lastModeSwitch = worldTime();
+			if( bestMode == 1 && !spotActive && 
+				(lastModeSwitch + 0.5f) < worldtime() ) {
+				botAction->add(BOT_FIRE_SEC, NULL);
+				lastModeSwitch = worldtime();
+				DEBUG_MSG( "Using RPG laser mode!\n" );
+			} else if( bestMode == 2 && spotActive &&
+				(lastModeSwitch + 0.5f) < worldtime() ) {
+				botAction->add(BOT_FIRE_SEC, NULL);
+				DEBUG_MSG( "Using RPG sneak mode!\n" );
+				lastModeSwitch = worldtime();
 			}	
 		}
 	}
@@ -312,11 +290,10 @@ void PB_WeaponHandling::setPreferredWeapon( int wId, int mode )
 {
 	if (available( wId )) {
 		preferredWeapon = wId;
-		preferredWeaponTimeOut = worldTime() + 0.5;
+		preferredWeaponTimeOut = worldtime() + 0.5f;
 		preferredMode = mode;
 	}
 }
-
 
 float PB_WeaponHandling::getWeaponScore( int wId, float distance, float hitProb, int flags, bool checkAmmo )
 {
@@ -324,13 +301,11 @@ float PB_WeaponHandling::getWeaponScore( int wId, float distance, float hitProb,
 	return weapon.getScore( distance, hitProb, flags, checkAmmo );
 }
 
-
 float PB_WeaponHandling::bestDistance( int wId )
 {
 	weapon.setCurrentWeapon( wId );
 	return weapon.bestDistance();
 }
-
 
 float PB_WeaponHandling::currentHighAimProb()
 {

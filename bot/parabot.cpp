@@ -3,32 +3,32 @@
 #include "parabot.h"
 #include "pb_observer.h"
 #include "bot.h"
-#include "pb_chat.h"
+#include "chat.h"
+#include "sectors.h"
+#include "kills.h"
 #include "pb_mapcells.h"
 
 
 extern PB_MapGraph mapGraph;
 extern PB_MapCells map;
 extern PB_Observer observer;
-extern Vector playerPos;		// position of observed player
-extern int botNr;				// bot to debug
+int botNr;				// bot to debug
 extern int activeBot;			// bot that's thinking
 extern int botTarget;			// target nav id to approach (-1 = nothing)
 extern int mod_id;
 extern bool pb_pause;
 extern int clientWeapon[32];
-extern PB_Chat chat;
 
 //extern ChatList chatGotKilled, chatKilledPlayer, chatGotWeapon;
 //extern bool botChat;	// from configfiles.cpp
-PB_Navpoint* getNearestNavpoint( edict_t *pEdict );
+PB_Navpoint* getNearestNavpoint( EDICT *pEdict );
 
 
 
 
-CParabot::CParabot( edict_t *botEnt, int botSlot )
+CParabot::CParabot( EDICT *botEnt, int botSlot )
 {
-#ifdef DEBUG
+#if DEBUG
 	goalMove[0] = 0;
 	goalView[0] = 0;
 	goalAct[0] = 0;
@@ -53,10 +53,10 @@ void CParabot::initAfterRespawn()
 {
 	lastThink = 0;
 	campTime = 0;
-	lastCamp = worldTime() - 100;
+	lastCamp = worldtime() - 100;
 	setRoamingIndex( -1 );
 	roamingBreak = 0;
-	lastJumpPos = g_vecZero;
+	lastJumpPos = zerovector;
 	makeRoomTime = 0;
 	preemptiveFire = false;
 	cellTimeOut = 0;
@@ -66,7 +66,7 @@ void CParabot::initAfterRespawn()
 	fleeingFrom = 0;
 	partner = 0;
 	botState = PB_NO_TASK;	
-	lastRespawn = worldTime();
+	lastRespawn = worldtime();
 
 	action.init( ent );
 	pathfinder.init( ent, &action );
@@ -84,18 +84,18 @@ void CParabot::initAfterRespawn()
 	actualJourney.cancel();
 	actualNavpoint = getNearestNavpoint( ent );
 	
-	if (!actualNavpoint) debugMsg( "CParabot::initAfterRespawn() : navpoint=0!\n" );
+	if (!actualNavpoint) DEBUG_MSG( "CParabot::initAfterRespawn() : navpoint=0!\n" );
 	else
 	if (!actualNavpoint->reached( ent )) {
 		actualNavpoint = 0;
-		debugMsg( "Not respawned at navpoint!\n" );
+		DEBUG_MSG( "Not respawned at navpoint!\n" );
 	}
 	needs.updateWishList();
 		
-	//debugMsg( "initAfterRespawn called\n" );
+	// DEBUG_MSG( "initAfterRespawn called\n" );
 }
 
-#ifdef DEBUG
+#if DEBUG
 void CParabot::setGoalViewDescr( const char *descr )
 {
 	strcpy( goalView, descr );
@@ -115,80 +115,71 @@ void CParabot::setGoalActDescr( const char *descr )
 #endif
 
 // types of damage to ignore...
-#define IGNORE_DAMAGE ( DMG_CRUSH | DMG_FREEZE | DMG_FALL | DMG_SHOCK | DMG_DROWN | \
-						DMG_POISON | DMG_NERVEGAS | DMG_RADIATION | DMG_DROWNRECOVER | \
-                        DMG_ACID | DMG_SLOWBURN | DMG_SLOWFREEZE)
+#define IGNORE_DAMAGE (~(0x82))
 
 
-void CParabot::registerDamage( int amount, Vector origin, int type )
+void CParabot::registerDamage( int amount, Vec3D *origin, int type )
 {
-/*	const char *name = STRING(ent->v.netname);
-	ALERT( at_console, "%s got -%i health, flags = %x\n", name, amount, dmgType );
-	ALERT( at_console, "  FallVel=%.f, Origin at (%.f, %.f, %.f)\n", 
-		ent->v.flFallVelocity, origin.x, origin.y, origin.z );
-	if (dmgType & IGNORE_DAMAGE) return;
-*/
 	const char *diname;
-	edict_t *di = FIND_ENTITY_IN_SPHERE( 0, origin, 5 );
+	EDICT *di = find_entityinsphere(0, origin, 5);
 	if (di) {
 		diname = STRING( di->v.classname );
-		if (!FStrEq(diname, "player") ) {
-			if ( FStrEq(diname, "grenade") ) {
-			}
-			else if ( FStrEq(diname, "monster_satchel") ) {
-			}
-			else if ( FStrEq(diname, "monster_tripmine") ) {
-			}
-			else if ( FStrEq(diname, "rpg_rocket") ) {
-			}
-			else if ( FStrEq(diname, "bodyque") ) {
-			}
-			else debugMsg( "DAMAGE BY %s\n", diname );
+		if (!Q_STREQ(diname, "player")) {
+			if (Q_STREQ(diname, "grenade")) {
+			} else if (Q_STREQ(diname, "monster_satchel")) {
+			} else if (Q_STREQ(diname, "monster_tripmine")) {
+			} else if (Q_STREQ(diname, "rpg_rocket")) {
+			} else if (Q_STREQ(diname, "bodyque")) {
+			} else
+				DEBUG_MSG("DAMAGE BY %s\n", diname);
+		} else {
+			if (vcomp(&di->v.origin, botPos())) DEBUG_MSG("SELF-DAMAGE\n");
+			//else DEBUG_MSG("DAMAGE BY PLAYER\n");
 		}
-		else {
-			if (di->v.origin == botPos()) debugMsg( "SELF-DAMAGE\n" );
-			//else debugMsg( "DAMAGE BY PLAYER\n" );
-		}
-	}
-	else {
-		debugMsg( "NO ENT FOUND\n" );
+	} else {
+		DEBUG_MSG("NO  FOUND\n");
 	}
 
-	if (type & DMG_SHOWNHUD) {
+	if (type & IGNORE_DAMAGE) {
 		int ci = map.getCellId( ent );
 		if ( ci != NO_CELL_FOUND) {
 			map.cell( ci ).addEnvDamage( amount );
-			debugMsg( "ENV_DAMAGE!\n" );
+			DEBUG_MSG( "ENV_DAMAGE!\n" );
 		}
 	}
 
-	if (origin == g_vecZero) return;	// falling etc.
+	if (vcomp(origin, &zerovector))	// falling etc.
+		return;
 
 	// who is shooting at the bot?
 	bool found = false;
-	edict_t *pPlayer = 0;
-	for (int i=1; i<=gpGlobals->maxClients; i++) {
-		pPlayer = INDEXENT( i );
-		if (!pPlayer) continue;							// skip invalid players
-		if ( pPlayer == ent ) continue;		// skip self
-		if (!isAlive( ENT(pPlayer) )) continue;	// skip player if not alive
-		if (pPlayer->v.solid == SOLID_NOT) continue;	
-		
-		if ((pPlayer->v.origin - origin).Length() < 30 ) {
+	EDICT *player = 0;
+	for (int i = 1; i <= com.globals->maxclients; i++) {
+		Vec3D dir;
+		float dist;
+
+		player = edictofindex( i );
+		if (!is_alive(player)	// skip player if not alive
+		    || (player == ent)		// skip self
+		    || (player->v.solid == SOLID_NOT))
+			continue;
+
+		vsub(&player->v.origin, origin, &dir);
+		dist = vlen(&dir);
+		if (dist < 30 ) {
 			found = true;
 			break;
 		}
 	}
 
 	if (!found) {	// now we'll have to guess
-		//debugMsg( "Guessing!\n" );
-		for (int i=1; i<=gpGlobals->maxClients; i++) {
-			pPlayer = INDEXENT( i );
-			if (!pPlayer) continue;							// skip invalid players
-			if ( pPlayer == ent ) continue;		// skip self
-			if (!isAlive( ENT(pPlayer) )) continue;	// skip player if not alive
-			if (pPlayer->v.solid == SOLID_NOT) continue;	
-		
+		//DEBUG_MSG( "Guessing!\n" );
+		for (int i = 1; i <= com.globals->maxclients; i++) {
+			player = edictofindex( i );
+			if (!is_alive(player)	// skip player if not alive
+			    || (player == ent)	// skip self
+			    || (player->v.solid == SOLID_NOT)) continue;	
+
 /*			int usedWeapon = clientWeapon[i];
 			switch (mod_id) {
 			case VALVE_DLL:		if (! ( usedWeapon==VALVE_WEAPON_RPG ||
@@ -202,67 +193,75 @@ void CParabot::registerDamage( int amount, Vector origin, int type )
 								break;
 
 			}*/
-			UTIL_MakeVectors( pPlayer->v.v_angle );
-			Vector dir = (botPos() - pPlayer->v.origin).Normalize();
-			float aim = DotProduct( gpGlobals->v_forward, dir );
-			//debugMsg( "Aim=%.3f\n", aim );
-			if (aim < 0.95) continue;
-			if ( !canShootAt( pPlayer, botPos() ) ) continue;
+			makevectors(&player->v.v_angle);
+			Vec3D dir;
+			vsub(botPos(), &player->v.origin, &dir);
+			normalize(&dir);
+			float aim = dotproduct(&com.globals->fwd, &dir );
+			//DEBUG_MSG( "Aim=%.3f\n", aim );
+			if ((aim < 0.95)
+			    || !canshootat(player, botPos()))
+				continue;
 
 			found = true;
 			break;
 		}
 	}
 	/*
-	pPlayer = ent->v.dmg_inflictor;
-	if ( pPlayer && strlen( STRING(pPlayer->v.netname) )>0 ) found = true;
+	player = ent->v.dmg_inflictor;
+	if ( player && strlen(STRING(player->v.netname)) > 0) found = true;
 */
 	if (found) {
-#ifdef _DEBUG
+#if _DEBUG
 		const char *botName = STRING(ent->v.netname);
-		const char *inflictorName = STRING(pPlayer->v.netname);
-		debugMsg( "%s hurt by %s\n", botName, inflictorName );
+		const char *inflictorName = STRING(player->v.netname);
+		DEBUG_MSG( "%s hurt by %s\n", botName, inflictorName );
 #endif
-		senses.addAttack( pPlayer, amount );
-	}
-	else {
-		//debugMsg( "No damage inflictor found!\n" );
+		senses.addAttack( player, amount );
+	} else {
+		// DEBUG_MSG( "No damage inflictor found!\n" );
 		senses.addAttack( 0, amount );
 	}
 }
 
 
-void CParabot::registerDeath( edict_t *killer, const char *wpnName )
+void CParabot::registerDeath( EDICT *killer, const char *wpnName )
 // bot has been killed
 {
 	// was it one of our fellow players? (not worldspawn)
-	if (killer && killer!=this->ent && strlen(STRING(killer->v.netname))>0) {
-		int botCell = map.getCellId( ent );
-		int killerCell = map.getCellId( killer );
-		if ( botCell>=0 && killerCell>=0 && map.lineOfSight( botCell, killerCell ) ) {
-			map.cell( botCell ).kills.addDir( killer->v.origin - botPos() );
+	if (killer && killer != this->ent && strlen(STRING(killer->v.netname)) > 0) {
+		int botCell = map.getCellId(ent);
+		int killerCell = map.getCellId(killer);
+		if (botCell >= 0 && killerCell >= 0 && map.lineOfSight(botCell, killerCell)) {
+			Vec3D dir;
+
+			vadd(&killer->v.origin, botPos(), &dir);
+			kills_adddir(&dir, map.cell(botCell).data.sectors);
 		}
-		chat.registerGotKilled( ent, killer, wpnName );
+		chat_registergotkilled(ent, killer, wpnName);
 	}
 }
 
-
-void CParabot::registerKill( edict_t *victim, const char *wpnName )
+void CParabot::registerKill( EDICT *victim, const char *wpnName )
 // bot has killed opponent
 {
-	chat.registerKilledPlayer( victim, ent, wpnName );
+	chat_registerkilledplayer(victim, ent, wpnName);
 	// check if bot was camping and should camp longer:
-	if (actualNavpoint && actualNavpoint->type()==NAV_S_CAMPING) {
+	if (actualNavpoint && actualNavpoint->type() == NAV_S_CAMPING) {
 		campTime = 0;
 	}
 }
 
 bool CParabot::hasLongJump()
 {
-	if ( !(mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) ) return false;
-	const char *value = g_engfuncs.pfnGetPhysicsKeyValue( ent, "slj");
-	if ( FStrEq( value, "1" ) ) return true;
-	else return false;
+	if ( !(mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) )
+		return false;
+	// const char *value = g_engfuncs.pfnGetPhysicsKeyValue( ent, "slj");
+
+	// if (Q_STREQ(value, "1"))
+	//	return true;
+
+	return false;
 }
 
 
@@ -299,37 +298,36 @@ bool CParabot::getJourneyTarget()
 		if (hasLongJump()) pathMask |= PATH_NEED_LONGJUMP;
 		if (combat.hasWeapon( VALVE_WEAPON_GAUSS )) pathMask |= PATH_NEED_GAUSSJUMP;
 	}
-	if (ent->v.health>80) pathMask |= PATH_CAUSES_DAMAGE;
+	if (ent->v.health > 80) pathMask |= PATH_CAUSES_DAMAGE;
 
-	if (ent->v.health<30) setJourneyMode( JOURNEY_LONELY );
+	if (ent->v.health < 30) setJourneyMode( JOURNEY_LONELY );
 	else if (needs.wishForCombat() > 7) setJourneyMode( JOURNEY_CROWDED );
 	else if (needs.needForItems() > 4) setJourneyMode( JOURNEY_RELIABLE );
 	else setJourneyMode( JOURNEY_FAST );
 	
 	// check if this bot has been assigned a reachable target
-	if ( (botNr==slot) && (botTarget>=0) &&	
-		 (mapGraph.getJourney( actualNavpoint->id(), botTarget, pathMask, actualJourney)) ) {	
-		debugMsg( "Trying to reach assigned target:\n" );
+	if ((botNr == slot)
+	    && (botTarget >= 0)
+	    && (mapGraph.getJourney(actualNavpoint->id(), botTarget, pathMask, actualJourney))) {
+		DEBUG_MSG("Trying to reach assigned target:\n");
 		targetNav = botTarget;
 		botTarget = -1;
-	}
-	else {	// if not, find a wish target
+	} else { // if not, find a wish target
 		//initWishList();	// not necessary, but more accurate
 		targetNav = mapGraph.getWishJourney( actualNavpoint->id(), needs, pathMask, actualJourney, ent );
 	}
 
-	if ( targetNav >= 0 ) {	// found a journey
+	if (targetNav >= 0) {	// found a journey
 		PB_Navpoint nav = getNavpoint( targetNav );
 		actualPath = actualJourney.getNextPath();
 		assert( actualPath != 0 );
-		actualPath->startAttempt( worldTime() );
+		actualPath->startAttempt( worldtime() );
 		waypoint = actualPath->getNextWaypoint();
 		botState = PB_ON_TOUR;
-		//debugMsg( "Switched to ON_TOUR, approach ");  
-		//nav.print();  debugMsg( "\n" );
+		// DEBUG_MSG( "Switched to ON_TOUR, approach ");  
+		//nav.print();  DEBUG_MSG( "\n" );
 		return true;
-	}
-	else {
+	} else {
 		actualPath = 0;
 		return false;
 	}
@@ -342,38 +340,35 @@ void CParabot::getRoamingTarget()
 	fleeingFrom = 0;
 
 	// check if this bot has been assigned a target
-	if ( (botNr==slot) && (botTarget>=0) ) { 
-		roamingTarget = &(getNavpoint( botTarget ));
+	if ((botNr == slot) && (botTarget >= 0)) { 
+		roamingTarget = &(getNavpoint(botTarget));
 		botTarget = -1;
-		debugMsg( "Trying to reach assigned target:\n" );
-	}
-	else { // if not, find a roaming navpoint
+		DEBUG_MSG( "Trying to reach assigned target:\n" );
+	} else { // if not, find a roaming navpoint
 		/*roamingTarget = mapGraph.getNearestRoamingNavpoint( ent, actualNavpoint );
 		if (!roamingTarget) {	// no linked navpoints found -> just get the nearest
 			roamingTarget = mapGraph.getNearestNavpoint( botPos() );
 		}*/
-		short start = map.getCellId( ent );
-		if (start>=0) {
-			setRoamingIndex( map.getPathToRoamingTarget( start, ent, roamingRoute ) );
-			if (roamingIndex >=0 ) {
-				roamingTarget = map.cell( roamingRoute[0] ).getNavpoint();
+		short start = map.getCellId(ent);
+		if (start >= 0) {
+			setRoamingIndex(map.getPathToRoamingTarget(start, ent, roamingRoute));
+			if (roamingIndex >= 0) {
+				roamingTarget = map.cell(roamingRoute[0]).getNavpoint();
+			} else {	// no path found:
+				roamingTarget = mapGraph.getNearestRoamingNavpoint(ent, actualNavpoint);
+				// DEBUG_MSG(" E!" );
 			}
-			else {	// no path found:
-				roamingTarget = mapGraph.getNearestRoamingNavpoint( ent, actualNavpoint );
-				//debugMsg(" E!" );
-			}
-		}
-		else {
-			roamingTarget = mapGraph.getNearestRoamingNavpoint( ent, actualNavpoint );
-			setRoamingIndex( -1 );
+		} else {
+			roamingTarget = mapGraph.getNearestRoamingNavpoint(ent, actualNavpoint);
+			setRoamingIndex(-1);
 		}
 	}
 	assert( roamingTarget != 0 );
 	pathfinder.reset( roamingTarget->pos() );
 	roamingCount = PB_ROAMING_COUNT;
 	botState = PB_ROAMING;
-	//debugMsg( "Switched to ROAMING, approach " );
-	//roamingTarget->print();	debugMsg( "\n" );
+	// DEBUG_MSG( "Switched to ROAMING, approach " );
+	//roamingTarget->print(); DEBUG_MSG( "\n" );
 	// assert that everything fits
 	assert( pathfinder.pev == ent );
 	//assert( action.ent == ent );
@@ -383,30 +378,30 @@ void CParabot::getRoamingTarget()
 
 void CParabot::approachRoamingTarget()
 {
-	assert( roamingTarget != 0);
+	assert(roamingTarget != 0);
 
-	if (roamingIndex >=0 ) {
+	if (roamingIndex >= 0) {
 		followActualRoute();
 		return;
 	}
-	if (roamingTarget->reached( ent )) {
-		//debugMsg( "Roaming target reached\n" );
-		roamingTarget->reportVisit( ent, worldTime() ); //now in observer
+	if (roamingTarget->reached(ent)) {
+		// DEBUG_MSG( "Roaming target reached\n" );
+		roamingTarget->reportVisit(ent, worldtime()); //now in observer
 		actualNavpoint = roamingTarget;
 		roamingTarget = 0;
-	}
-	else {
-		//if (roamingCount%10 == 0) debugBeam( botPos(), roamingTarget->pos( ent ), 5, 0 );
+	} else {
+		//if (roamingCount % 10 == 0) debugBeam(botPos(), roamingTarget->pos(ent), 5, 0);
 		roamingCount--;
-		if (roamingCount<0) {
+		if (roamingCount < 0) {
 			roamingTarget = 0;
-		}
-		else {
-			Vector rtPos = roamingTarget->pos( ent );
-			pathfinder.checkWay( rtPos );
+		} else {
+			Vec3D rtPos;
+
+			roamingTarget->pos(ent, &rtPos);
+			pathfinder.checkWay(&rtPos);
 			action.setViewLikeMove();
-			if ( action.gotStuck() || pathfinder.targetNotReachable() ) {
-				roamingTarget->doNotVisitBefore( ent, worldTime()+10.0 );
+			if (action.gotStuck() || pathfinder.targetNotReachable()) {
+				roamingTarget->doNotVisitBefore(ent, worldtime() + 10.0f);
 				roamingTarget = 0;
 				action.resetStuck();
 			}
@@ -414,38 +409,33 @@ void CParabot::approachRoamingTarget()
 	}
 }
 
-
-
-
 void CParabot::pathFinished()
 // called when path is finished
 {
-//	debugMsg( "Path finished\n" );
-	assert( actualPath != 0 );
-	actualPath->reportTargetReached( ent, worldTime() );
+	// DEBUG_MSG( "Path finished\n" );
+	assert(actualPath != 0);
+	actualPath->reportTargetReached( ent, worldtime() );
 	actualJourney.savePathData();
 	actualNavpoint = &(actualPath->endNav());
 	if (needs.newPriorities()) {
 		actualJourney.cancel();		// cancel current journey
 		actualPath = 0;				// set actualPath to 0 to invoke new journey
 		needs.affirmPriorities();	// do this only once
-		debugMsg( "Found new item priorities, canceling journey!\n" );
-	}
-	else if (actualJourney.continues()) {
+		DEBUG_MSG("Found new item priorities, canceling journey!\n");
+	} else if (actualJourney.continues()) {
 		actualPath = actualJourney.getNextPath();
-		assert( actualPath != 0 );
-		actualPath->startAttempt( worldTime() );
+		assert(actualPath != 0);
+		actualPath->startAttempt(worldtime());
 		waypoint = actualPath->getNextWaypoint();
-		if (actualPath->startNav().type()==NAV_S_BUTTON_SHOT) {
-			if (actualPath->startNav().isTriggerFor( actualPath->endNav() )) {
+		if (actualPath->startNav().type() == NAV_S_BUTTON_SHOT) {
+			if (actualPath->startNav().isTriggerFor(actualPath->endNav())) {
 				// bot must shoot this button!
-				shootObjectPos = getNavpoint( actualPath->startNav().special() ).pos();
+				vcopy(getNavpoint(actualPath->startNav().special()).pos(), &shootObjectPos);
 				mustShootObject = true;
 			}
 		}
-		//debugMsg( "Continue journey, Need=%.1f\n", maxWish );
-	}
-	else {
+		// DEBUG_MSG( "Continue journey, Need=%.1f\n", maxWish );
+	} else {
 		actualPath = 0;
 	}
 }
@@ -455,8 +445,9 @@ void CParabot::pathFailed()
 // called when path is *NOT* finished
 {
 	assert( actualPath != 0 );
-#ifdef _DEBUG
-	actualPath->print();	debugMsg( " failed\n" );
+#if _DEBUG
+	actualPath->print();
+	DEBUG_MSG( " failed\n" );
 #endif
 	actualPath->reportTargetFailed();
 	actualJourney.savePathData();
@@ -466,12 +457,19 @@ void CParabot::pathFailed()
 }
 
 
-bool CParabot::positionReached( Vector pos )
+bool CParabot::positionReached(Vec3D *pos)
 	// returns true if bot has reached pos within a distance of PB_REACH_DISTANCE
 {
-	Vector v = botPos() - pos;
-	if (v.Length() < PB_REACH_DISTANCE) return true;
-	else return false;
+	Vec3D dir;
+	float dist;
+
+	vsub(botPos(), pos, &dir);
+	dist = vlen(&dir);
+
+	if (dist < PB_REACH_DISTANCE)
+		return true;
+
+	return false;
 }
 
 
@@ -479,134 +477,144 @@ void CParabot::pathCheckWay()
 // checks if bot has to duck, strafe, or shoot breakable
 // if necessary adds these actions
 {
-	TraceResult tr, trLeft, trRight;
-	Vector startTr, endTr, planeAngle;
+	TRACERESULT tr, trLeft, trRight;
+	Vec3D startTr, endTr, planeAngle, fwd1, fwd2, right;
 	
-	Vector aDir( 0, action.moveAngleYaw(), 0 );	// use only yaw angle
-	UTIL_MakeVectors (aDir);
+	Vec3D aDir = {0, action.moveAngleYaw(), 0};	// use only yaw angle
+	makevectors(&aDir);
 
 	// check if bot needs to duck
 	if (mod_id != DMC_DLL ) {
-		startTr = botPos() + gpGlobals->v_forward * 16 + Vector( 0,0,36 );
-		endTr = botPos() + gpGlobals->v_forward * (16+36);
-		UTIL_TraceLine( startTr, endTr, ignore_monsters, ent, &tr);
-		if (tr.flFraction < 1.0) {
-			startTr = botPos() + gpGlobals->v_forward * 16;
-			UTIL_TraceLine( startTr, endTr, dont_ignore_monsters, ent, &tr);
-			if (tr.flFraction == 1.0) action.add( BOT_DUCK );
-			//else debugMsg( "pathCheckWay: completely blocked\n");
+		vma(botPos(), 16.0f, &com.globals->fwd, &startTr);
+		startTr.z += 36.0f;
+		vma(botPos(), (16.0f + 36.0f), &com.globals->fwd, &endTr);
+		trace_line(&startTr, &endTr, true, false, ent, &tr);
+		if (tr.fraction < 1.0) {
+			vma(botPos(), 16.0f, &com.globals->fwd, &startTr);
+			trace_line(&startTr, &endTr, false, false, ent, &tr);
+			if (tr.fraction == 1.0f)
+				action.add(BOT_DUCK, NULL);
+			//else DEBUG_MSG( "pathCheckWay: completely blocked\n");
 		}
 	}
 
 	// check if bot needs to strafe
-	startTr = botPos() + gpGlobals->v_forward *  8 + gpGlobals->v_right * 16;
-	endTr =   botPos() + gpGlobals->v_forward * 50 + gpGlobals->v_right * 16;
-	UTIL_TraceLine( startTr, endTr, dont_ignore_monsters, ent, &trRight);
-	startTr = botPos() + gpGlobals->v_forward *  8 - gpGlobals->v_right * 16;
-	endTr =   botPos() + gpGlobals->v_forward * 50 - gpGlobals->v_right * 16;
-	UTIL_TraceLine( startTr, endTr, dont_ignore_monsters, ent, &trLeft);
-	if ( (trRight.flFraction < 1.0) && (trLeft.flFraction == 1.0) ) {
-		//debugMsg( "Something in right front!\n" );
-		planeAngle = UTIL_VecToAngles (trRight.vecPlaneNormal);
-		if (planeAngle.x<40) action.add( BOT_STRAFE_LEFT );
-	}
-	else if ( (trLeft.flFraction < 1.0) && (trRight.flFraction == 1.0) ) {
-		//debugMsg( "Something in left front!\n" );
-		planeAngle = UTIL_VecToAngles (trLeft.vecPlaneNormal);
-		if (planeAngle.x<40) action.add( BOT_STRAFE_RIGHT );
+	vma(botPos(), 8.0f, &com.globals->fwd, &fwd1);
+	vma(botPos(), 50.0f, &com.globals->fwd, &fwd2);
+	vscale(&com.globals->right, 16.0f, &right);
+	vadd(&fwd1, &right, &startTr);
+	vadd(&fwd2, &right, &endTr);
+	trace_line(&startTr, &endTr, false, false, ent, &trRight);
+	vinv(&right);
+	vadd(&fwd1, &right, &startTr);
+	vadd(&fwd2, &right, &endTr);
+	trace_line(&startTr, &endTr, false, false, ent, &trLeft);
+	if ((trRight.fraction < 1.0f) && (trLeft.fraction == 1.0f)) {
+		// DEBUG_MSG("Something in right front!\n");
+		vectoangles(&trRight.planenormal, &planeAngle);
+		if (planeAngle.x < 40.0f)
+			action.add(BOT_STRAFE_LEFT, NULL);
+	} else if ((trLeft.fraction < 1.0f) && (trRight.fraction == 1.0f)) {
+		// DEBUG_MSG("Something in left front!\n");
+		vectoangles(&trLeft.planenormal, &planeAngle);
+		if (planeAngle.x < 40.0f)
+			action.add(BOT_STRAFE_RIGHT, NULL);
 	}
 
 	if ( actualPath ) {
 		// check if some breakable object needs to be destroyed
 		PB_Navpoint *target = &(actualPath->endNav());
 		assert( target != 0 );
-		if ( target->type() == NAV_F_BREAKABLE ) {
+		if (target->type() == NAV_F_BREAKABLE ) {
 			if (!target->entity()) {
-				debugMsg( "ERROR in pathCheckWay: No entity found!\n" );
+				DEBUG_MSG( "ERROR in pathCheckWay: No entity found!\n" );
 				return;
 			}
 			if (target->entity()->v.health > 0) {	// has to be destroyed
 				if (target->visible( ent )) {
-					combat.weapon.attack( target->pos(), 0.3 );
+					combat.weapon.attack(target->pos(), 0.3f, NULL);
 				}
-				//else debugMsg( "Can't see breakable\n" );
+				//else DEBUG_MSG( "Can't see breakable\n" );
 			}
 		}
 		// check if bot needs to wait for platform
 		if (actualPath->waitForPlatform() ) {
-			
-			Vector lastPos = actualPath->getLastWaypointPos( ent );
-			Vector platPos = actualPath->nextPlatformPos();
-			if ( (platPos - lastPos).Length() < 50  &&
-				  ent->v.groundentity!=0 && 
-				  ent->v.groundentity->v.size==Vector(2,2,2) )	// worldSpawn
-			{	
-				debugMsg(" EVADING PLATFORM\n" );	// lastPos useless
-				Vector evDir = botPos() - (platPos - botPos() );
-				action.setMoveDir( evDir );
+			Vec3D lastPos, platPos, dir, size = {2.0f, 2.0f, 2.0f};
+			actualPath->getLastWaypointPos(ent, &lastPos);
+			actualPath->nextPlatformPos(&platPos);
+			vsub(&platPos, &lastPos, &dir);
+
+			if (vlen(&dir) < 50  &&
+			    ent->v.groundentity != 0 && 
+				vcomp(&ent->v.groundentity->v.size, &size))	// worldSpawn
+			{
+				DEBUG_MSG(" EVADING PLATFORM\n" );	// lastPos useless
+				vsub(&platPos, botPos(), &dir);
+				vsub(botPos(), &dir, &dir);
+				action.setMoveDir(&dir);
 				action.setMaxSpeed();
 				//botNr = slot;	// film this!
-			}
-			else {
-				//debugMsg("WAIT FOR PLATFORM!\n" );
-				action.add( BOT_STOP_RUNNING );
-				action.setSpeed( 0 );
-				//action.setMoveDir( lastPos );
-				//action.setSpeed( 10*(lastPos-botPos()).Length() );
+			} else {
+				// DEBUG_MSG("WAIT FOR PLATFORM!\n" );
+				action.add(BOT_STOP_RUNNING, NULL);
+				action.setSpeed(0);
+				//action.setMoveDir(lastPos);
+				//action.setSpeed(10 * vlen(vsub(lastPos, botPos())));
 			}
 		}
 	}
 }
 
-void fixAngle( Vector &angle );
-
 void CParabot::checkForTripmines()
 {
 	// TODO: only check when beam visible
-	TraceResult trAll, trHalf;
-	edict_t *mine = senses.getNearestTripmine();
+	TRACERESULT trAll, trHalf;
+	EDICT *mine = senses.getNearestTripmine();
 	
-	if ( FNullEnt( mine ) ) return;
+	if (!mine)
+		return;
 	
-	Vector mine_vecDir = mine->v.angles;
-	fixAngle( mine_vecDir );
-	UTIL_MakeVectors( mine_vecDir );
-	mine_vecDir = gpGlobals->v_forward;
-	Vector moveDir = action.getMoveDir();
-	Vector fakeStart = mine->v.origin - 64*moveDir;
-	Vector fakeEnd = fakeStart +  512*mine_vecDir;
+	Vec3D mine_vecDir, moveDir, fakeStart, fakeEnd;
+	vcopy(&mine->v.angles, &mine_vecDir);
+	fixangle(&mine_vecDir);
+	makevectors(&mine_vecDir);
+	vcopy(&com.globals->fwd, &mine_vecDir);
+	vcopy(action.getMoveDir(), &moveDir);
+	vma(&mine->v.origin, -64.0f, &moveDir, &fakeStart);
+	vma(&fakeStart, 512.0f, &mine_vecDir, &fakeEnd);
 	
 	//debugBeam( fakeStart, fakeEnd, 250, 0 );
-	//debugMsg( "BOTS PAUSED!\n" );
+	// DEBUG_MSG( "BOTS PAUSED!\n" );
 	//pb_pause = true;
 	
-	bool tAll=false;
+	bool tAll = false;
 
-	// HACKHACK Set simple box using this really nice global!
-	gpGlobals->trace_flags = FTRACE_SIMPLEBOX;
-	UTIL_TraceLine( fakeStart, fakeEnd, dont_ignore_monsters, mine, &trAll );
-	if (trAll.pHit == ent) tAll = true;
+	trace_line(&fakeStart, &fakeEnd, false, false, mine, &trAll);
+	if (trAll.hit == ent) tAll = true;
 
 	if (tAll) {
-		if ( mine_vecDir.z == 0 ) { 
-			if (trAll.vecEndPos.z < (ent->v.absmin.z+40)) {
-				action.add( BOT_JUMP );
-				debugMsg( "JUMP - Trying to evade Tripmine ALL\n" );
+		if (mine_vecDir.z == 0) { 
+			if (trAll.endpos.z < (ent->v.absmin.z + 40.0f)) {
+				action.add(BOT_JUMP, NULL);
+				DEBUG_MSG( "JUMP - Trying to evade Tripmine ALL\n" );
+			} else {
+				action.add(BOT_DUCK_LONG, NULL);
+				DEBUG_MSG( "DUCK - Trying to evade Tripmine ALL\n" );
 			}
-			else {
-				action.add( BOT_DUCK_LONG );
-				debugMsg( "DUCK - Trying to evade Tripmine ALL\n" );
-			}
-		}
-		else debugMsg( "Tripmine vertical, can't evade\n" );
+		} else
+			DEBUG_MSG( "Tripmine vertical, can't evade\n" );
 	}
 
 	if (actualPath) {	// check if tripmine pathtarget
 		if (actualPath->endNav().type() == NAV_S_USE_TRIPMINE) {
-			float mineDist = (actualPath->endNav().pos() - mine->v.origin).Length();
-			float botDist = (actualPath->endNav().pos() - ent->v.origin).Length();
+			Vec3D dir;
+			float mineDist, botDist;
+			vsub(actualPath->endNav().pos(), &mine->v.origin, &dir);
+			mineDist = vlen(&dir);
+			vsub(actualPath->endNav().pos(), &ent->v.origin, &dir);
+			botDist = vlen(&dir);
 			if ( (mineDist < 50) && (botDist < 100) ) {
-				debugMsg( "Canceling path - tripmine found at end!\n" );
+				DEBUG_MSG( "Canceling path - tripmine found at end!\n" );
 				pathFinished();
 			}
 		}
@@ -618,10 +626,9 @@ void CParabot::followActualPath()
 {
 	assert( actualPath != 0 );
 
-	if ( actualPath->finished( ent ) ) {
+	if (actualPath->finished(ent)) {
 		pathFinished();
-	}
-	else {
+	} else {
 		if (mustShootObject) {
 			switch (mod_id) {
 				case AG_DLL:
@@ -635,50 +642,60 @@ void CParabot::followActualPath()
 									break;
 			}
 			// arm preferred weapon, params don't really matter...
-			bool bestArmed = combat.weapon.armBestWeapon( 200, 0.95, 0 );
+			bool bestArmed = combat.weapon.armBestWeapon( 200, 0.95f, 0 );
 			if (bestArmed) {
-				if (combat.weapon.attack( shootObjectPos, 0.95 )) mustShootObject = false;
-				else return;	// don't do anything else...
-			}
-			else return;	// don't do anything else...
+				if (combat.weapon.attack(&shootObjectPos, 0.95f, NULL))
+					mustShootObject = false;
+				else
+					return;	// don't do anything else...
+			} else
+				return;	// don't do anything else...
 		}
 		if (waypoint.reached( ent )) {
-			Vector wpos = waypoint.pos( ent );
+			Vec3D wpos;
+			vcopy(waypoint.pos(ent), &wpos);
 			action.add( actualPath->getNextAction(), &wpos );	// if there's something to do...
 			actualPath->reportWaypointReached();		// confirm waypoint
-#ifdef _DEBUG
-			Vector oldWP = waypoint.pos( ent );
+#if _DEBUG
+			Vec3D oldWP = waypoint.pos( ent );
 #endif
 			waypoint = actualPath->getNextWaypoint();	// get next one
-#ifdef _DEBUG
+#if _DEBUG
 			debugBeam( waypoint.pos( ent ), oldWP, 50, 1 );
-			float wpd = (waypoint.pos( ent ) - oldWP).Length();
-			//debugMsg( "Reached new WP after %.f\n", wpd );
+			float wpd = vlen(vsub(waypoint.pos(ent), oldWP));
+			// DEBUG_MSG( "Reached new WP after %.f\n", wpd );
 #endif
 		}
 		int prior;
-		Vector proposedViewPos = actualPath->getViewPos( ent, prior );
-		action.setViewDir( proposedViewPos, prior  );	// set viewAngle
-		action.setMoveDir( waypoint.pos( ent ) );		// set moveAngle and speed
+		Vec3D proposedViewPos;
+		actualPath->getViewPos(ent, &prior, &proposedViewPos);
+		action.setViewDir(&proposedViewPos, prior);	// set viewAngle
+		action.setMoveDir(waypoint.pos(ent));		// set moveAngle and speed
 
-		Vector xyzDir = waypoint.pos( ent ) - botPos();	
-		if ( !( isUnderwater( ent ) || waypoint.isOnLadder() ) ) {
-			Vector xyDir = xyzDir;	xyDir.z = 0;
-			float xyDist = xyDir.Length();
-			float xyzDist = xyzDir.Length();
-			if ( xyDist<30 && xyzDist>50) action.setSpeed( 8 * xyDist );
-			else action.setMaxSpeed();
+		if (!(is_underwater(ent) || waypoint.isOnLadder())) {
+			Vec3D dir;
+			float dist2d, dist;
+			
+			vsub(waypoint.pos(ent), botPos(), &dir);
+
+			dist2d = vlen2d((Vec2D *)&dir);
+			dist = vlen(&dir);
+
+			if (dist2d < 30 && dist > 50)
+				action.setSpeed(8 * dist2d);
+			else
+				action.setMaxSpeed();
 		}
 		else action.setMaxSpeed();
 		pathCheckWay();
-		if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) checkForTripmines();
+		if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL)
+			checkForTripmines();
 		if (!actualPath) return;	// maybe tripmine canceled path
 
 		if (actualPath->cannotBeContinued( ent )) {
-			debugMsg( "Path failed.\n" );
+			DEBUG_MSG( "Path failed.\n" );
 			pathFailed();
-		}
-		else if ( action.gotStuck() ) {
+		} else if ( action.gotStuck() ) {
 			pathFailed();
 			action.resetStuck();
 		}
@@ -694,89 +711,93 @@ void CParabot::followActualRoute()
 	short targetCell = roamingRoute[roamingIndex];
 	if (cellToReach != targetCell) {
 		cellToReach = targetCell;
-		cellTimeOut = worldTime() + 1.0;
+		cellTimeOut = worldtime() + 1.0;
 	}
-	Vector target = map.cell( targetCell ).pos();
+	Vec3D target;
 
-	//debugMsg( "." );
+	vcopy(map.cell(targetCell).pos(), &target);
+
+	// DEBUG_MSG( "." );
 	if (botCell == targetCell) {
-		//debugMsg( "Reached index %i\n", roamingIndex );
+		// DEBUG_MSG( "Reached index %i\n", roamingIndex );
 		if ( roamingIndex > 0 ) {
 			roamingIndex--;
 			debugBeam( target, map.cell( roamingRoute[roamingIndex] ).pos(), 50, 2 );
-		}
-		else {
-			//debugMsg( "TARGET REACHED.\n" );
+		} else {
+			// DEBUG_MSG( "TARGET REACHED.\n" );
 			PB_Navpoint *nav = map.cell( botCell ).getNavpoint();
 			if ( nav && nav == roamingTarget ) {
-				target = nav->pos( ent );
-				if (nav->reached( ent )) {
-					nav->reportVisit( ent, worldTime() );
+				nav->pos(ent, &target);
+				if (nav->reached(ent)) {
+					nav->reportVisit( ent, worldtime() );
 					actualNavpoint = nav;
 					roamingTarget = 0;
 					setRoamingIndex( -1 );
 					return;
 				}
-			}
-			else {
+			} else {
 				roamingTarget = 0;
 				setRoamingIndex( -1 );
 				return;
 			}
 		}
-	}
-	else if (botCell != roamingRoute[roamingIndex+1]) {
-		float dist2target = (target-map.cell( botCell ).pos()).Length();
-		float normDist = (target-map.cell( roamingRoute[roamingIndex+1] ).pos()).Length();
-		if (dist2target > (normDist+250)) {
+	} else if (botCell != roamingRoute[roamingIndex+1]) {
+		Vec3D dir;
+		float dist2target, normDist;
+
+		vsub(&target, map.cell(botCell).pos(), &dir);
+		dist2target = vlen(&dir);
+		vsub(&target, map.cell(roamingRoute[roamingIndex + 1]).pos(), &dir);
+		normDist = vlen(&dir);
+		if (dist2target > (normDist + 250)) {
 			//botNr = slot;
-			debugMsg( "ROUTE ERROR in %s!\n", goalMove );
+			DEBUG_MSG( "ROUTE ERROR in %s!\n", goalMove );
 			debugBeam( target, map.cell( botCell ).pos(), 250, 0 );
 			setRoamingIndex( -1 );
 			return;
 		}
 	}
 	
-	action.setViewDir( target );	// set viewAngle
-	action.setMoveDir( target );		// set moveAngle and speed
-	Vector xyzDir = target - botPos();	
-	
-	if ( ! isUnderwater( ent ) ) {
-		Vector xyDir = xyzDir;	xyDir.z = 0;
-		float xyDist = xyDir.Length();
-		float xyzDist = xyzDir.Length();
-		if ( xyDist<30 && xyzDist>50) action.setSpeed( 8 * xyDist );
+	action.setViewDir(&target);	// set viewAngle
+	action.setMoveDir(&target);	// set moveAngle and speed
+	if(!is_underwater(ent)) {
+		Vec3D dir;
+		vsub(&target, botPos(), &dir);
+		float dist2d = vlen2d((Vec2D *)&dir);
+		float dist = vlen(&dir);
+		if (dist2d < 30 && dist > 50) action.setSpeed(8 * dist2d);
 		else action.setMaxSpeed();
-	}
-	else action.setMaxSpeed();
+	} else
+		action.setMaxSpeed();
 
 	pathCheckWay();
 	
-	if ( action.gotStuck() || (worldTime() > cellTimeOut) ) {
+	if ( action.gotStuck() || (worldtime() > cellTimeOut) ) {
+		Vec3D dir;
+
 		action.resetStuck();
-		if ( (lastJumpPos-botPos()).Length() > 50 ) {
-			action.add( BOT_JUMP );
-			lastJumpPos = botPos();
-			cellTimeOut = worldTime() + 1.0;
-		}
-		else {
+		vsub(&lastJumpPos, botPos(), &dir);
+		if (vlen(&dir) > 50) {
+			action.add(BOT_JUMP, NULL);
+			vcopy(botPos(), &lastJumpPos);
+			cellTimeOut = worldtime() + 1.0;
+		} else {
 			// bisherigen traffic auf Teilstrecke auswerten, falls <3 Verbindung löschen
 			if ( map.cell( botCell ).getTraffic( targetCell ) < 3 ) {
 				if ( map.cell( botCell ).delNeighbour( targetCell ) ) {
-#ifdef _DEBUG
-					debugMsg( "Deleted cell neighbour.\n" );
-					Vector c1 = map.cell( botCell ).pos() +Vector(0,0,8);
-					Vector c2 = map.cell( targetCell ).pos();
+#if _DEBUG
+					DEBUG_MSG( "Deleted cell neighbour.\n" );
+					Vec3D c1 = map.cell( botCell ).pos() +Vector(0,0,8);
+					Vec3D c2 = map.cell( targetCell ).pos();
 					debugBeam( c1, c2, 250, 0 );
 					debugMarker( c2, 250 );
 #endif
-				}
-				else {
-#ifdef _DEBUG
-					debugMsg( "Could not delete cell neighbour.\n" );
-					Vector c0 = map.cell( botCell ).pos() -Vector(0,0,8);
-					Vector c1 = map.cell( roamingRoute[roamingIndex+1] ).pos() +Vector(0,0,8);
-					Vector c2 = map.cell( targetCell ).pos();
+				} else {
+#if _DEBUG
+					DEBUG_MSG( "Could not delete cell neighbour.\n" );
+					Vec3D c0 = map.cell( botCell ).pos() -Vector(0,0,8);
+					Vec3D c1 = map.cell( roamingRoute[roamingIndex+1] ).pos() +Vector(0,0,8);
+					Vec3D c2 = map.cell( targetCell ).pos();
 					debugBeam( c1, c2, 250, 0 );	// rot vom Vorgänger
 					debugBeam( c0, c2, 250, 1 );	// grün vom bot aus
 					debugMarker( c2, 250 );
@@ -785,15 +806,14 @@ void CParabot::followActualRoute()
 				}
 			}
 			PB_Cell tc = map.cell( botCell );
-			if (roamingTarget) roamingTarget->doNotVisitBefore( ent, worldTime()+10.0 );
-			lastJumpPos = g_vecZero;
+			if (roamingTarget) roamingTarget->doNotVisitBefore( ent, worldtime()+10.0 );
+			lastJumpPos = zerovector;
 			roamingTarget = 0;
 			setRoamingIndex( -1 );
 			return;
 		}
 	}
 }
-
 
 void CParabot::executeGoals()
 {
@@ -817,8 +837,6 @@ void CParabot::executeGoals()
 	//debugFile( "exec ok\n" );
 }
 
-
-
 void CParabot::botThink()
 {
 	assert( ent != 0 );
@@ -831,13 +849,13 @@ void CParabot::botThink()
 	activeBot = slot;
 
 	// execute in 10Hz steps:
-	float difTime = worldTime()-lastThink;
+	float difTime = worldtime()-lastThink;
 	if ( difTime >= 0 && difTime < 0.1) {
 		action.perform(); // execute planned actions
-		if (action.pausing()) cellTimeOut = worldTime() + 1.0;	// adjust cellTimeOut if pausing
+		if (action.pausing()) cellTimeOut = worldtime() + 1.0;	// adjust cellTimeOut if pausing
 		return;
 	}
-	lastThink = worldTime();
+	lastThink = worldtime();
 	
 	if (actualNavpoint) {	// check for navpoint
 		if (!actualNavpoint->reached( ent )) actualNavpoint = 0;
@@ -856,12 +874,12 @@ void CParabot::botThink()
 	//goalFinder.analyze( tactics );
 
 	executeGoals();
-	//debugMsg( "%i enemies\n", senses.numEnemies );
+	// DEBUG_MSG( "%i enemies\n", senses.numEnemies );
 
 	// check if any grenades have to b thrown (overrides former actions)
 	combat.weapon.checkForForcedAttack();
 
 	action.perform(); // execute planned actions
 	
-	if (action.pausing()) cellTimeOut = worldTime() + 1.0;	// adjust cellTimeOut if pausing
+	if (action.pausing()) cellTimeOut = worldtime() + 1.0;	// adjust cellTimeOut if pausing
 }

@@ -1,30 +1,11 @@
+#include "parabot.h"
 #include "pb_action.h"
-#include "pb_global.h"
 
 extern int mod_id;
 extern bool pb_pause;
 float globalFrameTime = 0;	// to access msec independant of bots
 
-
-void fixAngle( Vector &angle )
-{
-	if (angle.x > 10000 || angle.x < -10000) {
-		angle.x = 0;
-	}
-	if (angle.y > 10000 || angle.y < -10000) {
-		angle.y = 0;
-	}
-	
-	while (angle.x >  180) angle.x -= 360;
-	while (angle.x < -180) angle.x += 360;
-	while (angle.y >  180) angle.y -= 360;
-	while (angle.y < -180) angle.y += 360;
-
-	angle.z = 0;
-}
-
-
-void PB_Action::init( edict_t *botEnt )
+void PB_Action::init( EDICT *botEnt )
 {
 	ent = botEnt;
 	msecStart = 1000; 
@@ -36,25 +17,24 @@ void PB_Action::init( edict_t *botEnt )
 	duckEndTime = 0;
 	stopEndTime = 0;
 	nextViewUpdate = 0;
-	deltaView = g_vecZero;
+	deltaView = zerovector;
 	turnCount = 1;
 	maxTurn = 0;
 	fineJump = false;
 	longJumpState = 0;
-	maxSpeed = serverMaxSpeed();
-	viewAngle = g_vecZero;
-	currentView = g_vecZero;
-	targetPos = g_vecZero;
+	maxSpeed = servermaxspeed();
+	viewAngle = zerovector;
+	currentView = zerovector;
+	targetPos = zerovector;
 	hitProb = 0;
 	currentMSec = 0;
 	targetDist = 0;
-	lastMove = worldTime();
-	lastMoveCheck = worldTime();
+	lastMove = worldtime();
+	lastMoveCheck = worldtime();
 	vupdTime = 0.1;
 	weaponCone = 0.1;	// 5°
 	memset( &targetDiff, 0, sizeof targetDiff );
 }
-
 
 void PB_Action::reset() 
 { 
@@ -67,17 +47,17 @@ void PB_Action::reset()
 	viewPrior = 0;
 	movePrior = 0;
 	notStucking = false;
-	targetVel = g_vecZero;
+	targetVel = zerovector;
 }
 
 
-void PB_Action::add( int code, Vector *exactPos )
+void PB_Action::add( int code, Vec3D *exactPos )
 {
 	switch (code) {
 
 	case BOT_JUMP:
-		action |= IN_JUMP;
-		if (!isUnderwater( ent )) {	// no jumps underwater
+		action |= ACTION_JUMP;
+		if (!is_underwater( ent )) {	// no jumps underwater
 			inJump = true;
 			jumpPos = ent->v.origin.z;
 		}
@@ -86,9 +66,9 @@ void PB_Action::add( int code, Vector *exactPos )
 	case BOT_DELAYED_JUMP:
 		if (exactPos) {
 			fineJump = true;
-			memcpy( &fineJumpPos, exactPos, sizeof(Vector) );
+			vcopy(exactPos, &fineJumpPos);
 		}
-		nextJumpTime = worldTime() + 1.0;
+		nextJumpTime = worldtime() + 1.0;
 		break;
 
 	case BOT_LONGJUMP:
@@ -97,7 +77,7 @@ void PB_Action::add( int code, Vector *exactPos )
 
 	case BOT_USE:
 		if (exactPos) {
-			nextUseTime = worldTime() + 0.5;
+			nextUseTime = worldtime() + 0.5;
 			nextUsePos = *exactPos;
 		}
 		else 
@@ -105,41 +85,41 @@ void PB_Action::add( int code, Vector *exactPos )
 		break;
 
 	case BOT_DUCK:
-		action |= IN_DUCK;
+		action |= ACTION_CROUCH;
 		break;
 
 	case BOT_DUCK_LONG:
-		duckEndTime = worldTime() + 1.5;
+		duckEndTime = worldtime() + 1.5;
 		break;
 
 	case BOT_STOP_RUNNING:
-		stopEndTime = worldTime() + 0.5;
+		stopEndTime = worldtime() + 0.5;
 		break;
 
 	case BOT_FIRE_PRIM:
-		action |= IN_ATTACK;	
+		action |= ACTION_ATTACK1;	
 		break;
 
 	case BOT_FIRE_SEC:
-		action |= IN_ATTACK2;
+		action |= ACTION_ATTACK2;
 		break;
 
 	case BOT_RELEASE_SEC:
-		action &= ~IN_ATTACK2;
+		action &= ~ACTION_ATTACK2;
 		break;
 
 	case BOT_RELOAD:
-		action |= IN_RELOAD;
+		action |= ACTION_RELOAD;
 		break;
 
 	case BOT_STRAFE_LEFT:
-		//debugMsg( "Strafing left\n" );
+		// DEBUG_MSG( "Strafing left\n" );
 		if (exactPos) strafe = -exactPos->x;
 		else strafe = -400;	// strong influence
 		break;
 
 	case BOT_STRAFE_RIGHT:
-		//debugMsg( "Strafing right\n" );
+		// DEBUG_MSG( "Strafing right\n" );
 		if (exactPos) strafe = exactPos->x;
 		else strafe = 400;	// strong influence
 		break;
@@ -154,114 +134,115 @@ void PB_Action::setMaxSpeed()
 }
 
 
-void PB_Action::setMoveAngle( Vector angle ) 
+void PB_Action::setMoveAngle( Vec3D *angle ) 
 { 
-	fixAngle( angle );
-	moveAngle = angle; 
-	//debugMsg( "setMove  " );
+	fixangle(angle);
+	vcopy(angle, &moveAngle); 
+	//DEBUG_MSG( "setMove  " );
 }
 
 
 void PB_Action::setMoveAngleYaw( float angle )
 {
-	Vector ma = Vector( 0, angle, 0 );
-	fixAngle( ma );
+	Vec3D ma = {0, angle, 0};
+	fixangle( &ma );
 	moveAngle = ma;
-	//debugMsg( "setMoveYaw  " );
+	//DEBUG_MSG( "setMoveYaw  " );
 }
 
-
-void PB_Action::setMoveDir( Vector vec, int prior )
+void PB_Action::setMoveDir( Vec3D *vec, int prior )
 {
-	if (prior>=movePrior) {
-		Vector angle = UTIL_VecToAngles( vec - ent->v.origin );
-		fixAngle( angle );
+	if (prior >= movePrior) {
+		Vec3D angle, dir;
+
+		vsub(vec, &ent->v.origin, &dir);
+		vectoangles(&dir, &angle);
+		fixangle(&angle);
 		angle.x = -angle.x;
-		setMoveAngle( angle );
+		setMoveAngle(&angle);
 		movePrior = prior;
-		//debugMsg( "setMoveDir  " );
+		// DEBUG_MSG("setMoveDir  ");
 	}
 }
 
-
-Vector PB_Action::getMoveDir()
+Vec3D *PB_Action::getMoveDir()
 {
-	fixAngle( moveAngle );
-	UTIL_MakeVectors( moveAngle );
-	return gpGlobals->v_forward;
+	fixangle(&moveAngle);
+	makevectors(&moveAngle);
+	return &com.globals->fwd;
 }
 
-
-void PB_Action::setViewAngle( Vector angle, int prior )
+void PB_Action::setViewAngle( Vec3D *angle, int prior )
 { 
-	if (prior>=viewPrior) {
-		viewAngle = angle;
+	if (prior >= viewPrior) {
+		vcopy(angle, &viewAngle);
 		viewPrior = prior;
-		targetVel = g_vecZero;		// must be set != 0 afterwards!
+		vcopy(&zerovector, &targetVel);	// must be set != 0 afterwards!
 	}
 }
 
-
-void PB_Action::setViewDir( Vector vec, int prior )
+void PB_Action::setViewDir( Vec3D *vec, int prior )
 {
-	if (prior>=viewPrior) {
-		Vector angle = UTIL_VecToAngles( vec - (ent->v.origin+ent->v.view_ofs) );
-		fixAngle( angle );
+	if (prior >= viewPrior) {
+		Vec3D angle, dir;
+
+		eyepos(ent, &dir);
+		vsub(vec, &dir, &dir);
+		vectoangles(&dir, &angle);
+		fixangle(&angle);
 		angle.x = -angle.x;
-		setViewAngle( angle, prior );
+		setViewAngle(&angle, prior);
 		viewPrior = prior;
 	}
 }
-
 
 void PB_Action::setViewLikeMove() 
 { 
 	if (viewPrior == 0) viewAngle = moveAngle; 
 }
 
-
-float getProb( float x )
-{
-	if (x < -1) return 0;
-	if (x <  0) return 0.5*(x+1)*(x+1);
-	if (x <  1) return 1 - 0.5*(1-x)*(1-x);
-	return 1;
-}
-
-
 float PB_Action::estimateHitProb()
 {
+	Vec3D currentDiff;
 	float dirErrorForSkill[10] = { 20, 15, 12, 10, 8, 6, 4, 2, 1, 0 };
-	float dirError = 0.5 * dirErrorForSkill[aimSkill-1];
-	Vector currentDiff = viewAngle - currentView;
-	fixAngle( currentDiff );
-	float cdl = currentDiff.Length() + RANDOM_FLOAT( -dirError, dirError ) + RANDOM_FLOAT( -dirError, dirError );
-	if (cdl > 45) return 0;
-	float center = 0.0001894 * targetDist * cdl / weaponCone;
-	float hsize = 32.0 / (weaponCone * targetDist);
-	float prob = getProb( center + hsize ) - getProb( center - hsize );
+	float dirError, cdl, center, hsize, prob;
+
+	dirError = 0.5f * dirErrorForSkill[aimSkill - 1];
+	vsub(&viewAngle, &currentView, &currentDiff);
+	fixangle(&currentDiff);
+
+	cdl = vlen(&currentDiff) + randomfloat(-dirError, dirError) + randomfloat(-dirError, dirError);
+
+	if (cdl > 45.0f)
+		return 0;
+
+	center = 0.0001894f * targetDist * cdl / weaponCone;
+	hsize = 32.0f / (weaponCone * targetDist);
+	prob = getprob(center + hsize) - getprob(center - hsize);
+
 	return prob;
 }
 
 
-void PB_Action::setAimDir( Vector currentPos, Vector relVelocity )
+void PB_Action::setAimDir( Vec3D *currentPos, Vec3D *relVelocity )
 {
 	if (viewPrior<=2) {
-		targetPos = currentPos;
-		Vector tVec = targetPos - (ent->v.origin + ent->v.view_ofs);
-		targetDist = tVec.Length();
-		Vector angle = UTIL_VecToAngles( tVec );
-		fixAngle( angle );
+		Vec3D tVec, angle;
+
+		vcopy(currentPos, &targetPos);
+		eyepos(ent, &tVec);
+		vsub(&targetPos, &tVec, &tVec);
+		targetDist = vlen(&tVec);
+		vectoangles(&tVec, &angle);
+		fixangle(&angle);
 		angle.x = -angle.x;
-		setViewAngle( angle, 2 );
-		targetVel = relVelocity;
+		setViewAngle(&angle, 2);
+		vcopy(relVelocity, &targetVel);
 		hitProb = estimateHitProb();
-	}
-	else {
-		debugMsg( "Aiming priority too low!\n" );
+	} else {
+		DEBUG_MSG("Aiming priority too low!\n");
 	}
 }
-
 
 void PB_Action::setAimSkill( int skill )
 {
@@ -269,164 +250,154 @@ void PB_Action::setAimSkill( int skill )
 	float accuracies[10] = { 0.0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0 };
 		
 	aimSkill = skill;
-	vupdTime = updateTimes[10-skill];
-	aimAccuracy = accuracies[10-skill];
-//	infoMsg( "Set Aim to %i\n", skill );
+	vupdTime = updateTimes[10 - skill];
+	aimAccuracy = accuracies[10 - skill];
+//	INFO_MSG( "Set Aim to %i\n", skill );
 }
 
-
-bool worldTimeReached( float time )
+Vec3D *PB_Action::calcViewAngle()
 {
-	static float lastTime = 0;
+	Vec3D currentDiff, toAdd;
 
-	// take care of level changes:
-	if (worldTime() < lastTime) return true;	
-	lastTime = worldTime();
-
-	if (worldTime() > time) return true;
-	else return false;
-	
-}
-
-
-Vector PB_Action::calcViewAngle()
-{
 	viewAngle.z = 0;
-	fixAngle( viewAngle );		// optimal viewAngle
+	fixangle(&viewAngle);		// optimal viewAngle
 	currentView.z = 0;
-	Vector currentDiff = viewAngle - currentView;
-	fixAngle( currentDiff );	// current angle difference to target
-	
+	vsub(&viewAngle, &currentView, &currentDiff);
+	fixangle(&currentDiff);	// current angle difference to target
+
 	// try to estimate hit probability
-	for (int i=(MAX_VDELAY-1); i>0; i--) targetDiff[i] = targetDiff[i-1];
-	targetDiff[0] = currentDiff.Length() * targetDist;
+	for (int i = (MAX_VDELAY - 1); i > 0; i--)
+		targetDiff[i] = targetDiff[i - 1];
+
+	targetDiff[0] = vlen(&currentDiff) * targetDist;
 	hitProb = estimateHitProb();
 
+	if (worldtime_reached( nextViewUpdate )) {
+		nextViewUpdate = worldtime() + vupdTime;
 
-	if (worldTimeReached( nextViewUpdate )) {
-		nextViewUpdate = worldTime() + vupdTime;
-
-		if (targetVel != g_vecZero) {	
+		if (!vcomp(&targetVel, &zerovector)) {	
 			// predict position for moving target:
-			Vector predPos = targetPos + vupdTime * targetVel;
-			Vector tVec = predPos - (ent->v.origin + ent->v.view_ofs);
-			Vector angle = UTIL_VecToAngles( tVec );
-			fixAngle( angle );
-			angle.x = -angle.x;
-			deltaView = angle - currentView;
-		}
-		else {
-			deltaView = currentDiff;
-		}
-		// take accuracy into account:
-		float distConst = 5.0 / ( 2.0 + deltaView.Length() );
-		float bl = 1.0 / ( 1.0 + distConst ) - 0.4;
-		float bh = 1.5 + distConst;
-		bl = aimAccuracy * (1 - bl);
-		bh = aimAccuracy * (bh - 1);	// rnd( 1-a*bl, 1+a*bh)
+			Vec3D predPos, tVec, angle;
 
-		float acc = RANDOM_FLOAT( 1.0-bl, 1.0+bh );
-		deltaView = deltaView * acc;
-		fixAngle( deltaView );
-		maxTurn = deltaView.Length() / (float)turnCount;
+			vma(&targetPos, vupdTime, &targetVel, &predPos);
+			eyepos(ent, &tVec);
+			vsub(&predPos, &tVec, &tVec);
+			vectoangles(&tVec, &angle);
+			fixangle(&angle);
+			angle.x = -angle.x;
+			vsub(&angle, &currentView, &deltaView);
+		} else {
+			vcopy(&currentDiff, &deltaView);
+		}
+
+		// take accuracy into account:
+		float distConst = 5.0f / ( 2.0f + vlen(&deltaView) );
+		float bl = 1.0f / ( 1.0f + distConst ) - 0.4f;
+		float bh = 1.5f + distConst;
+		bl = aimAccuracy * (1.0f - bl);
+		bh = aimAccuracy * (bh - 1.0f);	// rnd( 1-a*bl, 1+a*bh)
+
+		float acc = randomfloat(1.0f - bl, 1.0f + bh);
+		vscale(&deltaView, acc, &deltaView);
+		fixangle(&deltaView);
+		maxTurn = vlen(&deltaView) / (float)turnCount;
 		turnCount = 0;
 	}
-	
-	Vector toAdd = deltaView;
-	if (toAdd.x>maxTurn) toAdd.x = maxTurn;
-	else if (toAdd.x<-maxTurn) toAdd.x = -maxTurn;
-	if (toAdd.y>maxTurn) toAdd.y = maxTurn;
-	else if (toAdd.y<-maxTurn) toAdd.y = -maxTurn;
-	
-	deltaView = deltaView - toAdd;
-	currentView = currentView + toAdd;
+
+	vcopy(&deltaView, &toAdd);
+	if (toAdd.x > maxTurn) toAdd.x = maxTurn;
+	else if (toAdd.x < -maxTurn) toAdd.x = -maxTurn;
+	if (toAdd.y > maxTurn) toAdd.y = maxTurn;
+	else if (toAdd.y < -maxTurn) toAdd.y = -maxTurn;
+
+	vsub(&deltaView, &toAdd, &deltaView);
+	vadd(&currentView, &toAdd, &currentView);
 	turnCount++;
 
-	fixAngle( currentView );
-	return currentView;
+	fixangle(&currentView);
+	return &currentView;
 }
-
-
 
 bool PB_Action::gotStuck()
 {
-	if ( (lastMoveCheck-lastMove) > 1.0 ) {
-		debugMsg( "BOT IS STUCK!\n" );
+	if ( (lastMoveCheck - lastMove) > 1.0f ) {
+		DEBUG_MSG( "BOT IS STUCK!\n" );
 		return true;
 	}
 	return false;
 }
-
 
 void PB_Action::resetStuck()
 {
 	lastMove = lastMoveCheck;
 }
 
-
 void PB_Action::perform()
 {
-	if (inJump && !(action & IN_JUMP)) {	// jumping with jump button released
-		action |= IN_DUCK;
-		if (FBitSet(ent->v.flags, FL_ONGROUND) || ent->v.origin.z<(jumpPos-100)) {
-			action &= ~IN_DUCK;
-			inJump=false;
+	if (inJump && !(action & ACTION_JUMP)) {	// jumping with jump button released
+		action |= ACTION_CROUCH;
+		if ((ent->v.flags & FL_ONGROUND) || ent->v.origin.z < (jumpPos - 100)) {
+			action &= ~ACTION_CROUCH;
+			inJump = false;
 		}
 	}
 	// check for long duck
 	if (duckEndTime > 0) {
-		if ( worldTime() < duckEndTime ) add( BOT_DUCK );
+		if ( worldtime() < duckEndTime ) add(BOT_DUCK, NULL);
 		else duckEndTime = 0;
 	}
 	// check for use
 	if (useCounter > 0) {
 		useCounter--;
-		if (useCounter & 1) action |= IN_USE;
+		if (useCounter & 1) action |= ACTION_USE;
 	}
 	if (nextUseTime > 0) {
-		setAimDir( nextUsePos );	// to be able to use accuracy
-		setMoveDir( nextUsePos, 3 );
+		setAimDir(&nextUsePos, NULL);	// to be able to use accuracy
+		setMoveDir(&nextUsePos, 3);
 		setMaxSpeed();
 		// don't get stuck...
 		dontGetStuck();
 		if ( targetAccuracy() > 0.8 ) {
-			action |= IN_USE;
+			action |= ACTION_USE;
 			nextUseTime = 0;
 		}
 	}
 	// check for longjump
 	if (longJumpState > 0) {
-		Vector difAngle = ent->v.angles - moveAngle;
-		fixAngle( difAngle );
-		float difX = fabs(difAngle.x);
+		Vec3D difAngle;
+
+		vsub(&ent->v.angles, &moveAngle, &difAngle);
+		fixangle(&difAngle);
+		float difX = fabsf(difAngle.x);
 		if (difX > 90) difX = 180 - difX;
-		//float vel = ((Vector)ent->v.velocity).Length();
+		//float vel = vlen(&ent->v.velocity);
 		//if ( (vel * difX)  > 2000 ) {
-		if ( difX > 5 ) {
-			debugMsg( "Waiting for longjump, x=%.f\n", difX );
+		if (difX > 5) {
+			DEBUG_MSG( "Waiting for longjump, x=%.f\n", difX );
 			setSpeed( 0 );
-		}
-		else {
-			debugMsg( "Executing longjump, x=%.f\n", difX );
-			add( BOT_DUCK );
+		} else {
+			DEBUG_MSG( "Executing longjump, x=%.f\n", difX );
+			add(BOT_DUCK, NULL);
 			if (longJumpState == 1) {
 				setMaxSpeed();
-				add( BOT_JUMP );
+				add(BOT_JUMP, NULL);
 			}
 			longJumpState--;
 		}
 	}
 	// check for delayed jump
-	if ( (nextJumpTime>0) && (worldTime()>nextJumpTime) ) {
-		add( BOT_JUMP );
+	if ( (nextJumpTime > 0) && (worldtime() > nextJumpTime) ) {
+		add(BOT_JUMP, NULL);
 		nextJumpTime = 0;
 		fineJump = false;
 	}
 	// while fineJump is true, ignore all given moveAngles and speeds...
 	if (fineJump) {
-		//debugMsgF(" Action:FineJump in %.f\n", (nextJumpTime-worldTime()) );
-		setMoveDir( fineJumpPos );
-		float bestSpeed = 5 * (fineJumpPos - ent->v.origin).Length();
+		Vec3D dir;
+		//DEBUG_MSG(" Action:FineJump in %.f\n", (nextJumpTime-worldtime()) );
+		setMoveDir(&fineJumpPos);
+		vsub(&fineJumpPos, &ent->v.origin, &dir);
+		float bestSpeed = 5 * vlen(&dir);
 		if (bestSpeed > maxSpeed) bestSpeed = maxSpeed;
 		dontGetStuck();
 		setSpeed( bestSpeed );
@@ -434,89 +405,89 @@ void PB_Action::perform()
 	// check for stop
 	if (stopEndTime > 0) {
 		dontGetStuck();
-		float vel = ((Vector)ent->v.velocity).Length();
+		float vel = vlen(&ent->v.velocity);
 		if (vel > 50) {
-			setMoveDir( ent->v.origin + ent->v.velocity, 5 );
-			setSpeed( -vel );
-			debugMsg( "Stopping\n" );
+			Vec3D dir;
+
+			vadd(&ent->v.origin, &ent->v.velocity, &dir);
+			setMoveDir(&dir, 5);
+			setSpeed(-vel);
+			DEBUG_MSG( "Stopping\n" );
 		}
 		else stopEndTime = 0;
 	}
 	
 	// stuck: velocity test
 /*	if (speed>0 && !notStucking) {
-		action |= IN_FORWARD;
-		Vector currentVel = ent->v.velocity;
+		action |= ACTION_MOVEFORWARD;
+		Vec3D currentVel = ent->v.velocity;
 		if ( jumping() ) currentVel.z = 0;	// jumping doesn't count as movement
-		float reachedSpeed = currentVel.Length() / speed;
+		float reachedSpeed = vlen(currentVel) / speed;
 		if ( reachedSpeed > 0.5 ||		// move ok
 			 nextUseTime > 0		)	// waiting to push button
-			lastMove = worldTime();
-	}
-	else {	// bot is waiting, everything ok
-		lastMove = worldTime();
+			lastMove = worldtime();
+	} else {	// bot is waiting, everything ok
+		lastMove = worldtime();
 	}*/
-	if (speed>0) action |= IN_FORWARD;
-	else if (speed<0) action |= IN_BACK;
+	if (speed>0) action |= ACTION_MOVEFORWARD;
+	else if (speed<0) action |= ACTION_MOVEBACK;
 	else notStucking = true;		// this is intentional!
 
 	if (notStucking) {	// bot is waiting, everything ok
-		lastMove = worldTime();
+		lastMove = worldtime();
+	} else {
+		Vec3D currentVel;
+		vcopy(&ent->v.velocity, &currentVel);
+		if (jumping()) currentVel.z = 0;	// jumping doesn't count as movement
+		if (vlen(&currentVel) > (maxSpeed * 0.25f) ) lastMove = worldtime();
 	}
-	else {	
-		Vector currentVel = ent->v.velocity;
-		if ( jumping() ) currentVel.z = 0;	// jumping doesn't count as movement
-		if ( currentVel.Length() > (maxSpeed/4) ) lastMove = worldTime();
-	}
-	lastMoveCheck = worldTime();
-	
+	lastMoveCheck = worldtime();
 
-	Vector view = calcViewAngle();
+	Vec3D view;
 
+	vcopy(calcViewAngle(), &view);
 	view.z = 0;
 	ent->v.v_angle = view;
 	ent->v.angles.y = view.y;
-	ent->v.angles.x = -view.x / 3;
+	ent->v.angles.x = -view.x / 3.0f;
 	ent->v.angles.z = 0;
 
 	// prevent crash?
-	fixAngle( moveAngle );
+	fixangle(&moveAngle);
 	if (speed > 10000 || speed < -10000) {
 		speed = 0;		
-		debugMsg( "FATAL SPEED\n" );
+		DEBUG_MSG( "FATAL SPEED\n" );
 	}
 	if (strafe > 10000 || strafe < -10000) {
 		strafe = 0;
-		debugMsg( "FATAL STRAFE\n" );
+		DEBUG_MSG( "FATAL STRAFE\n" );
 	}
-	g_engfuncs.pfnRunPlayerMove( ent, moveAngle, 
-		speed, strafe, 0, action, 0, (byte)msec() );
+	runplayermove(ent, &moveAngle, speed, strafe, 0, action, 0, (byte)msec());
 }
-
 
 float PB_Action::msec()
 {
-	if ((msecStart+msecCount/1000) < (worldTime()-0.5)) {	// after pause 
-		msecStart = worldTime() - 0.05;
+	if ((msecStart + msecCount / 1000) < (worldtime() - 0.5f)) {	// after pause 
+		msecStart = worldtime() - 0.05f;
 		msecCount = 0;
-		debugMsg( "MSEC: SUPPOSED PAUSE\n" );
+		DEBUG_MSG( "MSEC: SUPPOSED PAUSE\n" );
 	}
 
-	if (msecStart > worldTime()) {					// after map changes...
-		msecStart = worldTime() - 0.05;
+	if (msecStart > worldtime()) {					// after map changes...
+		msecStart = worldtime() - 0.05f;
 		msecCount = 0;
-		debugMsg( "MSEC: SUPPOSED MAPCHANGE\n" );
+		DEBUG_MSG( "MSEC: SUPPOSED MAPCHANGE\n" );
 	}
-	float opt = (worldTime()-msecStart) * 1000;		// optimal msec value since start of 1 sec period
+	float opt = (worldtime() - msecStart) * 1000;		// optimal msec value since start of 1 sec period
 	currentMSec = opt - msecCount;					// value ve have to add to reach optimum
-	globalFrameTime = currentMSec/1000;				// duration of last frame in sec
+	globalFrameTime = currentMSec / 1000;				// duration of last frame in sec
 	msecCount = opt;
 	if (msecCount > 1000) {							// do we have to start a new 1 sec period?
-		msecStart += msecCount/1000;
+		msecStart += msecCount / 1000;
 		msecCount = 0;
 	}
 	// check from THE FATAL:
 	if (currentMSec < 5) currentMSec = 5;
-    else if (currentMSec > 255) currentMSec = 255;
+	else if (currentMSec > 255) currentMSec = 255;
 	return currentMSec;
 }

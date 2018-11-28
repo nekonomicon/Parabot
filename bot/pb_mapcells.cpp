@@ -1,7 +1,8 @@
+#include "parabot.h"
+#include "sectors.h"
+#include "focus.h"
 #include "pb_mapcells.h"
-
 #include <algorithm>
-extern char mod_name[32];
 
 PB_MapCells::PB_MapCells() : 
 	cellArray( MAX_CELLS, 256 )
@@ -25,16 +26,17 @@ void PB_MapCells::clear()
 
 int PB_MapCells::updateVisibility( int maxUpdates )
 {
+	Vec3D dir;
 	int c1, c2, trCount = 0;
 
 	while (trCount < maxUpdates && vis.needTrace( c1, c2 ) ) {
-		if (LOSExists( cellArray[c1].pos(), cellArray[c2].pos() )) {
+		if (LOSExists( cellArray[c1].pos(), cellArray[c2].pos())) {
 			vis.addTrace( true );
-			Vector dir = cellArray[c2].pos() - cellArray[c1].pos();
-			cellArray[c1].focus.addDir( dir );
-			cellArray[c2].focus.addDir( -dir );
-		}
-		else {
+			vsub(cellArray[c2].pos(), cellArray[c1].pos(), &dir);
+			focus_adddir(&dir, cellArray[c1].data.sectors);
+			vinv(&dir);
+			focus_adddir(&dir, cellArray[c2].data.sectors);
+		} else {
 			vis.addTrace( false );
 		}
 		trCount++;
@@ -42,129 +44,138 @@ int PB_MapCells::updateVisibility( int maxUpdates )
 	return trCount;
 }
 
-
 int PB_MapCells::lastVisUpdate()
 {
-	int c1=0, c2;
+	int c1 = 0, c2;
 	vis.needTrace( c1, c2 );
 	return c1;
 }
 
-
-int PB_MapCells::getHashcode( const Vector &pos )
+int PB_MapCells::getHashcode( const Vec3D *pos )
 {
-	int ix = (((int)pos.x + 4096) & 0x007F80) >> 7;
-	int iy = (((int)pos.y + 4096) & 0x007F80) >> 1;
+	int ix = (((int)pos->x + 4096) & 0x007F80) >> 7;
+	int iy = (((int)pos->y + 4096) & 0x007F80) >> 1;
 	int hashcode = ix + iy;
 	assert( hashcode >= 0 );
 	assert( hashcode < 4096 );
 	return hashcode;
 }
 
-
-Vector PB_MapCells::getAllignedPos( const Vector &pos )
+void PB_MapCells::getAllignedPos(const Vec3D *pos, Vec3D *apos)
 {
-	int ix = (((int)pos.x + 4096) & 0x007F80) + 64;
-	int iy = (((int)pos.y + 4096) & 0x007F80) + 64;
-	return Vector( (float)(ix-4096), (float)(iy-4096), pos.z );
+	int ix, iy;
+
+	ix = (((int)pos->x + 4096) & 0x007F80) + 64;
+	iy = (((int)pos->y + 4096) & 0x007F80) + 64;
+
+	apos->x = (float)(ix - 4096);
+	apos->y = (float)(iy - 4096);
+	apos->z = pos->z;
 }
 
 int dbgCnt;
 
-#define CHECK_BUCKET( hcode )													\
-																				\
-	cellId = cellHash[hcode];													\
-	dbgCnt = 0; \
-	while (cellId != NO_CELL_REGISTERED && dbgCnt++ < 1000) {										\
-		if ( (dist = (pos-cellArray[cellId].pos()).Length()) < maxDist ) {		\
-			cellFound[numCellsFound++] = PBT_FoundCell( dist, cellId );			\
-			if (dist < closestDist) {											\
-				closestDist = dist;												\
-				closestId = cellId;												\
-			}																	\
-		}																		\
-		cellId = cellArray[cellId].nextCell();									\
+void PB_MapCells::checkbucket(int hcode, const Vec3D *pos, float *closestDist, int *closestid, float maxdist)
+{
+	Vec3D dir;
+	float dist;
+
+	short cellId = cellHash[hcode];
+	dbgCnt = 0;
+	while (cellId != NO_CELL_REGISTERED && dbgCnt++ < 1000) {
+		vsub(pos, cellArray[cellId].pos(), &dir);
+		dist = vlen(&dir);
+		if (dist < maxdist) {
+			cellFound[numCellsFound++] = PBT_FoundCell(dist, cellId);
+			if (dist < *closestDist) {
+				*closestDist = dist;
+				*closestid = cellId;
+			}
+		}
+		cellId = cellArray[cellId].nextCell();
 	}
+}
 
-
-int PB_MapCells::getCellId( const Vector &pos, float maxDist )
+int PB_MapCells::getCellId(const Vec3D *pos, float maxDist )
 {
 	float dist, closestDist = maxDist;	// max dist that found WP can have to pos
-	int closestId = NO_CELL_FOUND;			// is returned when no cell is found
-	short cellId;
-	int xStride=0, yStride=0;
-	float xbDist, ybDist;	// distance to next bucket in x- and y- direction
+	int closestid = NO_CELL_FOUND;			// is returned when no cell is found
+	int xStride = 0, yStride = 0;
+	Vec2D bdir;	// distance to next bucket in x- and y- direction
+	Vec3D cellStride;
 
 	numCellsFound = 0;		// no cells found yet
 
 	// search first (direct) bucket:
-	int hashcode = getHashcode( pos );
-	CHECK_BUCKET( hashcode )
+	int hashcode = getHashcode(pos);
+	checkbucket(hashcode, pos, &closestDist, &closestid, maxDist);
 
-	Vector cellStride = pos - getAllignedPos( pos );
+	getAllignedPos(pos, &cellStride);
+	vsub(pos, &cellStride, &cellStride);
 	if (cellStride.x > 0) {	// chance that better WP in E bucket?
-		xbDist = 64-cellStride.x;
-		if (pos.x < (4096-128) && closestDist > xbDist) {
+		bdir.x = 64.0f - cellStride.x;
+		if (pos->x < (4096.0f - 128.0f) && closestDist > bdir.x) {
 			xStride = +1;
-			CHECK_BUCKET( hashcode+xStride )
+			checkbucket(hashcode + xStride, pos, &closestDist, &closestid, maxDist);
 		}
-	}
-	else {	// chance that better WP in W bucket?
-		xbDist = 64+cellStride.x;
-		if (pos.x > (-4096+128) && closestDist > xbDist) {
+	} else {	// chance that better WP in W bucket?
+		bdir.x = 64.0f + cellStride.x;
+		if (pos->x > (-4096.0f + 128.0f) && closestDist > bdir.x) {
 			xStride = -1;
-			CHECK_BUCKET( hashcode+xStride )
+			checkbucket(hashcode + xStride, pos, &closestDist, &closestid, maxDist);
 		}
 	}
 	if (cellStride.y > 0) {	// chance that better WP in S bucket?
-		ybDist = 64-cellStride.y;
-		if (pos.y < (4096-128) && closestDist > ybDist) {
+		bdir.y = 64.0f - cellStride.y;
+		if (pos->y < (4096.0f - 128.0f) && closestDist > bdir.y) {
 			yStride = +64;
-			CHECK_BUCKET( hashcode+yStride )
+			checkbucket(hashcode + yStride, pos, &closestDist, &closestid, maxDist);
 		}
-	}
-	else {	// chance that better WP in N bucket?
-		ybDist = 64+cellStride.y;
-		if (pos.y > (-4096+128) && closestDist > ybDist) {
+	} else {	// chance that better WP in N bucket?
+		bdir.y = 64.0f + cellStride.y;
+		if (pos->y > (-4096.0f + 128.0f) && closestDist > bdir.y) {
 			yStride = -64;
-			CHECK_BUCKET( hashcode+yStride )
+			checkbucket(hashcode + yStride, pos, &closestDist, &closestid, maxDist);
 		}
 	}
 	if (xStride != 0 && yStride != 0) {	// chance that better WP in diagonal bucket?
-		float diagonalDist = sqrt( xbDist*xbDist + ybDist*ybDist );
-		if (closestDist > diagonalDist)	CHECK_BUCKET( hashcode+xStride+yStride )
+		float diagonalDist = vlen2d(&bdir);
+		if (closestDist > diagonalDist)
+			checkbucket(hashcode + xStride + yStride, pos, &closestDist, &closestid, maxDist);
 	}
 
 	// any cells close?
 	if (numCellsFound == 0) return NO_CELL_FOUND;
 
 	// is the closest one visible as well?
-	if ( LOSExists( pos, cellArray[closestId].pos() ) &&
-		 ( (cellArray[closestId].pos().z - pos.z) <= 45 ) ) return closestId;
-	
+	if (LOSExists(pos, cellArray[closestid].pos()) &&
+		 ((cellArray[closestid].pos()->z - pos->z) <= 45.0f)) return closestid;
+
 	// if not, sort all found cells
-	std::sort( cellFound, cellFound+numCellsFound );
-	for (int testCell=1; testCell<numCellsFound; testCell++) {
+	std::sort(cellFound, cellFound + numCellsFound);
+	for (int testCell = 1; testCell < numCellsFound; testCell++) {
 		int testId = cellFound[testCell].index;
-		if (LOSExists( pos, cellArray[testId].pos() ) &&
-			( (cellArray[testId].pos().z - pos.z) <= 45 ) ) return testId;
+		if (LOSExists(pos, cellArray[testId].pos()) &&
+			((cellArray[testId].pos()->z - pos->z) <= 45.0f)) return testId;
 	}
 	return NO_CELL_FOUND;
 }
 
-
 int PB_MapCells::addCell( PB_Cell newCell, bool initNbs, int addedFrom )
 {
-	Vector pos = newCell.pos();
-	int hashcode = getHashcode( pos );
-	//debugMsg( "Pos=(%.f,%.f,%.f)", pos.x, pos.y, pos.z );
-	//debugMsg( ", Hashcode = %x", hashcode );
+	Vec3D pos;
+
+	vcopy(newCell.pos(), &pos);
+	int hashcode = getHashcode(&pos);
+	// DEBUG_MSG("Pos=(%.f,%.f,%.f)", pos.x, pos.y, pos.z);
+	// DEBUG_MSG(", Hashcode = %x", hashcode);
 	// insert cell into array:
-	cellArray.add( numCells, newCell );
+	cellArray.add(numCells, newCell);
 
 	// insert id into hashtable:
 	short cellId = cellHash[hashcode];
-	if (cellId == NO_CELL_REGISTERED) cellHash[hashcode] = numCells;
+	if (cellId == NO_CELL_REGISTERED)
+		cellHash[hashcode] = numCells;
 	else {
 		dbgCnt = 0;
 		while (cellArray[cellId].nextCell() != NO_CELL_REGISTERED  && dbgCnt++ < 1000) {
@@ -176,63 +187,70 @@ int PB_MapCells::addCell( PB_Cell newCell, bool initNbs, int addedFrom )
 			fclose( dfp );
 		}*/
 		cellArray[cellId].setNextCell( numCells );
-		if (cellId==numCells) errorMsg( "CellId=numCells!\n" );
+		if (cellId == numCells) ERROR_MSG( "CellId=numCells!\n" );
 	}
 	vis.addCell();
 	if (initNbs) initNeighbours( numCells, addedFrom );
 	numCells++;
-	return (numCells-1);		// has already been incremented
+	return (numCells - 1);		// has already been incremented
 }
-
 
 int PB_MapCells::initNeighbours( int cellIndex, int firstNb )
 {
-	float maxDist = 2.0*CELL_SIZE;		// radius in which neighbours must lie
-
+	float maxDist = 2.0f * CELL_SIZE;		// radius in which neighbours must lie
 	float dist, closestDist = maxDist;	// required for macro...
-	int closestId = NO_CELL_FOUND;
-	short cellId = 0;
-	Vector nbPos;
-	
-	
+	int closestid = NO_CELL_FOUND;
+	Vec3D nbPos, pos;
+
 	numCellsFound = 0;		// no cells found yet
 
-	Vector pos = cellArray[cellIndex].pos();
-	int hashcode = getHashcode( pos );
+	vcopy(cellArray[cellIndex].pos(), &pos);
+	int hashcode = getHashcode(&pos);
 	// search center and 8 surrounding buckets
-	if (pos.y > (-4096+128)) {
-		if (pos.x > (-4096+128)) CHECK_BUCKET( hashcode-65 )
-		CHECK_BUCKET( hashcode-64 )
-		if (pos.x < (4096-128)) CHECK_BUCKET( hashcode-63 )
+	if (pos.y > (-4096.0f + 128.0f)) {
+		if (pos.x > (-4096.0f + 128.0f))
+			checkbucket(hashcode - 65, &pos, &closestDist, &closestid, maxDist);
+		checkbucket(hashcode - 64, &pos, &closestDist, &closestid, maxDist);
+		if (pos.x < (4096.0f - 128.0f))
+			checkbucket(hashcode - 63, &pos, &closestDist, &closestid, maxDist);
 	}
-	if (pos.x > (-4096+128)) CHECK_BUCKET( hashcode- 1 )
-	CHECK_BUCKET( hashcode )
-	if (pos.x < (4096-128)) CHECK_BUCKET( hashcode+ 1 )
-	if (pos.y < (4096-128)) {
-		if (pos.x > (-4096+128)) CHECK_BUCKET( hashcode+63 )
-		CHECK_BUCKET( hashcode+64 )
-		if (pos.x < (4096-128)) CHECK_BUCKET( hashcode+65 )
-	}
-	
-	int numNb = 0;
-	if (firstNb != NO_CELL_REGISTERED) {
-		float weightEst = (pos - cellArray[firstNb].pos() ).Length() / serverMaxSpeed();
-		//if (cellArray[cellIndex].setNeighbour( firstNb, weightEst )) numNb++;
-		// only add current cell as neighbour to previous one:
-		cellArray[firstNb].setNeighbour( cellIndex, weightEst );
+	if (pos.x > (-4096.0f + 128.0f))
+		checkbucket(hashcode - 1, &pos, &closestDist, &closestid, maxDist);
+	checkbucket(hashcode, &pos, &closestDist, &closestid, maxDist);
+	if (pos.x < (4096.0f - 128.0f))
+		checkbucket(hashcode + 1, &pos, &closestDist, &closestid, maxDist);
+	if (pos.y < (4096.0f - 128.0f)) {
+		if (pos.x > (-4096.0f + 128.0f))
+			checkbucket(hashcode + 63, &pos, &closestDist, &closestid, maxDist);
+		checkbucket(hashcode + 64, &pos, &closestDist, &closestid, maxDist);
+		if (pos.x < (4096.0f - 128.0f))
+			checkbucket(hashcode + 65, &pos, &closestDist, &closestid, maxDist);
 	}
 
-	for (int i=0; i<numCellsFound; i++) {
+	int numNb = 0;
+	if (firstNb != NO_CELL_REGISTERED) {
+		Vec3D dif;
+
+		vsub(&pos, cellArray[firstNb].pos(), &dif);
+		float weightEst = vlen(&dif) / servermaxspeed();
+		//if (cellArray[cellIndex].setNeighbour(firstNb, weightEst)) numNb++;
+		// only add current cell as neighbour to previous one:
+		cellArray[firstNb].setNeighbour(cellIndex, weightEst);
+	}
+
+	for (int i = 0; i < numCellsFound; i++) {
 		int nbId = cellFound[i].index;
-		if (nbId != cellIndex && LOSExists( pos, nbPos=cellArray[nbId].pos() )) {
-			Vector dif = nbPos - pos;
-			float weightEst = dif.Length() / serverMaxSpeed();
+		vcopy(cellArray[nbId].pos(), &pos);
+		if (nbId != cellIndex && LOSExists(&pos, &nbPos)) {
+			Vec3D dif;
+
+			vsub(&nbPos, &pos, &dif);
+			float weightEst = vlen(&dif) / servermaxspeed();
 			if (dif.z <= 45) {	// neighbour z-reachable from cell
-				if (cellArray[cellIndex].setNeighbour( nbId, weightEst )) numNb++;
-				//else printf( "too many nbs found for cell %i!\n", cellIndex );
-			}
-			if (dif.z >= -45) {	// cell z-reachable from neighbour
-				cellArray[nbId].setNeighbour( cellIndex, weightEst );
+				if (cellArray[cellIndex].setNeighbour(nbId, weightEst)) numNb++;
+				//else printf("too many nbs found for cell %i!\n", cellIndex);
+			} else if (dif.z >= -45) {	// cell z-reachable from neighbour
+				cellArray[nbId].setNeighbour(cellIndex, weightEst);
 			}
 			
 		}
@@ -266,12 +284,12 @@ int PB_MapCells::initNeighbours( int cellIndex, int firstNb )
 		currentCell = queue.getFirst();												\
 		if (goalReached) goto TargetReached;										\
 		if (failed) goto TargetFailed;												\
-		for (int n=0; n<10; n++) {													\
+		for (int n = 0; n < 10; n++) {													\
 			short nb = cellArray[currentCell].getNeighbour( n );					\
 			short nbg = cellArray[nb].getGround();									\
 			if (nb == NO_CELL_REGISTERED) break;									\
 			if ( cellArray[nb].getEnvDamage() > 20 ||								\
-				 (nbg>=0 && getNavpoint( nbg ).needsTriggering() && !getNavpoint( nbg ).isTriggered()) ||	\
+				 (nbg >= 0 && getNavpoint( nbg ).needsTriggering() && !getNavpoint( nbg ).isTriggered()) ||	\
 				 avoid ) continue;													\
 			float value = queue.getValue( currentCell ) +							\
 						  cellArray[currentCell].getWeight( n ) + penalty;			\
@@ -301,114 +319,429 @@ TargetReached:																		\
 int PB_MapCells::getPath( short startId, short targetId, short pathNodes[] )
 // to targetId with shortest path
 {
-	GET_PATH(
-		currentCell==targetId,
-		false,
-		false,
-		(cellArray[targetId].pos() - cellArray[nb].pos()).Length(),
-		0
-	)
-}
+	Vec3D dir;
 
+	short pre[MAX_CELLS];
+	memset( pre, NO_CELL_REGISTERED, sizeof pre);
+	pre[startId] = startId;
+
+	PBT_PriorityQueue queue;
+	queue.addOrUpdate(startId, 0);
+
+	int searchedNodes = 0;
+	short currentCell;
+	while (!queue.empty()) {
+		searchedNodes++;
+		currentCell = queue.getFirst();
+		if (currentCell == targetId) {
+			int pathLength = 0;
+
+			while (pre[currentCell] != currentCell) {
+				pathNodes[pathLength++] = currentCell;
+				currentCell = pre[currentCell];
+			}
+			pathNodes[pathLength] = startId;
+			pathNodes[pathLength + 1] = startId;	/* error with [index+1] */
+
+			return pathLength;
+		}
+		for (int n = 0; n < 10; n++) {
+			short nb = cellArray[currentCell].getNeighbour(n);
+			short nbg = cellArray[nb].getGround();
+			if (nb == NO_CELL_REGISTERED)
+				break;
+			if (cellArray[nb].getEnvDamage() > 20
+			    || (nbg >= 0
+			    && getNavpoint(nbg).needsTriggering()
+			    && !getNavpoint(nbg).isTriggered()))
+				continue;
+			float value = queue.getValue(currentCell) + cellArray[currentCell].getWeight(n);
+			vsub(cellArray[targetId].pos(), cellArray[nb].pos(), &dir);
+			float heuristic = vlen(&dir);
+			float estimate = value + heuristic;
+			if (queue.neverContained(nb)
+			    || estimate < queue.getWeight(nb)) {
+				pre[nb] = currentCell;
+				queue.addOrUpdate(nb, estimate, value);
+			}
+		}
+	}
+
+	return -1;
+}
 
 int PB_MapCells::getPathToCover( short startId, short enemyId, short pathNodes[] )
 // to second cell not visible from enemyId, bigger distance preferred
 {
-	GET_PATH(
-		!lineOfSight( currentCell, enemyId ) && !lineOfSight( pre[currentCell], enemyId ),
-		searchedNodes > 200,
-		false,
-		0,
-		( 15000 - (cellArray[enemyId].pos() - cellArray[nb].pos()).Length() ) 
-	)
-}
+	Vec3D dir;
 
+	short pre[MAX_CELLS];
+	memset(pre, NO_CELL_REGISTERED, sizeof pre);
+	pre[startId] = startId;
+
+	PBT_PriorityQueue queue;
+	queue.addOrUpdate(startId, 0);
+
+	int searchedNodes = 0;
+	short currentCell;
+	while (!queue.empty()) {
+		searchedNodes++;
+		currentCell = queue.getFirst();
+		if (!lineOfSight(currentCell, enemyId)
+		    && !lineOfSight(pre[currentCell], enemyId)) {
+			int pathLength = 0;
+
+			while (pre[currentCell] != currentCell) {
+				pathNodes[pathLength++] = currentCell;
+				currentCell = pre[currentCell];
+			}
+			pathNodes[pathLength] = startId;
+			pathNodes[pathLength + 1] = startId;    /* error with [index+1] */
+
+			return pathLength;
+		}
+		if (searchedNodes > 200)
+			return -1;
+		for (int n = 0; n < 10; n++) {
+			short nb = cellArray[currentCell].getNeighbour(n);
+			short nbg = cellArray[nb].getGround();
+			if (nb == NO_CELL_REGISTERED) break;
+			if (cellArray[nb].getEnvDamage() > 20
+			    || (nbg >= 0
+			    && getNavpoint(nbg).needsTriggering()
+			    && !getNavpoint(nbg).isTriggered()))
+				continue;
+			vsub(cellArray[enemyId].pos(), cellArray[nb].pos(), &dir);
+			float penalty = 15000 - vlen(&dir);
+			float value = queue.getValue(currentCell) + cellArray[currentCell].getWeight(n) + penalty;
+			float estimate = value;
+			if (queue.neverContained(nb) || estimate < queue.getWeight(nb)) {
+				pre[nb] = currentCell;
+				queue.addOrUpdate( nb, estimate, value );
+			}
+		}
+	}
+
+	return -1;
+}
 
 int PB_MapCells::getPathForSneakyEscape( short startId, short enemyId, short pathNodes[] )
 // to a cell far away from enemyId under best possible cover
 {
-	GET_PATH(
-		(cellArray[currentCell].pos() - cellArray[enemyId].pos()).Length() > 2000,
-		false,
-		false,
-		0,
-		( 100.0*((int)lineOfSight( nb, enemyId )) ) 
-	)
+	Vec3D dir;
+	short pre[MAX_CELLS];
+	memset( pre, NO_CELL_REGISTERED, sizeof pre );
+	pre[startId] = startId;
+
+	PBT_PriorityQueue queue;
+	queue.addOrUpdate( startId, 0 );
+
+	int searchedNodes = 0;
+	short currentCell;
+	while (!queue.empty()) {
+		searchedNodes++;
+		currentCell = queue.getFirst();
+		vsub(cellArray[currentCell].pos(), cellArray[enemyId].pos(), &dir);
+		if (vlen(&dir) > 2000) {
+			int pathLength = 0;
+
+			while (pre[currentCell] != currentCell) {
+				pathNodes[pathLength++] = currentCell;
+				currentCell = pre[currentCell];
+			}
+			pathNodes[pathLength] = startId;
+			pathNodes[pathLength + 1] = startId;	/* error with [index+1] */
+
+			return pathLength;
+		}
+		for (int n = 0; n < 10; n++) {
+			short nb = cellArray[currentCell].getNeighbour(n);
+			short nbg = cellArray[nb].getGround();
+			if (nb == NO_CELL_REGISTERED) break;
+			if ( cellArray[nb].getEnvDamage() > 20
+			    || (nbg >= 0
+			    && getNavpoint(nbg).needsTriggering()
+			    && !getNavpoint(nbg).isTriggered()))
+				continue;
+			float penalty = (100 * ((int)lineOfSight(nb, enemyId)));
+			float value = queue.getValue(currentCell) + cellArray[currentCell].getWeight(n) + penalty;
+			float estimate = value;
+			if (queue.neverContained(nb) || estimate < queue.getWeight(nb)) {
+				pre[nb] = currentCell;
+				queue.addOrUpdate(nb, estimate, value);
+			}
+		}
+	}
+
+	return -1;
 }
 
 
 int PB_MapCells::getPathToAttack( short startId, short enemyId, short pathNodes[] )
 // to first cell with visibility to enemyId
 {	
-	GET_PATH(
-		lineOfSight( currentCell, enemyId ),
-		false,
-		false,
-		0, 
-		0
-	)
+	short pre[MAX_CELLS];
+	memset( pre, NO_CELL_REGISTERED, sizeof pre );
+	pre[startId] = startId;
+
+	PBT_PriorityQueue queue;
+	queue.addOrUpdate( startId, 0 );
+
+	int searchedNodes = 0;
+	short currentCell;
+	while (!queue.empty()) {
+		searchedNodes++;
+		currentCell = queue.getFirst();
+		if (lineOfSight(currentCell, enemyId)) {
+			int pathLength = 0;
+
+			while (pre[currentCell] != currentCell) {
+				pathNodes[pathLength++] = currentCell;
+				currentCell = pre[currentCell];
+			}
+			pathNodes[pathLength] = startId;
+			pathNodes[pathLength + 1] = startId;    /* error with [index+1] */
+
+			return pathLength;			
+		}
+		for (int n = 0; n < 10; n++) {
+			short nb = cellArray[currentCell].getNeighbour(n);
+			short nbg = cellArray[nb].getGround();
+			if (nb == NO_CELL_REGISTERED)
+				break;
+			if (cellArray[nb].getEnvDamage() > 20
+			    || (nbg >= 0
+			    && getNavpoint(nbg).needsTriggering()
+			    && !getNavpoint(nbg).isTriggered()))
+				continue;
+			float value = queue.getValue(currentCell) + cellArray[currentCell].getWeight(n);
+			float estimate = value;
+			if (queue.neverContained(nb) || estimate < queue.getWeight(nb)) {
+				pre[nb] = currentCell;
+				queue.addOrUpdate(nb, estimate, value);
+			}
+		}
+	}
+
+	return -1;
 }
 
 
-int PB_MapCells::getDirectedPathToAttack( short startId, short enemyId, Vector dir, short pathNodes[] )
+int PB_MapCells::getDirectedPathToAttack( short startId, short enemyId, Vec3D *dir, short pathNodes[] )
 // to first cell in opposite direction to awayFromId with visibility to enemyId
 {
-	Vector startPos = cellArray[startId].pos();
-	dir.Normalize();
-	GET_PATH(
-		lineOfSight( currentCell, enemyId ),
-		searchedNodes > 100,
-		DotProduct( (cellArray[nb].pos()-startPos).Normalize(), dir) < 0.7,
-		0, 
-		0
-	)
+	Vec3D opdir;
+
+	normalize(dir);
+	short pre[MAX_CELLS];
+	memset( pre, NO_CELL_REGISTERED, sizeof pre );
+	pre[startId] = startId;
+
+	PBT_PriorityQueue queue;
+	queue.addOrUpdate(startId, 0);
+
+	int searchedNodes = 0;
+	short currentCell;
+	while (!queue.empty()) {
+		searchedNodes++;
+		currentCell = queue.getFirst();
+		if (lineOfSight(currentCell, enemyId)) {
+			int pathLength = 0;
+
+			while (pre[currentCell] != currentCell) {
+				pathNodes[pathLength++] = currentCell;
+				currentCell = pre[currentCell];
+			}
+			pathNodes[pathLength] = startId;
+			pathNodes[pathLength + 1] = startId;    /* error with [index+1] */
+
+			return pathLength;
+		}
+		if (searchedNodes > 100)
+			return -1;
+		for (int n = 0; n < 10; n++) {
+			short nb = cellArray[currentCell].getNeighbour( n );
+			short nbg = cellArray[nb].getGround();
+			if (nb == NO_CELL_REGISTERED) break;
+			vsub(cellArray[nb].pos(), cellArray[startId].pos(), &opdir);
+			normalize(&opdir);
+			if ( cellArray[nb].getEnvDamage() > 20
+			    || (nbg >= 0
+			    && getNavpoint(nbg).needsTriggering()
+			    && !getNavpoint(nbg).isTriggered())
+			    || dotproduct(&opdir, dir) < 0.7f)
+				continue;
+			float value = queue.getValue(currentCell) + cellArray[currentCell].getWeight(n);
+			float estimate = value;
+			if (queue.neverContained(nb) || estimate < queue.getWeight(nb)) {
+				pre[nb] = currentCell;
+				queue.addOrUpdate( nb, estimate, value );
+			}
+		}
+	}
+
+	return -1;
 }
 
 
 int PB_MapCells::getOffensivePath( short startId, short enemyId, float minDist, short pathNodes[] )
-
 {
 	short enemyTarget = enemyId;
 	
 	short predictedEnemyRoute[128];
-	if (getPathToCover( enemyId, startId, predictedEnemyRoute ) > 0) {
+	if (getPathToCover(enemyId, startId, predictedEnemyRoute) > 0) {
 		// enemy can find cover here:
 		enemyTarget = predictedEnemyRoute[0];
 	}
-	Vector enemyPos = cellArray[enemyId].pos();		// cover will at least be as far...
+	Vec3D enemyPos, dir;		// cover will at least be as far...
 
-	GET_PATH(
-		lineOfSight( currentCell, enemyTarget ) && (cellArray[currentCell].pos() - enemyPos).Length() > minDist,
-		searchedNodes > 200,
-		false,
-		0, 
-		( 0.5*((int)(!lineOfSight( nb, enemyId ))) )
-	)
+	vcopy(cellArray[enemyId].pos(), &enemyPos);
+	short pre[MAX_CELLS];
+	memset(pre, NO_CELL_REGISTERED, sizeof pre);
+	pre[startId] = startId;
+
+	PBT_PriorityQueue queue;
+	queue.addOrUpdate(startId, 0);
+
+	int searchedNodes = 0;
+	short currentCell;
+	while (!queue.empty()) {
+		searchedNodes++;
+		currentCell = queue.getFirst();
+		vsub(cellArray[currentCell].pos(), &enemyPos, &dir);
+		if (lineOfSight( currentCell, enemyTarget ) && vlen(&dir) > minDist) {
+			int pathLength = 0;
+
+			while (pre[currentCell] != currentCell) {
+				pathNodes[pathLength++] = currentCell;
+				currentCell = pre[currentCell];
+			}
+			pathNodes[pathLength] = startId;
+			pathNodes[pathLength + 1] = startId;	/* error with [index+1] */
+			return pathLength;
+		}
+		if (searchedNodes > 200)
+			return -1;
+		for (int n = 0; n < 10; n++) {
+			short nb = cellArray[currentCell].getNeighbour(n);
+			short nbg = cellArray[nb].getGround();
+			if (nb == NO_CELL_REGISTERED)
+				break;
+			if (cellArray[nb].getEnvDamage() > 20
+			    || (nbg >= 0
+			    && getNavpoint(nbg).needsTriggering()
+			    && !getNavpoint(nbg).isTriggered()))
+				continue;
+			float penalty = 0.5f * ((int)(!lineOfSight( nb, enemyId)));
+			float value = queue.getValue(currentCell) + cellArray[currentCell].getWeight(n) + penalty;
+			float estimate = value;
+			if (queue.neverContained(nb) || estimate < queue.getWeight(nb)) {
+				pre[nb] = currentCell;
+				queue.addOrUpdate(nb, estimate, value);
+			}
+		}
+	}
+
+	return -1;
 }
 
 
 int PB_MapCells::predictPlayerPos( short startId, short ownId, short pathNodes[] )
 {
-	GET_PATH(
-		queue.size()>5,
-		false,
-		lineOfSight(ownId, nb),
-		0, 
-		0
-	)
+	short pre[MAX_CELLS];
+	memset(pre, NO_CELL_REGISTERED, sizeof pre);
+	pre[startId] = startId;
+
+	PBT_PriorityQueue queue;
+	queue.addOrUpdate(startId, 0);
+
+	int searchedNodes = 0;
+	short currentCell;
+	while (!queue.empty()) {
+		searchedNodes++;
+		currentCell = queue.getFirst();
+		if (queue.size() > 5.0f) {
+			int pathLength = 0;
+
+			while (pre[currentCell] != currentCell) {
+				pathNodes[pathLength++] = currentCell;
+				currentCell = pre[currentCell];
+			}
+			pathNodes[pathLength] = startId;
+			pathNodes[pathLength + 1] = startId;	/* error with [index+1] */
+			return pathLength;
+		}
+		for (int n = 0; n < 10; n++) {
+			short nb = cellArray[currentCell].getNeighbour(n);
+			short nbg = cellArray[nb].getGround();
+			if (nb == NO_CELL_REGISTERED)
+				break;
+			if (cellArray[nb].getEnvDamage() > 20
+			    || (nbg >= 0
+			    && getNavpoint(nbg).needsTriggering()
+			    && !getNavpoint(nbg).isTriggered())
+			    || lineOfSight(ownId, nb))
+				continue;
+			float value = queue.getValue(currentCell) + cellArray[currentCell].getWeight(n);
+			float estimate = value;
+			if (queue.neverContained(nb)
+			    || estimate < queue.getWeight(nb)) {
+				pre[nb] = currentCell;
+				queue.addOrUpdate(nb, estimate, value);
+			}
+		}
+	}
+
+	return -1;
 }
 
 
-int PB_MapCells::getPathToRoamingTarget( short startId, edict_t *botEnt, short pathNodes[] )
+int PB_MapCells::getPathToRoamingTarget( short startId, EDICT *botEnt, short pathNodes[] )
 // to the nearest suitable roaming target
 {
-	GET_PATH(
-		cellArray[currentCell].isSuitableRoamingTarget( botEnt ),
-		false,
-		false,
-		0,
-		0
-	)	
+	short pre[MAX_CELLS];
+	memset( pre, NO_CELL_REGISTERED, sizeof pre );
+	pre[startId] = startId;
+
+	PBT_PriorityQueue queue;
+	queue.addOrUpdate(startId, 0);
+
+	int searchedNodes = 0;
+	short currentCell;
+	while (!queue.empty()) {
+		searchedNodes++;
+		currentCell = queue.getFirst();
+		if (cellArray[currentCell].isSuitableRoamingTarget(botEnt)) {
+			int pathLength = 0;
+
+			while (pre[currentCell] != currentCell) {
+				pathNodes[pathLength++] = currentCell;
+				currentCell = pre[currentCell];
+			}
+			pathNodes[pathLength] = startId;
+			pathNodes[pathLength + 1] = startId;	/* error with [index+1] */
+
+			return pathLength;
+		}
+		for (int n = 0; n < 10; n++) {
+			short nb = cellArray[currentCell].getNeighbour(n);
+			short nbg = cellArray[nb].getGround();
+			if (nb == NO_CELL_REGISTERED) break;
+			if (cellArray[nb].getEnvDamage() > 20
+			    || (nbg >= 0
+			    && getNavpoint(nbg).needsTriggering()
+			    && !getNavpoint(nbg).isTriggered()))
+				continue;
+			float value = queue.getValue(currentCell) + cellArray[currentCell].getWeight(n);
+			float estimate = value;
+			if (queue.neverContained( nb ) || estimate < queue.getWeight(nb)) {
+				pre[nb] = currentCell;
+				queue.addOrUpdate( nb, estimate, value );
+			}
+		}
+	}
+
+	return -1;
 }
 
 
@@ -434,13 +767,15 @@ bool PB_MapCells::save( char *mapname )
 {
 	FILE *fp;
 
-	if ( (fp = fopen( mapname, "wb" )) == NULL ) return false;
+	if ((fp = fopen(mapname, "wb")) == NULL) return false;
 
-	fwrite( &numCells, sizeof(int), 1, fp );
-	for (int i=0; i<numCells; i++) cellArray[i].save( fp );
+	fwrite(&numCells, sizeof(int), 1, fp);
+	for (int i = 0; i < numCells; i++)
+		cellArray[i].save(fp);
 
-	vis.save( fp );
+	vis.save(fp);
 
-	fclose( fp );
+	fclose(fp);
+
 	return true;
 }

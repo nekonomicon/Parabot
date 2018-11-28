@@ -1,58 +1,56 @@
+#pragma once
 #ifndef PB_PERCEPTION_H
 #define PB_PERCEPTION_H
-
-#pragma warning( disable : 4786 )	// disable stl warnings
-#pragma warning( disable : 4800 )	// disable int->bool warnings
-
 
 #include "pb_global.h"
 #include <list>
 
+enum { // perception-item classification
+	PI_PLAYER = 1,	// unidentified player in team-game
+	PI_FRIEND,	// teammate in team-game
+	PI_FOE,		// enemy
+	PI_HOSTAGE,	// CS
+	PI_BOMB,	// CS
+	PI_WEAPONBOX,	// weaponbox
+	PI_EXPLOSIVE,	// grenade, satchel
+	PI_LASERDOT,	// RPG laserdot
+	PI_TRIPMINE,	// Beam-Tripmine
+	PI_HALO,	// HW
+	PI_DAMAGE,	// damage perception
+	PI_SNARK,	// snark
+	PI_NEWAREA	// a big area that bot hasn't seen before
+};
 
-// perception-item classification
-#define PI_PLAYER		1	// unidentified player in team-game
-#define PI_FRIEND		2	// teammate in team-game
-#define PI_FOE			3	// enemy
-#define PI_HOSTAGE		4	// CS
-#define PI_BOMB			5	// CS
-#define PI_WEAPONBOX	6	// weaponbox
-#define PI_EXPLOSIVE	7	// grenade, satchel
-#define PI_LASERDOT		8	// RPG laserdot
-#define PI_TRIPMINE		9	// Beam-Tripmine
-#define PI_HALO			10	// HW
-#define PI_DAMAGE		11	// damage perception
-#define PI_SNARK		12	// snark
-#define PI_NEWAREA		13	// a big area that bot hasn't seen before
+#define MAX_PERCEPTION PI_NEWAREA
 
+enum { // perception-item state
+	PI_VISIBLE =	BIT(0),	// is seen
+	PI_AUDIBLE =	BIT(1),	// is heard but can't be tracked
+	PI_TRACKABLE =	BIT(2),	// is heard and trackable
+	PI_TACTILE =	BIT(3),	// is attacking
+	PI_PREDICTED =	BIT(4),	// has been seen and is predicted now
+	PI_ORIG_KNOWN =	BIT(5),	// for damage: origin/inflictor is known
 
-#define MAX_PERCEPTION	13
+	PI_UNKNOWN =	BIT(31)	// unknown model index
+};
 
-// perception-item state
-#define PI_VISIBLE		(1<<0)	// is seen
-#define PI_AUDIBLE		(1<<1)	// is heard but can't be tracked
-#define PI_TRACKABLE	(1<<2)	// is heard and trackable
-#define PI_TACTILE		(1<<3)	// is attacking
-#define PI_PREDICTED	(1<<4)	// has been seen and is predicted now
-#define PI_ORIG_KNOWN	(1<<5)	// for damage: origin/inflictor is known
-
-#define PI_UNKNOWN		-1	// unknown model index
-
-// flags
-#define PI_BEST_ARMED		(1<<0)	// best weapon has been armed for that enemy
-#define PI_ALERT			(1<<1)	// enemy knows that bot has seen it
-#define PI_HIGH_PRIORITY	(1<<2)	// e.g. the Saint in HW
-#define PI_FOCUS1			(1<<3)	// bot is attacking this frame
-#define PI_FOCUS2			(1<<4)	// bot is attacking last frame
-#define PI_UNREACHABLE		(1<<5)	// bot can't reach this item by roaming
-#define PI_DISAPPEARED		(1<<6)	// item has just become not visible
-#define PI_PREEMPTIVE		(1<<7)	// bot uses preemptive fire for that enemy
+enum { // flags
+	PI_BEST_ARMED =		BIT(0),	// best weapon has been armed for that enemy
+	PI_ALERT =		BIT(1),	// enemy knows that bot has seen it
+	PI_HIGH_PRIORITY =	BIT(2),	// e.g. the Saint in HW
+	PI_FOCUS1 =		BIT(3),	// bot is attacking this frame
+	PI_FOCUS2 =		BIT(4),	// bot is attacking last frame
+	PI_UNREACHABLE =	BIT(5),	// bot can't reach this item by roaming
+	PI_DISAPPEARED =	BIT(6),	// item has just become not visible
+	PI_PREEMPTIVE =		BIT(7)	// bot uses preemptive fire for that enemy
+};
 
 // distances
 #define MAX_DIST_VP		3000	// max. visible player detection distance
 #define MAX_DIST_VPR	 800	// max. visible player recognition distance
 #define MAX_DIST_VI		1200	// max. visible item detection distance
 
-#define UNKNOWN_POS		g_vecZero
+#define UNKNOWN_POS		&zerovector
 
 
 
@@ -62,38 +60,38 @@ public:
 	
 	int		id;
 	float	botSensitivity;		// sensitivity of bot that perceived item
-	edict_t *entity;			// pointer to edict
+	EDICT *entity;			// pointer to edict
 	short	pClass;				// classification of item
 	short	pState;				// kind of perception
 	int		model;				// model index of item
 	float	update;				// worldtime when goal-queue should be updated
-	float	firstDetection;		// worldTime first detection was registered
-	float	lastDetection;		// worldTime last detection was registered
-	float	lastSeenTime;		// worldTime last visible contact was registered
-	Vector	lastPos;			// last observed position (seen or heard)
-	Vector	lastSeenPos;		// last seen position
-	Vector	lastSeenVelocity;	// last seen velocity
+	float	firstDetection;		// worldtime first detection was registered
+	float	lastDetection;		// worldtime last detection was registered
+	float	lastSeenTime;		// worldtime last visible contact was registered
+	Vec3D	lastPos;			// last observed position (seen or heard)
+	Vec3D	lastSeenPos;		// last seen position
+	Vec3D	lastSeenVelocity;	// last seen velocity
 
 	// for enemy:
 	float	rating;				// weapon-rating
 	float	orientation;		// dotproduct if item is facing the bot
 	float	distance;			// distance to bot
 	int		flags;
-	Vector	predTarget;			// position the item is supposed to reach
+	Vec3D	predTarget;			// position the item is supposed to reach
 	float	lastCalcTarget;		// last worldtime target was predicted
-	Vector	predAppearance;		// position where the item is supposed to show up
+	Vec3D	predAppearance;		// position where the item is supposed to show up
 	float	lastCalcAppearance;	// last worldtime appearance was predicted
 
 	//PB_Percept() {}
-	PB_Percept( float botSens, edict_t *ent, short state, short realClass, float dist );
+	PB_Percept( float botSens, EDICT *ent, short state, short realClass, float dist );
 
-	float getReactionTime( edict_t *ent, short state, short realClass, float dist );
+	float getReactionTime( EDICT *ent, short state, short realClass, float dist );
 	// returns the time needed to react to the item (time to enter goal-queue)
 
-	Vector predictedPosition( const Vector &botPos );
+	void predictedPosition( const Vec3D *botPos, Vec3D *lastPos );
 	// returns a predicted position for an enemy that is not perceived anymore
 
-	Vector predictedAppearance( const Vector &botPos );
+	Vec3D *predictedAppearance( const Vec3D *botPos );
 	// returns the position where a not visible enemy is most likely to get into line-of-sight
 
 	bool hasBeenVisible()		{ return (pState & PI_PREDICTED); }
@@ -101,7 +99,7 @@ public:
 	bool isTrackable()			{ return (pState & (PI_TRACKABLE | PI_VISIBLE | PI_PREDICTED)); }
 	bool inflictorKnown()		{ return (pState & PI_ORIG_KNOWN); }
 	bool hasBeenSpotted()		{ return (pState & (PI_VISIBLE | PI_PREDICTED)); }
-	bool isMoving()				{ return (entity->v.velocity.Length() > 5.0); }
+	bool isMoving()				{ return (vlen(&entity->v.velocity) > 5.0); }
 	bool isFacingBot()			{ return (orientation > 0.7); }
 	bool isAimingAtBot();
 	bool isHurtingBot()			{ return (pState & PI_TACTILE); }
@@ -133,15 +131,15 @@ public:
 
 	~PB_Perception();
 
-	void init( edict_t *ent );
+	void init( EDICT *ent );
 	// initializes all necessary variables
 
 	void setSensitivity( int skill );
 
-	void addAttack( edict_t *att, int dmg  );
+	void addAttack( EDICT *att, int dmg  );
 	// adds a damage perception from entity att (maybe 0) with amount dmg
 
-	void addNewArea( Vector viewDir );
+	void addNewArea( Vec3D *viewDir );
 	// adds a new area perception in the direction viewDir
 
 	bool isNewPerception( tPerceptionList &pList, PB_Percept &perc );
@@ -153,7 +151,7 @@ public:
 	void resetPlayerClassifications();
 	// enforces new classifications for all players
 
-	edict_t* getNearestTripmine();
+	EDICT* getNearestTripmine();
 	// returns nearest tripmine or 0 if no tripmine seen
 
 	bool underFire();
@@ -167,7 +165,7 @@ public:
 
 private:
 		
-	edict_t *botEnt;
+	EDICT *botEnt;
 	float sensitivity;
 	int cdet, odet;
 	tPerceptionList detections[2];	// two lists to be able to compare old and actual
@@ -177,12 +175,11 @@ private:
 	bool classify( PB_Percept &perc );
 	// identifies a PI_PLAYER perception as friend or foe if possible
 
-	bool addIfVisible( edict_t *ent, int pClass );
-	bool addIfVisible( Vector pos, edict_t *ent, int pClass );
+	bool addIfVisible( EDICT *ent, int pClass );
+	bool addIfVisible( Vec3D *pos, EDICT *ent, int pClass );
 	
 	void checkDamageFor( PB_Percept &player );
 	void checkInflictorFor( PB_Percept &dmg );
-
 };
 
 #endif

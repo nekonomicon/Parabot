@@ -1,6 +1,7 @@
 #include "pb_goals.h"
 #include "parabot.h"
 #include "pb_observer.h"
+#include "sectors.h"
 #include "pb_mapcells.h"
 
 extern int mod_id;
@@ -8,10 +9,10 @@ extern PB_MapGraph mapGraph;
 extern PB_MapCells map;
 extern PB_Observer observer;
 extern int botNr;
-extern edict_t *camPlayer;
+extern EDICT *camPlayer;
 extern bool haloOnBase;
 
-void startBotCam( edict_t *pEntity );
+void startBotCam( EDICT *pEntity );
 
 extern float sineTable[256];
 
@@ -22,7 +23,7 @@ float lookAroundAngle = DEFAULT_LOOKAROUND_ANGLE;
 #if 0
 void goalDoNothing( CParabot *pb, PB_Percept*item )
 {
-	//debugMsg( "DoNothing\n" );
+	// DEBUG_MSG( "DoNothing\n" );
 }
 #endif
 
@@ -31,68 +32,60 @@ void goalDoNothing( CParabot *pb, PB_Percept*item )
 //  LOOK GOALS
 //---------------------------------------------------------------------------------------
 
-
-
 void goalReactToUnidentified( CParabot *pb, PB_Percept*item )
 {
-	assert( item != 0 );
-	//debugMsg( "ReactToUnidentified\n" );
+	assert(item != 0);
+	//DEBUG_MSG( "ReactToUnidentified\n" );
 	if (item->isTrackable()) {
-		Vector botPos = pb->botPos();
-		pb->action.setViewDir( item->predictedAppearance( botPos ), 1 );
+		pb->action.setViewDir( item->predictedAppearance( pb->botPos() ), 1 );
 		pb->setGoalViewDescr( "ReactToUnidentified (Trackable)" );
-	}
-	else {
+	} else {
 		goalLookAround( pb, item );
 		pb->setGoalViewDescr( "ReactToUnidentified (Unknown Pos)" );
 	}
 }
 
-
 float weightReactToUnidentified( CParabot *pb, PB_Percept*item )
 {
 	float weight = 0;
-	float time = worldTime() - item->firstDetection;	
+	float time = worldtime() - item->firstDetection;	
 	if ( time < 2 ) weight = 2 - time;		// look 2 seconds at new sounds
 	return weight;
 }
 
-
-
 void goalLookAtNewArea( CParabot *pb, PB_Percept*item )
 {
 	static float lastCall[32] = { -10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10 };
-	static int lastItem[32] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+	static int lastItem[32];
 	static float startLook[32];
 	static float startAngle[32];
 
 	int b = pb->slot;
-	Vector view = pb->action.getViewAngle();
-	if ( (lastCall[b]+0.5) < worldTime() || item->id!=lastItem[b] ) {	// in first call init viewangle
-		startLook[b] = worldTime();
-		view = UTIL_VecToAngles( item->lastPos ); 
+	Vec3D view;
+	vcopy(pb->action.getViewAngle(), &view);
+	if ((lastCall[b] + 0.5f) < worldtime() || item->id!=lastItem[b] ) {	// in first call init viewangle
+		startLook[b] = worldtime();
+		vectoangles(&item->lastPos, &view); 
 		startAngle[b] = view.y;
 	}
-	lastCall[b] = worldTime();
+	lastCall[b] = worldtime();
 	lastItem[b] = item->id;
 		
-	int cycle = (int) ( (worldTime()-startLook[b]) * 128 );
+	int cycle = (int)((worldtime() - startLook[b]) * 128);
 	cycle &= 255;
-	view.y = startAngle[b] + 30*sineTable[cycle];
-	pb->action.setViewAngle( view, 1 );
+	++cycle;
+	view.y = startAngle[b] + 30.0f * sinf(2.0f * M_PI / ((float)cycle));
+	pb->action.setViewAngle(&view, 1);
 	pb->setGoalViewDescr( "LookAround (NewArea)" );
 }
-
 
 float weightLookAtNewArea( CParabot *pb, PB_Percept*item )
 {
 	float weight = 0;
-	float time = worldTime() - item->firstDetection;	
+	float time = worldtime() - item->firstDetection;	
 	if ( time < 2 ) weight = 2 - time;		// look 2 seconds at new areas
 	return weight;
 }
-
-
 
 void goalLookAround( CParabot *pb, PB_Percept*item )
 {
@@ -101,17 +94,19 @@ void goalLookAround( CParabot *pb, PB_Percept*item )
 	static float startAngle[32];
 
 	int b = pb->slot;
-	//debugMsg( "LookAround\n" );
-	Vector view = pb->action.getViewAngle();
-	if ( (lastCall[b]+0.5) < worldTime() ) {
-		startLook[b] = worldTime();
-		startAngle[b]= view.y;
+	// DEBUG_MSG( "LookAround\n" );
+	Vec3D view;
+	vcopy(pb->action.getViewAngle(), &view);
+	if ( (lastCall[b] + 0.5f) < worldtime() ) {
+		startLook[b] = worldtime();
+		startAngle[b] = view.y;
 	}
-	lastCall[b] = worldTime();
-	int cycle = (int) ( (worldTime()-startLook[b]) * 128 );
+	lastCall[b] = worldtime();
+	int cycle = (int) ((worldtime() - startLook[b]) * 128);
 	cycle &= 255;
-	view.y = startAngle[b] + lookAroundAngle*sineTable[cycle];	// 60*...
-	pb->action.setViewAngle( view, 1 );
+	++cycle;
+	view.y = startAngle[b] + lookAroundAngle * sinf(2.0f * M_PI / ((float)cycle));	// 60*...
+	pb->action.setViewAngle(&view, 1);
 	if (item) {
 		switch( item->pClass ) {
 		case PI_LASERDOT:	pb->setGoalViewDescr( "LookAround (Laserdot)" );		break;
@@ -125,51 +120,55 @@ void goalLookAround( CParabot *pb, PB_Percept*item )
 	else pb->setGoalViewDescr( "LookAround" );
 }
 
-
 float weightLookAroundLaserdot( CParabot *pb, PB_Percept*item )
 {
+	Vec3D dir;
+
 	assert( item != 0 );
-	float dist = (pb->botPos() - item->entity->v.origin).Length();
-	float weight = (2000-dist) / 1000;
-	if (weight<0.5) weight = 0.5;
+
+	vsub(pb->botPos(), &item->entity->v.origin, &dir);
+	float dist = vlen(&dir);
+	float weight = (2000 - dist) / 1000;
+	if (weight < 0.5f) weight = 0.5f;
+
 	return weight;
 }
-
 
 float weightLookAroundDamage( CParabot *pb, PB_Percept*item )
 {
 	assert( item != 0 );
 	if ( !(item->inflictorKnown()) ) return 4;
-	else return 0;
-}
 
+	return 0;
+}
 
 float weightLookAroundDangerousSound( CParabot *pb, PB_Percept*item )
 {
 	assert( item != 0 );
 	if ( !(item->isTrackable()) ) return 3;
-	else return 0;
-}
 
+	return 0;
+}
 
 float weightLookAroundPlayerSound( CParabot *pb, PB_Percept*item )
 {
 	assert( item != 0 );
-	if ( !(item->isTrackable()) ) return weightReactToUnidentified( pb, item );
-	else return 0;
+	if ( !(item->isTrackable()) )
+		return weightReactToUnidentified( pb, item );
+
+	return 0;
 }
 
-
-
-
-void goalAssistFire( CParabot *pb, PB_Percept*item )
+void goalAssistFire(CParabot *pb, PB_Percept*item)
 {
-	TraceResult tr;
-	UTIL_MakeVectors( item->entity->v.v_angle );
-	Vector start = item->entity->v.origin + item->entity->v.view_ofs;
-	Vector target = start + gpGlobals->v_forward * 4096;
-	UTIL_TraceLine( start, target, dont_ignore_monsters, ENT(item->entity), &tr);	
-	target = tr.vecEndPos;
+	TRACERESULT tr;
+	Vec3D start, target;
+
+	makevectors(&item->entity->v.v_angle);
+	eyepos(item->entity, &start);
+	vma(&start, 4096, &com.globals->fwd, &target);
+	trace_line(&start, &target, false, false, item->entity, &tr);	
+	// target = tr.vecEndPos;
 	// TODO: search for entity in this area and fire
 	item->flags |= PI_FOCUS1;
 	pb->setGoalViewDescr( "AssistFire" );
@@ -181,7 +180,7 @@ float weightAssistFire( CParabot *pb, PB_Percept*item )
 	assert( item->entity != 0 );
 
 	if ( !pb->combat.weapon.bestWeaponUsable() ) return 0;
-	if (item->entity->v.button & IN_ATTACK) return 2;
+	if (item->entity->v.button & ACTION_ATTACK1) return 2;
 	else return 0;
 }
 
@@ -189,11 +188,6 @@ float weightAssistFire( CParabot *pb, PB_Percept*item )
 //---------------------------------------------------------------------------------------
 //  MOVE GOALS
 //---------------------------------------------------------------------------------------
-
-
-
-
-
 
 void goalCollectItems( CParabot *pb, PB_Percept*item )
 {
@@ -242,9 +236,9 @@ float weightCollectItems( CParabot *pb, PB_Percept*item )
 		else if ( pb->actualNavpoint->type()==NAV_F_TANKCONTROLS &&
 			 (pb->needs.desireFor( NAV_F_TANKCONTROLS ) == wish) ) wish = 0;
 		else if ( pb->actualNavpoint->type()==NAV_S_USE_TRIPMINE &&
-			 (pb->needs.desireFor( NAV_S_USE_TRIPMINE ) > 0) ) wish /= 2;
+			 (pb->needs.desireFor( NAV_S_USE_TRIPMINE ) > 0) ) wish *= 0.5f;
 	}
-	//debugMsgF( "Items = %.1f\n", wish );
+	// DEBUG_MSG( "Items = %.1f\n", wish );
 	return wish;
 }
 
@@ -253,10 +247,10 @@ float weightCollectItems( CParabot *pb, PB_Percept*item )
 
 void goalGetItem( CParabot *pb, PB_Percept*item )
 {
-	assert( item != 0 );
-	item->update = worldTime();
+	assert(item != 0);
+	item->update = worldtime();
 
-	pb->pathfinder.checkWay( item->lastSeenPos );
+	pb->pathfinder.checkWay(&item->lastSeenPos);
 	if (pb->action.gotStuck()) item->flags |= PI_UNREACHABLE;
 	switch( item->pClass ) {
 	case PI_WEAPONBOX:	pb->setGoalMoveDescr( "GetItem (Weaponbox)" );		break;
@@ -268,27 +262,27 @@ void goalGetItem( CParabot *pb, PB_Percept*item )
 
 float weightGetWeaponbox( CParabot *pb, PB_Percept*item )
 {
-	assert( item != 0 );
-	assert( item->distance > 0 );
+	assert(item != 0);
+	assert(item->distance > 0);
 
 	if (!item->isReachable()) return 0;
-	float weight = 300*pb->needs.needForWeapons() / (400+item->distance);
+	float weight = 300 * pb->needs.needForWeapons() / (400 + item->distance);
 	//if (weight > 9) weight = 9;
-	item->update = worldTime() + (item->distance / 1000);
-	//debugMsgF( "wbw=%.2f\n", weight );
+	item->update = worldtime() + (item->distance / 1000);
+	// DEBUG_MSG( "wbw=%.2f\n", weight );
 	return weight;
 }
 
 
 float weightGetHalo( CParabot *pb, PB_Percept*item )
 {
-	assert( item != 0 );
-	assert( item->distance > 0 );
+	assert(item != 0);
+	assert(item->distance > 0);
 
 	if (!item->isReachable()) return 0;
 	float weight = 4000 / item->distance;
 	if (weight > 15) weight = 15;
-	item->update = worldTime() + (item->distance / 2000);
+	item->update = worldtime() + (item->distance / 2000);
 	
 	return weight;
 	
@@ -297,12 +291,16 @@ float weightGetHalo( CParabot *pb, PB_Percept*item )
 
 void goalGetAway( CParabot *pb, PB_Percept*item )
 {
-	assert( item != 0 );
-	item->update = worldTime();
+	Vec3D tDir, botPos;
 
-	Vector botPos = pb->botPos();
-	Vector tDir = botPos - (item->predictedPosition( botPos ) - botPos);
-	pb->pathfinder.checkWay( tDir );
+	assert(item != 0);
+	item->update = worldtime();
+
+	vcopy(pb->botPos(), &botPos);
+	item->predictedPosition(&botPos, &tDir);
+	vsub(&tDir, &botPos, &tDir);
+	vsub(&botPos, &tDir, &tDir);
+	pb->pathfinder.checkWay(&tDir);
 	switch( item->pClass ) {
 	case PI_LASERDOT:	pb->setGoalMoveDescr( "GetAway (Laserdot)" );		break;
 	case PI_EXPLOSIVE:	pb->setGoalMoveDescr( "GetAway (Explosive)" );		break;
@@ -314,20 +312,26 @@ void goalGetAway( CParabot *pb, PB_Percept*item )
 
 float weightGetAwayLaserdot( CParabot *pb, PB_Percept*item )
 {
+	Vec3D dir;
+
 	assert( item != 0 );
-	float dist = (pb->botPos() - item->entity->v.origin).Length();
-	float weight = (500-dist) / 40;
-	if (weight<0) weight = 0;
+	vsub(pb->botPos(), &item->entity->v.origin, &dir);
+	float dist = vlen(&dir);
+	float weight = (500 - dist) / 40;
+	if (weight < 0) weight = 0;
 	return weight;
 }
 
 
 float weightGetAwayExplosive( CParabot *pb, PB_Percept*item )
 {
+	Vec3D dir;
+
 	assert( item != 0 );
-	float dist = (pb->botPos() - item->entity->v.origin).Length();
-	float weight = (600-dist) / 20;
-	if (weight<0) weight = 0;
+	vsub(pb->botPos(), &item->entity->v.origin, &dir);
+	float dist = vlen(&dir);
+	float weight = (600 - dist) / 20;
+	if (weight < 0) weight = 0;
 	return weight;
 }
 
@@ -343,10 +347,10 @@ float weightGetAwayEnemy( CParabot *pb, PB_Percept*item )
 
 void goalLoadHealthOrArmor( CParabot *pb, PB_Percept*item )
 {
-	//debugMsg( "LoadHealthOrArmor\n" );
+	// DEBUG_MSG( "LoadHealthOrArmor\n" );
 	pb->action.setSpeed( 0 );
 	pb->action.setViewDir( pb->actualNavpoint->pos(), 2 );
-	pb->action.add( BOT_USE );
+	pb->action.add(BOT_USE, NULL);
 	pb->setGoalMoveDescr( "LoadHealthOrArmor" );
 }
 
@@ -360,10 +364,10 @@ float weightLoadHealthOrArmor( CParabot *pb, PB_Percept*item )
 		if (pb->actualNavpoint->offersArmor())  weight = pb->needs.needForArmor();
 		if ((weight > 0) && (pb->senses.numEnemies > 0)) {
 			weight = 0;
-			debugMsg( "No Loading - enemy around!\n" );
+			DEBUG_MSG( "No Loading - enemy around!\n" );
 		}
 	}
-	//debugMsgF( "Health/Armor = %f\n", weight );
+	// DEBUG_MSG( "Health/Armor = %f\n", weight );
 	return weight;
 }
 
@@ -374,34 +378,39 @@ void goalLayTripmine( CParabot *pb, PB_Percept*item )
 	static float lastCall[32] = { -10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10 };
 
 	int b = pb->slot;
-	if ( (lastCall[b]+0.5) < worldTime() ) {	// in first call arm tripmine
+	if ( (lastCall[b] + 0.5f) < worldtime() ) {	// in first call arm tripmine
 		pb->combat.weapon.setPreferredWeapon( VALVE_WEAPON_TRIPMINE );
-		pb->combat.weapon.armBestWeapon( 50, 0.4, 0);
+		pb->combat.weapon.armBestWeapon( 50, 0.4f, 0);
 	}
 
 	assert( pb->actualNavpoint != 0 );
 
 	// duck if necessary
-	if ( pb->actualNavpoint->pos().z < (pb->ent->v.absmin.z+40) ) 
-		pb->action.add( BOT_DUCK );
+	if ( pb->actualNavpoint->pos()->z < (pb->ent->v.absmin.z + 40.0f) ) 
+		pb->action.add(BOT_DUCK, NULL);
 	// keep tripmine
 	pb->combat.weapon.setPreferredWeapon( VALVE_WEAPON_TRIPMINE );
 		
-	pb->combat.weapon.attack( pb->actualNavpoint->pos(), 0.4 );
+	pb->combat.weapon.attack(pb->actualNavpoint->pos(), 0.4f, NULL);
 	
-	lastCall[b] = worldTime();
+	lastCall[b] = worldtime();
 	pb->setGoalMoveDescr( "LayTripmine" );
 }
 
 
 float weightLayTripmine( CParabot *pb, PB_Percept*item )
 {
+	Vec3D dir;
+
 	if (!pb->combat.weapon.available( VALVE_WEAPON_TRIPMINE )) return 0;
 
 	if ( pb->actualNavpoint && !pb->senses.underFire() ) {
 		float nextMine = 10000;
-		edict_t *mine = pb->senses.getNearestTripmine();
-		if (mine) nextMine = (mine->v.origin - pb->actualNavpoint->pos()).Length();
+		EDICT *mine = pb->senses.getNearestTripmine();
+		if (mine) {
+			vsub(&mine->v.origin, pb->actualNavpoint->pos(), &dir);
+			nextMine = vlen(&dir);
+		}
 		if ( (pb->actualNavpoint->type()==NAV_S_USE_TRIPMINE) && (nextMine > 50) )
 			return 5;
 	}
@@ -410,30 +419,29 @@ float weightLayTripmine( CParabot *pb, PB_Percept*item )
 
 
 
-void goalCamp( CParabot *pb, PB_Percept*item )
+void goalCamp( CParabot *pb, PB_Percept *item )
 {
 	static float lastCall[32] = { -10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10 };
 
 	int b = pb->slot;
 	assert( pb->actualNavpoint != 0 );
 
-	if ( (lastCall[b]+0.5) < worldTime() ) {	// in first call init viewangle
+	if ((lastCall[b] + 0.5f) < worldtime()) {	// in first call init viewangle
 		pb->campTime = 0;
 		int angleX = pb->actualNavpoint->special();
 		int angleY = pb->actualNavpoint->special();
 		angleX &= 0xFFFF;
 		angleY >>= 16;
-		Vector campAngle;
+		Vec3D campAngle;
 		campAngle.x = (float) (angleX - 360);
 		campAngle.y = (float) (angleY - 360);
 		campAngle.z = 0;
-		pb->action.setViewAngle( campAngle, 1 );
+		pb->action.setViewAngle(&campAngle, 1);
+	} else {
+		pb->campTime += (worldtime() - lastCall[b]);
 	}
-	else {
-		pb->campTime += (worldTime() - lastCall[b]);
-	}
-	pb->lastCamp = worldTime();
-	lastCall[b] = worldTime();
+	pb->lastCamp = worldtime();
+	lastCall[b] = worldtime();
 		
 	pb->action.setSpeed( 0 );
 	lookAroundAngle = 45;
@@ -447,9 +455,10 @@ float weightCamp( CParabot *pb, PB_Percept*item )
 {
 	float weight = 0;
 
-	if ( pb->actualNavpoint && !pb->senses.underFire() ) {
-		if ( pb->actualNavpoint->offersCamping() &&
-			 pb->combat.weapon.bestWeaponUsable()				) weight = pb->needs.wishForSniping();
+	if (pb->actualNavpoint && !pb->senses.underFire()) {
+		if (pb->actualNavpoint->offersCamping() &&
+		    pb->combat.weapon.bestWeaponUsable())
+			weight = pb->needs.wishForSniping();
 	}
 	return weight;
 }
@@ -467,39 +476,35 @@ void goalUseTank( CParabot *pb, PB_Percept*item )
 
 	pb->action.setSpeed( 0 );
 
-	if ( (lastCall[b]+0.5) < worldTime() ||
+	if ( (lastCall[b]+0.5) < worldtime() ||
 		 (pb->campTime>0 && pb->ent->v.viewmodel) ) {	// in first call press button
 		pb->campTime = -2;
-		Vector lookPos = pb->actualNavpoint->pos() + pb->ent->v.view_ofs;
+		Vec3D lookPos;
+		vadd(pb->actualNavpoint->pos(), &pb->ent->v.view_ofs, &lookPos);
 		pb->action.add( BOT_USE, &lookPos );
-		debugMsg( "Trying to use tank\n" );
+		DEBUG_MSG( "Trying to use tank\n" );
+	} else {
+		pb->campTime += (worldtime() - lastCall[b]);
 	}
-	else {
-		pb->campTime += (worldTime() - lastCall[b]);
-	}
-	pb->lastCamp = worldTime();
-	lastCall[b] = worldTime();
+	pb->lastCamp = worldtime();
+	lastCall[b] = worldtime();
 
 	if (!pb->ent->v.viewmodel) {		// use tank!
 		if (item) {
 			if ( item->isVisible() ) {
-				pb->combat.shootAtEnemy( item->lastPos, 0.1 );
+				pb->combat.shootAtEnemy(&item->lastPos, 0.1f);
 				pb->setGoalMoveDescr( "UseTank (Shoot)" );
-			}
-			else {
-				Vector botPos = pb->botPos();
-				pb->action.setAimDir( item->predictedAppearance( botPos ) );
+			} else {
+				pb->action.setAimDir(item->predictedAppearance(pb->botPos()), NULL);
 				pb->setGoalMoveDescr( "UseTank (Tracking)" );
 			}
-		}
-		else {
+		} else {
 			lookAroundAngle = 45;
 			goalLookAround( pb, item );
 			lookAroundAngle = DEFAULT_LOOKAROUND_ANGLE;
 			pb->setGoalMoveDescr( "UseTank (LookAround)" );
 		}
-	}
-	else {
+	} else {
 		pb->setGoalMoveDescr( "UseTank (StartUse)" );
 	}
 }
@@ -524,7 +529,7 @@ void goalWaitAtNavpoint( CParabot *pb, PB_Percept*item )
 {
 	// don't do anything here...
 	pb->setGoalMoveDescr( "WaitAtNavpoint" );
-	debugMsg( "Waiting for halo!\n" );
+	DEBUG_MSG( "Waiting for halo!\n" );
 }
 
 
@@ -544,13 +549,13 @@ void goalPause( CParabot *pb, PB_Percept*item )
 {
 	pb->action.setSpeed( 0 );
 	pb->setGoalMoveDescr( "Pause" );
-	//pb->lastPause = worldTime();
+	//pb->lastPause = worldtime();
 }
 
 
 float weightPause( CParabot *pb, PB_Percept*item )
 {
-	float weight = 0;//exp( pb->pauseFactor * (worldTime() - pb->lastPause) );
+	float weight = 0;//exp( pb->pauseFactor * (worldtime() - pb->lastPause) );
 	if (weight > 4) weight = 4;
 	return weight;
 }
@@ -560,8 +565,8 @@ float weightPause( CParabot *pb, PB_Percept*item )
 void goalFollow( CParabot *pb, PB_Percept*item )
 {
 	assert( item != 0 );
-	//debugMsg( "FollowAndAssistLeader\n" );
-	if (pb->partner==0) debugMsg( "WARNING: partner == 0!\n" );
+	// DEBUG_MSG( "FollowAndAssistLeader\n" );
+	if (pb->partner==0) DEBUG_MSG( "WARNING: partner == 0!\n" );
 	if ( (pb->partner == 0 ) || (pb->partner != item->entity ) ) {
 		int partnerId = observer.playerId( item->entity );
 		if (partnerId >= 0) {
@@ -579,23 +584,22 @@ void goalFollow( CParabot *pb, PB_Percept*item )
 	if ( observer.shouldFollow( pb->slot, pb->ent ) ) {
 		PB_Path_Waypoint wp = observer.getNextWaypoint( pb->slot );
 		if (wp.reached( pb->ent )) {
-			//debugMsg( "WP reached, act=%i\n", wp.action() );
-			Vector wpPos = wp.pos();
-			pb->action.add( wp.action(), &wpPos );	// if there's something to do...
+			// DEBUG_MSG( "WP reached, act=%i\n", wp.action() );
+			pb->action.add( wp.action(), wp.pos() );	// if there's something to do...
 			observer.reportWaypointReached( pb->slot );		// confirm waypoint
 		}
 		
-		pb->action.setViewDir( pb->partner->v.origin );		// set viewAngle
+		pb->action.setViewDir(&pb->partner->v.origin, 0);		// set viewAngle
 		pb->action.setMoveDir( wp.pos(pb->ent) );				// set moveAngle and speed
 		pb->action.setMaxSpeed();
 		pb->pathCheckWay();	
 		if (observer.canNotFollow( pb->slot )) {
-			debugMsg( "Cannot follow\n" );
+			DEBUG_MSG( "Cannot follow\n" );
 			pb->partner = 0;
 		}
 	}
 /*	if ( observer.partnerInCombat( pb->slot ) ) {	// partner involved in combat
-		debugMsg( "I assist!\n" );
+		DEBUG_MSG( "I assist!\n" );
 		//botState = PB_IN_COMBAT;
 	}*/
 	pb->setGoalMoveDescr( "Follow" );
@@ -604,17 +608,20 @@ void goalFollow( CParabot *pb, PB_Percept*item )
 
 float weightFollowLeader( CParabot *pb, PB_Percept*item )
 {
+	Vec3D dir;
+
 	if (pb->partner) {
 		if (pb->partner == item->entity ) return 4;	// keep on following!
 	}
 
-	if ( (item->isVisible()) &&						// leader visible
-		 (item->lastSeenPos.z < (pb->botPos().z+16)) &&			// not higher than bot
-		 ((item->lastSeenPos-pb->botPos()).Length() < 500) )	// not too far away
-		return 2;
+	if (item->isVisible()	// leader visible
+	    && (item->lastSeenPos.z < (pb->botPos()->z + 16))) {	// not higher than bot
+		vsub(&item->lastSeenPos, pb->botPos(), &dir);
+		if(500.0f > vlen(&dir))	// not too far away
+			return 2;
+	}
 	return 0;
 }
-
 
 float weightFollowEnemy( CParabot *pb, PB_Percept*item )
 {
@@ -626,56 +633,61 @@ float weightFollowEnemy( CParabot *pb, PB_Percept*item )
 	else return (item->rating + pb->needs.wishForCombat());
 }
 
-
-Vector UTIL_GetRight( const Vector &vec );
-
 void goalMakeRoom( CParabot *pb, PB_Percept*item )
 {
 	static float lastCall[32] = { -10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10 };
-	static Vector newWp[32];
+	static Vec3D newWp[32];
 
 	int b = pb->slot;
 
-	if ( (lastCall[b]+0.5) < worldTime() ) {	// in first call init newWp
-		Vector forward;
-		if (pb->actualPath) forward = (pb->waypoint.pos( pb->ent ) - pb->botPos());
-		else forward = pb->action.getMoveDir();
-		forward.Normalize();
-		Vector right = UTIL_GetRight( forward );
-		newWp[b] = pb->botPos()+ 50*(forward + right);
+	if ((lastCall[b] + 0.5f) < worldtime()) {	// in first call init newWp
+		Vec3D forward, right;
+
+		if (pb->actualPath)
+			vsub(pb->waypoint.pos(pb->ent), pb->botPos(), &forward);
+		else
+			vcopy(pb->action.getMoveDir(), &forward);
+		normalize(&forward);
+		getright(&forward, &right);
+		vadd(&forward, &right, &right);
+		vma(pb->botPos(), 50.0f, &right, &newWp[b]);
 	}
+
 	if (!(pb->actualPath)) {		// if not on path: no problem
 		goalGetAway( pb, item );
-		debugMsg( "Making room - getAway\n" );
+		DEBUG_MSG( "Making room - getAway\n" );
+	} else {
+		//pb->action.setMoveDir(newWp);
+		pb->pathfinder.checkWay(&newWp[b]);
+		DEBUG_MSG( "Making room - newWp \n" );
 	}
-	else {
-		//pb->action.setMoveDir( newWp );
-		pb->pathfinder.checkWay( newWp[b] );
-		debugMsg( "Making room - newWp \n" );
-	}
-	pb->makeRoomTime = worldTime() + 0.5;	// maintain goal for 0.5 sec 
-	lastCall[b] = worldTime();
-	pb->setGoalMoveDescr( "MakeRoom" );
+	pb->makeRoomTime = worldtime() + 0.5f;	// maintain goal for 0.5 sec 
+	lastCall[b] = worldtime();
+	pb->setGoalMoveDescr("MakeRoom");
 }
 
-
-float weightMakeRoom( CParabot *pb, PB_Percept*item )
+float weightMakeRoom( CParabot *pb, PB_Percept *item )
 {
-	assert( item != 0 );
-	float dist = (pb->botPos() - item->entity->v.origin).Length();
-	if (dist > 100) return 0;
-	float newDist = ( (pb->botPos() + pb->ent->v.velocity/20) - 
-		              (item->entity->v.origin + item->entity->v.velocity) ).Length();
-	if (newDist>=dist && (worldTime()>pb->makeRoomTime)) return 0;
-	float weight = 10 + (100-newDist)/5;
-	if (weight>20) weight= 20;
+	Vec3D dir;
+
+	assert(item != 0);
+
+	vsub(pb->botPos(), &item->entity->v.origin, &dir);
+	float dist = vlen(&dir);
+	if (dist > 100)
+		return 0;
+	
+	vma(pb->botPos(), 0.05f, &pb->ent->v.velocity, &dir);
+	vsub(&dir, &item->entity->v.origin, &dir);
+	vsub(&dir, &item->entity->v.velocity, &dir);
+	float newDist = vlen(&dir);
+	if (newDist >= dist && (worldtime() > pb->makeRoomTime))
+		return 0;
+	float weight = 10.0f + (100.0f - newDist) * 0.2f;
+	if (weight > 20.0f) weight = 20.0f;
 	return weight;
 }
-
-
 
 //---------------------------------------------------------------------------------------
 //  ACTION GOALS
 //---------------------------------------------------------------------------------------
-
-

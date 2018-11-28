@@ -1,7 +1,9 @@
+#include "parabot.h"
+#include "dllwrap.h"
 #include "sounds.h"
 #include "bot.h"
 #include "pb_weapon.h"
-#include "pb_chat.h"
+#include "chat.h"
 #include "pb_mapgraph.h"
 
 
@@ -9,8 +11,8 @@ extern int mod_id;
 extern int clientWeapon[32];
 extern PB_MapGraph mapGraph;	// mapgraph for waypoints
 extern bool fatalParabotError;
-extern PB_Chat chat;
-extern PB_Navpoint* getNearestNavpoint( edict_t *pEdict );
+extern PB_Navpoint* getNearestNavpoint( EDICT *pEdict );
+STEPSOUNDS players[32];
 
 bool headToBunker;
 float airStrikeTime;
@@ -30,71 +32,54 @@ float nextAirstrikeTime = 500;
 #define CHAR_TEX_CSTRIKE_SNOW	'N'
 #define CHAR_TEX_CSTRIKE_GRASS	'X'
 
-bool UTIL_IsOnLadder( edict_t *ent )
-{
-	return (ent->v.movetype == MOVETYPE_FLY);
-}
 
-void Sounds::init()
-{
-	stepsounds_t nullStruct = {0,};
-	static bool firstInit = true;
-
-	if( !firstInit )
-		player.clear();
-	else
-		firstInit = false;
-
-	player = std::vector<stepsounds_t>( 32, nullStruct );
-	//player = std::vector<stepsounds_t>( gpGlobals->maxClients, nullStruct );
-}
-
-void Sounds::getAllClientSounds()
+void
+sounds_getAllClientSounds()
 {
 	bool writeResult = true;
 	
 	float hearSteps = footsteps->value;
 	if ( mod_id == DMC_DLL ) hearSteps = 0;		// no step sounds in DMC
 
-	edict_t *pPlayer = 0;
-	for (int i=1; i<=gpGlobals->maxClients; i++) {
-		pPlayer = INDEXENT( i );
-		if (!pPlayer) continue;							// skip invalid players
-		if (!isAlive( ENT(pPlayer) )) continue;	// skip player if not alive
-		if (pPlayer->v.solid == SOLID_NOT) continue;	
+	EDICT *player = 0;
+	for (int i = 1; i <= com.globals->maxclients; i++) {
+		player = edictofindex( i );
+		if (!player) continue;							// skip invalid players
+		if (!is_alive(player)) continue;	// skip player if not alive
+		if (player->v.solid == SOLID_NOT) continue;	
 		
 		// get step sounds
-		if (hearSteps > 0) calcStepSound( i-1, pPlayer, writeResult );
+		if (hearSteps > 0) sounds_calcStepSound( i - 1, player, writeResult );
 		// get attack sounds
-		if ( (pPlayer->v.button & (IN_ATTACK|IN_ATTACK2)) ) {
+		if ((player->v.button & (ACTION_ATTACK1 | ACTION_ATTACK2))) {
 			int wid = clientWeapon[i-1];
 			PB_Weapon w( wid );
-			float sensDist = w.getAudibleDistance( pPlayer->v.button );
-			float trackDist = sensDist/3;
-			if (sensDist > player[i - 1].stepSensableDist) player[i - 1].stepSensableDist = sensDist;
-			if (trackDist > player[i - 1].stepTrackableDist) player[i - 1].stepTrackableDist = trackDist;
+			float sensDist = w.getAudibleDistance( player->v.button );
+			float trackDist = sensDist / 3.0f;
+			if (sensDist > players[i - 1].stepSensableDist) players[i - 1].stepSensableDist = sensDist;
+			if (trackDist > players[i - 1].stepTrackableDist) players[i - 1].stepTrackableDist = trackDist;
 		}
 		// get jump sounds
-		if ( mod_id==HOLYWARS_DLL || mod_id==DMC_DLL ) {
-			if ( (pPlayer->v.button & IN_JUMP) && !isUnderwater( ENT(pPlayer) ) ) {
+		if ( mod_id == HOLYWARS_DLL || mod_id == DMC_DLL ) {
+			if ( (player->v.button & ACTION_JUMP) && !is_underwater(player) ) {
 				float sensDist = 300;
 				float trackDist = 150;
-				if (sensDist > player[i - 1].stepSensableDist) player[i - 1].stepSensableDist = sensDist;
-				if (trackDist > player[i - 1].stepTrackableDist) player[i - 1].stepTrackableDist = trackDist;
+				if (sensDist > players[i - 1].stepSensableDist) players[i - 1].stepSensableDist = sensDist;
+				if (trackDist > players[i - 1].stepTrackableDist) players[i - 1].stepTrackableDist = trackDist;
 			}
 		}
 		// get reload sounds
-		if ( pPlayer->v.button & IN_RELOAD ) {
+		if ( player->v.button & ACTION_RELOAD ) {
 			float sensDist = 200;
 			float trackDist = 100;
-			if (sensDist > player[i - 1].stepSensableDist) player[i - 1].stepSensableDist = sensDist;
-			if (trackDist > player[i - 1].stepTrackableDist) player[i - 1].stepTrackableDist = trackDist;
+			if (sensDist > players[i - 1].stepSensableDist) players[i - 1].stepSensableDist = sensDist;
+			if (trackDist > players[i - 1].stepTrackableDist) players[i - 1].stepTrackableDist = trackDist;
 		}
 	}
 }
 
 
-void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
+void sounds_calcStepSound( int clientIndex, EDICT *player, bool writeResult )
 // calculates the volume of step sounds for given player
 // if writeResult is true the method sets the values in CBasePlayer, otherwise it just
 // reads them out
@@ -103,12 +88,10 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 	float fvol = 0;
 	char szbuffer[64];
 	const char *pTextureName;
-	Vector start, end;
-	float rgfl1[3];
-	float rgfl2[3];
-	Vector knee;
-	Vector feet;
-	Vector center;
+	Vec3D start, end;
+	Vec3D knee;
+	Vec3D feet;
+	Vec3D center;
 	float height;
 	float speed;
 	float velrun;
@@ -119,128 +102,114 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 	float sensableDist = 0;
 	float trackableDist = 0;
 
-
-	//CBasePlayer *pl = (CBasePlayer*) GET_PRIVATE( ent );
-
 	if (writeResult) {
-		if ( worldTime() <= player[clientIndex].timeStepSound ) {
-			player[clientIndex].stepSensableDist = 0;
-			player[clientIndex].stepTrackableDist = 0;
+		if ( worldtime() <= players[clientIndex].timeStepSound ) {
+			players[clientIndex].stepSensableDist = 0;
+			players[clientIndex].stepTrackableDist = 0;
 			// check for mapchange -> start playing sounds
-			if ( (player[clientIndex].timeStepSound - worldTime()) > 1.0 ) 
-				player[clientIndex].timeStepSound = worldTime();
-			else return;
+			if ( (players[clientIndex].timeStepSound - worldtime()) > 1.0 ) 
+				players[clientIndex].timeStepSound = worldtime();
+			else
+				return;
 		}
-	}
-	else {
-		if ( player[clientIndex].timeStepSound == player[clientIndex].oldTimeStepSound ) {
-			player[clientIndex].stepSensableDist = 0;
-			player[clientIndex].stepTrackableDist = 0;
+	} else {
+		if ( players[clientIndex].timeStepSound == players[clientIndex].oldTimeStepSound ) {
+			players[clientIndex].stepSensableDist = 0;
+			players[clientIndex].stepTrackableDist = 0;
 			return;
-		}
-		else player[clientIndex].oldTimeStepSound = player[clientIndex].timeStepSound;
+		} else
+			players[clientIndex].oldTimeStepSound = players[clientIndex].timeStepSound;
 	}
 
-	speed = ent->v.velocity.Length();
+	speed = vlen(&player->v.velocity);
 
 	// determine if we are on a ladder
-	fLadder = UTIL_IsOnLadder( ent );
+	fLadder = is_onladder(player);
 
 	// UNDONE: need defined numbers for run, walk, crouch, crouch run velocities!!!!	
-	if (FBitSet(ent->v.flags, FL_DUCKING) || fLadder)
-	{
+	if ((player->v.flags & FL_DUCKING) || fLadder) {
 		//velwalk = 60;		// These constants should be based on cl_movespeedkey * cl_forwardspeed somehow
 		velrun = 80;		// UNDONE: Move walking to server
 		flduck = 0.1;
-	}
-	else
-	{
+	} else {
 		//velwalk = 120;
 		velrun = 210;
 		flduck = 0.0;
 	}
 
-	// ALERT (at_console, "vel: %f\n", vecVel.Length());
+	// ALERT (at_console, "vel: %f\n", vlen(vecVel));
 	
 	// if we're on a ladder or on the ground, and we're moving fast enough,
 	// play step sound.  Also, if m_flTimeStepSound is zero, get the new
 	// sound right away - we just started moving in new level.
 
-	if ((fLadder || FBitSet (ent->v.flags, FL_ONGROUND)) && (speed >= velrun))
+	if ((fLadder || (player->v.flags & FL_ONGROUND)) && (speed >= velrun))
 	{
 		fWalking = speed < velrun;		
 
-		center = knee = feet = (ent->v.absmin + ent->v.absmax) * 0.5;
-		height = ent->v.absmax.z - ent->v.absmin.z;
+		boxcenter(player, &feet);
+		vcopy(&feet, &knee);
+		vcopy(&feet, &center);
+		height = player->v.absmax.z - player->v.absmin.z;
 
-		knee.z = ent->v.absmin.z + height * 0.2;
-		feet.z = ent->v.absmin.z;
+		knee.z = player->v.absmin.z + height * 0.2f;
+		feet.z = player->v.absmin.z;
 
 		// find out what we're stepping in or on...
-		if (fLadder)
-		{
+		if (fLadder) {
 			//step = STEP_LADDER;
 			fvol = 0.35;
 			sensableDist = 600;
 			trackableDist = 400;
-			if (writeResult) player[clientIndex].timeStepSound = gpGlobals->time + 0.35;
-		}
-		else if ( UTIL_PointContents ( knee ) == CONTENTS_WATER )
-		{
+			if (writeResult) players[clientIndex].timeStepSound = com.globals->time + 0.35f;
+		} else if (pointcontents(&knee) == CONTENTS_WATER) {
 			//step = STEP_WADE;
 			fvol = 0.65;
 			sensableDist = 200;
 			trackableDist = 200;
-			if (writeResult) player[clientIndex].timeStepSound = gpGlobals->time + 0.6;
-		}
-		else if (UTIL_PointContents ( feet ) == CONTENTS_WATER )
-		{
+			if (writeResult) players[clientIndex].timeStepSound = com.globals->time + 0.6;
+		} else if (pointcontents(&feet) == CONTENTS_WATER) {
 			//step = STEP_SLOSH;
 			fvol = fWalking ? 0.2 : 0.5;
 			sensableDist = 200;
 			trackableDist = 200;
-			if (writeResult) player[clientIndex].timeStepSound = fWalking ? gpGlobals->time + 0.4 : gpGlobals->time + 0.3;		
-		}
-		else
-		{	
+			if (writeResult)
+				players[clientIndex].timeStepSound = fWalking ? com.globals->time + 0.4 : com.globals->time + 0.3;		
+		} else {
 			if (writeResult) {
 				// find texture under player, if different from current texture, 
 				// get material type
-				
-				start = end = center;							// center point of player BB
-				start.z = end.z = ent->v.absmin.z;				// copy zmin
+
+				vcopy(&center, &start);
+				vcopy(&center, &end);
+				start.z = end.z = player->v.absmin.z;				// copy zmin
 				start.z += 4.0;									// extend start up
 				end.z -= 24.0;									// extend end down
-				
-				start.CopyToArray( rgfl1 );
-				end.CopyToArray( rgfl2 );
-				
-				pTextureName = TRACE_TEXTURE( ENT( ent->v.groundentity), rgfl1, rgfl2 );
-				if ( pTextureName )
-				{
+
+				pTextureName = trace_texture(player->v.groundentity, &start, &end);
+				if (pTextureName) {
 					// strip leading '-0' or '{' or '!'
 					if (*pTextureName == '-')
 						pTextureName += 2;
 					if (*pTextureName == '{' || *pTextureName == '!')
 						pTextureName++;
 					
-					if (_strnicmp(pTextureName, player[clientIndex].textureName, CBTEXTURENAMEMAX-1))
-					{
+					if (_strnicmp(pTextureName, players[clientIndex].textureName, CBTEXTURENAMEMAX - 1)) {
 						// current texture is different from texture player is on...
 						// set current texture
 						strcpy(szbuffer, pTextureName);
 						szbuffer[CBTEXTURENAMEMAX - 1] = 0;
-						strcpy(player[clientIndex].textureName, szbuffer);
+						strcpy(players[clientIndex].textureName, szbuffer);
 						
-						//debugMsg( "texture: %s\n", player[clientIndex].textureName );
+						// DEBUG_MSG( "texture: %s\n", player[clientIndex].textureName );
 
 						// get texture type
-						player[clientIndex].textureType = MDLL_PM_FindTextureType( player[clientIndex].textureName );	
+						players[clientIndex].textureType = find_texturetype( players[clientIndex].textureName );	
 					}
 				}
 			}
 			
-			switch (player[clientIndex].textureType)
+			switch (players[clientIndex].textureType)
 			{
 			default:
 			case CHAR_TEX_CONCRETE:
@@ -248,7 +217,7 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 				fvol = fWalking ? 0.2 : 0.5;
 				sensableDist = 200;
 				trackableDist = 100;
-				if (writeResult) player[clientIndex].timeStepSound = fWalking ? gpGlobals->time + 0.4 : gpGlobals->time + 0.3;
+				if (writeResult) players[clientIndex].timeStepSound = fWalking ? com.globals->time + 0.4 : com.globals->time + 0.3;
 				break;
 
 			case CHAR_TEX_METAL:	
@@ -256,7 +225,7 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 				fvol = fWalking ? 0.2 : 0.5;
 				sensableDist = 600;
 				trackableDist = 300;
-				if (writeResult) player[clientIndex].timeStepSound = fWalking ? gpGlobals->time + 0.4 : gpGlobals->time + 0.3;
+				if (writeResult) players[clientIndex].timeStepSound = fWalking ? com.globals->time + 0.4 : com.globals->time + 0.3;
 				break;
 
 			case CHAR_TEX_DIRT:	
@@ -264,15 +233,15 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 				fvol = fWalking ? 0.25 : 0.55;
 				sensableDist = 200;
 				trackableDist = 100;
-				if (writeResult) player[clientIndex].timeStepSound = fWalking ? gpGlobals->time + 0.4 : gpGlobals->time + 0.3;
+				if (writeResult) players[clientIndex].timeStepSound = fWalking ? com.globals->time + 0.4 : com.globals->time + 0.3;
 				break;
 
 			case CHAR_TEX_VENT:	
-				//step = STEP_VENT;
+				//step = STEP_V;
 				fvol = fWalking ? 0.4 : 0.7;
 				sensableDist = 600;
 				trackableDist = 400;
-				if (writeResult) player[clientIndex].timeStepSound = fWalking ? gpGlobals->time + 0.4 : gpGlobals->time + 0.3;
+				if (writeResult) players[clientIndex].timeStepSound = fWalking ? com.globals->time + 0.4 : com.globals->time + 0.3;
 				break;
 
 			case CHAR_TEX_GRATE:
@@ -280,7 +249,7 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 				fvol = fWalking ? 0.2 : 0.5;
 				sensableDist = 600;
 				trackableDist = 400;
-				if (writeResult) player[clientIndex].timeStepSound = fWalking ? gpGlobals->time + 0.4 : gpGlobals->time + 0.3;
+				if (writeResult) players[clientIndex].timeStepSound = fWalking ? com.globals->time + 0.4 : com.globals->time + 0.3;
 				break;
 
 			case CHAR_TEX_TILE:	
@@ -288,7 +257,7 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 				fvol = fWalking ? 0.2 : 0.5;
 				sensableDist = 200;
 				trackableDist = 100;
-				if (writeResult) player[clientIndex].timeStepSound = fWalking ? gpGlobals->time + 0.4 : gpGlobals->time + 0.3;
+				if (writeResult) players[clientIndex].timeStepSound = fWalking ? com.globals->time + 0.4 : com.globals->time + 0.3;
 				break;
 
 			case CHAR_TEX_SLOSH:
@@ -296,48 +265,25 @@ void Sounds::calcStepSound( int clientIndex, edict_t *ent, bool writeResult )
 				fvol = fWalking ? 0.2 : 0.5;
 				sensableDist = 200;
 				trackableDist = 200;
-				if (writeResult) player[clientIndex].timeStepSound = fWalking ? gpGlobals->time + 0.4 : gpGlobals->time + 0.3;
+				if (writeResult) players[clientIndex].timeStepSound = fWalking ? com.globals->time + 0.4 : com.globals->time + 0.3;
 				break;
 			}
 		}
 
-		if (writeResult) player[clientIndex].timeStepSound += flduck; // slower step time if ducking
+		if (writeResult)
+			players[clientIndex].timeStepSound += flduck; // slower step time if ducking
 	
 		// 35% volume if ducking
-		//if ( ent->v.flags & FL_DUCKING ) fvol *= 0.35;
+		//if ( player->v.flags & FL_DUCKING ) fvol *= 0.35;
 		
-		/*char *name = (char*) STRING( ent->v.netname );
-		debugMsg( "%.1f: ", worldTime() );
-		debugMsg( "%s on %s", name, player[clientIndex].textureName );
-		debugMsg( " (Code %i)", step );
-		debugMsg( " -> vol %.2f\n", fvol );*/
+		/*char *name = (char*) STRING( player->v.netname );
+		DEBUG_MSG( "%.1f: %s on %s (Code %i) -> vol %.2f\n", worldtime(),
+		    name, players[clientIndex].textureName, step, fvol );*/
 	}
 
-	player[clientIndex].stepSensableDist = sensableDist;
-	player[clientIndex].stepTrackableDist = trackableDist;
+	players[clientIndex].stepSensableDist = sensableDist;
+	players[clientIndex].stepTrackableDist = trackableDist;
 }
-
-int UTIL_GetNearestPlayerIndex( Vector &pos )
-{
-	float dist, bestDist = 10000;
-	int	  bestPlayer = 0;
-	edict_t *pPlayer = 0;
-
-	for (int i=1; i<=gpGlobals->maxClients; i++) {
-		pPlayer = INDEXENT( i );
-		if (!pPlayer) continue;							// skip invalid players
-		if (!isAlive( ENT(pPlayer) )) continue;	// skip player if not alive
-		if (pPlayer->v.solid == SOLID_NOT) continue;	
-		
-		dist = (pPlayer->v.origin - pos).Length();
-		if (dist < bestDist) {
-			bestDist = dist;
-			bestPlayer = i;
-		}
-	}
-	return bestPlayer;
-}
-
 
 // weapons and ammo
 #define AMMO_SENS_DIST			400
@@ -356,250 +302,232 @@ int UTIL_GetNearestPlayerIndex( Vector &pos )
 #define SPEC_ITEM_TRACK_DIST   1200
 
 
-void Sounds::parseSound( edict_t *ent, const char *sample, float vol )
+void sounds_parseSound( EDICT *player, const char *sample, float vol )
 {
 	if (fatalParabotError) return;
 
 	int clientIndex;
 
 	switch( mod_id ) {
-	case AG_DLL:
-	case HUNGER_DLL:
-	case VALVE_DLL:
-	case GEARBOX_DLL:
-	case HOLYWARS_DLL:
-		if ( FStrEq( sample, "items/gunpickup2.wav" ) ) {		// weapon pickup
-			clientIndex = ENTINDEX( ent ) - 1;
-			player[clientIndex].itemSensableDist = AMMO_SENS_DIST;
-			player[clientIndex].itemTrackableDist = AMMO_TRACK_DIST;
-			player[clientIndex].timeItemSound = worldTime() + 0.3;
-			//debugMsg( "%s picked up gun!\n", STRING(ent->v.netname) );
-			PB_Navpoint *nearest = getNearestNavpoint( ent );
+	default:
+		if ( Q_STREQ( sample, "items/gunpickup2.wav" ) ) {		// weapon pickup
+			clientIndex = indexofedict( player ) - 1;
+			players[clientIndex].itemSensableDist = AMMO_SENS_DIST;
+			players[clientIndex].itemTrackableDist = AMMO_TRACK_DIST;
+			players[clientIndex].timeItemSound = worldtime() + 0.3;
+			//DEBUG_MSG( "%s picked up gun!\n", STRING(player->v.netname) );
+			PB_Navpoint *nearest = getNearestNavpoint( player );
 			//assert( nearest != 0 );
 			if (!nearest) return;	// listen server before map is loaded
 			const char *wpnName = nearest->classname();
 			if (mod_id==VALVE_DLL || mod_id==AG_DLL || mod_id==HUNGER_DLL || mod_id==GEARBOX_DLL) {
-				if ( FStrEq( wpnName, "weapon_rpg"      ) ||
-					 FStrEq( wpnName, "weapon_gauss"    ) ||
-					 FStrEq( wpnName, "weapon_egon"     ) ||
-					 FStrEq( wpnName, "weapon_crossbow" ) ) chat.registerGotWeapon( ent, wpnName );
+				if ( Q_STREQ( wpnName, "weapon_rpg"      ) ||
+					 Q_STREQ( wpnName, "weapon_gauss"    ) ||
+					 Q_STREQ( wpnName, "weapon_egon"     ) ||
+					 Q_STREQ( wpnName, "weapon_crossbow" ) ) chat_registergotweapon( player, wpnName );
+			} else {	// Holy Wars
+				chat_registergotweapon( player, wpnName );
 			}
-			else {	// Holy Wars
-				chat.registerGotWeapon( ent, wpnName );
-			}
-		}
-		else if ( FStrEq( sample, "items/9mmclip1.wav" ) ) {	// ammo pickup
-			clientIndex = UTIL_GetNearestPlayerIndex( ent->v.origin ) - 1;
-			//ent = INDEXENT( clientIndex+1 );
-			player[clientIndex].itemSensableDist = AMMO_SENS_DIST;
-			player[clientIndex].itemTrackableDist = AMMO_TRACK_DIST;
-			player[clientIndex].timeItemSound = worldTime() + 0.3;
-			//debugMsg( "%s picked up ammo!\n", STRING(ent->v.netname) );
-		}
-		else if ( FStrEq( sample, "doors/doorstop6.wav" ) ) {	// lift usage
-			Vector pos = 0.5 * (ent->v.absmin + ent->v.absmax);  
-			pos.z = ent->v.absmax.z;
-			clientIndex = UTIL_GetNearestPlayerIndex( pos ) - 1;
-			//ent = INDEXENT( clientIndex+1 );
-			player[clientIndex].itemSensableDist = LIFT_SENS_DIST;
-			player[clientIndex].itemTrackableDist = LIFT_TRACK_DIST;
-			player[clientIndex].timeItemSound = worldTime() + 0.3;
-			//debugMsg( "%s used lift!\n", STRING(ent->v.netname) );
-		}
-		else if ( FStrEq( sample, "items/suitcharge1.wav" ) ) {// battery charger
-			Vector pos = 0.5 * (ent->v.absmin + ent->v.absmax);  
-			clientIndex = UTIL_GetNearestPlayerIndex( pos ) - 1;
-			//ent = INDEXENT( clientIndex+1 );
+		} else if ( Q_STREQ( sample, "items/9mmclip1.wav" ) ) {	// ammo pickup
+			clientIndex = getnearestplayerindex(&player->v.origin) - 1;
+			//ent = edictofindex( clientIndex+1 );
+			players[clientIndex].itemSensableDist = AMMO_SENS_DIST;
+			players[clientIndex].itemTrackableDist = AMMO_TRACK_DIST;
+			players[clientIndex].timeItemSound = worldtime() + 0.3;
+			//DEBUG_MSG( "%s picked up ammo!\n", STRING(player->v.netname) );
+		} else if ( Q_STREQ( sample, "doors/doorstop6.wav" ) ) {	// lift usage
+			Vec3D pos;
+			boxcenter(player, &pos);
+			pos.z = player->v.absmax.z;
+			clientIndex = getnearestplayerindex(&pos) - 1;
+			//ent = edictofindex( clientIndex+1 );
+			players[clientIndex].itemSensableDist = LIFT_SENS_DIST;
+			players[clientIndex].itemTrackableDist = LIFT_TRACK_DIST;
+			players[clientIndex].timeItemSound = worldtime() + 0.3;
+			//DEBUG_MSG( "%s used lift!\n", STRING(player->v.netname) );
+		} else if ( Q_STREQ( sample, "items/suitcharge1.wav" ) ) {// battery charger
+			Vec3D pos;
+			boxcenter(player, &pos);  
+			clientIndex = getnearestplayerindex(&pos) - 1;
+			//ent = edictofindex( clientIndex+1 );
 			if (vol > 0) {
-				player[clientIndex].itemSensableDist = LOAD_SENS_DIST;
-				player[clientIndex].itemTrackableDist = LOAD_TRACK_DIST;
-				player[clientIndex].timeItemSound = worldTime() + 10.0;
-				//debugMsg( "%s started using suitcharger!\n", STRING(ent->v.netname) );
+				players[clientIndex].itemSensableDist = LOAD_SENS_DIST;
+				players[clientIndex].itemTrackableDist = LOAD_TRACK_DIST;
+				players[clientIndex].timeItemSound = worldtime() + 10.0;
+				//DEBUG_MSG( "%s started using suitcharger!\n", STRING(ent->v.netname) );
+			} else {
+				players[clientIndex].itemSensableDist = 0;
+				players[clientIndex].itemTrackableDist = 0;
+				players[clientIndex].timeItemSound = 0;
+				//DEBUG_MSG( "%s stopped using suitcharger!\n", STRING(ent->v.netname) );
 			}
-			else {
-				player[clientIndex].itemSensableDist = 0;
-				player[clientIndex].itemTrackableDist = 0;
-				player[clientIndex].timeItemSound = 0;
-				//debugMsg( "%s stopped using suitcharger!\n", STRING(ent->v.netname) );
-			}
-		}
-		else if ( FStrEq( sample, "items/medcharge4.wav" ) ) {	// med charger
-			Vector pos = 0.5 * (ent->v.absmin + ent->v.absmax);  
-			clientIndex = UTIL_GetNearestPlayerIndex( pos ) - 1;
-			//ent = INDEXENT( clientIndex+1 );
+		} else if ( Q_STREQ( sample, "items/medcharge4.wav" ) ) {	// med charger
+			Vec3D pos;
+			boxcenter(player, &pos);  
+			clientIndex = getnearestplayerindex(&pos) - 1;
+			//ent = edictofindex( clientIndex+1 );
 			if (vol > 0) {
-				player[clientIndex].itemSensableDist = LOAD_SENS_DIST;
-				player[clientIndex].itemTrackableDist = LOAD_TRACK_DIST;
-				player[clientIndex].timeItemSound = worldTime() + 10.0;
-				//debugMsg( "%s started using healthcharger!\n", STRING(ent->v.netname) );
+				players[clientIndex].itemSensableDist = LOAD_SENS_DIST;
+				players[clientIndex].itemTrackableDist = LOAD_TRACK_DIST;
+				players[clientIndex].timeItemSound = worldtime() + 10.0;
+				//DEBUG_MSG( "%s started using healthcharger!\n", STRING(player->v.netname) );
+			} else {
+				players[clientIndex].itemSensableDist = 0;
+				players[clientIndex].itemTrackableDist = 0;
+				players[clientIndex].timeItemSound = 0;
+				//DEBUG_MSG( "%s stopped using healthcharger!\n", STRING(player->v.netname) );
 			}
-			else {
-				player[clientIndex].itemSensableDist = 0;
-				player[clientIndex].itemTrackableDist = 0;
-				player[clientIndex].timeItemSound = 0;
-				//debugMsg( "%s stopped using healthcharger!\n", STRING(ent->v.netname) );
-			}
-		}
-		else if ( FStrEq( sample, "items/smallmedkit1.wav" ) ) {	// medkit pickup
-			clientIndex = ENTINDEX( ent ) - 1;
-			player[clientIndex].itemSensableDist = ITEM_SENS_DIST;
-			player[clientIndex].itemTrackableDist = ITEM_TRACK_DIST;
-			player[clientIndex].timeItemSound = worldTime() + 0.3;
-			//debugMsg( "%s picked up medkit!\n", STRING(ent->v.netname) );
-		}
-		else if ( FStrEq( sample, "!336" ) ) {						// longjump pickup
-			clientIndex = ENTINDEX( ent ) - 1;
-			player[clientIndex].itemSensableDist = SPEC_ITEM_SENS_DIST;
-			player[clientIndex].itemTrackableDist = SPEC_ITEM_TRACK_DIST;
-			player[clientIndex].timeItemSound = worldTime() + 3.0;
-			debugMsg( "%s picked up longjump!\n", STRING(ent->v.netname) );
-		}
-		else if ( FStrEq( sample, "misc/jumppad.wav" ) ) {			// HW-jumppad 
-			clientIndex = UTIL_GetNearestPlayerIndex( ent->v.origin ) - 1;
-			//ent = INDEXENT( clientIndex+1 );
-			player[clientIndex].itemSensableDist = LIFT_SENS_DIST;
-			player[clientIndex].itemTrackableDist = LIFT_TRACK_DIST;
-			player[clientIndex].timeItemSound = worldTime() + 0.3;
-			//debugMsg( "%s used HW-jumppad!\n", STRING(ent->v.netname) );
-		}
-		else if ( FStrEq( sample, "player/drink3.wav" ) ) {		// HW-bottle
-			clientIndex = ENTINDEX( ent ) - 1;
-			player[clientIndex].itemSensableDist = ITEM_SENS_DIST;
-			player[clientIndex].itemTrackableDist = ITEM_TRACK_DIST;
-			player[clientIndex].timeItemSound = worldTime() + 0.3;
-			//debugMsg( "%s picked up HW-bottle!\n", STRING(ent->v.netname) );
-		}
-		/*else {
-			if (ent) debugMsg( "%s caused %s!\n", STRING(ent->v.classname), sample);
-			else debugMsg( "NullEnt caused %s!\n", sample );
+		} else if ( Q_STREQ( sample, "items/smallmedkit1.wav" ) ) {	// medkit pickup
+			clientIndex = indexofedict( player ) - 1;
+			players[clientIndex].itemSensableDist = ITEM_SENS_DIST;
+			players[clientIndex].itemTrackableDist = ITEM_TRACK_DIST;
+			players[clientIndex].timeItemSound = worldtime() + 0.3;
+			//DEBUG_MSG( "%s picked up medkit!\n", STRING(player->v.netname) );
+		} else if ( Q_STREQ( sample, "!336" ) ) {						// longjump pickup
+			clientIndex = indexofedict( player ) - 1;
+			players[clientIndex].itemSensableDist = SPEC_ITEM_SENS_DIST;
+			players[clientIndex].itemTrackableDist = SPEC_ITEM_TRACK_DIST;
+			players[clientIndex].timeItemSound = worldtime() + 3.0;
+			DEBUG_MSG( "%s picked up longjump!\n", STRING(player->v.netname) );
+		} else if ( Q_STREQ( sample, "misc/jumppad.wav" ) ) {			// HW-jumppad 
+			clientIndex = getnearestplayerindex(&player->v.origin) - 1;
+			//ent = edictofindex( clientIndex+1 );
+			players[clientIndex].itemSensableDist = LIFT_SENS_DIST;
+			players[clientIndex].itemTrackableDist = LIFT_TRACK_DIST;
+			players[clientIndex].timeItemSound = worldtime() + 0.3;
+			// DEBUG_MSG( "%s used HW-jumppad!\n", STRING(player->v.netname) );
+		} else if ( Q_STREQ( sample, "player/drink3.wav" ) ) {		// HW-bottle
+			clientIndex = indexofedict( player ) - 1;
+			players[clientIndex].itemSensableDist = ITEM_SENS_DIST;
+			players[clientIndex].itemTrackableDist = ITEM_TRACK_DIST;
+			players[clientIndex].timeItemSound = worldtime() + 0.3;
+			// DEBUG_MSG( "%s picked up HW-bottle!\n", STRING(player->v.netname) );
+		}/*else {
+			if (player) DEBUG_MSG( "%s caused %s!\n", STRING(player->v.classname), sample);
+			else DEBUG_MSG( "NullEnt caused %s!\n", sample );
 		}*/
 		break;
 
 	case DMC_DLL:
-		if ( FStrEq( sample, "common/null.wav" ) ||
-			 FStrEq( sample, "player/lburn1.wav" ) ||
-			 FStrEq( sample, "player/lburn2.wav" ) ||
-			 FStrEq( sample, "items/itembk2.wav" ) ) {	// ignore
-		}
-		else if ( FStrEq( sample, "weapons/pkup.wav" ) ||		// weapon pickup
-				  FStrEq( sample, "weapons/lock4.wav" ) ) {		// ammo pickup
-			const char *wpnName = STRING( ent->v.classname );
-			clientIndex = UTIL_GetNearestPlayerIndex( ent->v.origin ) - 1;
-			ent = INDEXENT( clientIndex+1 );
-			player[clientIndex].itemSensableDist = AMMO_SENS_DIST;
-			player[clientIndex].itemTrackableDist = AMMO_TRACK_DIST;
-			player[clientIndex].timeItemSound = worldTime() + 0.3;
-			//debugMsg( "%s picked up gun or ammo: %s\n", STRING(ent->v.netname), wpnName );
-			if ( FStrEq( wpnName, "weapon_lightning" ) ||
-				 FStrEq( wpnName, "weapon_rocketlauncher" ) ||
-				 FStrEq( wpnName, "weapon_grenadelauncher" ) ||
-				 FStrEq( wpnName, "weapon_supernailgun" ) ) chat.registerGotWeapon( ent, wpnName );
-		}
-		else if ( FStrEq( sample, "plats/freightmove2.wav" ) ) {	// lift usage
-			Vector pos = 0.5 * (ent->v.absmin + ent->v.absmax);  
-			pos.z = ent->v.absmax.z;
-			clientIndex = UTIL_GetNearestPlayerIndex( pos ) - 1;
-			//ent = INDEXENT( clientIndex+1 );
-			player[clientIndex].itemSensableDist = LIFT_SENS_DIST;
-			player[clientIndex].itemTrackableDist = LIFT_TRACK_DIST;
-			player[clientIndex].timeItemSound = worldTime() + 0.3;
-			//debugMsg( "%s used lift!\n", STRING(ent->v.netname) );
-		}
-		else if ( FStrEq( sample, "items/button4.wav" ) ) {	// button usage
-			clientIndex = UTIL_GetNearestPlayerIndex( ent->v.origin ) - 1;
-			//ent = INDEXENT( clientIndex+1 );
-			player[clientIndex].itemSensableDist = LIFT_SENS_DIST;
-			player[clientIndex].itemTrackableDist = LIFT_TRACK_DIST;
-			player[clientIndex].timeItemSound = worldTime() + 0.3;
-			//debugMsg( "%s pressed button!\n", STRING(ent->v.netname) );
-		}
-		else if ( FStrEq( sample, "items/health1.wav" ) ||
-				  FStrEq( sample, "items/r_item2.wav" ) ) {	// medkit or armor pickup
-			clientIndex = UTIL_GetNearestPlayerIndex( ent->v.origin ) - 1;
-			//ent = INDEXENT( clientIndex+1 );
-			player[clientIndex].itemSensableDist = ITEM_SENS_DIST;
-			player[clientIndex].itemTrackableDist = ITEM_TRACK_DIST;
-			player[clientIndex].timeItemSound = worldTime() + 0.3;
-			//debugMsg( "%s picked up medkit or armor!\n", STRING(ent->v.netname) );
-		}
-		else if ( FStrEq( sample, "items/armor1.wav" ) ) {	// armor pickup
-			clientIndex = ENTINDEX( ent ) - 1;
-			player[clientIndex].itemSensableDist = ITEM_SENS_DIST;
-			player[clientIndex].itemTrackableDist = ITEM_TRACK_DIST;
-			player[clientIndex].timeItemSound = worldTime() + 0.3;
-			//debugMsg( "%s picked up armor!\n", STRING(ent->v.netname) );
-		}
-		else if ( FStrEq( sample, "items/damage.wav" ) ) {			// quad-damage
-			clientIndex = UTIL_GetNearestPlayerIndex( ent->v.origin ) - 1;
-			//ent = INDEXENT( clientIndex+1 );
-			player[clientIndex].itemSensableDist = SPEC_ITEM_SENS_DIST;
-			player[clientIndex].itemTrackableDist = SPEC_ITEM_TRACK_DIST;
-			player[clientIndex].timeItemSound = worldTime() + 2.0;
-			//debugMsg( "%s picked up quad-damage!\n", STRING(ent->v.netname) );
-		}
-		/*else {
-			if (ent) debugMsg( "%s caused %s!\n", STRING(ent->v.classname), sample );
-			else debugMsg( "NullEnt caused %s!\n", sample );
+		if ( Q_STREQ( sample, "common/null.wav" ) ||
+			 Q_STREQ( sample, "player/lburn1.wav" ) ||
+			 Q_STREQ( sample, "player/lburn2.wav" ) ||
+			 Q_STREQ( sample, "items/itembk2.wav" ) ) {	// ignore
+		} else if (Q_STREQ( sample, "weapons/pkup.wav" ) ||		// weapon pickup
+			    Q_STREQ( sample, "weapons/lock4.wav" ) ) {		// ammo pickup
+			const char *wpnName = STRING( player->v.classname );
+			clientIndex = getnearestplayerindex(&player->v.origin) - 1;
+			player = edictofindex( clientIndex+1 );
+			players[clientIndex].itemSensableDist = AMMO_SENS_DIST;
+			players[clientIndex].itemTrackableDist = AMMO_TRACK_DIST;
+			players[clientIndex].timeItemSound = worldtime() + 0.3;
+			// DEBUG_MSG( "%s picked up gun or ammo: %s\n", STRING(player->v.netname), wpnName );
+			if ( Q_STREQ( wpnName, "weapon_lightning" ) ||
+				 Q_STREQ( wpnName, "weapon_rocketlauncher" ) ||
+				 Q_STREQ( wpnName, "weapon_grenadelauncher" ) ||
+				 Q_STREQ( wpnName, "weapon_supernailgun" ) ) chat_registergotweapon( player, wpnName );
+		} else if ( Q_STREQ( sample, "plats/freightmove2.wav" ) ) {	// lift usage
+			Vec3D pos;
+			boxcenter(player, &pos);  
+			pos.z = player->v.absmax.z;
+			clientIndex = getnearestplayerindex(&pos) - 1;
+			//ent = edictofindex( clientIndex+1 );
+			players[clientIndex].itemSensableDist = LIFT_SENS_DIST;
+			players[clientIndex].itemTrackableDist = LIFT_TRACK_DIST;
+			players[clientIndex].timeItemSound = worldtime() + 0.3;
+			// DEBUG_MSG( "%s used lift!\n", STRING(player->v.netname) );
+		} else if ( Q_STREQ( sample, "items/button4.wav" ) ) {	// button usage
+			clientIndex = getnearestplayerindex(&player->v.origin) - 1;
+			//player = edictofindex( clientIndex+1 );
+			players[clientIndex].itemSensableDist = LIFT_SENS_DIST;
+			players[clientIndex].itemTrackableDist = LIFT_TRACK_DIST;
+			players[clientIndex].timeItemSound = worldtime() + 0.3;
+			// DEBUG_MSG( "%s pressed button!\n", STRING(player->v.netname) );
+		} else if ( Q_STREQ( sample, "items/health1.wav" ) ||
+				  Q_STREQ( sample, "items/r_item2.wav" ) ) {	// medkit or armor pickup
+			clientIndex = getnearestplayerindex(&player->v.origin) - 1;
+			//player = edictofindex( clientIndex+1 );
+			players[clientIndex].itemSensableDist = ITEM_SENS_DIST;
+			players[clientIndex].itemTrackableDist = ITEM_TRACK_DIST;
+			players[clientIndex].timeItemSound = worldtime() + 0.3;
+			// DEBUG_MSG( "%s picked up medkit or armor!\n", STRING(player->v.netname) );
+		} else if ( Q_STREQ( sample, "items/armor1.wav" ) ) {	// armor pickup
+			clientIndex = indexofedict( player ) - 1;
+			players[clientIndex].itemSensableDist = ITEM_SENS_DIST;
+			players[clientIndex].itemTrackableDist = ITEM_TRACK_DIST;
+			players[clientIndex].timeItemSound = worldtime() + 0.3;
+			// DEBUG_MSG( "%s picked up armor!\n", STRING(player->v.netname) );
+		} else if ( Q_STREQ( sample, "items/damage.wav" ) ) {			// quad-damage
+			clientIndex = getnearestplayerindex(&player->v.origin) - 1;
+			//player = edictofindex( clientIndex+1 );
+			players[clientIndex].itemSensableDist = SPEC_ITEM_SENS_DIST;
+			players[clientIndex].itemTrackableDist = SPEC_ITEM_TRACK_DIST;
+			players[clientIndex].timeItemSound = worldtime() + 2.0;
+			// DEBUG_MSG( "%s picked up quad-damage!\n", STRING(player->v.netname) );
+		}/*else {
+			if (player) DEBUG_MSG( "%s caused %s!\n", STRING(player->v.classname), sample );
+			else DEBUG_MSG( "NullEnt caused %s!\n", sample );
 		}*/
 		break;
 	}
 }
 
-void Sounds::parseAmbientSound( edict_t *ent, const char *sample, float vol )
+void sounds_parseAmbientSound( EDICT *player, const char *sample, float vol )
 {
 	if (fatalParabotError) return;
 
 	int clientIndex;
 
-	if ( FStrEq( sample, "ambience/siren.wav" ) ) {
+	if ( Q_STREQ( sample, "ambience/siren.wav" ) ) {
 		headToBunker = true;
 		// 4 to 14 minutes silence...
-		nextAirstrikeTime = worldTime() + 240.0 + RANDOM_FLOAT( 0.0, 600.0 );
-	}
-	else if ( FStrEq( sample, "weapons/mortarhit.wav" ) ) {
-		airStrikeTime = worldTime()+1.0;
-	}
-	else if ( FStrEq( sample, "debris/beamstart2.wav" ) ) {
-		Vector pos = 0.5 * (ent->v.absmin + ent->v.absmax);  
-		clientIndex = UTIL_GetNearestPlayerIndex( pos ) - 1;
-		ent = INDEXENT( clientIndex+1 );
-		if (!ent) return;
-		player[clientIndex].itemSensableDist = 800;
-		player[clientIndex].itemTrackableDist = 800;
-		player[clientIndex].timeItemSound = worldTime() + 0.3;
-		//debugMsg( "%s used teleporter!\n", STRING(ent->v.netname) );
-	}
-	/*else {
-		if (ent) debugMsg( "%s caused %s!\n", STRING(ent->v.classname), sample );
-		else debugMsg( "NullEnt caused %s!\n", sample );
+		nextAirstrikeTime = worldtime() + 240.0 + randomfloat( 0.0f, 600.0f );
+	} else if ( Q_STREQ( sample, "weapons/mortarhit.wav")) {
+		airStrikeTime = worldtime() + 1.0f;
+	} else if ( Q_STREQ( sample, "debris/beamstart2.wav") ) {
+		Vec3D pos;
+		boxcenter(player, &pos);
+		clientIndex = getnearestplayerindex(&pos) - 1;
+		player = edictofindex( clientIndex+1 );
+		if (!player) return;
+		players[clientIndex].itemSensableDist = 800;
+		players[clientIndex].itemTrackableDist = 800;
+		players[clientIndex].timeItemSound = worldtime() + 0.3f;
+		// DEBUG_MSG( "%s used teleporter!\n", STRING(player->v.netname) );
+	}/*else {
+		if (player) DEBUG_MSG( "%s caused %s!\n", STRING(player->v.classname), sample );
+		else DEBUG_MSG( "NullEnt caused %s!\n", sample );
 	}*/
 
 }
 
-float Sounds::getSensableDist( int clientIndex )
+float sounds_getSensableDist( int clientIndex )
 {
 	clientIndex--;	// array start with 0, index with 1
 
-	float vol = player[clientIndex].stepSensableDist;
-	float itemPlayTime = player[clientIndex].timeItemSound - worldTime();
-	if ( itemPlayTime > 0 ) {
+	float vol = players[clientIndex].stepSensableDist;
+	float itemPlayTime = players[clientIndex].timeItemSound - worldtime();
+	if (itemPlayTime > 0) {
 		// check for mapchange
-		if ( itemPlayTime > 20 ) player[clientIndex].timeItemSound = 0;
-		if (player[clientIndex].itemSensableDist > vol) vol = player[clientIndex].itemSensableDist;
+		if (itemPlayTime > 20)
+			players[clientIndex].timeItemSound = 0;
+
+		if (players[clientIndex].itemSensableDist > vol)
+			vol = players[clientIndex].itemSensableDist;
 	}
 	return vol;
 }
 
-float Sounds::getTrackableDist( int clientIndex )
+float sounds_getTrackableDist( int clientIndex )
 {
 	clientIndex--;	// array start with 0, index with 1
 
-	float vol = player[clientIndex].stepTrackableDist;
-	float itemPlayTime = player[clientIndex].timeItemSound - worldTime();
+	float vol = players[clientIndex].stepTrackableDist;
+	float itemPlayTime = players[clientIndex].timeItemSound - worldtime();
 	if ( itemPlayTime > 0 ) {
 		// check for mapchange
-		if ( itemPlayTime > 20 ) player[clientIndex].timeItemSound = 0;
-		if (player[clientIndex].itemTrackableDist > vol) vol = player[clientIndex].itemTrackableDist;
+		if ( itemPlayTime > 20 ) players[clientIndex].timeItemSound = 0;
+		if (players[clientIndex].itemTrackableDist > vol) vol = players[clientIndex].itemTrackableDist;
 	}
 	return vol;
 }

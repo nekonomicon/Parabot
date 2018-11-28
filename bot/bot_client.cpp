@@ -7,13 +7,12 @@
 // bot_client.cpp
 //
 
-#include "extdll.h"
+#include "parabot.h"
 #include "bot.h"
 #include "bot_func.h"
 #include "bot_client.h"
 #include "bot_weapons.h"
-#include "parabot.h"
-#include "pb_chat.h"
+#include "chat.h"
 
 
 extern int mod_id;
@@ -36,14 +35,14 @@ void BotClient_TFC_VGUI(void *p, int bot_index)
 	if ((*(int *)p) == 2) { // is it a team select menu?
 
 		bots[bot_index].start_action = MSG_TFC_TEAM_SELECT;
-		bots[bot_index].menuSelectTime = worldTime() + 0.5;
-		debugMsg( "Action=TEAM_SELECT\n" );
+		bots[bot_index].menuSelectTime = worldtime() + 0.5;
+		DEBUG_MSG( "Action=TEAM_SELECT\n" );
 	}
 	else if ((*(int *)p) == 3) { // is is a class selection menu?
 
 		bots[bot_index].start_action = MSG_TFC_CLASS_SELECT;
-		bots[bot_index].menuSelectTime = worldTime() + 0.5;
-		debugMsg( "Action=CLASS_SELECT\n" );
+		bots[bot_index].menuSelectTime = worldtime() + 0.5;
+		DEBUG_MSG( "Action=CLASS_SELECT\n" );
 	}
 }
 
@@ -76,15 +75,15 @@ void BotClient_CS_ShowMenu(void *p, int bot_index)
       return;
    }
 
-   if (FStrEq((char *)p, "#Team_Select") )  // team select menu?
+   if (Q_STREQ((char *)p, "#Team_Select") )  // team select menu?
    {
       bots[bot_index].start_action = MSG_CS_TEAM_SELECT;
    }
-   else if (FStrEq((char *)p, "#Terrorist_Select") )  // T model select?
+   else if (Q_STREQ((char *)p, "#Terrorist_Select") )  // T model select?
    {
       bots[bot_index].start_action = MSG_CS_T_SELECT;
    }
-   else if (FStrEq((char *)p, "#CT_Select") )  // CT model select menu?
+   else if (Q_STREQ((char *)p, "#CT_Select") )  // CT model select menu?
    {
       bots[bot_index].start_action = MSG_CS_CT_SELECT;
    }
@@ -256,7 +255,7 @@ void BotClient_Valve_CurrentWeapon(void *p, int bot_index)
 				bots[bot_index].m_rgAmmo[weapon_defs[iId].iAmmo2];
 			
 			// update clientWeapon
-			int clientIndex = ENTINDEX( bots[bot_index].pEdict ) - 1;
+			int clientIndex = indexofedict( bots[bot_index].e ) - 1;
 			assert( clientIndex >= 0 );
 			assert( clientIndex < 32 );
 			clientWeapon[clientIndex] = iId;
@@ -310,7 +309,7 @@ void BotClient_DMC_CurrentWeapon(void *p, int bot_index)
 				bots[bot_index].m_rgAmmo[weapon_defs[iId].iAmmo2];
 			
 			// update clientWeapon
-			int clientIndex = ENTINDEX( bots[bot_index].pEdict ) - 1;
+			int clientIndex = indexofedict( bots[bot_index].e ) - 1;
 			assert( clientIndex >= 0 );
 			assert( clientIndex < 32 );
 			clientWeapon[clientIndex] = iId;
@@ -373,7 +372,7 @@ void HumanClient_CurrentWeapon( void *p, int clientIndex )
 					while (siId!=1) {  siId>>=1;  iId++;  }	// get real ID
 			}
 			clientWeapon[clientIndex] = iId;
-			//debugMsg( "Armed weapon %i\n", iId );
+			//DEBUG_MSG( "Armed weapon %i\n", iId );
 		}
 		state = 0;
 	}
@@ -406,7 +405,7 @@ void BotClient_Valve_AmmoX(void *p, int bot_index)
       amount = *(int *)p;  // the amount of ammo currently available
 
       bots[bot_index].m_rgAmmo[index] = amount;  // store it away
-	  if (bot_index == activeBot) debugMsg("AmmoX: i=%i, am=%i\n", index, amount );
+	  if (bot_index == activeBot) DEBUG_MSG("AmmoX: i=%i, am=%i\n", index, amount );
 
       ammo_index = bots[bot_index].current_weapon.iId;
 
@@ -554,30 +553,30 @@ void Client_Valve_DeathMsg(void *p, int noMatter)
 	if (state == 0)
 	{
 		state++;
-		killer_index = *(int *)p;  // ENTINDEX() of killer
+		killer_index = *(int *)p;  // indexofedict() of killer
 	}
 	else if (state == 1)
 	{
 		state++;
-		victim_index = *(int *)p;  // ENTINDEX() of victim
+		victim_index = *(int *)p;  // indexofedict() of victim
 	}
 	else if (state == 2)
 	{
 		state = 0;
-		edict_t *victim = INDEXENT(victim_index);
-		edict_t *killer = INDEXENT(killer_index);
+		EDICT *victim = edictofindex(victim_index);
+		EDICT *killer = edictofindex(killer_index);
 		assert( victim != 0 );
 
 		// call bot's registerDeath function if necessary:
-		bot_t *botV = UTIL_GetBotPointer( victim );
+		bot_t *botV = getbotpointer( victim );
 		if (botV) botV->parabot->registerDeath( killer, (char*)p );
 		
 		if (killer && killer!=victim) {
 			// call bot's registerKill function if necessary:
-			bot_t *botK = UTIL_GetBotPointer( killer );
+			bot_t *botK = getbotpointer( killer );
 			if (botK) botK->parabot->registerKill( victim, (char*)p );			
 		}
-		//suggestChatKill( INDEXENT(victim_index), INDEXENT(killer_index), (char*)p );
+		//suggestChatKill( edictofindex(victim_index), edictofindex(killer_index), (char*)p );
 	}
 }
 
@@ -590,9 +589,8 @@ void BotClient_Valve_Damage(void *p, int bot_index)
 	static int damage_armor;
 	static int damage_taken;
 	static int damage_bits;  // type of damage being done
-	static Vector damage_origin;
-	
-	
+	static Vec3D damage_origin;
+
 	if (state == 0)
 	{
 		state++;
@@ -625,12 +623,11 @@ void BotClient_Valve_Damage(void *p, int bot_index)
 		if ( (damage_armor > 0) || (damage_taken > 0) ) {	
 			if ( (bots[bot_index].parabot == 0) || (bots[bot_index].parabot->ent == 0) ) {
 				// may happen when server is closing down
-				debugMsg( "Bot_Client_Valve_Damage : Entity not found!\n" );
-			}
-			else {
+				DEBUG_MSG( "Bot_Client_Valve_Damage : Entity not found!\n" );
+			} else {
 				assert( damage_armor >= 0 );
 				assert( damage_taken >= 0 );
-				bots[bot_index].parabot->registerDamage( (damage_taken+damage_armor), damage_origin, damage_bits );
+				bots[bot_index].parabot->registerDamage( (damage_taken+damage_armor), &damage_origin, damage_bits );
 			}
 		}
 		state = 0;

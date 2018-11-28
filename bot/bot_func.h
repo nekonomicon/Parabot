@@ -15,20 +15,15 @@
 void BotSpawnInit( bot_t *pBot );
 void BotCreate( int fixedPersNr = -1 );
 void BotStartGame( bot_t *pBot );
-int BotInFieldOfView( bot_t *pBot, Vector dest );
-bool BotEntityIsVisible( bot_t *pBot, Vector dest );
 void BotFindItem( bot_t *pBot );
 void BotThink( bot_t *pBot );
 
 
-void BotFixIdealPitch( edict_t *pEdict );
+void BotFixIdealPitch( EDICT *pEdict );
 float BotChangePitch( bot_t *pBot, float speed );
-void BotFixIdealYaw( edict_t *pEdict );
+void BotFixIdealYaw( EDICT *pEdict );
 float BotChangeYaw( bot_t *pBot, float speed );
 
-edict_t *BotFindEnemy( bot_t *pBot );
-Vector BotBodyTarget( edict_t *pBotEnemy, bot_t *pBot );
-bool BotFireWeapon( Vector v_enemy, bot_t *pBot );
 void BotShootAtEnemy( bot_t *pBot );
 
 

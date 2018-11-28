@@ -1,10 +1,8 @@
-#if !defined( PB_CELL_H )
+#pragma once
+#if !defined(PB_CELL_H)
 #define PB_CELL_H
 
-
 #include "pb_global.h"
-#include "pb_focus.h"
-#include "pb_kills.h"
 #include "pb_navpoint.h"
 
 
@@ -18,31 +16,28 @@
 class PB_Cell
 {
 
-// flags:
-#define CFL_UNDERWATER	(1<<0)	// cell is underwater
-#define CFL_LOW_CEILING	(1<<1)	// player can only pass ducked
+enum { // flags:
+	CFL_UNDERWATER = BIT(0),	// cell is underwater
+	CFL_LOW_CEILING	= BIT(1)	// player can only pass ducked
+};
 
-// group-memberships:
-#define CG_ROOM		1
-#define CG_HALLWAY	2
-#define CG_YARD		3
-#define CG_ALLEY	4
-#define CG_ROOF		5
-
+enum { // group-memberships:
+	CG_ROOM = 1,
+	CG_HALLWAY,
+	CG_YARD,
+	CG_ALLEY,
+	CG_ROOF
+};
 
 public:
 
-	static Vector makePos( edict_t *pEdict ) {
-		return (pEdict->v.origin + pEdict->v.view_ofs);
-	}
-
 	PB_Cell() {};
-	PB_Cell( edict_t *pEdict );
+	PB_Cell( EDICT *pEdict );
 	PB_Cell( FILE *fp );
 
 	bool save( FILE *fp );
 
-	Vector pos()						{ return data.position;		}
+	Vec3D *pos()						{ return &data.position;		}
 	short getNeighbour( int i )			{ return data.neighbour[i]; }
 	float getWeight( int i )			{ return data.weight[i];	}
 	int visits()						{ return data.visits;		}
@@ -52,20 +47,18 @@ public:
 	bool addTraffic( short nbId, float nbWeight );
 	void addEnvDamage( float dmg );
 	float getEnvDamage();
-	bool isSuitableRoamingTarget( edict_t *traveller );
+	bool isSuitableRoamingTarget( EDICT *traveller );
 	PB_Navpoint* getNavpoint();
 	short getTraffic( short nbId );
 	bool delNeighbour( short nbId );
 	short getGround()					{ return data.ground;		}
 
-	PB_Focus	focus;
-	PB_Kills	kills;
+	// PB_Focus	focus;
 
-
-private:
+// private:
 
 	typedef struct {
-		Vector	position;
+		Vec3D	position;
 		short	neighbour[MAX_NBS];	// ids of neighbouring cells
 		float	weight[MAX_NBS];		// weight to neighbouring cells (for A*)
 		short	traffic[MAX_NBS];	// count of observed moves to neighbours
@@ -74,6 +67,7 @@ private:
 		float	envDamage;
 		short	navpoint;		// -1 if no navpoint in cell, else id of nearest nav
 		short	ground;			// -1 if world, else id of ground-entity
+		SECTOR  sectors[NUM_SECTORS];
 		//byte	group;			// group membership
 	} TSaveData;
 
@@ -81,6 +75,4 @@ private:
 	short	next;			// id of next cell in linked list (for hashtable)
 
 };
-
-
 #endif

@@ -1,3 +1,4 @@
+#include "parabot.h"
 #include "pb_weapon.h"
 #include "pb_global.h"
 #include "bot.h"
@@ -182,17 +183,17 @@ const char* getWeaponName( int wId )
 {
 	switch (mod_id)	{
 	case AG_DLL:
-	case VALVE_DLL:		if (wId>=MIN_VALVE_WEAPONS && wId<MAX_VALVE_WEAPONS) return valveWeapon[wId].shortName;
+	case VALVE_DLL:		if (wId >= MIN_VALVE_WEAPONS && wId < MAX_VALVE_WEAPONS) return valveWeapon[wId].shortName;
 						else return "weapon";						
-	case HOLYWARS_DLL:	if (wId>=MIN_HW_WEAPONS && wId<MAX_HW_WEAPONS) return holywarsWeapon[wId].shortName;
+	case HOLYWARS_DLL:	if (wId >= MIN_HW_WEAPONS && wId < MAX_HW_WEAPONS) return holywarsWeapon[wId].shortName;
 						else return "weapon";
-	case TFC_DLL:		if (wId>=MIN_TFC_WEAPONS && wId<MAX_TFC_WEAPONS) return tfcWeapon[wId].shortName;
+	case TFC_DLL:		if (wId >= MIN_TFC_WEAPONS && wId < MAX_TFC_WEAPONS) return tfcWeapon[wId].shortName;
 						else return "weapon";
-	case DMC_DLL:		if (wId>=MIN_DMC_WEAPONS && wId<MAX_DMC_WEAPONS) return dmcWeapon[wId].shortName;
+	case DMC_DLL:		if (wId >= MIN_DMC_WEAPONS && wId < MAX_DMC_WEAPONS) return dmcWeapon[wId].shortName;
 						else return "weapon";
-	case HUNGER_DLL:	if (wId>=MIN_HUNGER_WEAPONS && wId<MAX_HUNGER_WEAPONS) return hungerWeapon[wId].shortName;
+	case HUNGER_DLL:	if (wId >= MIN_HUNGER_WEAPONS && wId < MAX_HUNGER_WEAPONS) return hungerWeapon[wId].shortName;
 						else return "weapon";
-	case GEARBOX_DLL:	if (wId>=MIN_GEARBOX_WEAPONS && wId<MAX_GEARBOX_WEAPONS) return gearboxWeapon[wId].shortName;
+	case GEARBOX_DLL:	if (wId >= MIN_GEARBOX_WEAPONS && wId < MAX_GEARBOX_WEAPONS) return gearboxWeapon[wId].shortName;
 						else return "weapon";
 	}
 	return "shitty unknown MOD weapon";
@@ -249,20 +250,20 @@ PB_Weapon::PB_Weapon()
 }
 
 
-PB_Weapon::PB_Weapon( int wId )
+PB_Weapon::PB_Weapon(int wId)
 {
 	initMOD();
-	if ( wId>=minModWeapon && wId<maxModWeapon ) currentWeapon = wId;
+	if ( wId >= minModWeapon && wId < maxModWeapon ) currentWeapon = wId;
 	else currentWeapon = minModWeapon;
 }
 
 
-void PB_Weapon::init( int slot, edict_t *ent, PB_Action *action )
+void PB_Weapon::init( int slot, EDICT *ent, PB_Action *action )
 {
 	botSlot = slot;
 	botEnt = ent;
 	botAction = action;
-	for (int i=0; i<MAX_WEAPONS; i++) {
+	for (int i = 0; i < MAX_WEAPONS; i++) {
 		bestMode[i] = 1;	// primary attack
 	}
 	nextAttackTime = 0;
@@ -277,17 +278,15 @@ void PB_Weapon::init( int slot, edict_t *ent, PB_Action *action )
 
 void PB_Weapon::setCurrentWeapon( int wId )
 { 
-	if ( wId>=minModWeapon && wId<maxModWeapon ) currentWeapon = wId;
+	if (wId >= minModWeapon && wId < maxModWeapon)
+		currentWeapon = wId;
 }
 
-
-void PB_Weapon::registerArmedWeapon( int wId )
+void PB_Weapon::registerArmedWeapon(int wId)
 { 
-	if ( wId>=minModWeapon && wId<maxModWeapon ) armedWeapon = wId; 
+	if (wId >= minModWeapon && wId < maxModWeapon)
+		armedWeapon = wId;
 }
-
-
-
 
 ///////////////////////////////////////////////////////////////////////////////////
 //
@@ -460,16 +459,16 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 		break;
 
 	case VALVE_WEAPON_EGON:
-		if( ( bm_gluon && bm_gluon->value )
-			|| FBitSet( g_uiGameFlags, GAME_SEVS ))
+		if((bm_gluon && bm_gluon->value)
+			|| (com.gamedll_flags & GAMEDLL_SEVS))
 		{
 				return 0;
 		}
-		if ( flags & (WF_UNDERWATER | WF_NEED_GRENADE) ) break;
+		if (flags & (WF_UNDERWATER | WF_NEED_GRENADE)) break;
 				
 		if (distance < 250) {
-			score = (distance-150) / 12.5;
-			if (score<0.5) score = 0.5;
+			score = (distance - 150.0f) / 12.5f;
+			if (score < 0.5f) score = 0.5f;
 		}
 		else {
 			score = 8 - 8*(distance-250)/1600;
@@ -498,7 +497,7 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 	case VALVE_WEAPON_TRIPMINE:
 		if( bm_trip && bm_trip->value )
 		{
-			bestMode[currentWeapon] = RANDOM_FLOAT( 1.5, 2.0 );
+			bestMode[currentWeapon] = randomfloat( 1.5, 2.0 );
 		}
 		return 0;		// never arm for combat
 
@@ -517,7 +516,7 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 		break;
 
 	default:
-		debugMsg( "ValveWeaponScore: Unknown ID %i !\n", currentWeapon );
+		DEBUG_MSG( "ValveWeaponScore: Unknown ID %i !\n", currentWeapon );
 	
 	}
 
@@ -539,7 +538,7 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 	
 	if (notSuitable) score /= 10;
 
-	//debugMsg( "wscore=%.2f\n", score );
+	// DEBUG_MSG( "wscore=%.2f\n", score );
 	return score;
 }
 
@@ -612,7 +611,7 @@ float PB_Weapon::hwWeaponScore( float distance, float hitProb, int flags, bool c
 		break;
 
 	default:
-		debugMsg( "HolyWarsWeaponScore: Unknown ID %i !\n", currentWeapon );
+		DEBUG_MSG( "HolyWarsWeaponScore: Unknown ID %i !\n", currentWeapon );
 	
 	}
 
@@ -634,7 +633,7 @@ float PB_Weapon::hwWeaponScore( float distance, float hitProb, int flags, bool c
 	
 	if (notSuitable) score /= 10;
 
-	//debugMsg( "wscore=%.2f\n", score );
+	// DEBUG_MSG( "wscore=%.2f\n", score );
 	return score;
 
 }
@@ -713,7 +712,7 @@ float PB_Weapon::dmcWeaponScore( float distance, float hitProb, int flags, bool 
 		if ( flags & WF_ENEMY_BELOW ) {		// this is going to be fun ;-)
 			if (distance < 500) {
 				float minDist = 150;
-				if (hasQuadDamage( botEnt )) minDist = 300;
+				if (has_quaddamage( botEnt )) minDist = 300;
 				if (distance>minDist) score = 5;
 			}
 			else {
@@ -724,7 +723,7 @@ float PB_Weapon::dmcWeaponScore( float distance, float hitProb, int flags, bool 
 		}
 		else {
 			if (distance < 250) {
-				if (!hasQuadDamage( botEnt )) {		// that would be very unwise
+				if (!has_quaddamage( botEnt )) {		// that would be very unwise
 					score = (distance-150) / 16.67;
 					if (score<2.5) score = 2.5;	// don't switch weapon!
 				}
@@ -741,7 +740,7 @@ float PB_Weapon::dmcWeaponScore( float distance, float hitProb, int flags, bool 
 		if (checkAmmo && ammo1() == 0) break;
 		
 		if (distance < 250) {
-			if (!hasQuadDamage( botEnt )) {		// that would be very unwise
+			if (!has_quaddamage( botEnt )) {		// that would be very unwise
 				score = (distance-150) / 12.5;
 				if (score<2.5) score = 2.5;	// don't switch weapon!
 			}
@@ -757,7 +756,7 @@ float PB_Weapon::dmcWeaponScore( float distance, float hitProb, int flags, bool 
 		if ( flags & WF_NEED_GRENADE ) break;
 		if ( flags & WF_UNDERWATER ) {
 			// suppose others are underwater as well ;-)
-			if (isInvulnerable( botEnt )) score = 10;
+			if (is_invulnerable( botEnt )) score = 10;
 			break;
 		}
 		if (checkAmmo && ammo1() == 0) break;
@@ -768,7 +767,7 @@ float PB_Weapon::dmcWeaponScore( float distance, float hitProb, int flags, bool 
 		break;
 
 	default:
-		debugMsg( "DMCWeaponScore: Unknown ID %i !\n", currentWeapon );
+		DEBUG_MSG( "DMCWeaponScore: Unknown ID %i !\n", currentWeapon );
 	
 	}
 
@@ -789,9 +788,9 @@ float PB_Weapon::dmcWeaponScore( float distance, float hitProb, int flags, bool 
 	}
 	
 	if (notSuitable) score /= 10;
-	if (hasQuadDamage( botEnt )) score *= 3;
+	if (has_quaddamage( botEnt )) score *= 3;
 
-	//debugMsg( "wscore=%.2f\n", score );
+	//DEBUG_MSG( "wscore=%.2f\n", score );
 	return score;
 
 }
@@ -1085,7 +1084,7 @@ float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, b
 	
 
 	default:
-		debugMsg( "GearboxWeaponScore: Unknown ID %i !\n", currentWeapon );
+		DEBUG_MSG( "GearboxWeaponScore: Unknown ID %i !\n", currentWeapon );
 	
 	}
 
@@ -1107,7 +1106,7 @@ float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, b
 	
 	if (notSuitable) score /= 10;
 
-	//debugMsg( "wscore=%.2f\n", score );
+	// DEBUG_MSG( "wscore=%.2f\n", score );
 	return score;
 }
 
@@ -1328,7 +1327,7 @@ float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bo
 
                 break;
 	default:
-		debugMsg( "HungerWeaponScore: Unknown ID %i !\n", currentWeapon );
+		DEBUG_MSG( "HungerWeaponScore: Unknown ID %i !\n", currentWeapon );
 	
 	}
 
@@ -1337,12 +1336,10 @@ float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bo
 		if (flags & WF_IMMEDIATE_ATTACK) {
 			if ( score > 4.1 ) score -= 4.0;
 			else if (score > 0) score = 0.1;	// it has to remain better than 0
-		}
-		else if (flags & WF_FAST_ATTACK) {
+		} else if (flags & WF_FAST_ATTACK) {
 			if ( score > 2.1 ) score -= 2.0;
 			else if (score > 0) score = 0.1;	// it has to remain better than 0
-		}
-		else {
+		} else {
 			if ( score > 0.6 ) score -= 0.5;
 			else if (score > 0) score = 0.1;	// it has to remain better than 0
 		}
@@ -1350,7 +1347,7 @@ float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bo
 	
 	if (notSuitable) score /= 10;
 
-	//debugMsg( "wscore=%.2f\n", score );
+	// DEBUG_MSG( "wscore=%.2f\n", score );
 	return score;
 }
 
@@ -1365,11 +1362,10 @@ float PB_Weapon::getScore( float distance, float hitProb, int flags, bool checkA
 	case CSTRIKE_DLL:	return csWeaponScore( distance, hitProb, flags, checkAmmo );
 	case TFC_DLL:		return tfcWeaponScore( distance, hitProb, flags, checkAmmo );
 	case HUNGER_DLL:	return hungerWeaponScore( distance, hitProb, flags, checkAmmo );
-	case GEARBOX_DLL:	return gearboxWeaponScore( distance, hitProb, flags, checkAmmo );
-	
+	case GEARBOX_DLL:	return gearboxWeaponScore( distance, hitProb, flags, checkAmmo );	
 	}
 
-	errorMsg( "FATAL ERROR in getWeaponScore(): Unknown MOD-ID!\n" );
+	ERROR_MSG( "FATAL ERROR in getWeaponScore(): Unknown MOD-ID!\n" );
 	return 0;
 }
 
@@ -1383,63 +1379,63 @@ float PB_Weapon::getScore( float distance, float hitProb, int flags, bool checkA
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-bool PB_Weapon::attackValveHandgrenade( Vector &target )
+bool PB_Weapon::attackValveHandgrenade( Vec3D *target )
 {
-	if (worldTime() < nextAttackTime) return false;
+	if (worldtime() < nextAttackTime) return false;
 
 	bool grenadeThrown = false;
 	if (!grenadePrepared) {
-		//debugMsg( "Arming HG!\n" );
+		// DEBUG_MSG( "Arming HG!\n" );
 		grenadePrepared=true;
-		grenadeLaunchTime = worldTime() + 2.0;
-		grenadeTarget = target;
+		grenadeLaunchTime = worldtime() + 2.0;
+		vcopy(target, &grenadeTarget);
 		grenadeWId = VALVE_WEAPON_HANDGRENADE;
 	}
-	if ( worldTime() < grenadeLaunchTime ) {
-		//debugMsg( "Holding HG, counter=%.1f\n", (grenadeLaunchTime-worldTime()) );
-		botAction->add( BOT_FIRE_PRIM );
+	if ( worldtime() < grenadeLaunchTime ) {
+		// DEBUG_MSG( "Holding HG, counter=%.1f\n", (grenadeLaunchTime-worldtime()) );
+		botAction->add(BOT_FIRE_PRIM, NULL);
 	}
 	else {
-		//debugMsg( "Throwing HG!\n" );
+		// DEBUG_MSG( "Throwing HG!\n" );
 		grenadeThrown = true;
 		grenadePrepared = false;
-		nextAttackTime = worldTime() + 0.5;	// give time to switch weapons
+		nextAttackTime = worldtime() + 0.5;	// give time to switch weapons
 	}
 
 	return grenadeThrown;
 }
 
 
-bool PB_Weapon::attackValveSatchel( Vector &target )
+bool PB_Weapon::attackValveSatchel( Vec3D *target )
 {
-	if (worldTime() < nextAttackTime) return false;
+	if (worldtime() < nextAttackTime) return false;
 
 	bool grenadeThrown = false;
 	if (!grenadePrepared) {
-		//debugMsg( "Throwing satchel!\n" );
-		botAction->add( BOT_FIRE_PRIM );
-		if ( FStrEq( STRING(botEnt->v.viewmodel), "models/v_satchel_radio.mdl" ) ) {
+		// DEBUG_MSG( "Throwing satchel!\n" );
+		botAction->add(BOT_FIRE_PRIM, NULL);
+		if ( Q_STREQ( STRING(botEnt->v.viewmodel), "models/v_satchel_radio.mdl" ) ) {
 			grenadePrepared=true;
-			grenadeLaunchTime = worldTime() + 1.5;
+			grenadeLaunchTime = worldtime() + 1.5;
 			grenadeWId = VALVE_WEAPON_SATCHEL;
 		}
 	}
-	else if ( worldTime() > grenadeLaunchTime ) {
-		//debugMsg( "Blowing up satchel!\n" );
-		botAction->add( BOT_FIRE_PRIM );
-		if ( worldTime() > (grenadeLaunchTime+0.1) ) {
+	else if ( worldtime() > grenadeLaunchTime ) {
+		// DEBUG_MSG( "Blowing up satchel!\n" );
+		botAction->add(BOT_FIRE_PRIM, NULL);
+		if ( worldtime() > (grenadeLaunchTime+0.1) ) {
 			grenadeThrown = true;
 			grenadePrepared = false;
-			nextAttackTime = worldTime() + 0.5;	// give time to switch weapons
+			nextAttackTime = worldtime() + 0.5;	// give time to switch weapons
 		}
 	}
-	//else debugMsg( "Waiting for satchel, counter=%.1f\n", (grenadeLaunchTime-worldTime()) );
+	//else DEBUG_MSG( "Waiting for satchel, counter=%.1f\n", (grenadeLaunchTime - worldtime()) );
 
 	return grenadeThrown;
 }
 
 
-bool PB_Weapon::attack( Vector target, float accuracy, Vector relVel )
+bool PB_Weapon::attack( Vec3D *target, float accuracy, Vec3D *relVel )
 // aims at target, if accuracy is reached fires and returns true, else returns false
 // reloads when necessary
 {
@@ -1448,70 +1444,67 @@ bool PB_Weapon::attack( Vector target, float accuracy, Vector relVel )
 	botAction->setAimDir( target, relVel );
 
 	// check for reload:
-	if ( needReload() ) reload();
-		
+	if (needReload())
+		reload();
 	else {
 				
 		// load special weapons:
 		if ( mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL ) {	
-			if ( currentWeapon==VALVE_WEAPON_GAUSS && bestMode[currentWeapon]==2 ) {
+			if ( currentWeapon == VALVE_WEAPON_GAUSS && bestMode[currentWeapon] == 2 ) {
 				if (!loadingGauss) {
 					loadingGauss = true;
-					loadStartTime = worldTime();
-					nextAttackTime = worldTime() + 1.0;	// at least load 1 sec.
+					loadStartTime = worldtime();
+					nextAttackTime = worldtime() + 1.0;	// at least load 1 sec.
 				}
 				// check if we have to stop loading to not explode...
-				if ((worldTime()-loadStartTime) < 5) botAction->add( BOT_FIRE_SEC );
+				if ((worldtime() - loadStartTime) < 5)
+					botAction->add(BOT_FIRE_SEC, NULL);
 				else {
 					loadingGauss = false;
 					fired = true;
 				}
-			}
-			else if (currentWeapon==VALVE_WEAPON_HANDGRENADE) {
+			} else if (currentWeapon==VALVE_WEAPON_HANDGRENADE) {
 				fired = attackValveHandgrenade( target );// pull trigger before aiming perfectly
-			}
-			else if (currentWeapon==VALVE_WEAPON_SATCHEL && grenadePrepared) {
+			} else if (currentWeapon==VALVE_WEAPON_SATCHEL && grenadePrepared) {
 				fired = attackValveSatchel( target );	// no need for aiming when satchel thrown
 			}
 		}
 		if (fired) return true;	// no need to go on
 
 		// fire if delay and accuracy are ok:
-		if (( worldTime() > nextAttackTime ) && 
-			( botAction->targetAccuracy() > accuracy || lastAttackTime > (worldTime()-0.5) )) {
-			lastAttackTime = worldTime();
+		if (( worldtime() > nextAttackTime ) && 
+			( botAction->targetAccuracy() > accuracy || lastAttackTime > (worldtime() - 0.5f) )) {
+			lastAttackTime = worldtime();
 			if ( bestMode[currentWeapon] == 1 ) {	
 				// primary fire:
-				if (mod_id==VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id==GEARBOX_DLL) {
-					if (currentWeapon==VALVE_WEAPON_HANDGRENADE) fired = attackValveHandgrenade( target );
-					else if (currentWeapon==VALVE_WEAPON_SATCHEL) fired = attackValveSatchel( target );
-					else {  botAction->add( BOT_FIRE_PRIM );  fired = true;  }
-				}
-				else {  botAction->add( BOT_FIRE_PRIM );  fired = true;  }
-			}
-			else {	
+				if (mod_id==VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) {
+					if (currentWeapon == VALVE_WEAPON_HANDGRENADE)
+						fired = attackValveHandgrenade( target );
+					else if (currentWeapon == VALVE_WEAPON_SATCHEL)
+						fired = attackValveSatchel( target );
+					else {  botAction->add(BOT_FIRE_PRIM, NULL);  fired = true;  }
+				} else {  botAction->add(BOT_FIRE_PRIM, NULL );  fired = true;  }
+			} else {
 				// secondary fire:
 				if (mod_id==VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id==GEARBOX_DLL) {
 					if (currentWeapon==VALVE_WEAPON_GAUSS) {
-						botAction->add( BOT_RELEASE_SEC );
+						botAction->add(BOT_RELEASE_SEC, NULL);
 						loadingGauss = false;
-					}
-					else if ( currentWeapon==VALVE_WEAPON_CROSSBOW || 
-						      currentWeapon==VALVE_WEAPON_PYTHON   || 
-							  currentWeapon==VALVE_WEAPON_RPG) 
+					} else if ( currentWeapon == VALVE_WEAPON_CROSSBOW || 
+						      currentWeapon == VALVE_WEAPON_PYTHON   || 
+							  currentWeapon == VALVE_WEAPON_RPG) 
 					{	// these weapons had their correct mode set in armBestWeapon
-						botAction->add( BOT_FIRE_PRIM );
+						botAction->add(BOT_FIRE_PRIM, NULL);
+					} else {
+						botAction->add(BOT_FIRE_SEC, NULL);
 					}
-					else {
-						botAction->add( BOT_FIRE_SEC );
-					}
-				}
-				else botAction->add( BOT_FIRE_SEC );
+				} else
+					botAction->add(BOT_FIRE_SEC, NULL);
 				fired = true;
 			}
-			nextAttackTime = worldTime() + modWeapon[currentWeapon].fireDelay;
+			nextAttackTime = worldtime() + modWeapon[currentWeapon].fireDelay;
 			if ( modWeapon[currentWeapon].fireDelay > 0 ) {		// has to release button
-				float rDelay = RANDOM_FLOAT( 0, 0.3 );	// add random delay
+				float rDelay = randomfloat( 0.0f, 0.3f );	// add random delay
 				nextAttackTime += rDelay;
 			}
 		}
@@ -1519,20 +1512,17 @@ bool PB_Weapon::attack( Vector target, float accuracy, Vector relVel )
 	return fired;
 }
 
-
 void PB_Weapon::finishAttack()
 {
-	//debugMsg( "Forced to finish attack!\n" );
+	// DEBUG_MSG( "Forced to finish attack!\n" );
 	if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) {
 		if (currentWeapon==VALVE_WEAPON_HANDGRENADE) {
-			botAction->setViewDir( grenadeTarget, 5 );
-			attackValveHandgrenade( grenadeTarget );
-		}
-		else if (currentWeapon==VALVE_WEAPON_SATCHEL) {
-			attackValveSatchel( grenadeTarget );
-		}
-		else {
-			debugMsg( "ERROR: Illegal wID!\n" );
+			botAction->setViewDir(&grenadeTarget, 5 );
+			attackValveHandgrenade( &grenadeTarget );
+		} else if (currentWeapon==VALVE_WEAPON_SATCHEL) {
+			attackValveSatchel( &grenadeTarget );
+		} else {
+			DEBUG_MSG( "ERROR: Illegal wID!\n" );
 		}
 	}
 }
@@ -1570,29 +1560,31 @@ float PB_Weapon::getAudibleDistance( int attackFlags )
 {
 	assert( modWeapon != 0 );
 
-	if (attackFlags & IN_ATTACK2)   return ( 2 * modWeapon[currentWeapon].volAttack2 );
-	else							return ( 2 * modWeapon[currentWeapon].volAttack1 );
+	if (attackFlags & ACTION_ATTACK2)
+		return (2 * modWeapon[currentWeapon].volAttack2);
+	return (2 * modWeapon[currentWeapon].volAttack1);
 }
-
 
 bool PB_Weapon::needReload()
 // returns true if the current weapon needs to be reloaded
 {
-	if (mod_id==DMC_DLL) return false;	// no reload in DMC!
+	if (mod_id == DMC_DLL)
+		return false;	// no reload in DMC!
 
 	// ammoclip values only available for armed weapons!
-	if ( currentWeapon!=armedWeapon ) return false;
+	if (currentWeapon != armedWeapon)
+		return false;
 
 	bool shouldReload = false;
-		
-	if (modWeapon[currentWeapon].secAmmo && bestMode[currentWeapon]==2) {	
+
+	if (modWeapon[currentWeapon].secAmmo && bestMode[currentWeapon] == 2) {	
 		// attack with secondary ammo
-		if ( bots[botSlot].current_weapon.iAmmo2 == 0 ) {
+		if (bots[botSlot].current_weapon.iAmmo2 == 0) {
 			bestMode[currentWeapon] = 1;
-			if ( bots[botSlot].current_weapon.iClip == 0 ) shouldReload = true;
+			if (bots[botSlot].current_weapon.iClip == 0)
+				shouldReload = true;
 		}
-	}
-	else {
+	} else {
 		// attack with primary ammo
 		if ( bots[botSlot].current_weapon.iClip == 0 ) shouldReload = true;
 	}
@@ -1603,22 +1595,20 @@ bool PB_Weapon::needReload()
 	return shouldReload;
 }
 
-
 void PB_Weapon::reload()
 {
 	// only execute if not reloading yet and weapon armed
-	if (!reloading && currentWeapon==armedWeapon) {
+	if (!reloading && currentWeapon == armedWeapon) {
 		reloading = true;
-		botAction->add( BOT_RELOAD );
-		//debugMsg( "Reload!\n" );
+		botAction->add(BOT_RELOAD, NULL);
+		// DEBUG_MSG("Reload!\n");
 	}
 }
-
 
 float PB_Weapon::bestDistance()
 // returns best distance for currentWeapon
 {
-	assert( modWeapon != 0 );
+	assert(modWeapon != 0);
 	return modWeapon[currentWeapon].bestDist;
 }
 

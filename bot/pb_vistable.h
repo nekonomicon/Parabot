@@ -1,18 +1,10 @@
 // PB_VisTable.h: interface for the PB_VisTable class.
 //
 //////////////////////////////////////////////////////////////////////
-
-#if !defined( PB_VISTABLE_H )
-#define PB_VISTABLE_H
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-
-
+#if !defined(PB_VISTABLE_H)
+#define PB_VISTABLE_H
 #include <stdio.h>
-
-
 
 class PB_VisTable  
 {

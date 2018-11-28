@@ -1,30 +1,35 @@
-#ifndef UTILITY_FUNCS_H
+#pragma once
+#if !defined(UTILITY_FUNCS_H)
 #define UTILITY_FUNCS_H
 
-
-#include "extdll.h"
-
-
-
-Vector getRight( const Vector &vec );
-bool canShootAt( edict_t *bot, Vector target );
-
-bool playerExists( edict_t *pEdict );
-bool isAlive(edict_t *pEdict);
-bool isUnderwater( edict_t *ent );
-bool needsAir( edict_t *ent );
-
-// for Valve:
-edict_t* laserdotOwner( edict_t *laser );
-
 // for HolyWars:
-bool isTheSaint( edict_t *ent );
-bool isHeretic( edict_t *ent );
+bool	 is_thesaint(EDICT *player);
+bool	 is_heretic(EDICT *player);
+
+// common funcs
+EDICT	*laserdotowner(EDICT *laser);
+bool	 worldtime_reached(float time);
+bool	 buttontriggers(EDICT *button, EDICT *target);
+char	*memfgets(byte *pMemFile, int fileSize, int *filePos);
+int	 getnearestplayerindex(Vec3D *pos);
+
+float	 worldtime();
+void	 boxcenter(EDICT *e, Vec3D *pos);
+void	 eyepos(EDICT *e, Vec3D *pos);
+bool	 playerexists(EDICT *player);
+bool	 is_alive(EDICT *player);
+bool	 is_underwater(EDICT *player);
+bool	 needsair(EDICT *player);
+bool	 canshootat(EDICT *bot, Vec3D *target);
 
 // for DMC:
-bool hasQuadDamage( edict_t *ent );
-bool isInvisible( edict_t *ent );
-bool isInvulnerable( edict_t *ent );
-
-
+bool	 has_quaddamage(EDICT *player);
+bool	 is_invisible(EDICT *player);
+bool	 is_invulnerable(EDICT *player);
+bool	 is_onladder(EDICT *player);
+bool	 is_hostowner(EDICT *player);
+bool	 is_validedict(EDICT *e);
+float	 servermaxspeed();
+int	 getframerateinterval();
+bool	 fileexists(const char *filename);
 #endif

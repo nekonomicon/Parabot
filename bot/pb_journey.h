@@ -1,6 +1,6 @@
-#if !defined( PB_JOURNEY_H )
+#pragma once
+#if !defined(PB_JOURNEY_H)
 #define PB_JOURNEY_H
-
 
 #include "pb_path.h"
 #include <stack>

@@ -5,28 +5,24 @@
 //
 // bot.h
 //
-
-#ifndef BOT_H
+#pragma once
+#if !defined(BOT_H)
 #define BOT_H
 
-#include "extdll.h"
-#include "studio.h"
+#include "sdk_common.h"
 #include "pb_global.h"
 
-typedef int (FAR *GETENTITYAPI)(DLL_FUNCTIONS *, int);
-typedef int (FAR *GETNEWDLLFUNCTIONS)(NEW_DLL_FUNCTIONS *, int *); 
+typedef int (*GETENTITYAPI)(SERVERFUNCS *, int);
+typedef int (*GETNEWDLLFUNCTIONS)(SERVERFUNCS2 *, int *); 
 
-typedef void (WINAPI *GIVEFNPTRSTODLL)(enginefuncs_t *, globalvars_t *);
-typedef void (FAR *LINK_ENTITY_FUNC)(entvars_t *);
-typedef int (*SERVER_GETBLENDINGINTERFACE) (int, struct sv_blending_interface_s **, struct engine_studio_api_s *, float (*)[3][4], float (*)[MAXSTUDIOBONES][3][4]);
+typedef void (WINAPI *GIVEFNPTRSTODLL)(ENGINEAPI *, GLOBALENTVARS *);
+typedef void (*LINK_ENTITY_FUNC)(ENTVARS *);
+typedef int (*SERVER_GETBLENDINGINTERFACE) (int, struct sv_blending_interface **, struct engine_studio_api *, void *, void *);
+typedef int (*SERVER_GETPHYSICSINTERFACE) (int, void *, PHYSICS_INTERFACE *);
 
 // define some function prototypes...
-BOOL ClientConnect( edict_t *pEntity, const char *pszName,
-                    const char *pszAddress, char szRejectReason[ 128 ] );
-void ClientPutInServer( edict_t *pEntity );
-void ClientCommand( edict_t *pEntity );
 
-void FakeClientCommand(edict_t *pBot, const char *arg1, const char *arg2, const char *arg3);
+void FakeClientCommand(EDICT *pBot, const char *arg1, const char *arg2, const char *arg3);
 
 const char *Cmd_Args( void );
 const char *Cmd_Argv( int argc );
@@ -92,7 +88,7 @@ typedef struct
 	CParabot *parabot;			// pointer to Parabot instance
 	int personality;			// index to personality-table
 
-   edict_t *pEdict;				// Pointer to bot-edict
+   EDICT *e;				// Pointer to bot-edict
    bool is_used;				// must be true if BotThink should be called
    int respawn_state;			// used to handle respawns after map changes
    bool need_to_initialize;		// used to handle initialization after bot death
@@ -108,26 +104,20 @@ typedef struct
    int bot_class;
    int bot_money;    // for Counter-Strike
 
-   //edict_t *pBotEnemy;
+   //EDICT *pBotEnemy;
 
    float prev_speed;
-   Vector v_prev_origin;
+   Vec3D v_prev_origin;
    float f_pause_time;
 
    float f_move_speed;
 
    bot_current_weapon_t current_weapon;  // one current weapon
-   int m_rgAmmo[MAX_AMMO_SLOTS];  // total ammo amounts
+   int m_rgAmmo[32];  // total ammo amounts
 
 } bot_t;
 
-// new UTIL.CPP functions (from HPB-bot)...
-void UTIL_SayText( const char *pText, edict_t *pEdict );
-int UTIL_GetTeam(edict_t *pEntity);
-int UTIL_GetBotIndex(edict_t *pEdict);
-bot_t *UTIL_GetBotPointer(edict_t *pEdict);
-void UTIL_SelectItem(edict_t *pEdict, const char *item_name);
-void UTIL_ShowMenu( edict_t *pEdict, int slots, int displaytime, bool needmore, const char *pText );
-
+int      getbotindex(EDICT *e);
+bot_t   *getbotpointer(EDICT *e);
 #endif // BOT_H
 

@@ -1,45 +1,45 @@
+#pragma once
 #if !defined( PB_PATH_H )
 #define PB_PATH_H
 
 
 #include <list>
 #include <vector>
-//using namespace std;
 #include "pb_navpoint.h"
-
-
-//using namespace std;
-
 
 #define MAX_PATH_WEIGHT	1000000
 
 
 // path flags (specials)
-#define PATH_NORMAL          0
-#define PATH_ALL			 7
-#define PATH_NEED_LONGJUMP   (1<<  0)
-#define PATH_NEED_GAUSSJUMP  (1<<  1)
-#define PATH_CAUSES_DAMAGE   (1<<  2)
-
+enum {
+	PATH_NORMAL = 0,
+	PATH_NEED_LONGJUMP =	BIT(0),
+	PATH_NEED_GAUSSJUMP =	BIT(1),
+	PATH_CAUSES_DAMAGE =	BIT(2),
+	PATH_ALL = (PATH_NEED_LONGJUMP|PATH_NEED_GAUSSJUMP|PATH_CAUSES_DAMAGE)
+};
 
 // waypoint flags (higher 16 bits of act)
-#define WP_DMG_OCURRED			(1<< 18)	// used to determine pathmode
-#define WP_ON_PLATFORM			(1<< 19)
-#define WP_ON_LADDER			(1<< 20)
-#define WP_NOT_REACHABLE		(1<< 21)	// reached() always returns false
-#define WP_IS_NAVPOINT			(1<< 22)	// marks a navpoint in the followers-trail
-#define WP_NOT_INITIALIZED		(1<< 23)	// waypoint contains no valid data
-#define WP_TELEPORTER_HINT		(1<< 24)	// marks a hint for a teleporter
-#define WP_PLAT_NEEDS_TRIGGER	(1<< 25)	// only together with WP_ON_PLATFORM
-#define WP_AT_PLATFORM_START	(1<< 26)	// only together with WP_ON_PLATFORM
-#define WP_AT_PLATFORM_END		(1<< 27)	// only together with WP_ON_PLATFORM
-
+enum {
+	WP_DMG_OCURRED =	BIT(18),	// used to determine pathmode
+	WP_ON_PLATFORM =	BIT(19),
+	WP_ON_LADDER =		BIT(20),
+	WP_NOT_REACHABLE =	BIT(21),	// reached() always returns false
+	WP_IS_NAVPOINT =	BIT(22),	// marks a navpoint in the followers-trail
+	WP_NOT_INITIALIZED =	BIT(23),	// waypoint contains no valid data
+	WP_TELEPORTER_HINT =	BIT(24),	// marks a hint for a teleporter
+	WP_PLAT_NEEDS_TRIGGER =	BIT(25),	// only together with WP_ON_PLATFORM
+	WP_AT_PLATFORM_START =	BIT(26),	// only together with WP_ON_PLATFORM
+	WP_AT_PLATFORM_END =	BIT(27)		// only together with WP_ON_PLATFORM
+};
 
 // journey modes (influence on PB_Path::weight())
-#define JOURNEY_FAST		0
-#define JOURNEY_RELIABLE	1
-#define JOURNEY_LONELY		2
-#define JOURNEY_CROWDED		3
+enum {
+	JOURNEY_FAST,
+	JOURNEY_RELIABLE,
+	JOURNEY_LONELY,
+	JOURNEY_CROWDED
+};
 
 void setJourneyMode( int mode );
 
@@ -52,7 +52,7 @@ class PB_Path_Waypoint
 {
 public:
 	typedef struct {
-		Vector	pos;		// position
+		Vec3D	pos;		// position
 		int		act;		// action + flags
 		float	arrival;	// time this waypoint has been reached (since start)
 	} TSaveData;
@@ -60,11 +60,11 @@ public:
 	TSaveData data;
 	
 	PB_Path_Waypoint();
-	PB_Path_Waypoint( Vector pos, int action=0, float arrival=0 );
+	PB_Path_Waypoint( Vec3D *pos, int action=0, float arrival=0 );
 	void reset() { data.act = WP_NOT_INITIALIZED; }
 	bool valid() { return !(data.act & WP_NOT_INITIALIZED); }
-	Vector pos() { return data.pos; }
-	Vector pos( edict_t *ent );
+	Vec3D *pos() { return &data.pos; }
+	Vec3D *pos( EDICT *ent );
 	int action() { return (data.act & 0x0000FFFF); }
 	bool isOnLadder() { if ((data.act & WP_ON_LADDER)>0) return true; return false;}
 	bool isOnPlatform() { if ((data.act & WP_ON_PLATFORM)>0) return true; return false;}
@@ -73,7 +73,7 @@ public:
 	bool needsTriggerForPlat()  { if ((data.act & WP_PLAT_NEEDS_TRIGGER)>0) return true; return false;}
 	bool causedDamage() { if ((data.act & WP_DMG_OCURRED)>0) return true; return false;}
 
-	bool reached( edict_t *ent );
+	bool reached( EDICT *ent );
 	// returns true if waypoint is reached by ent
 
 	bool operator==(const PB_Path_Waypoint& O) const  {  return data.arrival == O.data.arrival; }
@@ -87,7 +87,7 @@ class PB_Path_Attack
 {
 public:
 	typedef struct {
-		Vector	pos;		// position of attacker
+		Vec3D	pos;		// position of attacker
 		float	time;		// time the attack ocurred (since start)
 	} TSaveData;
 
@@ -103,13 +103,13 @@ class PB_Path_Platform
 public:
 	typedef struct {
 		int		navId;		// ID of Platform 
-		Vector	pos;		// position (abs_min) of navpoint entity
+		Vec3D	pos;		// position (abs_min) of navpoint entity
 	} TSaveData;
 
 	TSaveData data;
 
 	PB_Path_Platform() {};
-	PB_Path_Platform( int navId, Vector &pos ) { data.navId = navId;  data.pos = pos; }
+	PB_Path_Platform( int navId, Vec3D *pos ) { data.navId = navId; vcopy( pos, &data.pos ); }
 
 	bool operator==(const PB_Path_Platform& O) const  {  return data.navId == O.data.navId; }
 	bool operator<(const PB_Path_Platform& O) const   {  return data.navId <  O.data.navId; }
@@ -140,37 +140,37 @@ public:
 	//--------------------------------------------------------------------
 	//  OBSERVER METHODS
 
-	void startRecord( int startPnt, float worldTime );
+	void startRecord( int startPnt, float worldtime );
 	// start recording a path from given point at given time
 
 	void addWaypoint( PB_Path_Waypoint &wp );
 	// adds the waypoint to the path
 
-	void addWaypoint( Vector &pos, int action, float arrival );
+	void addWaypoint( Vec3D *pos, int action, float arrival );
 	// adds the waypoint to the path
 
-	void addPlatformInfo( int navId, Vector &pos );
+	void addPlatformInfo( int navId, Vec3D *pos );
 	// adds platform info
 
-	void stopRecord( int endPnt, float worldTime, int mode );
+	void stopRecord( int endPnt, float worldtime, int mode );
 	// stops recording
 
 	//--------------------------------------------------------------------
 	//  BOT NAVIGATION METHODS
 
-	void startAttempt( float worldTime );
+	void startAttempt( float worldtime );
 	// start the path at given time
 
 	void cancelAttempt();
 	// cancels the pass, no reportTarget needs to be called
 
-	void addAttack( Vector &origin );
+	void addAttack( Vec3D *origin );
 	// stores the position of attack (inclusive actual position in path)
 
 	void reportEnemySpotted() { data.enemyEncounters++; }
 	// enemies spotted before they could attack the bot
 
-	Vector getViewPos( edict_t *traveller, int &prior );
+	void getViewPos(EDICT *traveller, int *prior, Vec3D *pos);
 	// returns, depending on the position in the path, a place to look at for possible attackers
 	// prior returns priotity to look at this place
 
@@ -180,13 +180,13 @@ public:
 	bool waitForPlatform();
 	// return true if bot has to wait for a platform before continuing to the next waypoint
 
-	Vector nextPlatformPos();
+	void nextPlatformPos(Vec3D *pos);
 	// returns the next waypoint on a platform or null vector if no platform on path
 
 	PB_Path_Waypoint getNextWaypoint();
 	// returns the next waypoint
 
-	Vector getLastWaypointPos( edict_t *playerEnt );
+	void getLastWaypointPos( EDICT *playerEnt, Vec3D *pos);
 	// returns the position of the last waypoint reached
 
 	void reportWaypointReached();
@@ -195,19 +195,19 @@ public:
 	void reportWaypointFailed();
 	// message that the waypoint has not been reached in time, roll back possible changes
 
-	void reportTargetReached( edict_t *traveller, float worldTime );
+	void reportTargetReached( EDICT *traveller, float worldtime );
 	// confirms path as finished, internally set new success-variables
 
 	void reportTargetFailed();
 	// confirms path as failed, internally set new success-variables
 
-	bool finished( edict_t *traveller );
+	bool finished( EDICT *traveller );
 	// returns true if all waypoints have been confirmed and end-navpoint is reached by traveller
 	
-	bool timeOut( float worldTime );
+	bool timeOut( float worldtime );
 	// returns true if the next waypoint could not be reached in time
 
-	bool cannotBeContinued( edict_t *ent );
+	bool cannotBeContinued( EDICT *ent );
 	// returns true if the path has to be canceled
 
 	//--------------------------------------------------------------------
@@ -231,9 +231,9 @@ public:
 	void save( FILE *fp );
 	// save path to file if not readyToDelete
 
-#ifdef _DEBUG
+#if _DEBUG
 	void print();
-	// print path info using debugMsg()
+	// print path info using DEBUG_MSG()
 
 	void mark();
 	// mark all waypoints
@@ -315,10 +315,9 @@ public:
 	WaypointList::iterator currentWaypoint, lastReachedWaypoint;
 	PlatformList::iterator currentPlat, lastReachedPlat;
 
-	edict_t *lastWaitingPlat;
+	EDICT *lastWaitingPlat;
 	float	waitPlatEndTime;
-	edict_t *ignoredPlat;
-	
+	EDICT *ignoredPlat;	
 };
 
 #endif

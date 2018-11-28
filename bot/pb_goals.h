@@ -1,3 +1,6 @@
+#pragma once
+#if !defined(PB_GOALS_H)
+#define PB_GOALS_H
 class CParabot;
 class PB_Percept;
 
@@ -148,3 +151,4 @@ float weightFollowEnemy( CParabot *pb, PB_Percept*item );
 // assist team-member in combat
 void    goalAssistFire( CParabot *pb, PB_Percept*item );
 float weightAssistFire( CParabot *pb, PB_Percept*item );
+#endif // PB_GOALS_H

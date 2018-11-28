@@ -1,8 +1,7 @@
+#pragma once
 #ifndef PB_ROAMING_H
 #define PB_ROAMING_H
 
-
-#include "extdll.h"
 #include "pb_action.h"
 #include "pb_navpoint.h"
 
@@ -14,19 +13,19 @@ typedef struct {
 	bool	shouldDuck;
 	bool	blocked;
 	bool	gap;
-	vec3_t	wallAngle;
+	Vec3D	wallAngle;
 	float   wallDistance;
 	bool	onTouch;
 	bool	tooClose, tooFar;
-	vec3_t  jumpPos, landPos;	// for transmitting possible jumps
+	Vec3D  jumpPos, landPos;	// for transmitting possible jumps
 } checkWayRes;
 
 
 public:
 
-	void init( edict_t *botEnt, PB_Action *act );
-	void reset( Vector newTarget );
-	void checkWay( const Vector &targetPos );
+	void init( EDICT *botEnt, PB_Action *act );
+	void reset( const Vec3D *newTarget );
+	void checkWay( const Vec3D *targetPos );
 	bool targetNotReachable();
 
 
@@ -37,26 +36,23 @@ public:
 	bool followLeft, followRight, checkIfPassage;
 	float passedEdge;
 	bool debugWay, debugTrace;
-	vec3_t passageOrigin;
+	Vec3D passageOrigin;
 	float passageDistance;
 	int passageTries;
-	edict_t *pev;
+	EDICT *pev;
 	PB_Action *action;
-	Vector target, jumpTarget;
+	Vec3D target, jumpTarget;
 	float lastXyDist;	// last XY-Dist to target
-#ifdef _DEBUG
+#if _DEBUG
 	int markerId;
 #endif //_DEBUG
 
 
-void checkJump(vec3_t origin, vec3_t dir, checkWayRes *res );
-void checkFront (float sideOfs, Vector tAngle, checkWayRes *res);
+void checkJump (Vec3D *origin, Vec3D *dir, checkWayRes *res );
+void checkFront (float sideOfs, Vec3D *tAngle, checkWayRes *res);
 void checkSide (int side, float frontOfs, checkWayRes *res);
-int searchExit (Vector wallAngle);
-bool bigGapAt( Vector pos );
-
-
-
+int searchExit (Vec3D *wallAngle);
+bool bigGapAt (Vec3D *pos);
 };
 
 #endif

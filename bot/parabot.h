@@ -1,7 +1,14 @@
-#ifndef PARABOT_H
+#pragma once
+#if !defined(PARABOT_H)
 #define PARABOT_H
 
+#include "mathlib.h"
+#include "sdk_common.h"
+#include "meta_api.h"
+#include "engwrap.h"
 #include "pb_global.h"
+#include "bot.h"
+#include "utilityfuncs.h"
 #include "pb_mapgraph.h"
 #include "pb_action.h"
 #include "pb_roaming.h"
@@ -9,7 +16,6 @@
 #include "pb_perception.h"
 #include "pb_goalfinder.h"
 #include "pb_needs.h"
-
 
 
 
@@ -50,9 +56,9 @@ public:
 	PB_Needs	needs;
 	bool		stoppedForPlat;
 	bool		mustShootObject;
-	Vector		shootObjectPos;
-	edict_t		*huntingFor;		// points to edict of enemy bot is hunting for or 0
-	edict_t		*fleeingFrom;		// points to edict of enemy bot is fleeing from or 0
+	Vec3D		shootObjectPos;
+	EDICT		*huntingFor;		// points to edict of enemy bot is hunting for or 0
+	EDICT		*fleeingFrom;		// points to edict of enemy bot is fleeing from or 0
 
 	// used in ROAMING
 	PB_Roaming	pathfinder;			// old bot pathfinding
@@ -61,12 +67,12 @@ public:
 	short		roamingRoute[128];	// contains cell indices to target
 	int			roamingIndex;		// current target index in route
 	int			roamingBreak;		// after reaching this index a new route is calculated
-	Vector		lastJumpPos;
+	Vec3D		lastJumpPos;
 	float		cellTimeOut;
 	short		cellToReach;
 
 	// used in FOLLOW_AND_ASSIST
-	edict_t		*partner;			// player the bot is following
+	EDICT		*partner;			// player the bot is following
 	
 	// used in IN_COMBAT
 	PB_Combat	combat;
@@ -86,14 +92,14 @@ public:
 	
 	int			slot;				// slot in bots[] this bot is using
 	int			team;				// team the bot is in
-	edict_t		*ent;				// pointer to bot entity
+	EDICT		*ent;				// pointer to bot entity
 
 	// MOD variables
 	
 	
 	void executeGoals();
 
-	bool positionReached( Vector pos );
+	bool positionReached( Vec3D *pos );
 	// returns true if bot has reached pos within a distance of PB_REACH_DISTANCE
 	void pathFinished();
 	void pathFailed();
@@ -112,14 +118,14 @@ public:
 
 	PB_Action	 action;
 
-	CParabot( edict_t *botEnt, int botSlot );
+	CParabot( EDICT *botEnt, int botSlot );
 	~CParabot();
-	void setAggression( int agr ) { aggression = ((float)agr)/2; }
+	void setAggression( int agr ) { aggression = ((float)agr) * 0.5f; }
 	void setCommunication( int comm ) { chatRate = comm; }
 	void initAfterRespawn();
 	// initializes bot after respawn
 	void botThink();
-	Vector botPos() { return ent->v.origin; }
+	Vec3D *botPos() { return &ent->v.origin; }
 	
 
 	
@@ -127,12 +133,12 @@ public:
 	void approachRoamingTarget();
 	void followActualRoute();
 
-	void registerDamage( int amount, Vector origin, int type );
-	void registerDeath( edict_t *killer, const char *wpnName );
-	void registerKill( edict_t *victim, const char *wpnName );
+	void registerDamage( int amount, Vec3D *origin, int type );
+	void registerDeath( EDICT *killer, const char *wpnName );
+	void registerKill( EDICT *victim, const char *wpnName );
 	void reportEnemySpotted();
 
-#ifdef _DEBUG
+#if _DEBUG
 	void setGoalViewDescr( const char *descr );
 	void setGoalMoveDescr( const char *descr );
 	void setGoalActDescr( const char *descr );
@@ -144,7 +150,7 @@ public:
 };
 
 
-int UTIL_GetTeam(edict_t *pEntity);
+int getteam(EDICT *pEntity);
 
 
 #endif // PARABOT_H

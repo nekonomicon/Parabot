@@ -1,7 +1,6 @@
-#ifndef PB_NEEDS_H
+#pragma once
+#if !defined(PB_NEEDS_H)
 #define PB_NEEDS_H
-
-
 
 #include "pb_navpoint.h"
 class CParabot;
@@ -44,7 +43,7 @@ protected:
 	float	wish[MAX_NAV_TYPES];// wish-values for different items
 	float	maxWish;			// max. wish-value
 	float	weaponWish;			// added wishes of all available weapons and ammo
-	float	wishUpdate;			// worldTime wishes are calculated again
+	float	wishUpdate;			// worldtime wishes are calculated again
 	bool	newItemPriorities;	// to be able to cancel current journey for other targets
 	bool	haloKnownOnBase;	// used to set newItemPriorities
 	bool	airstrikeKnown;

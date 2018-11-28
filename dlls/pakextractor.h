@@ -1,6 +1,9 @@
 /* nwreckdum Quake .pak manipulator for linux by Daniel Reed <n@ml.org>
 based on wreckdum by Neal Tucker <ntucker@fester.axis.net>
 */
+#pragma once
+#if !defined(PAKEXTRACTOR_H)
+#define PAKEXTRACTOR_H
 #if defined(__ANDROID__)
 #include <ctype.h>
 #include <dirent.h>
@@ -101,4 +104,5 @@ static int	extrpak(FILE *in, char *mdir) {
 	free(dir);
 	return(0);
 }
-#endif
+#endif // __ANDROID__
+#endif // PAKEXTRACTOR_H

@@ -1,9 +1,8 @@
-#ifndef PB_ACTION_H
+#pragma once
+#if !defined(PB_ACTION_H)
 #define PB_ACTION_H
 
-
-#include "extdll.h"
-#include "util.h"
+#include "sdk_common.h"
 
 // movement constants:
 #define	MAX_YAW			 20
@@ -16,20 +15,20 @@ class PB_Action
 
 public:
 
-	void init( edict_t *botEnt );
+	void init( EDICT *botEnt );
 	void reset();
 	void setAimSkill( int skill );
-	void setMoveAngle( Vector angle );
+	void setMoveAngle( Vec3D *angle );
 	void setMoveAngleYaw( float angle );
-	void setMoveDir( Vector vec, int prior = 0 );
-	void setViewAngle( Vector angle, int prior = 0 );
-	void setViewDir( Vector vec, int prior = 0 );
+	void setMoveDir( Vec3D *vec, int prior = 0 );
+	void setViewAngle( Vec3D *angle, int prior = 0 );
+	void setViewDir( Vec3D *vec, int prior = 0 );
 	void setViewLikeMove();
-	void setAimDir( Vector currentPos, Vector relVelocity = g_vecZero );
+	void setAimDir( Vec3D *currentPos, Vec3D *relVelocity );
 	void setSpeed( float value )	  { speed = value;     }
 	void setMaxSpeed();
 	float getMaxSpeed() { return maxSpeed; }
-	void add( int code, Vector *exactPos = 0 );
+	void add( int code, Vec3D *exactPos );
 	bool gotStuck();
 	void resetStuck();
 	void dontGetStuck() { notStucking = true; }
@@ -40,8 +39,8 @@ public:
 	bool pausing() { return notStucking; }
 	float targetAccuracy() { return hitProb; }
 	// returns the accurcy for beforehand passed target
-	Vector getMoveDir();
-	Vector getViewAngle() { return viewAngle; }
+	Vec3D *getMoveDir();
+	Vec3D *getViewAngle() { return &viewAngle; }
 	float getFrameTime() { return (currentMSec/1000); }
 	int getAimSkill() { return aimSkill; }
 	float estimateHitProb();
@@ -50,18 +49,18 @@ public:
 
 private:
 
-	Vector		 moveAngle, viewAngle;		// actual move angle and view(shoot!)angle
+	Vec3D		moveAngle, viewAngle;		// actual move angle and view(shoot!)angle
 	float		 speed;						// speed to move at
 	float		 strafe;					// strafe speed (>0 = right, <0 = left )
 	int			 action;					// instant action e.g. fire, jump, duck
 	float		 msecStart, msecCount;
 	float		 currentMSec;				// frameTime * 1000
 		
-	edict_t		*ent;			// bot entity
+	EDICT		*ent;			// bot entity
 	float		jumpPos;		// zpos where jump started
 	bool		inJump;			// true while ducked in jump
 	bool		fineJump;
-	Vector		fineJumpPos;
+	Vec3D		fineJumpPos;
 	int			longJumpState;
 	float		nextJumpTime;	// for delayed jump
 	int			viewPrior, movePrior;		// priorities
@@ -69,19 +68,19 @@ private:
 
 	int			aimSkill;
 	
-	Vector		currentView;	// delayed view
-	Vector		deltaView;
+	Vec3D		currentView;	// delayed view
+	Vec3D		deltaView;
 	float		targetDiff[MAX_VDELAY];		// storing the difference to target for the last frames
 	float		hitProb;
 	float		weaponCone;
-	Vector		targetPos, targetVel;
+	Vec3D		targetPos, targetVel;
 	float		targetDist;
 
 	bool		notStucking;
 
 	int			useCounter;
 	float		nextUseTime;
-	Vector		nextUsePos;
+	Vec3D		nextUsePos;
 
 	float		duckEndTime;
 	float		stopEndTime;
@@ -90,7 +89,7 @@ private:
 	float		maxTurn;
 	int			turnCount;
 
-	Vector calcViewAngle();
+	Vec3D *calcViewAngle();
 	float msec();
 	// returns an adequate msec-value to pass to the engine
 
