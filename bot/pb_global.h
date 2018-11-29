@@ -63,15 +63,6 @@ extern const CVAR *bm_cbar;
 extern const CVAR *bm_gluon;
 extern const CVAR *bm_trip;
 
-float worldtime();
-// returns the game time
-
-float servermaxspeed();
-// returns the maximum speed clients can reach
-
-int getframerateinterval();
-// returns frame rate interval for new clients
-
 bool LOSExists(const Vec3D *v1, const Vec3D *v2);
 // traces line with ignore monster from v1 to v2
 

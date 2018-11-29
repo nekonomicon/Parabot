@@ -2,10 +2,6 @@
 #if !defined(PB_WEAPON_H)
 #define PB_WEAPON_H
 
-
-#include "pb_action.h"
-
-
 // weapon structure
 typedef struct {
 	const char	*name;
@@ -238,7 +234,7 @@ public:
 	PB_Weapon( int wId );
 	// directly initializing currentWeapon
 	
-	void init( int slot, EDICT *ent, PB_Action *action );
+	void init( int slot, EDICT *ent, ACTION *action );
 	// has to be called with the botSlot before all other methods
 
 	float getScore( float distance, float hitProb, int flags, bool checkAmmo );
@@ -298,7 +294,7 @@ private:
 
 	int			botSlot;		// slot the bot is using
 	EDICT		*botEnt;
-	PB_Action	*botAction;		// pointer to action-instace the bot is using
+	ACTION	*botAction;		// pointer to action-instace the bot is using
 
 	float	nextAttackTime;		// worldtime next attack can occur
 	float	lastAttackTime;		// worldtime last attack was executed

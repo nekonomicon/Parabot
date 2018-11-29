@@ -46,7 +46,7 @@ PB_WeaponHandling::PB_WeaponHandling()
 }
 
 
-void PB_WeaponHandling::init( int slot, EDICT *ent, PB_Action *action )
+void PB_WeaponHandling::init( int slot, EDICT *ent, ACTION *action )
 // has to be called with the botSlot before all other methods
 {
 	weapon.init( slot, ent, action );
@@ -207,7 +207,7 @@ void PB_WeaponHandling::switchToWeapon( int wId )
 		FakeClientCommand(bots[botSlot].e, weapon.name(), NULL, NULL);
 	}
 
-	bots[botSlot].parabot->action.setWeaponCone(weapon.cone());
+	action_setweaponcone(&bots[botSlot].parabot->action, weapon.cone());
 	weapon.setNextAttackTime(worldtime() + CHANGE_WEAPON_DELAY);
 }
 
@@ -243,12 +243,12 @@ bool PB_WeaponHandling::armBestWeapon( float distance, float hitProb, int flags 
 		if (bestWeapon == VALVE_WEAPON_CROSSBOW || bestWeapon==VALVE_WEAPON_PYTHON ) {	
 			if ( bestMode==1 && botEnt->v.fov!=90 && 
 				 (lastModeSwitch+0.5)<worldtime() ) {
-				botAction->add(BOT_FIRE_SEC, NULL);
+				action_add(botAction, BOT_FIRE_SEC, NULL);
 				lastModeSwitch = worldtime();
 				// DEBUG_MSG( "Using NORMAL MODE!\n" );
 			} else if ( bestMode == 2 && botEnt->v.fov == 90 &&
 					  (lastModeSwitch + 0.5f) < worldtime() ) {
-				botAction->add(BOT_FIRE_SEC, NULL);
+				action_add(botAction, BOT_FIRE_SEC, NULL);
 				// DEBUG_MSG( "Using ZOOM!\n" );
 				lastModeSwitch = worldtime();
 			}
@@ -265,12 +265,12 @@ bool PB_WeaponHandling::armBestWeapon( float distance, float hitProb, int flags 
 			}
 			if( bestMode == 1 && !spotActive && 
 				(lastModeSwitch + 0.5f) < worldtime() ) {
-				botAction->add(BOT_FIRE_SEC, NULL);
+				action_add(botAction, BOT_FIRE_SEC, NULL);
 				lastModeSwitch = worldtime();
 				DEBUG_MSG( "Using RPG laser mode!\n" );
 			} else if( bestMode == 2 && spotActive &&
 				(lastModeSwitch + 0.5f) < worldtime() ) {
-				botAction->add(BOT_FIRE_SEC, NULL);
+				action_add(botAction, BOT_FIRE_SEC, NULL);
 				DEBUG_MSG( "Using RPG sneak mode!\n" );
 				lastModeSwitch = worldtime();
 			}	

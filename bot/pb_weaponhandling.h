@@ -15,7 +15,7 @@ public:
 	
 	PB_WeaponHandling();
 	
-	void init( int slot, EDICT *ent, PB_Action *action );
+	void init( int slot, EDICT *ent, ACTION *action );
 	// has to be called with the botSlot before all other methods
 
 	void initCurrentWeapon();
@@ -56,7 +56,7 @@ private:
 
 	int			botSlot;				// slot the bot is using
 	EDICT		*botEnt;
-	PB_Action	*botAction;				// pointer to action-instace the bot is using
+	ACTION	*botAction;				// pointer to action-instace the bot is using
 
 	PB_Weapon	weapon;
 	int			defaultWeapon;

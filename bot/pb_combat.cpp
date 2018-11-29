@@ -9,7 +9,7 @@ int clientWeapon[32];
 
 
 
-void PB_Combat::init( int slot, EDICT *ent, PB_Action *act, PB_Roaming *pFinder )
+void PB_Combat::init( int slot, EDICT *ent, ACTION *act, PB_Roaming *pFinder )
 // initializes all necessary variables
 {
 	botEnt = ent;
@@ -85,7 +85,7 @@ float PB_Combat::getRating( PB_Percept &perceipt )
 			// bot variables
 			int botFlags = 0;
 			if ( botEnt->v.waterlevel == 3 ) botFlags |= WF_UNDERWATER;
-			float botHitProb = action->targetAccuracy();
+			float botHitProb = action_targetaccuracy(action);
 			// enemy variables
 			int enemyFlags = 0;
 			if ( enemy->v.waterlevel == 3 ) enemyFlags |= WF_UNDERWATER;
@@ -97,7 +97,7 @@ float PB_Combat::getRating( PB_Percept &perceipt )
 		// bot variables
 		int botFlags = 0;
 		if ( botEnt->v.waterlevel == 3 ) botFlags |= WF_UNDERWATER;
-		float botHitProb = action->targetAccuracy();
+		float botHitProb = action_targetaccuracy(action);
 		adv = weapon.getWeaponScore( botWeapon, enemyDist, botHitProb, botFlags, true );
 	}
 	adv = 2 * adv;	// stronger influence
@@ -115,7 +115,7 @@ bool PB_Combat::shootAtEnemy( Vec3D *enemyOrigin, float accuracy )
 
 	vcopy(enemyOrigin, &firePos);
 
-	if ((action->getAimSkill() > 6) && (accuracy >= 0.5f)) {
+	if ((action_getaimskill(action) > 6) && (accuracy >= 0.5f)) {
 		vadd(&firePos, &headpos, &firePos);	// aim at head
 	}
 	// TODO: Need ROCKETLAUNCHER flag
@@ -144,7 +144,7 @@ bool PB_Combat::shootAtEnemy( EDICT *enemy, float accuracy )
 	assert(enemy != 0);
 
 	vcopy(&enemy->v.origin, &firePos);
-	if ((action->getAimSkill() > 6) && (accuracy >= 0.5f)) {
+	if ((action_getaimskill(action) > 6) && (accuracy >= 0.5f)) {
 		vadd(&firePos, &enemy->v.view_ofs, &firePos); // aim at head
 	}
 
@@ -220,7 +220,7 @@ void PB_Combat::closeCombatMovement( PB_Percept &perceipt )
 		botFlags |= WF_UNDERWATER;
 		DEBUG_MSG( "underwater\n" );
 	}
-	float botHitProb = action->targetAccuracy();
+	float botHitProb = action_targetaccuracy(action);
 	
 	// init enemy variables
 	int clientIndex = indexofedict( enemy ) - 1;
@@ -281,7 +281,7 @@ void PB_Combat::closeCombatMovement( PB_Percept &perceipt )
 		vadd(&botEnt->v.origin, &evadeMove, &tDir);
 		pathfinder->checkWay(&tDir);
 	} else {	// no move -> duck
-		action->add(BOT_DUCK, NULL);
+		action_add(action, BOT_DUCK, NULL);
 	}
 }
 

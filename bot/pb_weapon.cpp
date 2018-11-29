@@ -258,7 +258,7 @@ PB_Weapon::PB_Weapon(int wId)
 }
 
 
-void PB_Weapon::init( int slot, EDICT *ent, PB_Action *action )
+void PB_Weapon::init( int slot, EDICT *ent, ACTION *action )
 {
 	botSlot = slot;
 	botEnt = ent;
@@ -1393,7 +1393,7 @@ bool PB_Weapon::attackValveHandgrenade( Vec3D *target )
 	}
 	if ( worldtime() < grenadeLaunchTime ) {
 		// DEBUG_MSG( "Holding HG, counter=%.1f\n", (grenadeLaunchTime-worldtime()) );
-		botAction->add(BOT_FIRE_PRIM, NULL);
+		action_add(botAction, BOT_FIRE_PRIM, NULL);
 	}
 	else {
 		// DEBUG_MSG( "Throwing HG!\n" );
@@ -1413,7 +1413,7 @@ bool PB_Weapon::attackValveSatchel( Vec3D *target )
 	bool grenadeThrown = false;
 	if (!grenadePrepared) {
 		// DEBUG_MSG( "Throwing satchel!\n" );
-		botAction->add(BOT_FIRE_PRIM, NULL);
+		action_add(botAction, BOT_FIRE_PRIM, NULL);
 		if ( Q_STREQ( STRING(botEnt->v.viewmodel), "models/v_satchel_radio.mdl" ) ) {
 			grenadePrepared=true;
 			grenadeLaunchTime = worldtime() + 1.5;
@@ -1422,7 +1422,7 @@ bool PB_Weapon::attackValveSatchel( Vec3D *target )
 	}
 	else if ( worldtime() > grenadeLaunchTime ) {
 		// DEBUG_MSG( "Blowing up satchel!\n" );
-		botAction->add(BOT_FIRE_PRIM, NULL);
+		action_add(botAction, BOT_FIRE_PRIM, NULL);
 		if ( worldtime() > (grenadeLaunchTime+0.1) ) {
 			grenadeThrown = true;
 			grenadePrepared = false;
@@ -1441,7 +1441,7 @@ bool PB_Weapon::attack( Vec3D *target, float accuracy, Vec3D *relVel )
 {
 	bool fired = false;
 
-	botAction->setAimDir( target, relVel );
+	action_setaimdir(botAction, target, relVel );
 
 	// check for reload:
 	if (needReload())
@@ -1458,7 +1458,7 @@ bool PB_Weapon::attack( Vec3D *target, float accuracy, Vec3D *relVel )
 				}
 				// check if we have to stop loading to not explode...
 				if ((worldtime() - loadStartTime) < 5)
-					botAction->add(BOT_FIRE_SEC, NULL);
+					action_add(botAction, BOT_FIRE_SEC, NULL);
 				else {
 					loadingGauss = false;
 					fired = true;
@@ -1473,7 +1473,7 @@ bool PB_Weapon::attack( Vec3D *target, float accuracy, Vec3D *relVel )
 
 		// fire if delay and accuracy are ok:
 		if (( worldtime() > nextAttackTime ) && 
-			( botAction->targetAccuracy() > accuracy || lastAttackTime > (worldtime() - 0.5f) )) {
+			(action_targetaccuracy(botAction) > accuracy || lastAttackTime > (worldtime() - 0.5f) )) {
 			lastAttackTime = worldtime();
 			if ( bestMode[currentWeapon] == 1 ) {	
 				// primary fire:
@@ -1482,24 +1482,24 @@ bool PB_Weapon::attack( Vec3D *target, float accuracy, Vec3D *relVel )
 						fired = attackValveHandgrenade( target );
 					else if (currentWeapon == VALVE_WEAPON_SATCHEL)
 						fired = attackValveSatchel( target );
-					else {  botAction->add(BOT_FIRE_PRIM, NULL);  fired = true;  }
-				} else {  botAction->add(BOT_FIRE_PRIM, NULL );  fired = true;  }
+					else {  action_add(botAction, BOT_FIRE_PRIM, NULL);  fired = true;  }
+				} else {  action_add(botAction, BOT_FIRE_PRIM, NULL );  fired = true;  }
 			} else {
 				// secondary fire:
 				if (mod_id==VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id==GEARBOX_DLL) {
 					if (currentWeapon==VALVE_WEAPON_GAUSS) {
-						botAction->add(BOT_RELEASE_SEC, NULL);
+						action_add(botAction, BOT_RELEASE_SEC, NULL);
 						loadingGauss = false;
 					} else if ( currentWeapon == VALVE_WEAPON_CROSSBOW || 
 						      currentWeapon == VALVE_WEAPON_PYTHON   || 
 							  currentWeapon == VALVE_WEAPON_RPG) 
 					{	// these weapons had their correct mode set in armBestWeapon
-						botAction->add(BOT_FIRE_PRIM, NULL);
+						action_add(botAction, BOT_FIRE_PRIM, NULL);
 					} else {
-						botAction->add(BOT_FIRE_SEC, NULL);
+						action_add(botAction, BOT_FIRE_SEC, NULL);
 					}
 				} else
-					botAction->add(BOT_FIRE_SEC, NULL);
+					action_add(botAction, BOT_FIRE_SEC, NULL);
 				fired = true;
 			}
 			nextAttackTime = worldtime() + modWeapon[currentWeapon].fireDelay;
@@ -1517,7 +1517,7 @@ void PB_Weapon::finishAttack()
 	// DEBUG_MSG( "Forced to finish attack!\n" );
 	if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) {
 		if (currentWeapon==VALVE_WEAPON_HANDGRENADE) {
-			botAction->setViewDir(&grenadeTarget, 5 );
+			action_setviewdir(botAction, &grenadeTarget, 5 );
 			attackValveHandgrenade( &grenadeTarget );
 		} else if (currentWeapon==VALVE_WEAPON_SATCHEL) {
 			attackValveSatchel( &grenadeTarget );
@@ -1600,7 +1600,7 @@ void PB_Weapon::reload()
 	// only execute if not reloading yet and weapon armed
 	if (!reloading && currentWeapon == armedWeapon) {
 		reloading = true;
-		botAction->add(BOT_RELOAD, NULL);
+		action_add(botAction, BOT_RELOAD, NULL);
 		// DEBUG_MSG("Reload!\n");
 	}
 }

@@ -24,7 +24,7 @@ class PB_Combat
 
 public:
 
-	void init( int slot, EDICT *ent, PB_Action *act, PB_Roaming *pFinder );
+	void init( int slot, EDICT *ent, ACTION *act, PB_Roaming *pFinder );
 	// initializes all necessary variables
 
 	float getRating( PB_Percept &perceipt );
@@ -55,7 +55,7 @@ public:
 
 private:
 	EDICT	 *botEnt;
-	PB_Action *action;
+	ACTION	*action;
 	PB_Roaming *pathfinder;
 	float		enemyContact;		// worldtime enemy has been registered
 	

@@ -2,7 +2,6 @@
 #ifndef PB_ROAMING_H
 #define PB_ROAMING_H
 
-#include "pb_action.h"
 #include "pb_navpoint.h"
 
 class PB_Roaming
@@ -23,7 +22,7 @@ typedef struct {
 
 public:
 
-	void init( EDICT *botEnt, PB_Action *act );
+	void init( EDICT *botEnt, ACTION *act );
 	void reset( const Vec3D *newTarget );
 	void checkWay( const Vec3D *targetPos );
 	bool targetNotReachable();
@@ -40,7 +39,7 @@ public:
 	float passageDistance;
 	int passageTries;
 	EDICT *pev;
-	PB_Action *action;
+	ACTION *action;
 	Vec3D target, jumpTarget;
 	float lastXyDist;	// last XY-Dist to target
 #if _DEBUG

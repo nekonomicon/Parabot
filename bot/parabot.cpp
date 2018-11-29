@@ -68,7 +68,7 @@ void CParabot::initAfterRespawn()
 	botState = PB_NO_TASK;	
 	lastRespawn = worldtime();
 
-	action.init( ent );
+	action_init(&action, ent);
 	pathfinder.init( ent, &action );
 	combat.init( slot, ent, &action, &pathfinder );
 	senses.init( ent );
@@ -399,11 +399,11 @@ void CParabot::approachRoamingTarget()
 
 			roamingTarget->pos(ent, &rtPos);
 			pathfinder.checkWay(&rtPos);
-			action.setViewLikeMove();
-			if (action.gotStuck() || pathfinder.targetNotReachable()) {
+			action_setviewlikemove(&action);
+			if (action_gotstuck(&action) || pathfinder.targetNotReachable()) {
 				roamingTarget->doNotVisitBefore(ent, worldtime() + 10.0f);
 				roamingTarget = 0;
-				action.resetStuck();
+				action_resetstuck(&action);
 			}
 		}
 	}
@@ -480,7 +480,7 @@ void CParabot::pathCheckWay()
 	TRACERESULT tr, trLeft, trRight;
 	Vec3D startTr, endTr, planeAngle, fwd1, fwd2, right;
 	
-	Vec3D aDir = {0, action.moveAngleYaw(), 0};	// use only yaw angle
+	Vec3D aDir = {0, action_moveangleyaw(&action), 0};	// use only yaw angle
 	makevectors(&aDir);
 
 	// check if bot needs to duck
@@ -493,7 +493,7 @@ void CParabot::pathCheckWay()
 			vma(botPos(), 16.0f, &com.globals->fwd, &startTr);
 			trace_line(&startTr, &endTr, false, false, ent, &tr);
 			if (tr.fraction == 1.0f)
-				action.add(BOT_DUCK, NULL);
+				action_add(&action, BOT_DUCK, NULL);
 			//else DEBUG_MSG( "pathCheckWay: completely blocked\n");
 		}
 	}
@@ -513,12 +513,12 @@ void CParabot::pathCheckWay()
 		// DEBUG_MSG("Something in right front!\n");
 		vectoangles(&trRight.planenormal, &planeAngle);
 		if (planeAngle.x < 40.0f)
-			action.add(BOT_STRAFE_LEFT, NULL);
+			action_add(&action, BOT_STRAFE_LEFT, NULL);
 	} else if ((trLeft.fraction < 1.0f) && (trRight.fraction == 1.0f)) {
 		// DEBUG_MSG("Something in left front!\n");
 		vectoangles(&trLeft.planenormal, &planeAngle);
 		if (planeAngle.x < 40.0f)
-			action.add(BOT_STRAFE_RIGHT, NULL);
+			action_add(&action, BOT_STRAFE_RIGHT, NULL);
 	}
 
 	if ( actualPath ) {
@@ -551,13 +551,13 @@ void CParabot::pathCheckWay()
 				DEBUG_MSG(" EVADING PLATFORM\n" );	// lastPos useless
 				vsub(&platPos, botPos(), &dir);
 				vsub(botPos(), &dir, &dir);
-				action.setMoveDir(&dir);
-				action.setMaxSpeed();
+				action_setmovedir(&action, &dir, 0);
+				action_setmaxspeed(&action);
 				//botNr = slot;	// film this!
 			} else {
 				// DEBUG_MSG("WAIT FOR PLATFORM!\n" );
-				action.add(BOT_STOP_RUNNING, NULL);
-				action.setSpeed(0);
+				action_add(&action, BOT_STOP_RUNNING, NULL);
+				action_setspeed(&action, 0);
 				//action.setMoveDir(lastPos);
 				//action.setSpeed(10 * vlen(vsub(lastPos, botPos())));
 			}
@@ -579,7 +579,7 @@ void CParabot::checkForTripmines()
 	fixangle(&mine_vecDir);
 	makevectors(&mine_vecDir);
 	vcopy(&com.globals->fwd, &mine_vecDir);
-	vcopy(action.getMoveDir(), &moveDir);
+	action_getmovedir(&action, &moveDir);
 	vma(&mine->v.origin, -64.0f, &moveDir, &fakeStart);
 	vma(&fakeStart, 512.0f, &mine_vecDir, &fakeEnd);
 	
@@ -595,10 +595,10 @@ void CParabot::checkForTripmines()
 	if (tAll) {
 		if (mine_vecDir.z == 0) { 
 			if (trAll.endpos.z < (ent->v.absmin.z + 40.0f)) {
-				action.add(BOT_JUMP, NULL);
+				action_add(&action, BOT_JUMP, NULL);
 				DEBUG_MSG( "JUMP - Trying to evade Tripmine ALL\n" );
 			} else {
-				action.add(BOT_DUCK_LONG, NULL);
+				action_add(&action, BOT_DUCK_LONG, NULL);
 				DEBUG_MSG( "DUCK - Trying to evade Tripmine ALL\n" );
 			}
 		} else
@@ -654,7 +654,7 @@ void CParabot::followActualPath()
 		if (waypoint.reached( ent )) {
 			Vec3D wpos;
 			vcopy(waypoint.pos(ent), &wpos);
-			action.add( actualPath->getNextAction(), &wpos );	// if there's something to do...
+			action_add(&action, actualPath->getNextAction(), &wpos);	// if there's something to do...
 			actualPath->reportWaypointReached();		// confirm waypoint
 #if _DEBUG
 			Vec3D oldWP = waypoint.pos( ent );
@@ -669,8 +669,8 @@ void CParabot::followActualPath()
 		int prior;
 		Vec3D proposedViewPos;
 		actualPath->getViewPos(ent, &prior, &proposedViewPos);
-		action.setViewDir(&proposedViewPos, prior);	// set viewAngle
-		action.setMoveDir(waypoint.pos(ent));		// set moveAngle and speed
+		action_setviewdir(&action, &proposedViewPos, prior);	// set viewAngle
+		action_setmovedir(&action, waypoint.pos(ent), 0);		// set moveAngle and speed
 
 		if (!(is_underwater(ent) || waypoint.isOnLadder())) {
 			Vec3D dir;
@@ -682,11 +682,12 @@ void CParabot::followActualPath()
 			dist = vlen(&dir);
 
 			if (dist2d < 30 && dist > 50)
-				action.setSpeed(8 * dist2d);
+				action_setspeed(&action, 8 * dist2d);
 			else
-				action.setMaxSpeed();
+				action_setmaxspeed(&action);
 		}
-		else action.setMaxSpeed();
+		else
+			action_setmaxspeed(&action);
 		pathCheckWay();
 		if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL)
 			checkForTripmines();
@@ -695,9 +696,9 @@ void CParabot::followActualPath()
 		if (actualPath->cannotBeContinued( ent )) {
 			DEBUG_MSG( "Path failed.\n" );
 			pathFailed();
-		} else if ( action.gotStuck() ) {
+		} else if (action_gotstuck(&action)) {
 			pathFailed();
-			action.resetStuck();
+			action_resetstuck(&action);
 		}
 
 	}
@@ -758,27 +759,29 @@ void CParabot::followActualRoute()
 		}
 	}
 	
-	action.setViewDir(&target);	// set viewAngle
-	action.setMoveDir(&target);	// set moveAngle and speed
+	action_setviewdir(&action, &target, 0);	// set viewAngle
+	action_setmovedir(&action, &target, 0);	// set moveAngle and speed
 	if(!is_underwater(ent)) {
 		Vec3D dir;
 		vsub(&target, botPos(), &dir);
 		float dist2d = vlen2d((Vec2D *)&dir);
 		float dist = vlen(&dir);
-		if (dist2d < 30 && dist > 50) action.setSpeed(8 * dist2d);
-		else action.setMaxSpeed();
+		if (dist2d < 30 && dist > 50)
+			action_setspeed(&action, 8.0f * dist2d);
+		else
+			action_setmaxspeed(&action);
 	} else
-		action.setMaxSpeed();
+		action_setmaxspeed(&action);
 
 	pathCheckWay();
 	
-	if ( action.gotStuck() || (worldtime() > cellTimeOut) ) {
+	if (action_gotstuck(&action) || (worldtime() > cellTimeOut) ) {
 		Vec3D dir;
 
-		action.resetStuck();
+		action_resetstuck(&action);
 		vsub(&lastJumpPos, botPos(), &dir);
 		if (vlen(&dir) > 50) {
-			action.add(BOT_JUMP, NULL);
+			action_add(&action, BOT_JUMP, NULL);
 			vcopy(botPos(), &lastJumpPos);
 			cellTimeOut = worldtime() + 1.0;
 		} else {
@@ -851,8 +854,9 @@ void CParabot::botThink()
 	// execute in 10Hz steps:
 	float difTime = worldtime()-lastThink;
 	if ( difTime >= 0 && difTime < 0.1) {
-		action.perform(); // execute planned actions
-		if (action.pausing()) cellTimeOut = worldtime() + 1.0;	// adjust cellTimeOut if pausing
+		action_perform(&action); // execute planned actions
+		if (action_pausing(&action))
+			cellTimeOut = worldtime() + 1.0;	// adjust cellTimeOut if pausing
 		return;
 	}
 	lastThink = worldtime();
@@ -865,7 +869,7 @@ void CParabot::botThink()
 
 	needs.updateWishList();
 
-	action.reset();		// initializes action flag and other variables
+	action_reset(&action);		// initializes action flag and other variables
 
 	senses.collectData();
 	goalFinder.init( this );
@@ -879,7 +883,8 @@ void CParabot::botThink()
 	// check if any grenades have to b thrown (overrides former actions)
 	combat.weapon.checkForForcedAttack();
 
-	action.perform(); // execute planned actions
+	action_perform(&action); // execute planned actions
 	
-	if (action.pausing()) cellTimeOut = worldtime() + 1.0;	// adjust cellTimeOut if pausing
+	if (action_pausing(&action))
+		cellTimeOut = worldtime() + 1.0;	// adjust cellTimeOut if pausing
 }

@@ -21,7 +21,6 @@ extern int mod_id;
 extern int clientWeapon[32];
 int playerNr = 0;
 extern float roundStartTime;
-extern float globalFrameTime;	// set by the bots in action.msec()
 extern bool visualizeCellConnections;
 extern bot_t bots[32];
 
@@ -433,7 +432,7 @@ void PB_Observer::checkForJump( int oId, Vec3D *pos )
 			}
 		} else if (jumpType == 2) {
 			// longjump has to start earlier:
-			vma(pos, -globalFrameTime, &obs[oId].player->v.velocity, pos);
+			vma(pos, -getframerate(), &obs[oId].player->v.velocity, pos);
 			//glMarker.newMarker( pos, 1 );
 			addWaypoint( oId, pos, BOT_LONGJUMP );
 			// DEBUG_MSG( "Stored Longjump=\n" );
@@ -687,7 +686,7 @@ void PB_Observer::updateCellInfo( int i )
 			int bNr = getbotindex(obs[i].player);
 			if (bNr>=0) {
 				Vec3D moveDir, area = {1.0f, 0.0f, 0.0f};
-				vcopy(bots[bNr].parabot->action.getMoveDir(), &moveDir);
+				action_getmovedir(&bots[bNr].parabot->action, &moveDir);
 				float fd1 = (focus_cellsfordir(&area, map.cell(obs[i].currentCell).data.sectors)
 				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentCell).data.sectors))
 				    * (1.5f + moveDir.x);

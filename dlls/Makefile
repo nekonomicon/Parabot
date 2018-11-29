@@ -105,7 +105,7 @@ SRC =		../bot/bot.cpp \
 		physint.cpp \
 		../bot/marker.cpp \
 		../bot/parabot.cpp \
-		../bot/pb_action.cpp \
+		../bot/action.cpp \
 		../bot/pb_cell.cpp \
 		../bot/menu.cpp \
 		../bot/chat.cpp \

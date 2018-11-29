@@ -3,7 +3,6 @@
 #define PB_NEEDS_H
 
 #include "pb_navpoint.h"
-class CParabot;
 
 
 class PB_Needs

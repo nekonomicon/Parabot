@@ -37,7 +37,7 @@ void goalReactToUnidentified( CParabot *pb, PB_Percept*item )
 	assert(item != 0);
 	//DEBUG_MSG( "ReactToUnidentified\n" );
 	if (item->isTrackable()) {
-		pb->action.setViewDir( item->predictedAppearance( pb->botPos() ), 1 );
+		action_setviewdir(&pb->action,item->predictedAppearance( pb->botPos() ), 1 );
 		pb->setGoalViewDescr( "ReactToUnidentified (Trackable)" );
 	} else {
 		goalLookAround( pb, item );
@@ -62,7 +62,7 @@ void goalLookAtNewArea( CParabot *pb, PB_Percept*item )
 
 	int b = pb->slot;
 	Vec3D view;
-	vcopy(pb->action.getViewAngle(), &view);
+	action_getviewangle(&pb->action, &view);
 	if ((lastCall[b] + 0.5f) < worldtime() || item->id!=lastItem[b] ) {	// in first call init viewangle
 		startLook[b] = worldtime();
 		vectoangles(&item->lastPos, &view); 
@@ -75,7 +75,7 @@ void goalLookAtNewArea( CParabot *pb, PB_Percept*item )
 	cycle &= 255;
 	++cycle;
 	view.y = startAngle[b] + 30.0f * sinf(2.0f * M_PI / ((float)cycle));
-	pb->action.setViewAngle(&view, 1);
+	action_setviewangle(&pb->action, &view, 1);
 	pb->setGoalViewDescr( "LookAround (NewArea)" );
 }
 
@@ -96,7 +96,7 @@ void goalLookAround( CParabot *pb, PB_Percept*item )
 	int b = pb->slot;
 	// DEBUG_MSG( "LookAround\n" );
 	Vec3D view;
-	vcopy(pb->action.getViewAngle(), &view);
+	action_getviewangle(&pb->action, &view);
 	if ( (lastCall[b] + 0.5f) < worldtime() ) {
 		startLook[b] = worldtime();
 		startAngle[b] = view.y;
@@ -106,7 +106,7 @@ void goalLookAround( CParabot *pb, PB_Percept*item )
 	cycle &= 255;
 	++cycle;
 	view.y = startAngle[b] + lookAroundAngle * sinf(2.0f * M_PI / ((float)cycle));	// 60*...
-	pb->action.setViewAngle(&view, 1);
+	action_setviewangle(&pb->action, &view, 1);
 	if (item) {
 		switch( item->pClass ) {
 		case PI_LASERDOT:	pb->setGoalViewDescr( "LookAround (Laserdot)" );		break;
@@ -251,7 +251,8 @@ void goalGetItem( CParabot *pb, PB_Percept*item )
 	item->update = worldtime();
 
 	pb->pathfinder.checkWay(&item->lastSeenPos);
-	if (pb->action.gotStuck()) item->flags |= PI_UNREACHABLE;
+	if (action_gotstuck(&pb->action))
+		item->flags |= PI_UNREACHABLE;
 	switch( item->pClass ) {
 	case PI_WEAPONBOX:	pb->setGoalMoveDescr( "GetItem (Weaponbox)" );		break;
 	case PI_HALO:		pb->setGoalMoveDescr( "GetItem (Halo)" );			break;
@@ -348,9 +349,9 @@ float weightGetAwayEnemy( CParabot *pb, PB_Percept*item )
 void goalLoadHealthOrArmor( CParabot *pb, PB_Percept*item )
 {
 	// DEBUG_MSG( "LoadHealthOrArmor\n" );
-	pb->action.setSpeed( 0 );
-	pb->action.setViewDir( pb->actualNavpoint->pos(), 2 );
-	pb->action.add(BOT_USE, NULL);
+	action_setspeed(&pb->action, 0);
+	action_setviewdir(&pb->action, pb->actualNavpoint->pos(), 2);
+	action_add(&pb->action, BOT_USE, NULL);
 	pb->setGoalMoveDescr( "LoadHealthOrArmor" );
 }
 
@@ -387,7 +388,7 @@ void goalLayTripmine( CParabot *pb, PB_Percept*item )
 
 	// duck if necessary
 	if ( pb->actualNavpoint->pos()->z < (pb->ent->v.absmin.z + 40.0f) ) 
-		pb->action.add(BOT_DUCK, NULL);
+		action_add(&pb->action, BOT_DUCK, NULL);
 	// keep tripmine
 	pb->combat.weapon.setPreferredWeapon( VALVE_WEAPON_TRIPMINE );
 		
@@ -436,14 +437,14 @@ void goalCamp( CParabot *pb, PB_Percept *item )
 		campAngle.x = (float) (angleX - 360);
 		campAngle.y = (float) (angleY - 360);
 		campAngle.z = 0;
-		pb->action.setViewAngle(&campAngle, 1);
+		action_setviewangle(&pb->action, &campAngle, 1);
 	} else {
 		pb->campTime += (worldtime() - lastCall[b]);
 	}
 	pb->lastCamp = worldtime();
 	lastCall[b] = worldtime();
 		
-	pb->action.setSpeed( 0 );
+	action_setspeed(&pb->action, 0);
 	lookAroundAngle = 45;
 	goalLookAround( pb, item );
 	lookAroundAngle = DEFAULT_LOOKAROUND_ANGLE;
@@ -474,14 +475,14 @@ void goalUseTank( CParabot *pb, PB_Percept*item )
 	int b = pb->slot;
 	assert( pb->actualNavpoint != 0 );
 
-	pb->action.setSpeed( 0 );
+	action_setspeed(&pb->action, 0);
 
 	if ( (lastCall[b]+0.5) < worldtime() ||
 		 (pb->campTime>0 && pb->ent->v.viewmodel) ) {	// in first call press button
 		pb->campTime = -2;
 		Vec3D lookPos;
 		vadd(pb->actualNavpoint->pos(), &pb->ent->v.view_ofs, &lookPos);
-		pb->action.add( BOT_USE, &lookPos );
+		action_add(&pb->action, BOT_USE, &lookPos );
 		DEBUG_MSG( "Trying to use tank\n" );
 	} else {
 		pb->campTime += (worldtime() - lastCall[b]);
@@ -495,7 +496,7 @@ void goalUseTank( CParabot *pb, PB_Percept*item )
 				pb->combat.shootAtEnemy(&item->lastPos, 0.1f);
 				pb->setGoalMoveDescr( "UseTank (Shoot)" );
 			} else {
-				pb->action.setAimDir(item->predictedAppearance(pb->botPos()), NULL);
+				action_setaimdir(&pb->action, item->predictedAppearance(pb->botPos()), NULL);
 				pb->setGoalMoveDescr( "UseTank (Tracking)" );
 			}
 		} else {
@@ -547,7 +548,7 @@ float weightWaitForHalo( CParabot *pb, PB_Percept*item )
 
 void goalPause( CParabot *pb, PB_Percept*item )
 {
-	pb->action.setSpeed( 0 );
+	action_setspeed(&pb->action, 0);
 	pb->setGoalMoveDescr( "Pause" );
 	//pb->lastPause = worldtime();
 }
@@ -585,13 +586,13 @@ void goalFollow( CParabot *pb, PB_Percept*item )
 		PB_Path_Waypoint wp = observer.getNextWaypoint( pb->slot );
 		if (wp.reached( pb->ent )) {
 			// DEBUG_MSG( "WP reached, act=%i\n", wp.action() );
-			pb->action.add( wp.action(), wp.pos() );	// if there's something to do...
+			action_add(&pb->action, wp.action(), wp.pos() );	// if there's something to do...
 			observer.reportWaypointReached( pb->slot );		// confirm waypoint
 		}
 		
-		pb->action.setViewDir(&pb->partner->v.origin, 0);		// set viewAngle
-		pb->action.setMoveDir( wp.pos(pb->ent) );				// set moveAngle and speed
-		pb->action.setMaxSpeed();
+		action_setviewdir(&pb->action, &pb->partner->v.origin, 0);		// set viewAngle
+		action_setmovedir(&pb->action, wp.pos(pb->ent), 0);				// set moveAngle and speed
+		action_setmaxspeed(&pb->action);
 		pb->pathCheckWay();	
 		if (observer.canNotFollow( pb->slot )) {
 			DEBUG_MSG( "Cannot follow\n" );
@@ -646,7 +647,7 @@ void goalMakeRoom( CParabot *pb, PB_Percept*item )
 		if (pb->actualPath)
 			vsub(pb->waypoint.pos(pb->ent), pb->botPos(), &forward);
 		else
-			vcopy(pb->action.getMoveDir(), &forward);
+			action_getmovedir(&pb->action, &forward);
 		normalize(&forward);
 		getright(&forward, &right);
 		vadd(&forward, &right, &right);

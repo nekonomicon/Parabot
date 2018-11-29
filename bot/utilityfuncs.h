@@ -30,6 +30,7 @@ bool	 is_onladder(EDICT *player);
 bool	 is_hostowner(EDICT *player);
 bool	 is_validedict(EDICT *e);
 float	 servermaxspeed();
-int	 getframerateinterval();
+float	 getframerate();
+byte	 getframerateinterval();
 bool	 fileexists(const char *filename);
 #endif

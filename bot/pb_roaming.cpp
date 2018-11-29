@@ -13,7 +13,7 @@
 
 extern int mod_id;
 
-void PB_Roaming::init( EDICT *botEnt, PB_Action *act )
+void PB_Roaming::init( EDICT *botEnt, ACTION *act )
 {
 	pev = botEnt;
 	action = act;
@@ -36,7 +36,7 @@ void PB_Roaming::reset(const Vec3D *newTarget)
 	vsub(newTarget, &pev->v.origin, &tDir);
 	vectoangles(&tDir, &targetAngle);
 	fixangle(&targetAngle);
-	action->setMoveAngleYaw( targetAngle.y );
+	action_setmoveangleyaw(action, targetAngle.y);
 	lastXyDist = 10000;
 }
 
@@ -150,7 +150,7 @@ void PB_Roaming::checkJump(Vec3D *origin, Vec3D *_dir, checkWayRes *res )
 		vcopy(&dir, &dirNorm);
 		normalize(&dirNorm);
 		float dot = dotproduct(&pev->v.velocity, &dirNorm);
-		float minJumpSpeed = 0.9f * action->getMaxSpeed();
+		float minJumpSpeed = 0.9f * action_getmaxspeed(action);
 
 		if ((landpos.z + 36.0f + MAX_ZREACH) < target.z
 		    || tr.fraction == 1.0f
@@ -207,7 +207,7 @@ void PB_Roaming::checkFront (float sideOfs, Vec3D *angle, checkWayRes *res)
 	res->shouldJump = 0;
 
 	// init vDir:
-	Vec3D aDir = {0.0f, action->moveAngleYaw(), 0.0f}; // use only yaw angle tAngle.y;
+	Vec3D aDir = {0.0f, action_moveangleyaw(action), 0.0f}; // use only yaw angle tAngle.y;
 	makevectors(&aDir);
 	vscale(&com.globals->fwd, CHECK_FORW_DISTANCE, &vDir);
 	vscale(&com.globals->right, sideOfs, &vSide);
@@ -293,7 +293,7 @@ void PB_Roaming::checkFront (float sideOfs, Vec3D *angle, checkWayRes *res)
 		// needjump ||
 	if (needDuck || jumpBlocked || duckBlocked) return; // not free
 
-	if (!action->jumping()) {
+	if (!action_jumping(action)) {
 		vadd(&pev->v.origin, &vSide, &vSide);
 		checkJump(&vSide, &vDir, res);
 	}
@@ -448,15 +448,15 @@ void PB_Roaming::checkWay( const Vec3D *targetPos )
 	assert( action != 0 );
 	assert( pev != 0 );
 
-	if (action->jumping()) {
+	if (action_jumping(action)) {
 		vcopy(&jumpTarget, &target);
 		vsub(&target, &pev->v.origin, &tDir);
 		vectoangles(&tDir, &targetAngle);
 		fixangle(&targetAngle);
 		float jumpSpeed = vlen2d((Vec2D *)&tDir);
-		action->setMoveAngleYaw( targetAngle.y );
+		action_setmoveangleyaw(action, targetAngle.y);
 		//action->dontGetStuck();
-		action->setSpeed( 5 * jumpSpeed );
+		action_setspeed(action, 5.0f * jumpSpeed);
 		// DEBUG_MSG( "AC! " );
 		//marker.drawMarkers();
 		return;	// air control!
@@ -468,7 +468,7 @@ void PB_Roaming::checkWay( const Vec3D *targetPos )
 	fixangle(&targetAngle);
 	float targetDistance = vlen(&tDir);
 	
-	action->setMaxSpeed();
+	action_setmaxspeed(action);
 
 	checkFront(-16, &targetAngle, &left);
 	checkFront( 16, &targetAngle, &right);	// first check forward...
@@ -484,13 +484,13 @@ void PB_Roaming::checkWay( const Vec3D *targetPos )
 				right.blocked = false;	// direction change -> cancel everything
 				left.shouldJump = false;
 				right.shouldJump = false;
-				if ((fabsf(anglediff(action->moveAngleYaw(), targetAngle.y)) <= 90) &&
-					(fabsf(anglediff(action->moveAngleYaw() + 90, targetAngle.y)) <= 90) ) {
+				if ((fabsf(anglediff(action_moveangleyaw(action), targetAngle.y)) <= 90) &&
+					(fabsf(anglediff(action_moveangleyaw(action) + 90, targetAngle.y)) <= 90) ) {
 					followLeft = false;
 					if (debugWay)
 						DEBUG_MSG( "Freed from left wall.\n");
 				} else {
-					action->setMoveAngleYaw(action->moveAngleYaw() + 90);  // turn left
+					action_setmoveangleyaw(action, action_moveangleyaw(action) + 90);  // turn left
 					checkIfPassage = true;
 					vcopy(&pev->v.origin, &passageOrigin);
 					passageTries = 0;
@@ -499,17 +499,18 @@ void PB_Roaming::checkWay( const Vec3D *targetPos )
 				}
 			} else {  // everything fine
 				passageDistance = side.wallDistance + 24;  // if wall disappears next frame
-				if (side.tooClose || left.blocked) action->add(BOT_STRAFE_RIGHT, NULL);
-				else if (side.tooFar) action->add(BOT_STRAFE_LEFT, NULL);
+				if (side.tooClose || left.blocked) action_add(action, BOT_STRAFE_RIGHT, NULL);
+				else if (side.tooFar) action_add(action, BOT_STRAFE_LEFT, NULL);
 			}
 		} else { // in search of passage
 			passageTries++;
-			if (!left.blocked) action->add(BOT_STRAFE_LEFT, NULL );
+			if (!left.blocked)
+				action_add(action, BOT_STRAFE_LEFT, NULL );
 			Vec3D moved;
 			vsub(&pev->v.origin, &passageOrigin, &moved);
 			if (vlen(&moved) >= passageDistance) {
 				if (side.onTouch) {	// that's the wall we were looking for 
-					action->setMoveAngleYaw (side.wallAngle.y + 90);
+					action_setmoveangleyaw(action, side.wallAngle.y + 90);
 					if (debugWay) DEBUG_MSG( "Alligned to new wall.\n" );
 				} else {  // very short wall!
 					followLeft = false;		// let him free
@@ -518,7 +519,7 @@ void PB_Roaming::checkWay( const Vec3D *targetPos )
 				checkIfPassage=false;
 			} else { // not yet reached the passage
 				if (passageTries > 8) {
-					action->add(BOT_STRAFE_RIGHT, NULL);	// follow old direction
+					action_add(action, BOT_STRAFE_RIGHT, NULL);	// follow old direction
 					if (passageTries > 20) {
 						checkIfPassage = false;
 						followLeft = false;		// let him free
@@ -529,7 +530,7 @@ void PB_Roaming::checkWay( const Vec3D *targetPos )
 		}
 
 		if (right.blocked) {	// in any case check for wall in front
-			action->setMoveAngleYaw (right.wallAngle.y+90);  // follow wall to Right
+			action_setmoveangleyaw(action, right.wallAngle.y + 90);  // follow wall to Right
 			if (debugWay) DEBUG_MSG( " Blocked, turning right.\n");
 		}
 	}
@@ -543,12 +544,12 @@ void PB_Roaming::checkWay( const Vec3D *targetPos )
 				left.blocked = false;	// direction change -> cancel everything
 				left.shouldJump = false;
 				right.shouldJump = false;
-				if ((fabsf(anglediff(action->moveAngleYaw(), targetAngle.y)) <= 90) &&
-					(fabsf(anglediff(action->moveAngleYaw() - 90, targetAngle.y)) <= 90)) {
+				if ((fabsf(anglediff(action_moveangleyaw(action), targetAngle.y)) <= 90) &&
+					(fabsf(anglediff(action_moveangleyaw(action) - 90, targetAngle.y)) <= 90)) {
 					followRight = false;
 					if (debugWay) DEBUG_MSG( "Freed from right wall.\n");
 				} else {
-					action->setMoveAngleYaw(action->moveAngleYaw() - 90);  // turn right
+					action_setmoveangleyaw(action, action_moveangleyaw(action) - 90);  // turn right
 					checkIfPassage = true;
 					passageOrigin = pev->v.origin;
 					passageTries = 0;
@@ -556,17 +557,17 @@ void PB_Roaming::checkWay( const Vec3D *targetPos )
 				}
 			} else {  // everything fine
 				passageDistance = side.wallDistance + 24;  // if wall disappears next frame
-				if (side.tooClose || right.blocked) action->add(BOT_STRAFE_LEFT, NULL);
-				else if (side.tooFar) action->add(BOT_STRAFE_RIGHT, NULL);
+				if (side.tooClose || right.blocked) action_add(action, BOT_STRAFE_LEFT, NULL);
+				else if (side.tooFar) action_add(action, BOT_STRAFE_RIGHT, NULL);
 			}
 		} else { // in search of passage
 			passageTries++;
-			if (!right.blocked) action->add(BOT_STRAFE_RIGHT, NULL);
+			if (!right.blocked) action_add(action, BOT_STRAFE_RIGHT, NULL);
 			Vec3D moved;
 			vsub(&pev->v.origin, &passageOrigin, &moved);
 			if (vlen(&moved)>=passageDistance) {
 				if (side.onTouch) {	// that's the wall we were looking for 
-					action->setMoveAngleYaw(side.wallAngle.y - 90);
+					action_setmoveangleyaw(action, side.wallAngle.y - 90);
 					if (debugWay) DEBUG_MSG("Alligned to new wall.\n");
 				} else {  // very short wall!
 					followRight = false;		// let him free
@@ -575,7 +576,7 @@ void PB_Roaming::checkWay( const Vec3D *targetPos )
 				checkIfPassage = false;
 			} else { // not yet reached the passage
 				if (passageTries > 8) {
-					action->add(BOT_STRAFE_LEFT, NULL);	// follow old direction
+					action_add(action, BOT_STRAFE_LEFT, NULL);	// follow old direction
 					if (passageTries > 20) {
 						checkIfPassage = false;
 						followRight = false;		// let him free
@@ -586,7 +587,7 @@ void PB_Roaming::checkWay( const Vec3D *targetPos )
 		}
 
 		if (left.blocked) {	// in any case check for wall in front
-			action->setMoveAngleYaw(left.wallAngle.y - 90);  // follow wall to Left
+			action_setmoveangleyaw(action, left.wallAngle.y - 90);  // follow wall to Left
 			if (debugWay) DEBUG_MSG(" Blocked, turning left.\n");
 		}
 	} else { // not following any walls
@@ -615,18 +616,18 @@ void PB_Roaming::checkWay( const Vec3D *targetPos )
 
 			if (turn == LEFT) {
 				if (debugWay) DEBUG_MSG("Turning left, following wall.\n");
-				action->setMoveAngleYaw(left.wallAngle.y - 90);	// follow wall to left
+				action_setmoveangleyaw(action, left.wallAngle.y - 90);	// follow wall to left
 				followRight = true;		// wall should be at the right
 			} else if (turn == RIGHT) {
 				if (debugWay) DEBUG_MSG("Turning right, following wall.\n");
-				action->setMoveAngleYaw(right.wallAngle.y + 90);	// follow wall to right
+				action_setmoveangleyaw(action, right.wallAngle.y + 90);	// follow wall to right
 				followLeft = true;	// wall should be at the left
 			}
 		} else {
-			action->setMoveAngleYaw (targetAngle.y);
+			action_setmoveangleyaw(action, targetAngle.y);
 
 			if (left.blocked) {
-				action->add(BOT_STRAFE_RIGHT, NULL);
+				action_add(action, BOT_STRAFE_RIGHT, NULL);
 				strafeRightCount++;
 				if (strafeRightCount > 3) {
 					if (debugWay) DEBUG_MSG( "Strafing too long, mode set to followLeft\n");
@@ -636,7 +637,7 @@ void PB_Roaming::checkWay( const Vec3D *targetPos )
 			} else
 				strafeRightCount = 0;
 			if (right.blocked) {
-				action->add(BOT_STRAFE_LEFT, NULL);
+				action_add(action, BOT_STRAFE_LEFT, NULL);
 				strafeLeftCount++;
 				if (strafeLeftCount > 3) {
 					if (debugWay) DEBUG_MSG( "Strafing too long, mode set to followRight\n");
@@ -648,19 +649,19 @@ void PB_Roaming::checkWay( const Vec3D *targetPos )
 		}
 	}
 	
-	if (!action->jumping()) {	// jump...
+	if (!action_jumping(action)) {	// jump...
 		if (left.shouldJump > 0 && !right.blocked) {
 			jumpTarget = left.landPos;
 			//marker.setPos( markerId, jumpTarget );
-			action->add(BOT_JUMP, NULL);
+			action_add(action, BOT_JUMP, NULL);
 		} else if (right.shouldJump > 0 && !left.blocked) {
 			jumpTarget = right.landPos;
 			//marker.setPos( markerId, jumpTarget );
-			action->add(BOT_JUMP, NULL);
+			action_add(action, BOT_JUMP, NULL);
 		}
 	}
 
-	if ((left.shouldDuck || right.shouldDuck)) action->add(BOT_DUCK, NULL); // ...or duck if necessary
+	if ((left.shouldDuck || right.shouldDuck)) action_add(action, BOT_DUCK, NULL); // ...or duck if necessary
 
 	TRACERESULT tr;
 	bool targetVisible;
@@ -675,8 +676,8 @@ void PB_Roaming::checkWay( const Vec3D *targetPos )
 			 ((followLeft || followRight) && sideValid && (fabsf(anglediff(side.wallAngle.y, targetAngle.y)) <= 90)) ) {	
 			//if (debugWay)
 			// DEBUG_MSG( "Close to target!\n");
-			action->setMoveAngleYaw(targetAngle.y);
-			action->setMaxSpeed();
+			action_setmoveangleyaw(action, targetAngle.y);
+			action_setmaxspeed(action);
 			followRight = false;
 			followLeft = false;
 			checkIfPassage = false;
@@ -686,14 +687,14 @@ void PB_Roaming::checkWay( const Vec3D *targetPos )
 	// underwater behaviour:
 	if (is_underwater( pev )) {
 		if (needsair( pev )) {
-			action->add(BOT_JUMP, NULL);
+			action_add(action, BOT_JUMP, NULL);
 		} else {
-			Vec3D angle = {-60.0f, action->moveAngleYaw(), 0.0f};
+			Vec3D angle = {-60.0f, action_moveangleyaw(action), 0.0f};
 			if (targetPos->z > (pev->v.origin.z + 32.0f))
-				action->setMoveAngle(&angle);
+				action_setmoveangle(action, &angle);
 			else if (targetPos->z < (pev->v.origin.z - 32.0f)) {
 				angle.x = -angle.x;
-				action->setMoveAngle(&angle);
+				action_setmoveangle(action, &angle);
 			}
 		}
 	}

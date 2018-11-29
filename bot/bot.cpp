@@ -6,9 +6,7 @@
 // bot.cpp
 //
 
-
 #include "parabot.h"
-
 #include "bot.h"
 #include "bot_func.h"
 #include "bot_weapons.h"
@@ -233,7 +231,7 @@ void BotCreate( int fixedPersNr )
 	// make instance of parabot
 	if (pBot->parabot != 0) delete pBot->parabot;
 	pBot->parabot = ::new CParabot( botEnt, slot );
-	pBot->parabot->action.setAimSkill( pbConfig.personality( persNr ).aimSkill );
+	action_setaimskill(&pBot->parabot->action, pbConfig.personality( persNr ).aimSkill );
 	pBot->parabot->setAggression( pbConfig.personality( persNr ).aggression );
 	pBot->parabot->senses.setSensitivity( pbConfig.personality( persNr ).sensitivity );
 	pBot->parabot->setCommunication( pbConfig.personality( persNr ).communication );
@@ -1144,7 +1142,7 @@ void adjustAimSkills()
 
 	for (int i=0; i<32; i++) if (bots[i].is_used) {
 		int aimSkill = pbConfig.personality( bots[i].personality ).aimSkill;
-		bots[i].parabot->action.setAimSkill( clamp( aimSkill, maxAimSkill, minAimSkill ) );
+		action_setaimskill(&bots[i].parabot->action,  clamp( aimSkill, maxAimSkill, minAimSkill ) );
 	}
 }
 
@@ -1166,10 +1164,9 @@ void BotUnPause()
 	for( int i = 0; i < com.globals->maxclients; i++ )
 	{
 		if( bots[i].is_used
-			&& bots[i].respawn_state == RESPAWN_IDLE )
-		{
+		    && bots[i].respawn_state == RESPAWN_IDLE ) {
 			assert( bots[i].parabot != 0 );
-			bots[i].parabot->action.resetStuck();
+			action_resetstuck(&bots[i].parabot->action);
 		}
 	}
 }

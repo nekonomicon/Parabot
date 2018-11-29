@@ -163,8 +163,8 @@ void goalCloseCombat( CParabot *pb, PB_Percept*item )
 	*/
 	if (item->distance < 100 && item->isVisible()) {
 		pb->setGoalMoveDescr("CloseCombat (vaBanque)");
-		pb->action.setMoveDir(&item->lastSeenPos);
-		pb->action.setMaxSpeed();
+		action_setmovedir(&pb->action, &item->lastSeenPos, 0);
+		action_setmaxspeed(&pb->action);
 	} else if (pb->roamingIndex >= pb->roamingBreak && pb->huntingFor==item->entity ) {
 		// already hunting
 		pb->setGoalMoveDescr("CloseCombat (FollowRoute)");
@@ -238,7 +238,7 @@ void goalSilentAttack( CParabot *pb, PB_Percept*item )
 	pb->reportEnemySpotted();
 
 	if (item->distance > 500) {		// too far to approach, just fire from current position
-		pb->action.add(BOT_DUCK, NULL);
+		action_add(&pb->action, BOT_DUCK, NULL);
 		if (item->canBeAttackedBest()) {
 			pb->combat.shootAtEnemy(&item->lastSeenPos, 0.8);
 			pb->setGoalMoveDescr("SilentAttack (ShootDistance)");
@@ -261,7 +261,7 @@ void goalSilentAttack( CParabot *pb, PB_Percept*item )
 			pb->pathfinder.checkWay(&item->lastSeenPos);	// get near...
 			pb->setGoalMoveDescr( "SilentAttack (Approaching)" );
 		} else {
-			pb->action.add(BOT_DUCK, NULL);
+			action_add(&pb->action, BOT_DUCK, NULL);
 			if (item->canBeAttackedBest()) {	// ...and attack from there
 				//bool shot = pb->combat.shootAtEnemy(item->lastSeenPos, pb->combat.weapon.currentHighAimProb());
 				pb->combat.shootAtEnemy(&item->lastSeenPos, pb->combat.weapon.currentHighAimProb());
@@ -321,7 +321,7 @@ void goalShootAtEnemy( CParabot *pb, PB_Percept*item )
 				pb->setGoalViewDescr("ShootAtEnemy (SwitchingWpn)");
 			}
 			if (!pb->senses.underFire()) {
-				pb->action.setSpeed(0);
+				action_setspeed(&pb->action, 0);
 			}
 		}
 		if (fired) item->flags |= PI_ALERT;
@@ -358,8 +358,8 @@ void goalShootAtEnemy( CParabot *pb, PB_Percept*item )
 				// check if bot should throw grenade at last position:
 				int flags = WF_NEED_GRENADE;
 				if (pb->ent->v.waterlevel == 3) flags |= WF_UNDERWATER;
-				int bestWeapon = pb->combat.weapon.getBestWeapon( item->distance, pb->action.targetAccuracy(), flags );
-				float bestScore = pb->combat.weapon.getWeaponScore( bestWeapon, item->distance, pb->action.targetAccuracy(), flags, true );
+				int bestWeapon = pb->combat.weapon.getBestWeapon( item->distance, action_targetaccuracy(&pb->action), flags );
+				float bestScore = pb->combat.weapon.getWeaponScore( bestWeapon, item->distance, action_targetaccuracy(&pb->action), flags, true );
 				vma(&item->lastSeenPos, -0.05f, &item->lastSeenVelocity, &prePos);
 				if ((bestScore > 0) && canshootat(pb->ent, &prePos)) {
 					//botNr = pb->slot;
@@ -394,12 +394,12 @@ void goalShootAtEnemy( CParabot *pb, PB_Percept*item )
 				pb->setGoalViewDescr("ShootAtEnemy (Preemptive:Shoot)");
 			} else {
 				DEBUG_MSG("Waiting for bestWeapon...");
-				pb->action.setAimDir(&prePos, NULL);
+				action_setaimdir(&pb->action, &prePos, NULL);
 				pb->setGoalViewDescr("ShootAtEnemy (Preemptive:SwitchingWpn)");
 			}
 		} else {
 			if (item->isTrackable()) {
-				pb->action.setAimDir(item->predictedAppearance(pb->botPos()), NULL);
+				action_setaimdir(&pb->action, item->predictedAppearance(pb->botPos()), NULL);
 				pb->setGoalViewDescr("ShootAtEnemy (Disappeared:PredictiveAiming)");
 			} else {
 				goalLookAround(pb, item);
@@ -449,7 +449,7 @@ void goalBunnyHop( CParabot *pb, PB_Percept*item )
 
 	int i = pb->slot;
 	if (worldtime() >= nextHop[i]) {
-		pb->action.add(BOT_JUMP, NULL);
+		action_add(&pb->action, BOT_JUMP, NULL);
 		nextHop[i] = worldtime() + randomfloat(0.5, 1.5);
 	} else if (worldtime() + 5.0f < nextHop[i]) {
 		// level change
@@ -473,7 +473,7 @@ void goalArmBestWeapon( CParabot *pb, PB_Percept*item )
 
 	if (item && item->isTrackable()) {
 		dist = item->distance;
-		hitProb = pb->action.targetAccuracy();
+		hitProb = action_targetaccuracy(&pb->action);
 		if (item->isFacingBot()) {
 			if ( hitProb > 0.2f && item->targetAccuracy() > 0.2f ) 
 				botFlags |= WF_IMMEDIATE_ATTACK;	// both can shoot

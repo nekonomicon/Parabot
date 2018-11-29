@@ -1,7 +1,6 @@
 #include "parabot.h"
 #include "pb_path.h"
 #include "pb_global.h"
-#include "pb_action.h"
 #include <stdio.h>
 
 int journeyMode = JOURNEY_FAST;

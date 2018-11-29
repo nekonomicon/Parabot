@@ -305,11 +305,17 @@ servermaxspeed()
 	return maxspeed->value;
 }
 
-int
+float
+getframerate()
+{
+	return com.globals->frametime;
+}
+
+byte
 getframerateinterval()
 {
 	// Jumbot 2.4 has same code
-	return (int)(com.globals->frametime * 1000.0f);
+	return (byte)(com.globals->frametime * 1000.0f);
 }
 
 bool

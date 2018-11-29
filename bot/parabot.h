@@ -7,10 +7,10 @@
 #include "meta_api.h"
 #include "engwrap.h"
 #include "pb_global.h"
+#include "action.h"
 #include "bot.h"
 #include "utilityfuncs.h"
 #include "pb_mapgraph.h"
-#include "pb_action.h"
 #include "pb_roaming.h"
 #include "pb_combat.h"
 #include "pb_perception.h"
@@ -116,7 +116,7 @@ public:
 
 public:
 
-	PB_Action	 action;
+	ACTION	 action;
 
 	CParabot( EDICT *botEnt, int botSlot );
 	~CParabot();
