@@ -4,6 +4,7 @@
 #include "focus.h"
 #include "kills.h"
 #include "pb_cell.h"
+#include "vistable.h"
 #include "pb_mapgraph.h"
 #include "pb_mapcells.h"
 

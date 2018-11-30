@@ -13,6 +13,7 @@
 #include "bot_func.h"
 #include "chat.h"
 #include "sectors.h"
+#include "vistable.h"
 #include "pb_mapcells.h"
 #include "pb_configuration.h"
 #include "pb_observer.h"

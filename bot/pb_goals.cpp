@@ -2,6 +2,7 @@
 #include "parabot.h"
 #include "pb_observer.h"
 #include "sectors.h"
+#include "vistable.h"
 #include "pb_mapcells.h"
 
 extern int mod_id;

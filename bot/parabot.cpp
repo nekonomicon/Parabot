@@ -6,6 +6,7 @@
 #include "chat.h"
 #include "sectors.h"
 #include "kills.h"
+#include "vistable.h"
 #include "pb_mapcells.h"
 
 

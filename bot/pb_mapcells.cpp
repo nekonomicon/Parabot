@@ -1,6 +1,7 @@
 #include "parabot.h"
 #include "sectors.h"
 #include "focus.h"
+#include "vistable.h"
 #include "pb_mapcells.h"
 #include <algorithm>
 
@@ -20,7 +21,7 @@ void PB_MapCells::clear()
 {
 	numCells = 0;
 	memset( &cellHash, NO_CELL_REGISTERED, sizeof cellHash );
-	vis.clear();
+	vistable_clear(&vis);
 }
 
 
@@ -29,15 +30,15 @@ int PB_MapCells::updateVisibility( int maxUpdates )
 	Vec3D dir;
 	int c1, c2, trCount = 0;
 
-	while (trCount < maxUpdates && vis.needTrace( c1, c2 ) ) {
+	while (trCount < maxUpdates && vistable_needtrace(&vis, c1, c2 ) ) {
 		if (LOSExists( cellArray[c1].pos(), cellArray[c2].pos())) {
-			vis.addTrace( true );
+			vistable_addtrace(&vis, true);
 			vsub(cellArray[c2].pos(), cellArray[c1].pos(), &dir);
 			focus_adddir(&dir, cellArray[c1].data.sectors);
 			vinv(&dir);
 			focus_adddir(&dir, cellArray[c2].data.sectors);
 		} else {
-			vis.addTrace( false );
+			vistable_addtrace(&vis, false);
 		}
 		trCount++;
 	}
@@ -47,7 +48,7 @@ int PB_MapCells::updateVisibility( int maxUpdates )
 int PB_MapCells::lastVisUpdate()
 {
 	int c1 = 0, c2;
-	vis.needTrace( c1, c2 );
+	vistable_needtrace(&vis, c1, c2 );
 	return c1;
 }
 
@@ -189,7 +190,7 @@ int PB_MapCells::addCell( PB_Cell newCell, bool initNbs, int addedFrom )
 		cellArray[cellId].setNextCell( numCells );
 		if (cellId == numCells) ERROR_MSG( "CellId=numCells!\n" );
 	}
-	vis.addCell();
+	vistable_addcell(&vis);
 	if (initNbs) initNeighbours( numCells, addedFrom );
 	numCells++;
 	return (numCells - 1);		// has already been incremented
@@ -756,7 +757,7 @@ bool PB_MapCells::load( char *mapname )
 	fread( &count, sizeof(int), 1, fp );
 	for (int i=0; i<count; i++) addCell( PB_Cell( fp ), false ); // don't init neighbours
 
-	vis.load( fp );
+	vistable_load(&vis, fp);
 
 	fclose( fp );
 	return true;
@@ -773,7 +774,7 @@ bool PB_MapCells::save( char *mapname )
 	for (int i = 0; i < numCells; i++)
 		cellArray[i].save(fp);
 
-	vis.save(fp);
+	vistable_save(&vis, fp);
 
 	fclose(fp);
 

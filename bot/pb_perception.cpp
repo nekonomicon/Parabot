@@ -5,6 +5,7 @@
 #include "pb_configuration.h"
 #include "sounds.h"
 #include "sectors.h"
+#include "vistable.h"
 #include "pb_mapcells.h"
 
 

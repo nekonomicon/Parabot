@@ -3,7 +3,6 @@
 #define PB_MapCells_H
 
 #include "pb_cell.h"
-#include "pb_vistable.h"
 #include "pbt_priorityqueue.h"
 #include "pbt_dynarray.h"
 
@@ -50,7 +49,7 @@ public:
 	int initNeighbours( int cellIndex, int firstNb  );
 	int numberOfCells() { return numCells; }
 
-	bool lineOfSight( int cell1, int cell2 ) {  return vis.isVisible( cell1, cell2 );  }
+	bool lineOfSight( int cell1, int cell2 ) {  return vistable_isvisible(&vis, cell1, cell2 );  }
 	int updateVisibility( int maxUpdates );
 	int lastVisUpdate();
 
@@ -82,7 +81,7 @@ private:
 	int			numCellsFound;		// number of elements in cellSearch
 	//int			lastCellFound;		// last passed element
 
-	PB_VisTable vis;
+	VISTABLE vis;
 
 	int getHashcode( const Vec3D *pos );
 	void getAllignedPos( const Vec3D *pos, Vec3D *apos);
