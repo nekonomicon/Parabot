@@ -226,18 +226,18 @@ void goalCollectItems( CParabot *pb, PB_Percept*item )
 
 float weightCollectItems( CParabot *pb, PB_Percept*item )
 {
-	float wish = pb->needs.needForItems();
+	float wish = needs_wishforitems(&pb->needs);
 	if (pb->actualNavpoint) {	// when getting to a navpoint is all we want...
 		if ( pb->actualNavpoint->offersHealth() &&
-			 (pb->needs.needForHealth() > 0) ) wish = 0;
+			 (needs_wishforhealth(&pb->needs) > 0) ) wish = 0;
 		else if ( pb->actualNavpoint->offersArmor() &&
-			 (pb->needs.needForArmor() > 0) ) wish = 0;
+			 (needs_wishforarmor(&pb->needs) > 0) ) wish = 0;
 		else if ( pb->actualNavpoint->offersCamping() &&
-			 (pb->needs.desireFor( NAV_S_CAMPING ) == wish) ) wish = 0;
+			 (needs_desirefor(&pb->needs, NAV_S_CAMPING) == wish) ) wish = 0;
 		else if ( pb->actualNavpoint->type()==NAV_F_TANKCONTROLS &&
-			 (pb->needs.desireFor( NAV_F_TANKCONTROLS ) == wish) ) wish = 0;
+			 (needs_desirefor(&pb->needs, NAV_F_TANKCONTROLS) == wish) ) wish = 0;
 		else if ( pb->actualNavpoint->type()==NAV_S_USE_TRIPMINE &&
-			 (pb->needs.desireFor( NAV_S_USE_TRIPMINE ) > 0) ) wish *= 0.5f;
+			 (needs_desirefor(&pb->needs, NAV_S_USE_TRIPMINE) > 0) ) wish *= 0.5f;
 	}
 	// DEBUG_MSG( "Items = %.1f\n", wish );
 	return wish;
@@ -268,7 +268,7 @@ float weightGetWeaponbox( CParabot *pb, PB_Percept*item )
 	assert(item->distance > 0);
 
 	if (!item->isReachable()) return 0;
-	float weight = 300 * pb->needs.needForWeapons() / (400 + item->distance);
+	float weight = 300 * needs_wishforweapons(&pb->needs) / (400 + item->distance);
 	//if (weight > 9) weight = 9;
 	item->update = worldtime() + (item->distance / 1000);
 	// DEBUG_MSG( "wbw=%.2f\n", weight );
@@ -341,7 +341,7 @@ float weightGetAwayExplosive( CParabot *pb, PB_Percept*item )
 float weightGetAwayEnemy( CParabot *pb, PB_Percept*item )
 {
 	assert( item != 0 );
-	if (item->isTrackable()) return ( 4 - item->rating - pb->needs.wishForCombat() );
+	if (item->isTrackable()) return ( 4 - item->rating - needs_wishforcombat(&pb->needs) );
 	return 0;
 }
 
@@ -362,8 +362,8 @@ float weightLoadHealthOrArmor( CParabot *pb, PB_Percept*item )
 	float weight = 0;
 
 	if ( pb->actualNavpoint && !pb->senses.underFire() ) {
-		if (pb->actualNavpoint->offersHealth()) weight = pb->needs.needForHealth();
-		if (pb->actualNavpoint->offersArmor())  weight = pb->needs.needForArmor();
+		if (pb->actualNavpoint->offersHealth()) weight = needs_wishforhealth(&pb->needs);
+		if (pb->actualNavpoint->offersArmor())  weight = needs_wishforarmor(&pb->needs);
 		if ((weight > 0) && (pb->senses.numEnemies > 0)) {
 			weight = 0;
 			DEBUG_MSG( "No Loading - enemy around!\n" );
@@ -460,7 +460,7 @@ float weightCamp( CParabot *pb, PB_Percept*item )
 	if (pb->actualNavpoint && !pb->senses.underFire()) {
 		if (pb->actualNavpoint->offersCamping() &&
 		    pb->combat.weapon.bestWeaponUsable())
-			weight = pb->needs.wishForSniping();
+			weight = needs_wishforsniping(&pb->needs, true);
 	}
 	return weight;
 }
@@ -518,7 +518,7 @@ float weightUseTank( CParabot *pb, PB_Percept*item )
 
 	if ( pb->actualNavpoint && !pb->senses.underFire() ) {
 		if ( pb->actualNavpoint->type() == NAV_F_TANKCONTROLS ) {
-			weight = pb->needs.wishForSniping( false );
+			weight = needs_wishforsniping(&pb->needs, false);
 			if (item && item->isVisible() && item->distance > 300) weight += 10;
 		}
 	}
@@ -540,7 +540,7 @@ float weightWaitForHalo( CParabot *pb, PB_Percept*item )
 	float weight = 0;
 	if ( pb->actualNavpoint ) {
 		if ( pb->actualNavpoint->type()==NAV_HW_HALOBASE && haloOnBase ) 
-			weight = pb->needs.needForItems() + 0.1;	// just a bit more than running to it...
+			weight = needs_wishforitems(&pb->needs) + 0.1;	// just a bit more than running to it...
 	}
 	return weight;
 }
@@ -630,9 +630,9 @@ float weightFollowEnemy( CParabot *pb, PB_Percept*item )
 	return 0;
 	assert( item != 0 );
 	if ( !pb->combat.weapon.bestWeaponUsable() ) return 0;
-	if (item->pState & PI_TACTILE) return (5 + item->rating + pb->needs.wishForCombat());
+	if (item->pState & PI_TACTILE) return (5 + item->rating + needs_wishforcombat(&pb->needs));
 	else if (item->rating < -3) return 0;	// too bad
-	else return (item->rating + pb->needs.wishForCombat());
+	else return (item->rating + needs_wishforcombat(&pb->needs));
 }
 
 void goalMakeRoom( CParabot *pb, PB_Percept*item )

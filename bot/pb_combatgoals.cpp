@@ -45,7 +45,7 @@ float weightHuntEnemy( CParabot *pb, PB_Percept*item )
 	// only hunt players that haven't been seen yet and are trackable
 	if (item->hasBeenSpotted() || !(item->isTrackable())) return 0;
 
-	return pb->needs.wishForCombat();
+	return needs_wishforcombat(&pb->needs);
 }
 
 void goalFleeEnemy( CParabot *pb, PB_Percept*item )
@@ -130,7 +130,7 @@ float weightTakeCover( CParabot *pb, PB_Percept*item )
 	if (item->distance < 150) return 0;						// too close
 	if (item->rating > 0) return 0;							// we have advantage
 
-	float weight = pb->needs.wishForCombat() - item->rating;
+	float weight = needs_wishforcombat(&pb->needs) - item->rating;
 
 	// are we already in a combat? -> keep on to it!
 	if (item->isHurtingBot() || item->isAlert()) weight += 3;
@@ -202,7 +202,7 @@ float weightCloseCombat(CParabot *pb, PB_Percept *item)
 	if (item->distance < 100) return 15 + (item->rating / 5);	// va banque
 	if (item->rating < -3) return 0;						// too bad, better don't try that...
 
-	float weight = pb->needs.wishForCombat() + item->rating;
+	float weight = needs_wishforcombat(&pb->needs) + item->rating;
 
 	// are we already in a combat? -> keep on to it!
 	if (item->isHurtingBot() || item->isAlert()) weight += 3;

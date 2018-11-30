@@ -4,7 +4,6 @@
 #include "pb_mapgraph.h"
 #include "dynpq.h"
 #include "pb_global.h"
-#include "pb_needs.h"
 #include <stdio.h>
 
 extern PB_MapGraph mapGraph;
@@ -414,7 +413,7 @@ bool PB_MapGraph::getJourney( int start, int target, int mode, PB_Journey &journ
 
 
 int PB_MapGraph::DijkstraToWish( std::vector<float>& dist, std::vector<int>& path, 
-						    int start, PB_Needs &needs, int searchMode, EDICT *traveller )
+						    int start, NEEDS *needs, int searchMode, EDICT *traveller )
 {
 	// init distances
 	dist = std::vector<float>(graph.size(), MAX_PATH_WEIGHT);
@@ -464,7 +463,7 @@ int PB_MapGraph::DijkstraToWish( std::vector<float>& dist, std::vector<int>& pat
 					if (graph[neighbor].first.nextVisit( traveller ) < worldtime() ) {
 						navWeight += 0.1;
 						score[neighbor] = score[actualVertex] + 
-						    ( needs.desireFor( graph[neighbor].first.type() )
+						    (needs_desirefor(needs, graph[neighbor].first.type())
 						    / navWeight );
 					}
 				}
@@ -481,7 +480,7 @@ int PB_MapGraph::DijkstraToWish( std::vector<float>& dist, std::vector<int>& pat
 	return targetNav;
 }
 
-int PB_MapGraph::getWishJourney( int start, PB_Needs &needs, int mode, PB_Journey &journey, EDICT *traveller)
+int PB_MapGraph::getWishJourney( int start, NEEDS *needs, int mode, PB_Journey &journey, EDICT *traveller)
 // returns the nav-id that according to wishList is the best to head for and the best
 // journey to get there if possible in mode, if not returns -1 and an empty journey
 {

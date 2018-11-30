@@ -73,7 +73,7 @@ void CParabot::initAfterRespawn()
 	pathfinder.init( ent, &action );
 	combat.init( slot, ent, &action, &pathfinder );
 	senses.init( ent );
-	needs.init( this );
+	needs_init(&needs, this);
 	
 	mustShootObject = false;
 	stoppedForPlat = false;
@@ -91,8 +91,8 @@ void CParabot::initAfterRespawn()
 		actualNavpoint = 0;
 		DEBUG_MSG( "Not respawned at navpoint!\n" );
 	}
-	needs.updateWishList();
-		
+	needs_updatewishlist(&needs);
+
 	// DEBUG_MSG( "initAfterRespawn called\n" );
 }
 
@@ -301,10 +301,14 @@ bool CParabot::getJourneyTarget()
 	}
 	if (ent->v.health > 80) pathMask |= PATH_CAUSES_DAMAGE;
 
-	if (ent->v.health < 30) setJourneyMode( JOURNEY_LONELY );
-	else if (needs.wishForCombat() > 7) setJourneyMode( JOURNEY_CROWDED );
-	else if (needs.needForItems() > 4) setJourneyMode( JOURNEY_RELIABLE );
-	else setJourneyMode( JOURNEY_FAST );
+	if (ent->v.health < 30)
+		setJourneyMode( JOURNEY_LONELY );
+	else if (needs_wishforcombat(&needs) > 7)
+		setJourneyMode( JOURNEY_CROWDED );
+	else if (needs_wishforitems(&needs) > 4)
+		setJourneyMode( JOURNEY_RELIABLE );
+	else
+		setJourneyMode( JOURNEY_FAST );
 	
 	// check if this bot has been assigned a reachable target
 	if ((botNr == slot)
@@ -315,7 +319,7 @@ bool CParabot::getJourneyTarget()
 		botTarget = -1;
 	} else { // if not, find a wish target
 		//initWishList();	// not necessary, but more accurate
-		targetNav = mapGraph.getWishJourney( actualNavpoint->id(), needs, pathMask, actualJourney, ent );
+		targetNav = mapGraph.getWishJourney( actualNavpoint->id(), &needs, pathMask, actualJourney, ent );
 	}
 
 	if (targetNav >= 0) {	// found a journey
@@ -418,10 +422,10 @@ void CParabot::pathFinished()
 	actualPath->reportTargetReached( ent, worldtime() );
 	actualJourney.savePathData();
 	actualNavpoint = &(actualPath->endNav());
-	if (needs.newPriorities()) {
+	if (needs_newpriorities(&needs)) {
 		actualJourney.cancel();		// cancel current journey
 		actualPath = 0;				// set actualPath to 0 to invoke new journey
-		needs.affirmPriorities();	// do this only once
+		needs_affirmpriorities(&needs);	// do this only once
 		DEBUG_MSG("Found new item priorities, canceling journey!\n");
 	} else if (actualJourney.continues()) {
 		actualPath = actualJourney.getNextPath();
@@ -868,7 +872,7 @@ void CParabot::botThink()
 
 	combat.weapon.initCurrentWeapon();
 
-	needs.updateWishList();
+	needs_updatewishlist(&needs);
 
 	action_reset(&action);		// initializes action flag and other variables
 

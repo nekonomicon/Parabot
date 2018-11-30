@@ -10,12 +10,12 @@
 #include "action.h"
 #include "bot.h"
 #include "utilityfuncs.h"
+#include "needs.h"
 #include "pb_mapgraph.h"
 #include "pb_roaming.h"
 #include "pb_combat.h"
 #include "pb_perception.h"
 #include "pb_goalfinder.h"
-#include "pb_needs.h"
 
 
 
@@ -53,7 +53,7 @@ public:
 	PB_Path		*actualPath;		// path bot is currently on
 	PB_Path_Waypoint waypoint;		// waypoint bot is approaching
 	PB_Navpoint	*actualNavpoint;	// navpoint bot is on, 0 if not on any navpoint
-	PB_Needs	needs;
+	NEEDS		needs;
 	bool		stoppedForPlat;
 	bool		mustShootObject;
 	Vec3D		shootObjectPos;

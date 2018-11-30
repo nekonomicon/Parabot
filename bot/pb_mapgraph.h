@@ -7,7 +7,6 @@
 #include <stack>
 #include "pbt_dynarray.h"
 #include "pb_journey.h"
-class PB_Needs;
 
 
 
@@ -76,7 +75,7 @@ public:
 	bool getJourney( int start, int target, int mode, PB_Journey &journey );
 	// returns a journey from start to target or false if none available in mode
 
-	int getWishJourney( int start, PB_Needs &needs, int mode, PB_Journey &journey, EDICT *traveller );
+	int getWishJourney( int start, NEEDS *needs, int mode, PB_Journey &journey, EDICT *traveller );
 	// returns the nav-id that according to wishList is the best to head for and the best
 	// journey to get there if possible in mode, if not returns -1 and an empty journey
 
@@ -115,7 +114,7 @@ private:
 	// classic Dijkstra algo
 
 	int DijkstraToWish( std::vector<float>& dist, std::vector<int>& path, 
-						    int start, PB_Needs &needs, int searchMode, EDICT *traveller );
+						    int start, NEEDS *needs, int searchMode, EDICT *traveller );
 
 	
 };
