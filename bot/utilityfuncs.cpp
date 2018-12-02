@@ -1,6 +1,4 @@
 #include "parabot.h"
-#include "pb_global.h"
-#include "pb_weapon.h"
 #include "bot.h"
 #include "utilityfuncs.h"
 

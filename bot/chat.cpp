@@ -2,7 +2,7 @@
 #include "chat.h"
 #include "pb_configuration.h"
 #include "bot.h"
-#include "pb_weapon.h"
+#include "weapon.h"
 #include "utf8_strfunc.h"
 #include <ctype.h>
 #include <stdio.h>
@@ -344,7 +344,7 @@ chat_checkmsgforweapon(const char *msg, const char *wpnName, EDICT *wpnOwner, ch
 	else {
 		// TODO: check for tripmines!
 		int owner = indexofedict(wpnOwner) - 1;
-		strcpy(usedWpn, getWeaponName(clientWeapon[owner]));
+		strcpy(usedWpn, weapon_getweaponname(clientWeapon[owner]));
 	}
 
 	namePos = (char *)strstr(msg, "%s");

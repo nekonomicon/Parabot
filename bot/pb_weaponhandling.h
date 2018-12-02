@@ -1,7 +1,6 @@
 #pragma once
 #if !defined(PB_WEAPON_HANDLING_H)
 #define PB_WEAPON_HANDLING_H
-#include "pb_weapon.h"
 
 
 #define CHANGE_WEAPON_DELAY		1.0	// time needed to switch between weapons
@@ -58,7 +57,7 @@ private:
 	EDICT		*botEnt;
 	ACTION	*botAction;				// pointer to action-instace the bot is using
 
-	PB_Weapon	weapon;
+	WEAPON	weapon;
 	int			defaultWeapon;
 	int			armedWeapon;
 	int			preferredWeapon;

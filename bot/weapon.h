@@ -17,8 +17,34 @@ typedef struct {
 	const char	*shortName;
 } tWeaponRec;
 
+#define MAX_WEAPONS	32	// have to fit in 32-bit-flag
 
-#define MAX_WEAPONS 32	// have to fit in 32-bit-flag
+typedef struct weapon {
+	EDICT		*botent;
+	ACTION		*botaction;			// pointer to action-instace the bot is using
+	tWeaponRec	*modweapon;			// pointer to the correct mod-weapons
+	int		 currentweapon;			// holds the Weapon ID that all functions are working with
+	int		 armedweapon;			// weapon the player has armed
+
+	int		 botslot;			// slot the bot is using
+
+	float		 nextattacktime;		// worldtime next attack can occur
+	float		 lastattacktime;		// worldtime last attack was executed
+
+	int		 bestmode[MAX_WEAPONS];		// if weapons have several modes, the best get
+							// stored here in getWeaponScore()
+
+	int		 minmodweapon, maxmodweapon;
+
+	float		 grenadelaunchtime;		// when to throw/bomb
+	Vec3D		 grenadetarget;			// for handgrenades to remember where to throw if forced to
+	int		 grenadewid;			// holds wid if grenadePrepared
+
+	float		 loadstarttime;
+	bool		 reloading;			// true if current weapon is being reloaded
+	bool		 grenadeprepared;		// for handgrenades and satchels
+	bool		 loadinggauss;
+} WEAPON;
 
 // weapon ID values for Valve's Half-Life Deathmatch
 #define MIN_VALVE_WEAPONS		   1
@@ -218,116 +244,56 @@ typedef struct {
 
 #define CHANGE_WEAPON_DELAY		1.0	// time needed to switch between weapons
 
+void		 weapon_construct(WEAPON *weapon);
+void		 weapon_construct2(WEAPON *weapon, int wId);
+// directly initializing currentWeapon
 
-
-const char* getWeaponName( int wId );
+const char	*weapon_getweaponname(int wId);
 // returns the short weapon name of weapon wId
 
+void		 weapon_init(WEAPON *weapon, int slot, EDICT *ent, ACTION *action);
+// has to be called with the botSlot before all other methods
 
-class PB_Weapon
-{
-	
-public:
-	
-	PB_Weapon();
+float		 weapon_getscore(WEAPON *weapon, float distance, float hitProb, int flags, bool checkAmmo);
+// returns the weapon-score for given situation
 
-	PB_Weapon( int wId );
-	// directly initializing currentWeapon
-	
-	void init( int slot, EDICT *ent, ACTION *action );
-	// has to be called with the botSlot before all other methods
+float		 weapon_getaudibledistance(WEAPON *weapon, int attackFlags);
+// returns the audible distance
 
-	float getScore( float distance, float hitProb, int flags, bool checkAmmo );
-	// returns the weapon-score for given situation
+bool		 weapon_attack(WEAPON *weapon, Vec3D *target, float accuracy, Vec3D *relVel);
+// attacks in best mode at best time the given position when accuracy is reached
 
-	float getAudibleDistance( int attackFlags );
-	// returns the audible distance
+bool		 weapon_hastofinishattack(WEAPON *weapon);
+// true if bot has to finish e.g. a grenade attack
 
-	bool attack( Vec3D *target, float accuracy, Vec3D *relVel );
-	// attacks in best mode at best time the given position when accuracy is reached
+int		 weapon_armedgrenade(WEAPON *weapon);
+// returns the weapon id that has to finish attack
 
-	bool hasToFinishAttack() { return grenadePrepared; }
-	// true if bot has to finish e.g. a grenade attack
+void		 weapon_finishattack(WEAPON *weapon);
+// throws grenade to avoid blasting up 
 
-	int armedGrenade() { return grenadeWId; }
-	// returns the weapon id that has to finish attack
+bool		 weapon_needreload(WEAPON *weapon);
+// returns true if the current weapon needs to be reloaded
 
-	void finishAttack();
-	// throws grenade to avoid blasting up 
+void		 weapon_reload(WEAPON *weapon);
+// reloads weapon
 
-	bool needReload();
-	// returns true if the current weapon needs to be reloaded
+float		 weapon_bestdistance(WEAPON *weapon);
+// returns best distance for currentWeapon
 
-	void reload();
-	// reloads weapon
+int		 weapon_ammo1(WEAPON *weapon);
+int		 weapon_ammo2(WEAPON *weapon);
+float		 weapon_highaimprob(WEAPON *weapon);
+// returns necessary aimProb for a high precision attack for current weapon
 
-	float bestDistance();
-	// returns best distance for currentWeapon
+void		 weapon_setcurrentweapon(WEAPON *weapon, int wId);
+void		 weapon_registerarmedweapon(WEAPON *weapon, int wId);
+const char	*weapon_name(WEAPON *weapon);
+// returns the weapon-name
 
-	int ammo1();
-
-	int ammo2();
-
-	float highAimProb();
-	// returns necessary aimProb for a high precision attack for current weapon
-
-	void setCurrentWeapon( int wId );
-	
-	void registerArmedWeapon( int wId );
-
-	const char* name() {  return modWeapon[currentWeapon].name;  }
-	// returns the weapon-name
-
-	float cone()	{ return modWeapon[currentWeapon].cone; }
-	void setNextAttackTime( float time ) {	nextAttackTime = time; }
-
-	int bestAttackMode() {  return bestMode[currentWeapon];  }
-
-	void setAttackMode( int mode )  {  bestMode[currentWeapon] = mode;  }
-
-
-
-private:
-
-	int currentWeapon;			// holds the Weapon ID that all functions are working with
-	int armedWeapon;			// weapon the player has armed
-
-	int			botSlot;		// slot the bot is using
-	EDICT		*botEnt;
-	ACTION	*botAction;		// pointer to action-instace the bot is using
-
-	float	nextAttackTime;		// worldtime next attack can occur
-	float	lastAttackTime;		// worldtime last attack was executed
-	bool	reloading;			// true if current weapon is being reloaded
-
-	int bestMode[MAX_WEAPONS];	// if weapons have several modes, the best get
-								// stored here in getWeaponScore()
-	
-	tWeaponRec *modWeapon;		// pointer to the correct mod-weapons
-	int minModWeapon, maxModWeapon;
-	
-
-	bool grenadePrepared;		// for handgrenades and satchels
-	float grenadeLaunchTime;	// when to throw/bomb
-	Vec3D grenadeTarget;		// for handgrenades to remember where to throw if forced to
-	int grenadeWId;				// holds wid if grenadePrepared
-
-	bool loadingGauss;
-	float loadStartTime;
-
-	// private methods:
-
-	void initMOD();
-	float valveWeaponScore( float distance, float hitProb, int flags, bool checkAmmo );
-	float hwWeaponScore( float distance, float hitProb, int flags, bool checkAmmo );
-	float dmcWeaponScore( float distance, float hitProb, int flags, bool checkAmmo );
-	float csWeaponScore( float distance, float hitProb, int flags, bool checkAmmo );
-	float tfcWeaponScore( float distance, float hitProb, int flags, bool checkAmmo );
-	float gearboxWeaponScore( float distance, float hitProb, int flags, bool checkAmmo );
-	float hungerWeaponScore( float distance, float hitProb, int flags, bool checkAmmo );	
-
-	bool attackValveHandgrenade( Vec3D *target );
-	bool attackValveSatchel( Vec3D *target );
-};
+float		 weapon_cone(WEAPON *weapon);
+void		 weapon_setnextattacktime(WEAPON *weapon, float time);
+int		 weapon_bestattackmode(WEAPON *weapon);
+void		 weapon_setattackmode(WEAPON *weapon, int mode);
 
 #endif

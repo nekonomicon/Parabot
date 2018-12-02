@@ -177,8 +177,9 @@ void goalCloseCombat( CParabot *pb, PB_Percept*item )
 			int clientIndex = indexofedict(pb->ent) - 1;
 			assert((clientIndex >= 0) && (clientIndex < 32));
 			int wid = clientWeapon[clientIndex];
-			PB_Weapon w(wid);
-			float minDist = w.bestDistance();
+			WEAPON w;
+			weapon_construct2(&w, wid);
+			float minDist = weapon_bestdistance(&w);
 			int pl;
 			if ((pl = map.getOffensivePath(start, enemyId, minDist, pb->roamingRoute)) > 0) {
 				pb->setRoamingIndex(pl);

@@ -1,7 +1,7 @@
 #include "parabot.h"
 #include "pb_perception.h"
 #include "bot.h"
-#include "pb_weapon.h"
+#include "weapon.h"
 #include "pb_configuration.h"
 #include "sounds.h"
 #include "sectors.h"

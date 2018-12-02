@@ -49,7 +49,7 @@ PB_WeaponHandling::PB_WeaponHandling()
 void PB_WeaponHandling::init( int slot, EDICT *ent, ACTION *action )
 // has to be called with the botSlot before all other methods
 {
-	weapon.init( slot, ent, action );
+	weapon_init(&weapon, slot, ent, action );
 	botSlot = slot;
 	botEnt = ent;
 	botAction = action;
@@ -66,14 +66,14 @@ void PB_WeaponHandling::initCurrentWeapon()
 	int cwId = bots[botSlot].current_weapon.iId;
 	if( cwId >= minModWeapon && cwId < maxModWeapon ) {
 		armedWeapon = cwId;
-		weapon.registerArmedWeapon( armedWeapon );
+		weapon_registerarmedweapon(&weapon, armedWeapon );
 	} else {
 		// strange values in weapon_id, check model:
 		if (botEnt->v.weaponmodel != 0) {
 			DEBUG_MSG( "CWBug" );
 		}
 	}
-	//int a = weapon.ammo1();
+	//int a = weapon_ammo1(&weapon);
 	// DEBUG_MSG( "Ammo1 = %i\n", a );
 }
 
@@ -81,20 +81,20 @@ void PB_WeaponHandling::initCurrentWeapon()
 bool PB_WeaponHandling::attack( Vec3D *target, float accuracy, Vec3D *relVel )
 // attacks in best mode at best time the given position when accuracy is reached
 {
-	weapon.setCurrentWeapon( currentWeapon() );
-	return weapon.attack(target, accuracy, relVel );
+	weapon_setcurrentweapon(&weapon, currentWeapon() );
+	return weapon_attack(&weapon, target, accuracy, relVel );
 }
 
 
 void PB_WeaponHandling::checkForForcedAttack()
 {
-	weapon.setCurrentWeapon( currentWeapon() );
-	if ( weapon.hasToFinishAttack() ) {
-		if ( currentWeapon() != weapon.armedGrenade() ) {
+	weapon_setcurrentweapon(&weapon, currentWeapon() );
+	if ( weapon_hastofinishattack(&weapon) ) {
+		if ( currentWeapon() != weapon_armedgrenade(&weapon) ) {
 			// if bot picked up other weapon while grenade is still armed:
-			switchToWeapon( weapon.armedGrenade() );
+			switchToWeapon( weapon_armedgrenade(&weapon) );
 		}
-		weapon.finishAttack();
+		weapon_finishattack(&weapon);
 	}
 }
 
@@ -162,12 +162,13 @@ bool PB_WeaponHandling::available( int wId )
 	int mask = 1 << wId;
 	if (bots[botSlot].e->v.weapons & mask) {
 		// bot has this weapon - ammo as well?
-		PB_Weapon wpn( wId );
-		wpn.init( botSlot, botEnt, botAction );
-		if (wpn.ammo1() == 0 && wpn.bestDistance() >= 30) return false;
-		else return true;
+		WEAPON wpn;
+		weapon_construct2(&wpn, wId);
+		weapon_init(&wpn, botSlot, botEnt, botAction );
+		if (weapon_ammo1(&wpn) == 0 && weapon_bestdistance(&wpn) >= 30) return false;
+		return true;
 	}
-	else return false;
+	return false;
 }
 
 
@@ -178,8 +179,8 @@ int PB_WeaponHandling::getBestWeapon( float distance, float hitProb, int flags )
 			
 	for (int wId = minModWeapon; wId < maxModWeapon; wId++) {
 		if (available(wId)) {
-			weapon.setCurrentWeapon(wId);
-			score = weapon.getScore(distance, hitProb, flags, true);
+			weapon_setcurrentweapon(&weapon, wId);
+			score = weapon_getscore(&weapon, distance, hitProb, flags, true);
 			if (score > bestScore) {
 				bestScore = score;
 				bestWeapon = wId;
@@ -198,25 +199,25 @@ int PB_WeaponHandling::getBestWeapon( float distance, float hitProb, int flags )
 void PB_WeaponHandling::switchToWeapon( int wId )
 {
 	char cmd[32];
-	weapon.setCurrentWeapon( wId );
+	weapon_setcurrentweapon(&weapon, wId );
 
 	if (mod_id == DMC_DLL) {
 		sprintf(cmd, "slot%d", wId + 1);
 		FakeClientCommand(bots[botSlot].e, cmd, NULL, NULL);
 	} else {
-		FakeClientCommand(bots[botSlot].e, weapon.name(), NULL, NULL);
+		FakeClientCommand(bots[botSlot].e, weapon_name(&weapon), NULL, NULL);
 	}
 
-	action_setweaponcone(&bots[botSlot].parabot->action, weapon.cone());
-	weapon.setNextAttackTime(worldtime() + CHANGE_WEAPON_DELAY);
+	action_setweaponcone(&bots[botSlot].parabot->action, weapon_cone(&weapon));
+	weapon_setnextattacktime(&weapon, worldtime() + CHANGE_WEAPON_DELAY);
 }
 
 
 bool PB_WeaponHandling::armBestWeapon( float distance, float hitProb, int flags )
 {
-	weapon.setCurrentWeapon( currentWeapon() );
+	weapon_setcurrentweapon(&weapon, currentWeapon() );
 
-	if ( weapon.hasToFinishAttack() ) {
+	if ( weapon_hastofinishattack(&weapon) ) {
 		DEBUG_MSG( "Must use grenade!\n" );
 		return true;
 	}
@@ -225,7 +226,7 @@ bool PB_WeaponHandling::armBestWeapon( float distance, float hitProb, int flags 
 
 	if (worldtime() < preferredWeaponTimeOut && available(preferredWeapon)) {
 		bestWeapon = preferredWeapon;
-		weapon.setAttackMode( preferredMode );
+		weapon_setattackmode(&weapon, preferredMode );
 	} else {
 		bestWeapon = getBestWeapon( distance, hitProb, flags );
 	}
@@ -237,7 +238,7 @@ bool PB_WeaponHandling::armBestWeapon( float distance, float hitProb, int flags 
 //	DEBUG_MSG( "Current weapon id = %i, clip=%i, ammo1=%i, ammo2=%i\n",
 //	    currentWeapon, bots[botSlot].current_weapon.iClip, bots[botSlot].current_weapon.iAmmo1, bots[botSlot].current_weapon.iAmmo2 );
 
-	int bestMode = weapon.bestAttackMode();
+	int bestMode = weapon_bestattackmode(&weapon);
 	
 	if (mod_id == VALVE_DLL || mod_id==AG_DLL || mod_id==HUNGER_DLL || mod_id==GEARBOX_DLL) {	// switch to correct weapon-mode
 		if (bestWeapon == VALVE_WEAPON_CROSSBOW || bestWeapon==VALVE_WEAPON_PYTHON ) {	
@@ -277,8 +278,8 @@ bool PB_WeaponHandling::armBestWeapon( float distance, float hitProb, int flags 
 		}
 	}
 	// check for reload
-	if ( weapon.needReload() ) {
-		weapon.reload();
+	if ( weapon_needreload(&weapon) ) {
+		weapon_reload(&weapon);
 		return false;
 	}
 	return true;
@@ -297,19 +298,19 @@ void PB_WeaponHandling::setPreferredWeapon( int wId, int mode )
 
 float PB_WeaponHandling::getWeaponScore( int wId, float distance, float hitProb, int flags, bool checkAmmo )
 {
-	weapon.setCurrentWeapon( wId );
-	return weapon.getScore( distance, hitProb, flags, checkAmmo );
+	weapon_setcurrentweapon(&weapon, wId );
+	return weapon_getscore(&weapon, distance, hitProb, flags, checkAmmo );
 }
 
 float PB_WeaponHandling::bestDistance( int wId )
 {
-	weapon.setCurrentWeapon( wId );
-	return weapon.bestDistance();
+	weapon_setcurrentweapon(&weapon, wId );
+	return weapon_bestdistance(&weapon);
 }
 
 float PB_WeaponHandling::currentHighAimProb()
 {
-	weapon.setCurrentWeapon( currentWeapon() );
-	return weapon.highAimProb();
+	weapon_setcurrentweapon(&weapon, currentWeapon() );
+	return weapon_highaimprob(&weapon);
 }
 

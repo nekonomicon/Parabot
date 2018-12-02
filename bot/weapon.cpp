@@ -1,5 +1,5 @@
 #include "parabot.h"
-#include "pb_weapon.h"
+#include "weapon.h"
 #include "pb_global.h"
 #include "bot.h"
 #include "bot_weapons.h"
@@ -91,7 +91,7 @@ static tWeaponRec dmcWeapon[MAX_DMC_WEAPONS] = {
 
 
 // TFC Weaponlist
-static tWeaponRec tfcWeapon[MAX_TFC_WEAPONS] = { 
+static tWeaponRec tfcWeapon[MAX_TFC_WEAPONS];/* = { 
 	{ "", 0, 0.0, false, 0.0 }, { "", 0, 0.0, false, 0.0 }, { "", 0, 0.0, false, 0.0 },
 	// name					bestDist	highAimProb	secAmmo	fireDelay
 	{ "tf_weapon_medikit",		 10,	0.3,		false,	0.0 },
@@ -115,7 +115,7 @@ static tWeaponRec tfcWeapon[MAX_TFC_WEAPONS] = {
 	{ "tf_weapon_railgun",		300,	0.6,		false,	0.0 },
 	{ "tf_weapon_pl",			300,	0.6,		false,	0.0 },
 	{ "tf_weapon_knife",		 10,	0.3,		false,	0.0 },
-};
+};*/
 
 
 // Gearbox Weaponlist 
@@ -179,7 +179,8 @@ static tWeaponRec hungerWeapon[MAX_HUNGER_WEAPONS] = {
 	{ "weapon_th_medkit", 0,             0.1,    0.0,            false,  WV_NONE,       WV_NONE,        WF_NONE,        WF_NONE,        0.0,    "medkit" },
 };
 
-const char* getWeaponName( int wId )
+const char *
+weapon_getweaponname(int wId)
 {
 	switch (mod_id)	{
 	case AG_DLL:
@@ -207,85 +208,87 @@ const char* getWeaponName( int wId )
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-
-void PB_Weapon::initMOD()
+static void
+weapon_initmod(WEAPON *weapon)
 {
-	modWeapon = 0;
+	weapon->modweapon = 0;
 	switch (mod_id)	{
 	case AG_DLL:
-	case VALVE_DLL:		modWeapon = &valveWeapon[0];
-						minModWeapon = MIN_VALVE_WEAPONS;
-						maxModWeapon = MAX_VALVE_WEAPONS;
+	case VALVE_DLL:		weapon->modweapon = &valveWeapon[0];
+						weapon->minmodweapon = MIN_VALVE_WEAPONS;
+						weapon->maxmodweapon = MAX_VALVE_WEAPONS;
 						break;
-	case HOLYWARS_DLL:	modWeapon = &holywarsWeapon[0];
-						minModWeapon = MIN_HW_WEAPONS;
-						maxModWeapon = MAX_HW_WEAPONS;
+	case HOLYWARS_DLL:	weapon->modweapon = &holywarsWeapon[0];
+						weapon->minmodweapon = MIN_HW_WEAPONS;
+						weapon->maxmodweapon = MAX_HW_WEAPONS;
 						break;
-	case TFC_DLL:		modWeapon = &tfcWeapon[0];
-						minModWeapon = MIN_TFC_WEAPONS;
-						maxModWeapon = MAX_TFC_WEAPONS;
+	case TFC_DLL:		weapon->modweapon = &tfcWeapon[0];
+						weapon->minmodweapon = MIN_TFC_WEAPONS;
+						weapon->maxmodweapon = MAX_TFC_WEAPONS;
 						break;
-	case DMC_DLL:		modWeapon = &dmcWeapon[0];
-						minModWeapon = MIN_DMC_WEAPONS;
-						maxModWeapon = MAX_DMC_WEAPONS;
+	case DMC_DLL:		weapon->modweapon = &dmcWeapon[0];
+						weapon->minmodweapon = MIN_DMC_WEAPONS;
+						weapon->maxmodweapon = MAX_DMC_WEAPONS;
 						break;
-	case HUNGER_DLL:	modWeapon = &hungerWeapon[0];
-						minModWeapon = MIN_HUNGER_WEAPONS;
-						maxModWeapon = MAX_HUNGER_WEAPONS;
+	case HUNGER_DLL:	weapon->modweapon = &hungerWeapon[0];
+						weapon->minmodweapon = MIN_HUNGER_WEAPONS;
+						weapon->maxmodweapon = MAX_HUNGER_WEAPONS;
 						break;
-	case GEARBOX_DLL:	modWeapon = &gearboxWeapon[0];
-						minModWeapon = MIN_GEARBOX_WEAPONS;
-						maxModWeapon = MAX_GEARBOX_WEAPONS;
+	case GEARBOX_DLL:	weapon->modweapon = &gearboxWeapon[0];
+						weapon->minmodweapon = MIN_GEARBOX_WEAPONS;
+						weapon->maxmodweapon = MAX_GEARBOX_WEAPONS;
 						break;
 	}
-	assert( modWeapon != 0 );
+	assert( modweapon != 0 );
 }
 
-
-
-PB_Weapon::PB_Weapon()
+void
+weapon_construct(WEAPON *weapon)
 {
-	initMOD();
-	currentWeapon = minModWeapon;
+	weapon_initmod(weapon);
+	weapon->currentweapon = weapon->minmodweapon;
 }
 
-
-PB_Weapon::PB_Weapon(int wId)
+void
+weapon_construct2(WEAPON *weapon, int wId)
 {
-	initMOD();
-	if ( wId >= minModWeapon && wId < maxModWeapon ) currentWeapon = wId;
-	else currentWeapon = minModWeapon;
+	weapon_initmod(weapon);
+	if (wId >= weapon->minmodweapon && wId < weapon->maxmodweapon)
+		weapon->currentweapon = wId;
+	else
+		weapon->currentweapon = weapon->minmodweapon;
 }
 
-
-void PB_Weapon::init( int slot, EDICT *ent, ACTION *action )
+void
+weapon_init(WEAPON *weapon, int slot, EDICT *ent, ACTION *action)
 {
-	botSlot = slot;
-	botEnt = ent;
-	botAction = action;
+	weapon->botslot = slot;
+	weapon->botent = ent;
+	weapon->botaction = action;
 	for (int i = 0; i < MAX_WEAPONS; i++) {
-		bestMode[i] = 1;	// primary attack
+		weapon->bestmode[i] = 1;	// primary attack
 	}
-	nextAttackTime = 0;
-	lastAttackTime = 0;
-	reloading = false;
-	grenadePrepared = false;
-	loadingGauss = false;
-	armedWeapon = minModWeapon;
-	currentWeapon = minModWeapon;
+	weapon->nextattacktime = 0;
+	weapon->lastattacktime = 0;
+	weapon->reloading = false;
+	weapon->grenadeprepared = false;
+	weapon->loadinggauss = false;
+	weapon->armedweapon = weapon->minmodweapon;
+	weapon->currentweapon = weapon->minmodweapon;
 }
 
-
-void PB_Weapon::setCurrentWeapon( int wId )
+void
+weapon_setcurrentweapon(WEAPON *weapon, int wId)
 { 
-	if (wId >= minModWeapon && wId < maxModWeapon)
-		currentWeapon = wId;
+	if (wId >= weapon->minmodweapon && wId < weapon->maxmodweapon)
+		weapon->currentweapon = wId;
 }
 
-void PB_Weapon::registerArmedWeapon(int wId)
+void
+weapon_registerarmedweapon(WEAPON *weapon, int wId)
 { 
-	if (wId >= minModWeapon && wId < maxModWeapon)
-		armedWeapon = wId;
+	if (wId >= weapon->minmodweapon && wId < weapon->maxmodweapon)
+		weapon->armedweapon = wId;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -294,40 +297,32 @@ void PB_Weapon::registerArmedWeapon(int wId)
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-
-float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, bool checkAmmo )
+static float
+weapon_valveweaponscore(WEAPON *weapon, float distance, float hitProb, int flags, bool checkAmmo)
 // returns max. 10 pts
 {
 	float score = 0;
 	float score2 = 0;
 	bool notSuitable = false;
 
-	switch (currentWeapon) {
-
+	switch (weapon->currentweapon) {
 	case VALVE_WEAPON_CROWBAR:
 		if ( flags & WF_NEED_GRENADE ) break;
 		
-		if( bm_cbar )
-		{
-                        if( bm_cbar->value )
-                        {
-				if( distance < 55 )
-				{
-					bestMode[currentWeapon] = 1;
+		if (bm_cbar) {
+                        if( bm_cbar->value ) {
+				if( distance < 55 ) {
+					weapon->bestmode[weapon->currentweapon] = 1;
 					score = 9;
-				}
-				else if( distance < 300 )
-				{
-					bestMode[currentWeapon] = 2;
+				} else if( distance < 300 ) {
+					weapon->bestmode[weapon->currentweapon] = 2;
 					score = 5;
 				}
-			}
-			else if( distance < 55 )
+			} else if( distance < 55 )
 				score = 9;
 			else if( distance < 100 )
 				score = ( 100 - distance ) / 5;
-		}
-		else if( distance < 55 )
+		} else if( distance < 55 )
 			score = 9;
 		else if( distance < 100 )
 			score = ( 100 - distance ) / 5;
@@ -342,11 +337,11 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 		if (score<0.1) score = 0.1;
 
 		if (checkAmmo) {
-			if (ammo1() == 0) score = 0;
-			else if (ammo1() <= 5) score /= 2;
+			if (weapon_ammo1(weapon) == 0) score = 0;
+			else if (weapon_ammo1(weapon) <= 5) score /= 2;
 		}
-		if (hitProb > 0.3) bestMode[currentWeapon] = 2;
-		else			   bestMode[currentWeapon] = 1;	// don't waste bullets
+		if (hitProb > 0.3) weapon->bestmode[weapon->currentweapon] = 2;
+		else			   weapon->bestmode[weapon->currentweapon] = 1;	// don't waste bullets
 
 		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
 		break;
@@ -358,8 +353,8 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 		if (score<0.3) score = 0.3;
 
 		if (checkAmmo) {
-			if (ammo1() == 0) score = 0;
-			else if (ammo1() <= 3) score /= 2;
+			if (weapon_ammo1(weapon) == 0) score = 0;
+			else if (weapon_ammo1(weapon) <= 3) score /= 2;
 		}
 		if ( hitProb < 0.5) score *= (hitProb + 0.5);	// punish slow reload
 		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
@@ -368,10 +363,10 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 	case VALVE_WEAPON_MP5:
 		if ( flags & WF_UNDERWATER ) break;
 
-		if (checkAmmo && (ammo2()>0) && (distance>250)) {	// if not sure assume that
+		if (checkAmmo && (weapon_ammo2(weapon)>0) && (distance>250)) {	// if not sure assume that
 			  if (distance<400) score2 = (distance-250) / 15;	// player doesn't have grens
 			  else if (distance<550) score2 = (550-distance) / 15;
-			  bestMode[currentWeapon] = 2;
+			  weapon->bestmode[weapon->currentweapon] = 2;
 		}
 		if ( flags & WF_NEED_GRENADE ) break;
 				
@@ -379,18 +374,18 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 		if (score<0.2) score = 0.2;
 		
 		if (checkAmmo) {
-			if (ammo1() == 0) score = 0;
-			else if (ammo1() <= 10) score /= 2;
+			if (weapon_ammo1(weapon) == 0) score = 0;
+			else if (weapon_ammo1(weapon) <= 10) score /= 2;
 		}
 		if ( flags & WF_SINGLE_SHOT_KILL ) {
 			notSuitable = true;
-			if  ((score/10) > score2) bestMode[currentWeapon] = 1;
+			if  ((score/10) > score2) weapon->bestmode[weapon->currentweapon] = 1;
 		}
-		else if (score > score2) bestMode[currentWeapon] = 1;
+		else if (score > score2) weapon->bestmode[weapon->currentweapon] = 1;
 		break;
 
 	case VALVE_WEAPON_CROSSBOW:
-		if (checkAmmo && ammo1() == 0) break;
+		if (checkAmmo && weapon_ammo1(weapon) == 0) break;
 
 		if (distance<600) {
 			score = (distance-200) / 100;
@@ -398,9 +393,9 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 		}
 		else score = 4;
 
-		if (hitProb>0.5) bestMode[currentWeapon] = 2;	// use sniper mode when possible
+		if (hitProb>0.5) weapon->bestmode[weapon->currentweapon] = 2;	// use sniper mode when possible
 		else {
-			bestMode[currentWeapon] = 1;
+			weapon->bestmode[weapon->currentweapon] = 1;
 			if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
 		}
 		break;
@@ -412,31 +407,31 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 		if (score<0.2) score = 0.2;
 
 		if (checkAmmo) {
-			if (ammo1() == 0) score = 0;
-			else if (ammo1() <= 4) score /= 2;
+			if (weapon_ammo1(weapon) == 0) score = 0;
+			else if (weapon_ammo1(weapon) <= 4) score /= 2;
 		}
-		if ( hitProb < 0.5) score *= (hitProb + 0.5);	// punish slow reload
+		if (hitProb < 0.5) score *= (hitProb + 0.5);	// punish slow reload
 		
-		if (hitProb>0.5 && distance<200 && ammo1()>1) {
-			bestMode[currentWeapon] = 2;	// use double mode when possible
+		if (hitProb>0.5 && distance<200 && weapon_ammo1(weapon)>1) {
+			weapon->bestmode[weapon->currentweapon] = 2;	// use double mode when possible
 			score = 10;			// to win against crowbar
 		}
 		else {
-			bestMode[currentWeapon] = 1;
+			weapon->bestmode[weapon->currentweapon] = 1;
 			if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
 		}
 		break;
 
 	case VALVE_WEAPON_RPG:
-		if (checkAmmo && ammo1() == 0) break;
+		if (checkAmmo && weapon_ammo1(weapon) == 0) break;
 
 		if (distance < 400) {
-			bestMode[currentWeapon] = 1;
+			weapon->bestmode[weapon->currentweapon] = 1;
 			score = (distance-250) / 18.75;
 			if (score<1.5) score = 1.5;	// don't use glock!
 		}
 		else {
-			bestMode[currentWeapon] = 2;
+			weapon->bestmode[weapon->currentweapon] = 2;
 			score = 8 - 8*(distance-400)/1600; 
 			if ( flags & WF_ENEMY_ABOVE ) score -= 1;
 			if (score<1) score = 1;
@@ -449,13 +444,13 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 		score = 6;
 		
 		if (checkAmmo) {
-			if (ammo1() <= 1) score = 0;
-			else if (ammo1() <= 10) score /= 2;
+			if (weapon_ammo1(weapon) <= 1) score = 0;
+			else if (weapon_ammo1(weapon) <= 10) score /= 2;
 		}
 		if(hitProb>0.5)
-			bestMode[currentWeapon] = 2;
+			weapon->bestmode[weapon->currentweapon] = 2;
 		else
-			bestMode[currentWeapon] = 1;
+			weapon->bestmode[weapon->currentweapon] = 1;
 		break;
 
 	case VALVE_WEAPON_EGON:
@@ -476,8 +471,8 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 		}
 
 		if (checkAmmo) {
-			if (ammo1() <= 1) break;
-			else if (ammo1() <= 10) score /= 2;
+			if (weapon_ammo1(weapon) <= 1) break;
+			else if (weapon_ammo1(weapon) <= 10) score /= 2;
 		}
 		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
 		break;
@@ -497,7 +492,7 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 	case VALVE_WEAPON_TRIPMINE:
 		if( bm_trip && bm_trip->value )
 		{
-			bestMode[currentWeapon] = randomfloat( 1.5, 2.0 );
+			weapon->bestmode[weapon->currentweapon] = randomfloat( 1.5, 2.0 );
 		}
 		return 0;		// never arm for combat
 
@@ -516,12 +511,12 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 		break;
 
 	default:
-		DEBUG_MSG( "ValveWeaponScore: Unknown ID %i !\n", currentWeapon );
+		DEBUG_MSG( "ValveWeaponScore: Unknown ID %i !\n", currentweapon );
 	
 	}
 
 	// switch-time handicaps
-	if ( armedWeapon != currentWeapon ) {
+	if ( weapon->armedweapon != weapon->currentweapon ) {
 		if (flags & WF_IMMEDIATE_ATTACK) {
 			if ( score > 4.1 ) score -= 4.0;
 			else if (score > 0) score = 0.1;	// it has to remain better than 0
@@ -542,14 +537,14 @@ float PB_Weapon::valveWeaponScore( float distance, float hitProb, int flags, boo
 	return score;
 }
 
-
-float PB_Weapon::hwWeaponScore( float distance, float hitProb, int flags, bool checkAmmo )
+static float
+weapon_hwweaponscore(WEAPON *weapon, float distance, float hitProb, int flags, bool checkAmmo)
 // returns max. 10 pts
 {
 	float score = 0;
 	bool notSuitable = false;
 
-	switch (currentWeapon) {
+	switch (weapon->currentweapon) {
 
 	case HW_WEAPON_JACKHAMMER:
 		if ( flags & WF_NEED_GRENADE ) break;
@@ -566,8 +561,8 @@ float PB_Weapon::hwWeaponScore( float distance, float hitProb, int flags, bool c
 		score = 8 - (8*distance/1600);
 		if (score<0.2) score = 0.2;
 
-		if (checkAmmo && ammo1() == 0) score = 0;
-		if ( hitProb < 0.5) score *= (hitProb + 0.5);	// punish slow reload
+		if (checkAmmo && weapon_ammo1(weapon) == 0) score = 0;
+		if (hitProb < 0.5) score *= (hitProb + 0.5);	// punish slow reload
 		
 		if (hitProb>0.5 && distance<200) score = 10;	
 		else if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
@@ -580,14 +575,14 @@ float PB_Weapon::hwWeaponScore( float distance, float hitProb, int flags, bool c
 		if (score<0.2) score = 0.2;
 		
 		if (checkAmmo) {
-			if (ammo1() == 0) score = 0;
-			else if (ammo1() <= 10) score /= 2;
+			if (weapon_ammo1(weapon) == 0) score = 0;
+			else if (weapon_ammo1(weapon) <= 10) score /= 2;
 		}
 		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;			
 		break;
 
 	case HW_WEAPON_ROCKETLAUNCHER:
-		if (checkAmmo && ammo1() == 0) break;
+		if (checkAmmo && weapon_ammo1(weapon) == 0) break;
 		//score = 10; break;
 
 		if (distance < 400) {
@@ -603,7 +598,7 @@ float PB_Weapon::hwWeaponScore( float distance, float hitProb, int flags, bool c
 	
 	case HW_WEAPON_RAILGUN:
 		if ( flags & WF_NEED_GRENADE ) break;
-		if (checkAmmo && ammo1() == 0) break;
+		if (checkAmmo && weapon_ammo1(weapon) == 0) break;
 
 		score = hitProb * 15;
 		if (score<2) score = 2;		// in any case better than jackhammer
@@ -611,12 +606,12 @@ float PB_Weapon::hwWeaponScore( float distance, float hitProb, int flags, bool c
 		break;
 
 	default:
-		DEBUG_MSG( "HolyWarsWeaponScore: Unknown ID %i !\n", currentWeapon );
+		DEBUG_MSG( "HolyWarsWeaponScore: Unknown ID %i !\n", currentweapon );
 	
 	}
 
 	// switch-time handicaps
-	if ( armedWeapon != currentWeapon ) {
+	if ( weapon->armedweapon != weapon->currentweapon ) {
 		if (flags & WF_IMMEDIATE_ATTACK) {
 			if ( score > 4.1 ) score -= 4.0;
 			else if (score > 0) score = 0.1;	// it has to remain better than 0
@@ -638,15 +633,14 @@ float PB_Weapon::hwWeaponScore( float distance, float hitProb, int flags, bool c
 
 }
 
-
-float PB_Weapon::dmcWeaponScore( float distance, float hitProb, int flags, bool checkAmmo )
+static float
+weapon_dmcweaponscore(WEAPON *weapon, float distance, float hitProb, int flags, bool checkAmmo )
 // returns max. 10 pts
 {
 	float score = 0;
 	bool notSuitable = false;
 
-	switch (currentWeapon) {
-
+	switch (weapon->currentweapon) {
 	case DMC_WEAPON_CROWBAR:
 		if ( flags & WF_NEED_GRENADE ) break;
 		
@@ -662,7 +656,7 @@ float PB_Weapon::dmcWeaponScore( float distance, float hitProb, int flags, bool 
 		score = 3 - (3*distance/1800);
 		if (score<0.2) score = 0.2;
 
-		if (checkAmmo && ammo1() == 0) score = 0;
+		if (checkAmmo && weapon_ammo1(weapon) == 0) score = 0;
 		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
 		break;
 
@@ -673,7 +667,7 @@ float PB_Weapon::dmcWeaponScore( float distance, float hitProb, int flags, bool 
 		if (score>6) score = 6;
 		else if (score<0.1) score = 0.1;
 
-		if (checkAmmo && ammo1() == 0) score = 0;
+		if (checkAmmo && weapon_ammo1(weapon) == 0) score = 0;
 		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
 		break;
 
@@ -685,8 +679,8 @@ float PB_Weapon::dmcWeaponScore( float distance, float hitProb, int flags, bool 
 		if (score<0.2) score = 0.2;
 		
 		if (checkAmmo) {
-			if (ammo1() == 0) score = 0;
-			else if (ammo1() <= 10) score /= 2;
+			if (weapon_ammo1(weapon) == 0) score = 0;
+			else if (weapon_ammo1(weapon) <= 10) score /= 2;
 		}
 		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;			
 		break;
@@ -699,20 +693,20 @@ float PB_Weapon::dmcWeaponScore( float distance, float hitProb, int flags, bool 
 		if (score<0.2) score = 0.2;
 		
 		if (checkAmmo) {
-			if (ammo1() == 0) score = 0;
-			else if (ammo1() <= 10) score /= 2;
+			if (weapon_ammo1(weapon) == 0) score = 0;
+			else if (weapon_ammo1(weapon) <= 10) score /= 2;
 		}
 		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;			
 		break;
 
 	case DMC_WEAPON_GRENLAUNCHER:
 		if ( flags & WF_ENEMY_ABOVE ) break;	// can't use this towards higher pos
-		if (checkAmmo && ammo1() == 0) break;
+		if (checkAmmo && weapon_ammo1(weapon) == 0) break;
 		
 		if ( flags & WF_ENEMY_BELOW ) {		// this is going to be fun ;-)
 			if (distance < 500) {
 				float minDist = 150;
-				if (has_quaddamage( botEnt )) minDist = 300;
+				if (has_quaddamage(weapon->botent )) minDist = 300;
 				if (distance>minDist) score = 5;
 			}
 			else {
@@ -723,7 +717,7 @@ float PB_Weapon::dmcWeaponScore( float distance, float hitProb, int flags, bool 
 		}
 		else {
 			if (distance < 250) {
-				if (!has_quaddamage( botEnt )) {		// that would be very unwise
+				if (!has_quaddamage( weapon->botent )) {		// that would be very unwise
 					score = (distance-150) / 16.67;
 					if (score<2.5) score = 2.5;	// don't switch weapon!
 				}
@@ -737,10 +731,10 @@ float PB_Weapon::dmcWeaponScore( float distance, float hitProb, int flags, bool 
 		break;
 		
 	case DMC_WEAPON_ROCKETLAUNCHER:
-		if (checkAmmo && ammo1() == 0) break;
+		if (checkAmmo && weapon_ammo1(weapon) == 0) break;
 		
 		if (distance < 250) {
-			if (!has_quaddamage( botEnt )) {		// that would be very unwise
+			if (!has_quaddamage( weapon->botent )) {		// that would be very unwise
 				score = (distance-150) / 12.5;
 				if (score<2.5) score = 2.5;	// don't switch weapon!
 			}
@@ -756,10 +750,10 @@ float PB_Weapon::dmcWeaponScore( float distance, float hitProb, int flags, bool 
 		if ( flags & WF_NEED_GRENADE ) break;
 		if ( flags & WF_UNDERWATER ) {
 			// suppose others are underwater as well ;-)
-			if (is_invulnerable( botEnt )) score = 10;
+			if (is_invulnerable( weapon->botent )) score = 10;
 			break;
 		}
-		if (checkAmmo && ammo1() == 0) break;
+		if (checkAmmo && weapon_ammo1(weapon) == 0) break;
 
 		score = hitProb * 20;
 		if (score<3) score = 3;		
@@ -767,12 +761,12 @@ float PB_Weapon::dmcWeaponScore( float distance, float hitProb, int flags, bool 
 		break;
 
 	default:
-		DEBUG_MSG( "DMCWeaponScore: Unknown ID %i !\n", currentWeapon );
+		DEBUG_MSG( "DMCWeaponScore: Unknown ID %i !\n", currentweapon );
 	
 	}
 
 	// switch-time handicaps
-	if ( armedWeapon != currentWeapon ) {
+	if ( weapon->armedweapon != weapon->currentweapon ) {
 		if (flags & WF_IMMEDIATE_ATTACK) {
 			if ( score > 4.1 ) score -= 4.0;
 			else if (score > 0) score = 0.1;	// it has to remain better than 0
@@ -788,44 +782,44 @@ float PB_Weapon::dmcWeaponScore( float distance, float hitProb, int flags, bool 
 	}
 	
 	if (notSuitable) score /= 10;
-	if (has_quaddamage( botEnt )) score *= 3;
+	if (has_quaddamage( weapon->botent )) score *= 3;
 
 	//DEBUG_MSG( "wscore=%.2f\n", score );
 	return score;
 
 }
 
-
-float PB_Weapon::csWeaponScore( float distance, float hitProb, int flags, bool checkAmmo )
+static float
+weapon_csweaponscore(WEAPON *weapon, float distance, float hitProb, int flags, bool checkAmmo )
 // returns max. 10 pts
 {
 	float score = 0;
 
-	if ( armedWeapon==currentWeapon ) score = 10;
+	if ( weapon->armedweapon==weapon->currentweapon ) score = 10;
 
 	return score;
 }
 
-
-float PB_Weapon::tfcWeaponScore( float distance, float hitProb, int flags, bool checkAmmo )
+static float
+weapon_tfcweaponscore(WEAPON *weapon, float distance, float hitProb, int flags, bool checkAmmo )
 // returns max. 10 pts
 {
 	float score = 0;
 
-	if ( armedWeapon==currentWeapon ) score = 10;
+	if ( weapon->armedweapon==weapon->currentweapon ) score = 10;
 	
 	return score;
 }
 
-
-float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, bool checkAmmo )
+static float
+weapon_gearboxweaponscore(WEAPON *weapon, float distance, float hitProb, int flags, bool checkAmmo )
 // returns max. 10 pts
 {
 	float score = 0;
 	float score2 = 0;
 	bool notSuitable = false;
 
-	switch (currentWeapon) {
+	switch (weapon->currentweapon) {
 
 	case VALVE_WEAPON_CROWBAR:
 	case GEARBOX_WEAPON_PIPEWRENCH:
@@ -845,11 +839,11 @@ float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, b
 		if (score<0.1) score = 0.1;
 
 		if (checkAmmo) {
-			if (ammo1() == 0) score = 0;
-			else if (ammo1() <= 5) score /= 2;
+			if (weapon_ammo1(weapon) == 0) score = 0;
+			else if (weapon_ammo1(weapon) <= 5) score /= 2;
 		}
-		if (hitProb > 0.3) bestMode[currentWeapon] = 2;
-		else			   bestMode[currentWeapon] = 1;	// don't waste bullets
+		if (hitProb > 0.3) weapon->bestmode[weapon->currentweapon] = 2;
+		else			   weapon->bestmode[weapon->currentweapon] = 1;	// don't waste bullets
 
 		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
 		break;
@@ -861,8 +855,8 @@ float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, b
 		if (score<0.3) score = 0.3;
 
 		if (checkAmmo) {
-			if (ammo1() == 0) score = 0;
-			else if (ammo1() <= 3) score /= 2;
+			if (weapon_ammo1(weapon) == 0) score = 0;
+			else if (weapon_ammo1(weapon) <= 3) score /= 2;
 		}
 		if ( hitProb < 0.5) score *= (hitProb + 0.5);	// punish slow reload
 		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
@@ -871,10 +865,10 @@ float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, b
 	case VALVE_WEAPON_MP5:
 		if ( flags & WF_UNDERWATER ) break;
 
-		if (checkAmmo && (ammo2()>0) && (distance>250)) {	// if not sure assume that
+		if (checkAmmo && (weapon_ammo2(weapon)>0) && (distance>250)) {	// if not sure assume that
 			  if (distance<400) score2 = (distance-250) / 15;	// player doesn't have grens
 			  else if (distance<550) score2 = (550-distance) / 15;
-			  bestMode[currentWeapon] = 2;
+			  weapon->bestmode[weapon->currentweapon] = 2;
 		}
 		if ( flags & WF_NEED_GRENADE ) break;
 				
@@ -882,18 +876,18 @@ float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, b
 		if (score<0.2) score = 0.2;
 		
 		if (checkAmmo) {
-			if (ammo1() == 0) score = 0;
-			else if (ammo1() <= 10) score /= 2;
+			if (weapon_ammo1(weapon) == 0) score = 0;
+			else if (weapon_ammo1(weapon) <= 10) score /= 2;
 		}
 		if ( flags & WF_SINGLE_SHOT_KILL ) {
 			notSuitable = true;
-			if  ((score/10) > score2) bestMode[currentWeapon] = 1;
+			if  ((score/10) > score2) weapon->bestmode[weapon->currentweapon] = 1;
 		}
-		else if (score > score2) bestMode[currentWeapon] = 1;
+		else if (score > score2) weapon->bestmode[weapon->currentweapon] = 1;
 		break;
 
 	case VALVE_WEAPON_CROSSBOW:
-		if (checkAmmo && ammo1() == 0) break;
+		if (checkAmmo && weapon_ammo1(weapon) == 0) break;
 
 		if (distance<600) {
 			score = (distance-200) / 100;
@@ -901,9 +895,9 @@ float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, b
 		}
 		else score = 4;
 
-		if (hitProb>0.5) bestMode[currentWeapon] = 2;	// use sniper mode when possible
+		if (hitProb>0.5) weapon->bestmode[weapon->currentweapon] = 2;	// use sniper mode when possible
 		else {
-			bestMode[currentWeapon] = 1;
+			weapon->bestmode[weapon->currentweapon] = 1;
 			if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
 		}
 		break;
@@ -915,31 +909,31 @@ float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, b
 		if (score<0.2) score = 0.2;
 
 		if (checkAmmo) {
-			if (ammo1() == 0) score = 0;
-			else if (ammo1() <= 4) score /= 2;
+			if (weapon_ammo1(weapon) == 0) score = 0;
+			else if (weapon_ammo1(weapon) <= 4) score /= 2;
 		}
 		if ( hitProb < 0.5) score *= (hitProb + 0.5);	// punish slow reload
 		
-		if (hitProb>0.5 && distance<200 && ammo1()>1) {
-			bestMode[currentWeapon] = 2;	// use double mode when possible
+		if (hitProb>0.5 && distance<200 && weapon_ammo1(weapon)>1) {
+			weapon->bestmode[weapon->currentweapon] = 2;	// use double mode when possible
 			score = 10;			// to win against crowbar
 		}
 		else {
-			bestMode[currentWeapon] = 1;
+			weapon->bestmode[weapon->currentweapon] = 1;
 			if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
 		}
 		break;
 
 	case VALVE_WEAPON_RPG:
-		if (checkAmmo && ammo1() == 0) break;
+		if (checkAmmo && weapon_ammo1(weapon) == 0) break;
 
 		if (distance < 400) {
-			bestMode[currentWeapon] = 1;
+			weapon->bestmode[weapon->currentweapon] = 1;
 			score = (distance-250) / 18.75;
 			if (score<1.5) score = 1.5;	// don't use glock!
 		}
 		else {
-			bestMode[currentWeapon] = 2;
+			weapon->bestmode[weapon->currentweapon] = 2;
 			score = 8 - 8*(distance-400)/1600; 
 			if ( flags & WF_ENEMY_ABOVE ) score -= 1;
 			if (score<1) score = 1;
@@ -952,13 +946,13 @@ float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, b
 		score = 6;
 		
 		if (checkAmmo) {
-			if (ammo1() <= 1) score = 0;
-			else if (ammo1() <= 10) score /= 2;
+			if (weapon_ammo1(weapon) <= 1) score = 0;
+			else if (weapon_ammo1(weapon) <= 10) score /= 2;
 		}
 		if(hitProb>0.5)
-			bestMode[currentWeapon] = 2;
+			weapon->bestmode[weapon->currentweapon] = 2;
 		else
-			bestMode[currentWeapon] = 1;
+			weapon->bestmode[weapon->currentweapon] = 1;
 		break;
 
 	case VALVE_WEAPON_EGON:
@@ -974,8 +968,8 @@ float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, b
 		}
 
 		if (checkAmmo) {
-			if (ammo1() <= 1) break;
-			else if (ammo1() <= 10) score /= 2;
+			if (weapon_ammo1(weapon) <= 1) break;
+			else if (weapon_ammo1(weapon) <= 10) score /= 2;
 		}
 		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
 		break;
@@ -1027,8 +1021,8 @@ float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, b
 		if (score<0.3) score = 0.3;
 
 		if (checkAmmo) {
-			if (ammo1() == 0) score = 0;
-			else if (ammo1() <= 3) score /= 2;
+			if (weapon_ammo1(weapon) == 0) score = 0;
+			else if (weapon_ammo1(weapon) <= 3) score /= 2;
 		}
 		break;
 
@@ -1039,8 +1033,8 @@ float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, b
 		if (score<0.3) score = 0.3;
 		
 		if (checkAmmo) {
-			if (ammo1() == 0) score = 0;
-			else if (ammo1() <= 10) score /= 2;
+			if (weapon_ammo1(weapon) == 0) score = 0;
+			else if (weapon_ammo1(weapon) <= 10) score /= 2;
 		}
 		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
 		break;
@@ -1058,7 +1052,7 @@ float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, b
 		break;
 
 	case GEARBOX_WEAPON_SPORELAUNCHER:
-		if (checkAmmo && ammo1() == 0) break;
+		if (checkAmmo && weapon_ammo1(weapon) == 0) break;
 		
 		if (distance < 250) {
 			score = (distance-150) / 16.67;
@@ -1073,7 +1067,7 @@ float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, b
 
 	case GEARBOX_WEAPON_SNIPERRIFLE:
 		if ( flags & (WF_UNDERWATER | WF_NEED_GRENADE) ) break;
-		if (checkAmmo && ammo1() == 0) break;
+		if (checkAmmo && weapon_ammo1(weapon) == 0) break;
 
 		if (distance<600) {
 			score = (distance-100) / 100;
@@ -1084,12 +1078,12 @@ float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, b
 	
 
 	default:
-		DEBUG_MSG( "GearboxWeaponScore: Unknown ID %i !\n", currentWeapon );
+		DEBUG_MSG( "GearboxWeaponScore: Unknown ID %i !\n", currentweapon );
 	
 	}
 
 	// switch-time handicaps
-	if ( armedWeapon != currentWeapon ) {
+	if ( weapon->armedweapon != weapon->currentweapon ) {
 		if (flags & WF_IMMEDIATE_ATTACK) {
 			if ( score > 4.1 ) score -= 4.0;
 			else if (score > 0) score = 0.1;	// it has to remain better than 0
@@ -1110,14 +1104,15 @@ float PB_Weapon::gearboxWeaponScore( float distance, float hitProb, int flags, b
 	return score;
 }
 
-float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bool checkAmmo )
+static float
+weapon_hungerweaponscore(WEAPON *weapon, float distance, float hitProb, int flags, bool checkAmmo )
 // returns max. 10 pts
 {
 	float score = 0;
 	float score2 = 0;
 	bool notSuitable = false;
 
-	switch (currentWeapon) {
+	switch (weapon->currentweapon) {
 
 	case VALVE_WEAPON_CROWBAR:
 	case HUNGER_WEAPON_SPANNER:
@@ -1138,8 +1133,8 @@ float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bo
 		if (score<0.1) score = 0.1;
 
 		if (checkAmmo) {
-			if (ammo1() == 0) score = 0;
-			else if (ammo1() <= 5) score /= 2;
+			if (weapon_ammo1(weapon) == 0) score = 0;
+			else if (weapon_ammo1(weapon) <= 5) score /= 2;
 		}
 
 		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
@@ -1152,8 +1147,8 @@ float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bo
 		if (score<0.3) score = 0.3;
 
 		if (checkAmmo) {
-			if (ammo1() == 0) score = 0;
-			else if (ammo1() <= 3) score /= 2;
+			if (weapon_ammo1(weapon) == 0) score = 0;
+			else if (weapon_ammo1(weapon) <= 3) score /= 2;
 		}
 		if ( hitProb < 0.5) score *= (hitProb + 0.5);	// punish slow reload
 		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
@@ -1162,10 +1157,10 @@ float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bo
 	case VALVE_WEAPON_MP5:
 		if ( flags & WF_UNDERWATER ) break;
 
-		if (checkAmmo && (ammo2()>0) && (distance>250)) {	// if not sure assume that
+		if (checkAmmo && (weapon_ammo2(weapon)>0) && (distance>250)) {	// if not sure assume that
 			  if (distance<400) score2 = (distance-250) / 15;	// player doesn't have grens
 			  else if (distance<550) score2 = (550-distance) / 15;
-			  bestMode[currentWeapon] = 2;
+			  weapon->bestmode[weapon->currentweapon] = 2;
 		}
 		if ( flags & WF_NEED_GRENADE ) break;
 				
@@ -1173,18 +1168,18 @@ float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bo
 		if (score<0.2) score = 0.2;
 		
 		if (checkAmmo) {
-			if (ammo1() == 0) score = 0;
-			else if (ammo1() <= 10) score /= 2;
+			if (weapon_ammo1(weapon) == 0) score = 0;
+			else if (weapon_ammo1(weapon) <= 10) score /= 2;
 		}
 		if ( flags & WF_SINGLE_SHOT_KILL ) {
 			notSuitable = true;
-			if  ((score/10) > score2) bestMode[currentWeapon] = 1;
+			if  ((score/10) > score2) weapon->bestmode[weapon->currentweapon] = 1;
 		}
-		else if (score > score2) bestMode[currentWeapon] = 1;
+		else if (score > score2) weapon->bestmode[weapon->currentweapon] = 1;
 		break;
 
 	case VALVE_WEAPON_CROSSBOW:
-		if (checkAmmo && ammo1() == 0) break;
+		if (checkAmmo && weapon_ammo1(weapon) == 0) break;
 
 		if (distance<600) {
 			score = (distance-200) / 100;
@@ -1192,9 +1187,9 @@ float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bo
 		}
 		else score = 4;
 
-		if (hitProb>0.5) bestMode[currentWeapon] = 2;	// use sniper mode when possible
+		if (hitProb>0.5) weapon->bestmode[weapon->currentweapon] = 2;	// use sniper mode when possible
 		else {
-			bestMode[currentWeapon] = 1;
+			weapon->bestmode[weapon->currentweapon] = 1;
 			if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
 		}
 		break;
@@ -1213,8 +1208,8 @@ float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bo
 		}
 
                 if (checkAmmo) {
-                        if (ammo1() == 0) score = 0;
-                        else if (ammo1() <= 10) score /= 2;
+                        if (weapon_ammo1(weapon) == 0) score = 0;
+                        else if (weapon_ammo1(weapon) <= 10) score /= 2;
                 }
 		if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
 		break;
@@ -1226,31 +1221,31 @@ float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bo
 		if (score<0.2) score = 0.2;
 
 		if (checkAmmo) {
-			if (ammo1() == 0) score = 0;
-			else if (ammo1() <= 4) score /= 2;
+			if (weapon_ammo1(weapon) == 0) score = 0;
+			else if (weapon_ammo1(weapon) <= 4) score /= 2;
 		}
 		if ( hitProb < 0.5) score *= (hitProb + 0.5);	// punish slow reload
 		
-		if (hitProb>0.5 && distance<200 && ammo1()>1) {
-			bestMode[currentWeapon] = 2;	// use double mode when possible
+		if (hitProb>0.5 && distance<200 && weapon_ammo1(weapon)>1) {
+			weapon->bestmode[weapon->currentweapon] = 2;	// use double mode when possible
 			score = 10;			// to win against crowbar
 		}
 		else {
-			bestMode[currentWeapon] = 1;
+			weapon->bestmode[weapon->currentweapon] = 1;
 			if ( flags & WF_SINGLE_SHOT_KILL ) notSuitable = true;
 		}
 		break;
 
 	case VALVE_WEAPON_RPG:
-		if (checkAmmo && ammo1() == 0) break;
+		if (checkAmmo && weapon_ammo1(weapon) == 0) break;
 
 		if (distance < 400) {
-			bestMode[currentWeapon] = 1;
+			weapon->bestmode[weapon->currentweapon] = 1;
 			score = (distance-250) / 18.75;
 			if (score<1.5) score = 1.5;	// don't use glock!
 		}
 		else {
-			bestMode[currentWeapon] = 2;
+			weapon->bestmode[weapon->currentweapon] = 2;
 			score = 8 - 8*(distance-400)/1600; 
 			if ( flags & WF_ENEMY_ABOVE ) score -= 1;
 			if (score<1) score = 1;
@@ -1263,13 +1258,13 @@ float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bo
 		score = 6;
 		
 		if (checkAmmo) {
-			if (ammo1() <= 1) score = 0;
-			else if (ammo1() <= 10) score /= 2;
+			if (weapon_ammo1(weapon) <= 1) score = 0;
+			else if (weapon_ammo1(weapon) <= 10) score /= 2;
 		}
 		if(hitProb>0.5)
-			bestMode[currentWeapon] = 2;
+			weapon->bestmode[weapon->currentweapon] = 2;
 		else
-			bestMode[currentWeapon] = 1;
+			weapon->bestmode[weapon->currentweapon] = 1;
 		break;
 
 	case VALVE_WEAPON_HANDGRENADE:
@@ -1299,7 +1294,7 @@ float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bo
 	case HUNGER_WEAPON_SNIPER:
 	case HUNGER_WEAPON_TFCSNIPER:
                 if ( flags & (WF_UNDERWATER | WF_NEED_GRENADE) ) break;
-                if (checkAmmo && ammo1() == 0) break;
+                if (checkAmmo && weapon_ammo1(weapon) == 0) break;
 
                 if (distance<600) {
                         score = (distance-100) / 100;
@@ -1314,25 +1309,25 @@ float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bo
                 if (score<0.2) score = 0.2;
 
                 if (checkAmmo) {
-                        if (ammo1() == 0) score = 0;
-                        else if (ammo1() <= 10) score /= 2;
+                        if (weapon_ammo1(weapon) == 0) score = 0;
+                        else if (weapon_ammo1(weapon) <= 10) score /= 2;
                 }
 
                 if ( flags & WF_SINGLE_SHOT_KILL ) {
                         notSuitable = true;
                 }
 
-		if (hitProb > 0.3) bestMode[currentWeapon] = 2;
-                else bestMode[currentWeapon] = 1;
+		if (hitProb > 0.3) weapon->bestmode[weapon->currentweapon] = 2;
+                else weapon->bestmode[weapon->currentweapon] = 1;
 
                 break;
 	default:
-		DEBUG_MSG( "HungerWeaponScore: Unknown ID %i !\n", currentWeapon );
+		DEBUG_MSG( "HungerWeaponScore: Unknown ID %i !\n", currentweapon );
 	
 	}
 
 	// switch-time handicaps
-	if ( armedWeapon != currentWeapon ) {
+	if ( weapon->armedweapon != weapon->currentweapon ) {
 		if (flags & WF_IMMEDIATE_ATTACK) {
 			if ( score > 4.1 ) score -= 4.0;
 			else if (score > 0) score = 0.1;	// it has to remain better than 0
@@ -1351,18 +1346,19 @@ float PB_Weapon::hungerWeaponScore( float distance, float hitProb, int flags, bo
 	return score;
 }
 
-float PB_Weapon::getScore( float distance, float hitProb, int flags, bool checkAmmo )
+float
+weapon_getscore(WEAPON *weapon, float distance, float hitProb, int flags, bool checkAmmo)
 // returns max. 10 pts
 {
 	switch (mod_id)	{
 	case AG_DLL:
-	case VALVE_DLL:		return valveWeaponScore( distance, hitProb, flags, checkAmmo );
-	case HOLYWARS_DLL:	return hwWeaponScore( distance, hitProb, flags, checkAmmo );
-	case DMC_DLL:		return dmcWeaponScore( distance, hitProb, flags, checkAmmo );
-	case CSTRIKE_DLL:	return csWeaponScore( distance, hitProb, flags, checkAmmo );
-	case TFC_DLL:		return tfcWeaponScore( distance, hitProb, flags, checkAmmo );
-	case HUNGER_DLL:	return hungerWeaponScore( distance, hitProb, flags, checkAmmo );
-	case GEARBOX_DLL:	return gearboxWeaponScore( distance, hitProb, flags, checkAmmo );	
+	case VALVE_DLL:		return weapon_valveweaponscore(weapon, distance, hitProb, flags, checkAmmo );
+	case HOLYWARS_DLL:	return weapon_hwweaponscore(weapon, distance, hitProb, flags, checkAmmo );
+	case DMC_DLL:		return weapon_dmcweaponscore(weapon, distance, hitProb, flags, checkAmmo );
+	case CSTRIKE_DLL:	return weapon_csweaponscore(weapon, distance, hitProb, flags, checkAmmo );
+	case TFC_DLL:		return weapon_tfcweaponscore(weapon, distance, hitProb, flags, checkAmmo );
+	case HUNGER_DLL:	return weapon_hungerweaponscore(weapon, distance, hitProb, flags, checkAmmo );
+	case GEARBOX_DLL:	return weapon_gearboxweaponscore(weapon, distance, hitProb, flags, checkAmmo );	
 	}
 
 	ERROR_MSG( "FATAL ERROR in getWeaponScore(): Unknown MOD-ID!\n" );
@@ -1378,149 +1374,160 @@ float PB_Weapon::getScore( float distance, float hitProb, int flags, bool checkA
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-
-bool PB_Weapon::attackValveHandgrenade( Vec3D *target )
+static bool
+weapon_attackvalvehandgrenade(WEAPON *weapon, Vec3D *target)
 {
-	if (worldtime() < nextAttackTime) return false;
+	if (worldtime() < weapon->nextattacktime) return false;
 
 	bool grenadeThrown = false;
-	if (!grenadePrepared) {
+	if (!weapon->grenadeprepared) {
 		// DEBUG_MSG( "Arming HG!\n" );
-		grenadePrepared=true;
-		grenadeLaunchTime = worldtime() + 2.0;
-		vcopy(target, &grenadeTarget);
-		grenadeWId = VALVE_WEAPON_HANDGRENADE;
+		weapon->grenadeprepared = true;
+		weapon->grenadelaunchtime = worldtime() + 2.0;
+		vcopy(target, &weapon->grenadetarget);
+		weapon->grenadewid = VALVE_WEAPON_HANDGRENADE;
 	}
-	if ( worldtime() < grenadeLaunchTime ) {
-		// DEBUG_MSG( "Holding HG, counter=%.1f\n", (grenadeLaunchTime-worldtime()) );
-		action_add(botAction, BOT_FIRE_PRIM, NULL);
-	}
-	else {
+	if (worldtime() < weapon->grenadelaunchtime) {
+		// DEBUG_MSG( "Holding HG, counter=%.1f\n", (weapon->grenadelaunchtime - worldtime()) );
+		action_add(weapon->botaction, BOT_FIRE_PRIM, NULL);
+	} else {
 		// DEBUG_MSG( "Throwing HG!\n" );
 		grenadeThrown = true;
-		grenadePrepared = false;
-		nextAttackTime = worldtime() + 0.5;	// give time to switch weapons
+		weapon->grenadeprepared = false;
+		weapon->nextattacktime = worldtime() + 0.5;	// give time to switch weapons
 	}
 
 	return grenadeThrown;
 }
 
-
-bool PB_Weapon::attackValveSatchel( Vec3D *target )
+static bool
+weapon_attackvalvesatchel(WEAPON *weapon, Vec3D *target )
 {
-	if (worldtime() < nextAttackTime) return false;
+	if (worldtime() < weapon->nextattacktime) return false;
 
 	bool grenadeThrown = false;
-	if (!grenadePrepared) {
+	if (!weapon->grenadeprepared) {
 		// DEBUG_MSG( "Throwing satchel!\n" );
-		action_add(botAction, BOT_FIRE_PRIM, NULL);
-		if ( Q_STREQ( STRING(botEnt->v.viewmodel), "models/v_satchel_radio.mdl" ) ) {
-			grenadePrepared=true;
-			grenadeLaunchTime = worldtime() + 1.5;
-			grenadeWId = VALVE_WEAPON_SATCHEL;
+		action_add(weapon->botaction, BOT_FIRE_PRIM, NULL);
+		if ( Q_STREQ( STRING(weapon->botent->v.viewmodel), "models/v_satchel_radio.mdl" ) ) {
+			weapon->grenadeprepared=true;
+			weapon->grenadelaunchtime = worldtime() + 1.5;
+			weapon->grenadewid = VALVE_WEAPON_SATCHEL;
 		}
 	}
-	else if ( worldtime() > grenadeLaunchTime ) {
+	else if ( worldtime() > weapon->grenadelaunchtime ) {
 		// DEBUG_MSG( "Blowing up satchel!\n" );
-		action_add(botAction, BOT_FIRE_PRIM, NULL);
-		if ( worldtime() > (grenadeLaunchTime+0.1) ) {
+		action_add(weapon->botaction, BOT_FIRE_PRIM, NULL);
+		if ( worldtime() > (weapon->grenadelaunchtime + 0.1f)) {
 			grenadeThrown = true;
-			grenadePrepared = false;
-			nextAttackTime = worldtime() + 0.5;	// give time to switch weapons
+			weapon->grenadeprepared = false;
+			weapon->nextattacktime = worldtime() + 0.5;	// give time to switch weapons
 		}
 	}
-	//else DEBUG_MSG( "Waiting for satchel, counter=%.1f\n", (grenadeLaunchTime - worldtime()) );
+	//else DEBUG_MSG( "Waiting for satchel, counter=%.1f\n", (weapon->grenadelaunchtime - worldtime()) );
 
 	return grenadeThrown;
 }
 
-
-bool PB_Weapon::attack( Vec3D *target, float accuracy, Vec3D *relVel )
+bool
+weapon_attack(WEAPON *weapon, Vec3D *target, float accuracy, Vec3D *relVel )
 // aims at target, if accuracy is reached fires and returns true, else returns false
 // reloads when necessary
 {
 	bool fired = false;
 
-	action_setaimdir(botAction, target, relVel );
+	action_setaimdir(weapon->botaction, target, relVel );
 
 	// check for reload:
-	if (needReload())
-		reload();
+	if (weapon_needreload(weapon))
+		weapon_reload(weapon);
 	else {
-				
 		// load special weapons:
 		if ( mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL ) {	
-			if ( currentWeapon == VALVE_WEAPON_GAUSS && bestMode[currentWeapon] == 2 ) {
-				if (!loadingGauss) {
-					loadingGauss = true;
-					loadStartTime = worldtime();
-					nextAttackTime = worldtime() + 1.0;	// at least load 1 sec.
+			if ( weapon->currentweapon == VALVE_WEAPON_GAUSS && weapon->bestmode[weapon->currentweapon] == 2 ) {
+				if (!weapon->loadinggauss) {
+					weapon->loadinggauss = true;
+					weapon->loadstarttime = worldtime();
+					weapon->nextattacktime = worldtime() + 1.0;	// at least load 1 sec.
 				}
 				// check if we have to stop loading to not explode...
-				if ((worldtime() - loadStartTime) < 5)
-					action_add(botAction, BOT_FIRE_SEC, NULL);
+				if ((worldtime() - weapon->loadstarttime) < 5)
+					action_add(weapon->botaction, BOT_FIRE_SEC, NULL);
 				else {
-					loadingGauss = false;
+					weapon->loadinggauss = false;
 					fired = true;
 				}
-			} else if (currentWeapon==VALVE_WEAPON_HANDGRENADE) {
-				fired = attackValveHandgrenade( target );// pull trigger before aiming perfectly
-			} else if (currentWeapon==VALVE_WEAPON_SATCHEL && grenadePrepared) {
-				fired = attackValveSatchel( target );	// no need for aiming when satchel thrown
+			} else if (weapon->currentweapon==VALVE_WEAPON_HANDGRENADE) {
+				fired = weapon_attackvalvehandgrenade(weapon, target );// pull trigger before aiming perfectly
+			} else if (weapon->currentweapon==VALVE_WEAPON_SATCHEL && weapon->grenadeprepared) {
+				fired = weapon_attackvalvesatchel(weapon, target );	// no need for aiming when satchel thrown
 			}
 		}
 		if (fired) return true;	// no need to go on
 
 		// fire if delay and accuracy are ok:
-		if (( worldtime() > nextAttackTime ) && 
-			(action_targetaccuracy(botAction) > accuracy || lastAttackTime > (worldtime() - 0.5f) )) {
-			lastAttackTime = worldtime();
-			if ( bestMode[currentWeapon] == 1 ) {	
+		if (( worldtime() > weapon->nextattacktime ) && 
+			(action_targetaccuracy(weapon->botaction) > accuracy || weapon->lastattacktime > (worldtime() - 0.5f) )) {
+			weapon->lastattacktime = worldtime();
+			if ( weapon->bestmode[weapon->currentweapon] == 1 ) {	
 				// primary fire:
 				if (mod_id==VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) {
-					if (currentWeapon == VALVE_WEAPON_HANDGRENADE)
-						fired = attackValveHandgrenade( target );
-					else if (currentWeapon == VALVE_WEAPON_SATCHEL)
-						fired = attackValveSatchel( target );
-					else {  action_add(botAction, BOT_FIRE_PRIM, NULL);  fired = true;  }
-				} else {  action_add(botAction, BOT_FIRE_PRIM, NULL );  fired = true;  }
+					if (weapon->currentweapon == VALVE_WEAPON_HANDGRENADE)
+						fired = weapon_attackvalvehandgrenade(weapon, target);
+					else if (weapon->currentweapon == VALVE_WEAPON_SATCHEL)
+						fired = weapon_attackvalvesatchel(weapon, target);
+					else {  action_add(weapon->botaction, BOT_FIRE_PRIM, NULL);  fired = true;  }
+				} else {  action_add(weapon->botaction, BOT_FIRE_PRIM, NULL );  fired = true;  }
 			} else {
 				// secondary fire:
 				if (mod_id==VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id==GEARBOX_DLL) {
-					if (currentWeapon==VALVE_WEAPON_GAUSS) {
-						action_add(botAction, BOT_RELEASE_SEC, NULL);
-						loadingGauss = false;
-					} else if ( currentWeapon == VALVE_WEAPON_CROSSBOW || 
-						      currentWeapon == VALVE_WEAPON_PYTHON   || 
-							  currentWeapon == VALVE_WEAPON_RPG) 
+					if (weapon->currentweapon==VALVE_WEAPON_GAUSS) {
+						action_add(weapon->botaction, BOT_RELEASE_SEC, NULL);
+						weapon->loadinggauss = false;
+					} else if ( weapon->currentweapon == VALVE_WEAPON_CROSSBOW || 
+						      weapon->currentweapon == VALVE_WEAPON_PYTHON   || 
+							  weapon->currentweapon == VALVE_WEAPON_RPG) 
 					{	// these weapons had their correct mode set in armBestWeapon
-						action_add(botAction, BOT_FIRE_PRIM, NULL);
+						action_add(weapon->botaction, BOT_FIRE_PRIM, NULL);
 					} else {
-						action_add(botAction, BOT_FIRE_SEC, NULL);
+						action_add(weapon->botaction, BOT_FIRE_SEC, NULL);
 					}
 				} else
-					action_add(botAction, BOT_FIRE_SEC, NULL);
+					action_add(weapon->botaction, BOT_FIRE_SEC, NULL);
 				fired = true;
 			}
-			nextAttackTime = worldtime() + modWeapon[currentWeapon].fireDelay;
-			if ( modWeapon[currentWeapon].fireDelay > 0 ) {		// has to release button
+			weapon->nextattacktime = worldtime() + weapon->modweapon[weapon->currentweapon].fireDelay;
+			if ( weapon->modweapon[weapon->currentweapon].fireDelay > 0 ) {		// has to release button
 				float rDelay = randomfloat( 0.0f, 0.3f );	// add random delay
-				nextAttackTime += rDelay;
+				weapon->nextattacktime += rDelay;
 			}
 		}
 	}
 	return fired;
 }
 
-void PB_Weapon::finishAttack()
+bool
+weapon_hastofinishattack(WEAPON *weapon)
+{
+	return weapon->grenadeprepared;
+}
+
+int
+weapon_armedgrenade(WEAPON *weapon)
+{
+	return weapon->grenadewid;
+}
+
+void
+weapon_finishattack(WEAPON *weapon)
 {
 	// DEBUG_MSG( "Forced to finish attack!\n" );
 	if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) {
-		if (currentWeapon==VALVE_WEAPON_HANDGRENADE) {
-			action_setviewdir(botAction, &grenadeTarget, 5 );
-			attackValveHandgrenade( &grenadeTarget );
-		} else if (currentWeapon==VALVE_WEAPON_SATCHEL) {
-			attackValveSatchel( &grenadeTarget );
+		if (weapon->currentweapon==VALVE_WEAPON_HANDGRENADE) {
+			action_setviewdir(weapon->botaction, &weapon->grenadetarget, 5 );
+			weapon_attackvalvehandgrenade(weapon, &weapon->grenadetarget );
+		} else if (weapon->currentweapon==VALVE_WEAPON_SATCHEL) {
+			weapon_attackvalvesatchel(weapon, &weapon->grenadetarget );
 		} else {
 			DEBUG_MSG( "ERROR: Illegal wID!\n" );
 		}
@@ -1537,78 +1544,111 @@ void PB_Weapon::finishAttack()
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-int PB_Weapon::ammo1()
+int
+weapon_ammo1(WEAPON *weapon)
 {
-	return (bots[botSlot].m_rgAmmo[weapon_defs[currentWeapon].iAmmo1]);
+	return (bots[weapon->botslot].m_rgAmmo[weapon_defs[weapon->currentweapon].iAmmo1]);
 }
 
-
-int PB_Weapon::ammo2()
+int
+weapon_ammo2(WEAPON *weapon)
 {
-	return (bots[botSlot].m_rgAmmo[weapon_defs[currentWeapon].iAmmo2]);
+	return (bots[weapon->botslot].m_rgAmmo[weapon_defs[weapon->currentweapon].iAmmo2]);
 }
 
-
-float PB_Weapon::highAimProb()
+float
+weapon_highaimprob(WEAPON *weapon)
 {
-	assert( modWeapon != 0 );
-	return modWeapon[currentWeapon].highAimProb;
+	assert( weapon->modweapon != 0 );
+	return weapon->modweapon[weapon->currentweapon].highAimProb;
 }
 
-
-float PB_Weapon::getAudibleDistance( int attackFlags )
+float
+weapon_getaudibledistance(WEAPON *weapon, int attackFlags)
 {
-	assert( modWeapon != 0 );
+	assert( weapon->modweapon != 0 );
 
 	if (attackFlags & ACTION_ATTACK2)
-		return (2 * modWeapon[currentWeapon].volAttack2);
-	return (2 * modWeapon[currentWeapon].volAttack1);
+		return (2 * weapon->modweapon[weapon->currentweapon].volAttack2);
+	return (2 * weapon->modweapon[weapon->currentweapon].volAttack1);
 }
 
-bool PB_Weapon::needReload()
+bool
+weapon_needreload(WEAPON *weapon)
 // returns true if the current weapon needs to be reloaded
 {
 	if (mod_id == DMC_DLL)
 		return false;	// no reload in DMC!
 
 	// ammoclip values only available for armed weapons!
-	if (currentWeapon != armedWeapon)
+	if (weapon->currentweapon != weapon->armedweapon)
 		return false;
 
 	bool shouldReload = false;
 
-	if (modWeapon[currentWeapon].secAmmo && bestMode[currentWeapon] == 2) {	
+	if (weapon->modweapon[weapon->currentweapon].secAmmo && weapon->bestmode[weapon->currentweapon] == 2) {	
 		// attack with secondary ammo
-		if (bots[botSlot].current_weapon.iAmmo2 == 0) {
-			bestMode[currentWeapon] = 1;
-			if (bots[botSlot].current_weapon.iClip == 0)
+		if (bots[weapon->botslot].current_weapon.iAmmo2 == 0) {
+			weapon->bestmode[weapon->currentweapon] = 1;
+			if (bots[weapon->botslot].current_weapon.iClip == 0)
 				shouldReload = true;
 		}
 	} else {
 		// attack with primary ammo
-		if ( bots[botSlot].current_weapon.iClip == 0 ) shouldReload = true;
+		if ( bots[weapon->botslot].current_weapon.iClip == 0 ) shouldReload = true;
 	}
 
 	// check if reloading has to be set to false
-	if (!shouldReload) reloading = false;
+	if (!shouldReload) weapon->reloading = false;
 
 	return shouldReload;
 }
 
-void PB_Weapon::reload()
+void
+weapon_reload(WEAPON *weapon)
 {
 	// only execute if not reloading yet and weapon armed
-	if (!reloading && currentWeapon == armedWeapon) {
-		reloading = true;
-		action_add(botAction, BOT_RELOAD, NULL);
+	if (!weapon->reloading && weapon->currentweapon == weapon->armedweapon) {
+		weapon->reloading = true;
+		action_add(weapon->botaction, BOT_RELOAD, NULL);
 		// DEBUG_MSG("Reload!\n");
 	}
 }
 
-float PB_Weapon::bestDistance()
-// returns best distance for currentWeapon
+float
+weapon_bestdistance(WEAPON *weapon)
+// returns best distance for currentweapon
 {
-	assert(modWeapon != 0);
-	return modWeapon[currentWeapon].bestDist;
+	assert(weapon->modweapon != 0);
+	return weapon->modweapon[weapon->currentweapon].bestDist;
 }
 
+const char *
+weapon_name(WEAPON *weapon)
+{
+	return weapon->modweapon[weapon->currentweapon].name;
+}
+
+float
+weapon_cone(WEAPON *weapon)
+{
+	return weapon->modweapon[weapon->currentweapon].cone;
+}
+
+void
+weapon_setnextattacktime(WEAPON *weapon, float time)
+{
+	weapon->nextattacktime = time;
+}
+
+int
+weapon_bestattackmode(WEAPON *weapon)
+{
+	return weapon->bestmode[weapon->currentweapon];
+}
+
+void
+weapon_setattackmode(WEAPON *weapon, int mode)
+{
+	weapon->bestmode[weapon->currentweapon] = mode;
+}

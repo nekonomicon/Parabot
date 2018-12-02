@@ -2,7 +2,7 @@
 #include "dllwrap.h"
 #include "sounds.h"
 #include "bot.h"
-#include "pb_weapon.h"
+#include "weapon.h"
 #include "chat.h"
 #include "pb_mapgraph.h"
 
@@ -53,8 +53,9 @@ sounds_getAllClientSounds()
 		// get attack sounds
 		if ((player->v.button & (ACTION_ATTACK1 | ACTION_ATTACK2))) {
 			int wid = clientWeapon[i-1];
-			PB_Weapon w( wid );
-			float sensDist = w.getAudibleDistance( player->v.button );
+			WEAPON w;
+			weapon_construct2(&w, wid);
+			float sensDist = weapon_getaudibledistance(&w, player->v.button );
 			float trackDist = sensDist / 3.0f;
 			if (sensDist > players[i - 1].stepSensableDist) players[i - 1].stepSensableDist = sensDist;
 			if (trackDist > players[i - 1].stepTrackableDist) players[i - 1].stepTrackableDist = trackDist;

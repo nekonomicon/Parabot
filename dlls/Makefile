@@ -129,7 +129,7 @@ SRC =		../bot/bot.cpp \
 		../bot/pb_roaming.cpp \
 		../bot/sectors.cpp \
 		../bot/vistable.cpp \
-		../bot/pb_weapon.cpp \
+		../bot/weapon.cpp \
 		../bot/pb_weaponhandling.cpp \
 		../bot/pbt_priorityqueue.cpp \
 		../bot/sounds.cpp \

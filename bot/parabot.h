@@ -13,6 +13,7 @@
 #include "needs.h"
 #include "pb_mapgraph.h"
 #include "pb_roaming.h"
+#include "weapon.h"
 #include "pb_combat.h"
 #include "pb_perception.h"
 #include "pb_goalfinder.h"
