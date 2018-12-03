@@ -537,7 +537,7 @@ void CParabot::pathCheckWay()
 			}
 			if (target->entity()->v.health > 0) {	// has to be destroyed
 				if (target->visible( ent )) {
-					combat.weapon.attack(target->pos(), 0.3f, NULL);
+					weaponhandling_attack(&combat.weapon, target->pos(), 0.3f, NULL);
 				}
 				//else DEBUG_MSG( "Can't see breakable\n" );
 			}
@@ -639,17 +639,17 @@ void CParabot::followActualPath()
 				case AG_DLL:
 				case HUNGER_DLL:
 				case GEARBOX_DLL:
-				case VALVE_DLL:		combat.weapon.setPreferredWeapon( VALVE_WEAPON_GLOCK, 1 );		
+				case VALVE_DLL:		weaponhandling_setpreferredweapon(&combat.weapon, VALVE_WEAPON_GLOCK, 1 );		
 									break;
-				case HOLYWARS_DLL:	combat.weapon.setPreferredWeapon( HW_WEAPON_DOUBLESHOTGUN, 1 );	
+				case HOLYWARS_DLL:	weaponhandling_setpreferredweapon(&combat.weapon, HW_WEAPON_DOUBLESHOTGUN, 1 );	
 									break;
-				case DMC_DLL:		combat.weapon.setPreferredWeapon( DMC_WEAPON_QUAKEGUN, 1 );		
+				case DMC_DLL:		weaponhandling_setpreferredweapon(&combat.weapon, DMC_WEAPON_QUAKEGUN, 1 );		
 									break;
 			}
 			// arm preferred weapon, params don't really matter...
-			bool bestArmed = combat.weapon.armBestWeapon( 200, 0.95f, 0 );
+			bool bestArmed = weaponhandling_armbestweapon(&combat.weapon, 200, 0.95f, 0 );
 			if (bestArmed) {
-				if (combat.weapon.attack(&shootObjectPos, 0.95f, NULL))
+				if (weaponhandling_attack(&combat.weapon, &shootObjectPos, 0.95f, NULL))
 					mustShootObject = false;
 				else
 					return;	// don't do anything else...
@@ -870,7 +870,7 @@ void CParabot::botThink()
 		if (!actualNavpoint->reached( ent )) actualNavpoint = 0;
 	}
 
-	combat.weapon.initCurrentWeapon();
+	weaponhandling_initcurrentweapon(&combat.weapon);
 
 	needs_updatewishlist(&needs);
 
@@ -886,7 +886,7 @@ void CParabot::botThink()
 	// DEBUG_MSG( "%i enemies\n", senses.numEnemies );
 
 	// check if any grenades have to b thrown (overrides former actions)
-	combat.weapon.checkForForcedAttack();
+	weaponhandling_checkforforcedattack(&combat.weapon);
 
 	action_perform(&action); // execute planned actions
 	

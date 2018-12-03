@@ -15,7 +15,7 @@ void PB_Combat::init( int slot, EDICT *ent, ACTION *act, PB_Roaming *pFinder )
 	botEnt = ent;
 	action = act; 
 	pathfinder = pFinder;
-	weapon.init( slot, ent, act );
+	weaponhandling_init(&weapon, slot, ent, act );
 	enemyContact = 0;
 	nextWeaponCheck = 0;
 	strafeState = 0;
@@ -72,7 +72,7 @@ float PB_Combat::getRating( PB_Percept &perceipt )
 	assert(enemy != 0);
 	float adv = 0;
 	float enemyDist = perceipt.distance;
-	int botWeapon = weapon.currentWeapon();
+	int botWeapon = weaponhandling_currentweapon(&weapon);
 
 	if (is_invulnerable(perceipt.entity)) return -5;	// don't mess with this one!
 
@@ -90,15 +90,15 @@ float PB_Combat::getRating( PB_Percept &perceipt )
 			int enemyFlags = 0;
 			if ( enemy->v.waterlevel == 3 ) enemyFlags |= WF_UNDERWATER;
 			float enemyHitProb = perceipt.targetAccuracy();
-			adv = weapon.getWeaponScore( botWeapon, enemyDist, botHitProb, botFlags, true )
-			    - weapon.getWeaponScore( enemyWeapon, enemyDist, enemyHitProb, enemyFlags, false );
+			adv = weaponhandling_getweaponscore(&weapon, botWeapon, enemyDist, botHitProb, botFlags, true )
+			    - weaponhandling_getweaponscore(&weapon, enemyWeapon, enemyDist, enemyHitProb, enemyFlags, false );
 		}
 	} else {
 		// bot variables
 		int botFlags = 0;
 		if ( botEnt->v.waterlevel == 3 ) botFlags |= WF_UNDERWATER;
 		float botHitProb = action_targetaccuracy(action);
-		adv = weapon.getWeaponScore( botWeapon, enemyDist, botHitProb, botFlags, true );
+		adv = weaponhandling_getweaponscore(&weapon, botWeapon, enemyDist, botHitProb, botFlags, true );
 	}
 	adv = 2 * adv;	// stronger influence
 	if (adv > 5) adv = 5;
@@ -119,7 +119,7 @@ bool PB_Combat::shootAtEnemy( Vec3D *enemyOrigin, float accuracy )
 		vadd(&firePos, &headpos, &firePos);	// aim at head
 	}
 	// TODO: Need ROCKETLAUNCHER flag
-	switch(weapon.currentWeapon()) {
+	switch(weaponhandling_currentweapon(&weapon)) {
 		default:
 			break;
 		case VALVE_WEAPON_RPG:
@@ -131,7 +131,7 @@ bool PB_Combat::shootAtEnemy( Vec3D *enemyOrigin, float accuracy )
 				vcopy(&feetPos, &firePos);
 			break;
 	}
-	return weapon.attack(&firePos, accuracy, NULL);
+	return weaponhandling_attack(&weapon, &firePos, accuracy, NULL);
 }
 
 
@@ -151,7 +151,7 @@ bool PB_Combat::shootAtEnemy( EDICT *enemy, float accuracy )
 	// TODO: Need ROCKETLAUNCHER and NAILGUN flags
 	switch(mod_id) {
 	default:
-		if (weapon.currentWeapon() == VALVE_WEAPON_RPG) {		
+		if (weaponhandling_currentweapon(&weapon) == VALVE_WEAPON_RPG) {		
 			// aim at feet if possible
 			vcopy(&firePos, &feetPos);
 			feetPos.z = enemy->v.absmin.z + 1.0f;
@@ -160,7 +160,7 @@ bool PB_Combat::shootAtEnemy( EDICT *enemy, float accuracy )
 		}
 		break;
 	case HOLYWARS_DLL:
-		if (weapon.currentWeapon() == HW_WEAPON_ROCKETLAUNCHER) {	
+		if (weaponhandling_currentweapon(&weapon) == HW_WEAPON_ROCKETLAUNCHER) {	
 			// aim at feet and predict movement
 			vcopy(&firePos, &feetPos);
 			feetPos.z = enemy->v.absmin.z + 1.0f;
@@ -173,7 +173,7 @@ bool PB_Combat::shootAtEnemy( EDICT *enemy, float accuracy )
 		}
 		break;
 	case DMC_DLL:
-		if (weapon.currentWeapon() == DMC_WEAPON_ROCKETLAUNCHER) {	
+		if (weaponhandling_currentweapon(&weapon) == DMC_WEAPON_ROCKETLAUNCHER) {	
 			// aim at feet and predict movement
 			vcopy(&firePos, &feetPos);
 			feetPos.z = enemy->v.absmin.z + 1.0f;
@@ -183,8 +183,8 @@ bool PB_Combat::shootAtEnemy( EDICT *enemy, float accuracy )
 			vadd(&feetPos, &predictedMove, &testPos);
 			if (canshootat(botEnt, &testPos))
 				vcopy(&testPos, &firePos);
-		} else if (weapon.currentWeapon() == DMC_WEAPON_NAILGUN ||
-			    weapon.currentWeapon() == DMC_WEAPON_SUPERNAILGUN) {
+		} else if (weaponhandling_currentweapon(&weapon) == DMC_WEAPON_NAILGUN ||
+			    weaponhandling_currentweapon(&weapon) == DMC_WEAPON_SUPERNAILGUN) {
 			// predict movement
 			vsub(&botEnt->v.origin, &enemy->v.origin, &dir);
 			dist = vlen(&dir);
@@ -198,7 +198,7 @@ bool PB_Combat::shootAtEnemy( EDICT *enemy, float accuracy )
 
 	vsub(&enemy->v.velocity, &botEnt->v.velocity, &vel);
 
-	return weapon.attack(&firePos, accuracy, &vel);
+	return weaponhandling_attack(&weapon, &firePos, accuracy, &vel);
 }
 
 
@@ -214,7 +214,7 @@ void PB_Combat::closeCombatMovement( PB_Percept &perceipt )
 	float enemyDist = perceipt.distance;
 		
 	// init bot variables
-	int botWeapon = weapon.currentWeapon();
+	int botWeapon = weaponhandling_currentweapon(&weapon);
 	int botFlags = WF_FAST_ATTACK;
 	if ( botEnt->v.waterlevel == 3 ) {
 		botFlags |= WF_UNDERWATER;
@@ -235,19 +235,19 @@ void PB_Combat::closeCombatMovement( PB_Percept &perceipt )
 	closeUp=false; gainDistance=false;
 	if ( enemyDist < 1000 ) {	// don't give up sniper position
 		if ( enemyWeapon != botWeapon ) {	// different weapons: calculate...
-			float currentAdv = weapon.getWeaponScore( botWeapon, enemyDist, botHitProb, botFlags, true )
-				- weapon.getWeaponScore( enemyWeapon, enemyDist, enemyHitProb, enemyFlags, false );
-			float nearAdv = weapon.getWeaponScore( botWeapon, enemyDist-25, botHitProb, botFlags, true )
-				- weapon.getWeaponScore( enemyWeapon, enemyDist-25, enemyHitProb, enemyFlags, false );
-			float farAdv = weapon.getWeaponScore( botWeapon, enemyDist+25, botHitProb, botFlags, true )
-				- weapon.getWeaponScore( enemyWeapon, enemyDist+25, enemyHitProb, enemyFlags, false );
-			
+			float currentAdv = weaponhandling_getweaponscore(&weapon, botWeapon, enemyDist, botHitProb, botFlags, true )
+				- weaponhandling_getweaponscore(&weapon, enemyWeapon, enemyDist, enemyHitProb, enemyFlags, false );
+			float nearAdv = weaponhandling_getweaponscore(&weapon, botWeapon, enemyDist-25, botHitProb, botFlags, true )
+				- weaponhandling_getweaponscore(&weapon, enemyWeapon, enemyDist-25, enemyHitProb, enemyFlags, false );
+			float farAdv = weaponhandling_getweaponscore(&weapon, botWeapon, enemyDist+25, botHitProb, botFlags, true )
+				- weaponhandling_getweaponscore(&weapon, enemyWeapon, enemyDist+25, enemyHitProb, enemyFlags, false );
+
 			if ( (farAdv>currentAdv) && (farAdv>nearAdv) ) gainDistance = true;
 			if ( (nearAdv>currentAdv) && (nearAdv>farAdv) ) closeUp = true;
 		} else {	// same weapons: go to optimum
-			if  (weapon.bestDistance( botWeapon ) > (enemyDist+25)) 
+			if  (weaponhandling_bestdistance(&weapon, botWeapon ) > (enemyDist+25)) 
 				gainDistance = true;	// only for non-sniper-weapons
-			else if (weapon.bestDistance( botWeapon ) < enemyDist) 
+			else if (weaponhandling_bestdistance(&weapon, botWeapon ) < enemyDist) 
 				closeUp = true;
 		}
 	}
@@ -308,6 +308,6 @@ void PB_Combat::idleActions()
 		if (hitProb>1) hitProb = 1;
 		int flags = 0;
 		nextWeaponCheck = worldtime() + CHECK_WEAPON_IDLE;
-		weapon.armBestWeapon( dist, hitProb, flags );
+		weaponhandling_armbestweapon(&weapon, dist, hitProb, flags );
 	}*/
 }

@@ -4,7 +4,6 @@
 
 #include "pb_global.h"
 #include "pb_roaming.h"
-#include "pb_weaponhandling.h"
 #include "pb_perception.h"
 
 
@@ -46,11 +45,11 @@ public:
 	void idleActions();
 	// manages weapon actions when no enemy is around
 
-	bool hasWeapon( int wId ) { return weapon.available( wId ); }
+	bool hasWeapon( int wId ) { return weaponhandling_available(&weapon, wId); }
 
 	
 	float nextWeaponCheck;	// worldtime next armBestWeapon should be called
-	PB_WeaponHandling	weapon;
+	WEAPONHANDLING	weapon;
 
 
 private:

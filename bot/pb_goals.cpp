@@ -180,7 +180,7 @@ float weightAssistFire( CParabot *pb, PB_Percept*item )
 {
 	assert( item->entity != 0 );
 
-	if ( !pb->combat.weapon.bestWeaponUsable() ) return 0;
+	if ( !weaponhandling_bestweaponusable(&pb->combat.weapon) ) return 0;
 	if (item->entity->v.button & ACTION_ATTACK1) return 2;
 	else return 0;
 }
@@ -381,8 +381,8 @@ void goalLayTripmine( CParabot *pb, PB_Percept*item )
 
 	int b = pb->slot;
 	if ( (lastCall[b] + 0.5f) < worldtime() ) {	// in first call arm tripmine
-		pb->combat.weapon.setPreferredWeapon( VALVE_WEAPON_TRIPMINE );
-		pb->combat.weapon.armBestWeapon( 50, 0.4f, 0);
+		weaponhandling_setpreferredweapon(&pb->combat.weapon, VALVE_WEAPON_TRIPMINE, 1);
+		weaponhandling_armbestweapon(&pb->combat.weapon, 50, 0.4f, 0);
 	}
 
 	assert( pb->actualNavpoint != 0 );
@@ -391,9 +391,9 @@ void goalLayTripmine( CParabot *pb, PB_Percept*item )
 	if ( pb->actualNavpoint->pos()->z < (pb->ent->v.absmin.z + 40.0f) ) 
 		action_add(&pb->action, BOT_DUCK, NULL);
 	// keep tripmine
-	pb->combat.weapon.setPreferredWeapon( VALVE_WEAPON_TRIPMINE );
-		
-	pb->combat.weapon.attack(pb->actualNavpoint->pos(), 0.4f, NULL);
+	weaponhandling_setpreferredweapon(&pb->combat.weapon, VALVE_WEAPON_TRIPMINE, 1);
+
+	weaponhandling_attack(&pb->combat.weapon, pb->actualNavpoint->pos(), 0.4f, NULL);
 	
 	lastCall[b] = worldtime();
 	pb->setGoalMoveDescr( "LayTripmine" );
@@ -404,7 +404,7 @@ float weightLayTripmine( CParabot *pb, PB_Percept*item )
 {
 	Vec3D dir;
 
-	if (!pb->combat.weapon.available( VALVE_WEAPON_TRIPMINE )) return 0;
+	if (!weaponhandling_available(&pb->combat.weapon, VALVE_WEAPON_TRIPMINE )) return 0;
 
 	if ( pb->actualNavpoint && !pb->senses.underFire() ) {
 		float nextMine = 10000;
@@ -459,7 +459,7 @@ float weightCamp( CParabot *pb, PB_Percept*item )
 
 	if (pb->actualNavpoint && !pb->senses.underFire()) {
 		if (pb->actualNavpoint->offersCamping() &&
-		    pb->combat.weapon.bestWeaponUsable())
+		    weaponhandling_bestweaponusable(&pb->combat.weapon))
 			weight = needs_wishforsniping(&pb->needs, true);
 	}
 	return weight;
@@ -629,7 +629,7 @@ float weightFollowEnemy( CParabot *pb, PB_Percept*item )
 {
 	return 0;
 	assert( item != 0 );
-	if ( !pb->combat.weapon.bestWeaponUsable() ) return 0;
+	if ( !weaponhandling_bestweaponusable(&pb->combat.weapon) ) return 0;
 	if (item->pState & PI_TACTILE) return (5 + item->rating + needs_wishforcombat(&pb->needs));
 	else if (item->rating < -3) return 0;	// too bad
 	else return (item->rating + needs_wishforcombat(&pb->needs));

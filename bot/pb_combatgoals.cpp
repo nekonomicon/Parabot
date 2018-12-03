@@ -252,11 +252,11 @@ void goalSilentAttack( CParabot *pb, PB_Percept*item )
 			case AG_DLL:
 			case HUNGER_DLL:
 			case GEARBOX_DLL:
-			case VALVE_DLL:		pb->combat.weapon.setPreferredWeapon( VALVE_WEAPON_SHOTGUN, 2 );
+			case VALVE_DLL:		weaponhandling_setpreferredweapon(&pb->combat.weapon, VALVE_WEAPON_SHOTGUN, 2 );
 								break;
-			case HOLYWARS_DLL:	pb->combat.weapon.setPreferredWeapon( HW_WEAPON_DOUBLESHOTGUN, 1 );
+			case HOLYWARS_DLL:	weaponhandling_setpreferredweapon(&pb->combat.weapon, HW_WEAPON_DOUBLESHOTGUN, 1 );
 								break;
-			case DMC_DLL:		pb->combat.weapon.setPreferredWeapon( DMC_WEAPON_SUPERSHOTGUN, 1 );
+			case DMC_DLL:		weaponhandling_setpreferredweapon(&pb->combat.weapon, DMC_WEAPON_SUPERSHOTGUN, 1 );
 								break;
 		}
 		if (item->distance > 50) {
@@ -265,8 +265,8 @@ void goalSilentAttack( CParabot *pb, PB_Percept*item )
 		} else {
 			action_add(&pb->action, BOT_DUCK, NULL);
 			if (item->canBeAttackedBest()) {	// ...and attack from there
-				//bool shot = pb->combat.shootAtEnemy(item->lastSeenPos, pb->combat.weapon.currentHighAimProb());
-				pb->combat.shootAtEnemy(&item->lastSeenPos, pb->combat.weapon.currentHighAimProb());
+				//bool shot = pb->combat.shootAtEnemy(item->lastSeenPos, weaponhandling_currenthighaimprob(&pb->combat.weapon));
+				pb->combat.shootAtEnemy(&item->lastSeenPos, weaponhandling_currenthighaimprob(&pb->combat.weapon));
 				pb->setGoalMoveDescr("SilentAttack (ShootClose)");
 			} else {
 				pb->setGoalMoveDescr("SilentAttack (SwitchingWpn)");
@@ -281,7 +281,7 @@ float weightSilentAttack( CParabot *pb, PB_Percept*item )
 	assert( item != 0 );
 	float weight = 0;
 
-	if (pb->senses.underFire() || !pb->combat.weapon.bestWeaponUsable()) return 0;
+	if (pb->senses.underFire() || !weaponhandling_bestweaponusable(&pb->combat.weapon)) return 0;
 	if (item->isVisible() && !item->isFacingBot() && !item->isMoving()) {
 		weight = 15;
 		if (item->hasHighPriority()) weight += 5;
@@ -312,12 +312,12 @@ void goalShootAtEnemy( CParabot *pb, PB_Percept*item )
 	if (item->isVisible()) {
 		if (item->isAimingAtBot() || item->isAlert())	{
 		// enemy is aiming or alert: shoot with low accuracy
-			fired = pb->combat.shootAtEnemy(item->entity, (pb->combat.weapon.currentHighAimProb() - 0.2f) / 2.0f );
+			fired = pb->combat.shootAtEnemy(item->entity, (weaponhandling_currenthighaimprob(&pb->combat.weapon) - 0.2f) / 2.0f );
 			pb->setGoalViewDescr( "ShootAtEnemy (LowAcc)" );
 		} else {
 		// else take time to aim well
 			if (item->canBeAttackedBest()) {
-				fired = pb->combat.shootAtEnemy(item->entity, pb->combat.weapon.currentHighAimProb());
+				fired = pb->combat.shootAtEnemy(item->entity, weaponhandling_currenthighaimprob(&pb->combat.weapon));
 				pb->setGoalViewDescr("ShootAtEnemy (HighAcc)");
 			} else {
 				pb->setGoalViewDescr("ShootAtEnemy (SwitchingWpn)");
@@ -360,8 +360,8 @@ void goalShootAtEnemy( CParabot *pb, PB_Percept*item )
 				// check if bot should throw grenade at last position:
 				int flags = WF_NEED_GRENADE;
 				if (pb->ent->v.waterlevel == 3) flags |= WF_UNDERWATER;
-				int bestWeapon = pb->combat.weapon.getBestWeapon( item->distance, action_targetaccuracy(&pb->action), flags );
-				float bestScore = pb->combat.weapon.getWeaponScore( bestWeapon, item->distance, action_targetaccuracy(&pb->action), flags, true );
+				int bestWeapon = weaponhandling_getbestweapon(&pb->combat.weapon, item->distance, action_targetaccuracy(&pb->action), flags );
+				float bestScore = weaponhandling_getweaponscore(&pb->combat.weapon, bestWeapon, item->distance, action_targetaccuracy(&pb->action), flags, true );
 				vma(&item->lastSeenPos, -0.05f, &item->lastSeenVelocity, &prePos);
 				if ((bestScore > 0) && canshootat(pb->ent, &prePos)) {
 					//botNr = pb->slot;
@@ -387,7 +387,7 @@ void goalShootAtEnemy( CParabot *pb, PB_Percept*item )
 			if (!pb->senses.underFire()) {
 				//pb->action.setSpeed( 0 );
 			}
-			pb->combat.weapon.setPreferredWeapon(pb->preemptiveWeapon, pb->preemptiveMode);
+			weaponhandling_setpreferredweapon(&pb->combat.weapon, pb->preemptiveWeapon, pb->preemptiveMode);
 			Vec3D prePos;
 			vma(&item->lastSeenPos, -0.05f, &item->lastSeenVelocity, &prePos);
 			if (item->canBeAttackedBest()) {
@@ -419,7 +419,7 @@ float weightShootAtEnemy( CParabot *pb, PB_Percept*item )
 	assert(item != 0);
 	float weight;
 
-	if (!pb->combat.weapon.bestWeaponUsable()) return 0;
+	if (!weaponhandling_bestweaponusable(&pb->combat.weapon)) return 0;
 
 	if (!item->isTrackable()) {	// try to look at it:
 		if (item->isHurtingBot()) weight = 5;		// hidden attacker -> dangerous!
@@ -499,7 +499,7 @@ void goalArmBestWeapon( CParabot *pb, PB_Percept*item )
 
 	// if best weapon already armed, store in item:
 	checkForBreakpoint( BREAK_WEAPON );
-	bool bestArmed = pb->combat.weapon.armBestWeapon( dist, hitProb, botFlags );
+	bool bestArmed = weaponhandling_armbestweapon(&pb->combat.weapon, dist, hitProb, botFlags );
 	if (!bestArmed) pb->combat.nextWeaponCheck = worldtime() + CHANGE_WEAPON_DELAY;
 	if (bestArmed && item) item->flags |= PI_BEST_ARMED;
 	pb->setGoalActDescr( "ArmBestWeapon" );
