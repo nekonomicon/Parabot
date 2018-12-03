@@ -251,7 +251,7 @@ void goalGetItem( CParabot *pb, PB_Percept*item )
 	assert(item != 0);
 	item->update = worldtime();
 
-	pb->pathfinder.checkWay(&item->lastSeenPos);
+	roaming_checkway(&pb->pathfinder, &item->lastSeenPos);
 	if (action_gotstuck(&pb->action))
 		item->flags |= PI_UNREACHABLE;
 	switch( item->pClass ) {
@@ -302,7 +302,7 @@ void goalGetAway( CParabot *pb, PB_Percept*item )
 	item->predictedPosition(&botPos, &tDir);
 	vsub(&tDir, &botPos, &tDir);
 	vsub(&botPos, &tDir, &tDir);
-	pb->pathfinder.checkWay(&tDir);
+	roaming_checkway(&pb->pathfinder, &tDir);
 	switch( item->pClass ) {
 	case PI_LASERDOT:	pb->setGoalMoveDescr( "GetAway (Laserdot)" );		break;
 	case PI_EXPLOSIVE:	pb->setGoalMoveDescr( "GetAway (Explosive)" );		break;
@@ -660,7 +660,7 @@ void goalMakeRoom( CParabot *pb, PB_Percept*item )
 		DEBUG_MSG( "Making room - getAway\n" );
 	} else {
 		//pb->action.setMoveDir(newWp);
-		pb->pathfinder.checkWay(&newWp[b]);
+		roaming_checkway(&pb->pathfinder, &newWp[b]);
 		DEBUG_MSG( "Making room - newWp \n" );
 	}
 	pb->makeRoomTime = worldtime() + 0.5f;	// maintain goal for 0.5 sec 

@@ -12,7 +12,7 @@
 #include "utilityfuncs.h"
 #include "needs.h"
 #include "pb_mapgraph.h"
-#include "pb_roaming.h"
+#include "roaming.h"
 #include "weapon.h"
 #include "weaponhandling.h"
 #include "pb_combat.h"
@@ -63,7 +63,7 @@ public:
 	EDICT		*fleeingFrom;		// points to edict of enemy bot is fleeing from or 0
 
 	// used in ROAMING
-	PB_Roaming	pathfinder;			// old bot pathfinding
+	ROAMING		pathfinder;			// old bot pathfinding
 	PB_Navpoint	*roamingTarget;		// navpoint bot tries to reach in roaming-mode
 	int			roamingCount;		// time-out variable for updating roamingTarget
 	short		roamingRoute[128];	// contains cell indices to target

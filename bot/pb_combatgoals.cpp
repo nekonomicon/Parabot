@@ -260,7 +260,7 @@ void goalSilentAttack( CParabot *pb, PB_Percept*item )
 								break;
 		}
 		if (item->distance > 50) {
-			pb->pathfinder.checkWay(&item->lastSeenPos);	// get near...
+			roaming_checkway(&pb->pathfinder, &item->lastSeenPos);	// get near...
 			pb->setGoalMoveDescr( "SilentAttack (Approaching)" );
 		} else {
 			action_add(&pb->action, BOT_DUCK, NULL);

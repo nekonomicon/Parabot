@@ -9,7 +9,7 @@ int clientWeapon[32];
 
 
 
-void PB_Combat::init( int slot, EDICT *ent, ACTION *act, PB_Roaming *pFinder )
+void PB_Combat::init( int slot, EDICT *ent, ACTION *act, ROAMING *pFinder )
 // initializes all necessary variables
 {
 	botEnt = ent;
@@ -273,13 +273,13 @@ void PB_Combat::closeCombatMovement( PB_Percept &perceipt )
 		vsub(&enemy->v.origin, &botEnt->v.origin, &tDir);
 		vsub(&botEnt->v.origin, &tDir, &tDir);
 		vadd(&evadeMove, &tDir, &tDir);
-		pathfinder->checkWay(&tDir);
+		roaming_checkway(pathfinder, &tDir);
 	} else if (closeUp) {	// closer distance better
 		vadd(&enemy->v.origin, &evadeMove, &tDir);
-		pathfinder->checkWay(&tDir);
+		roaming_checkway(pathfinder, &tDir);
 	} else if (vlen(&evadeMove) > 0) {	// just evade
 		vadd(&botEnt->v.origin, &evadeMove, &tDir);
-		pathfinder->checkWay(&tDir);
+		roaming_checkway(pathfinder, &tDir);
 	} else {	// no move -> duck
 		action_add(action, BOT_DUCK, NULL);
 	}
@@ -295,7 +295,7 @@ void PB_Combat::retreat(EDICT *enemy )
 
 	vsub(&enemy->v.origin, &botEnt->v.origin, &tDir);
 	vsub(&botEnt->v.origin, &tDir, &tDir);
-	pathfinder->checkWay(&tDir);
+	roaming_checkway(pathfinder, &tDir);
 }
 
 

@@ -2,8 +2,6 @@
 #define PB_COMBAT_H
 
 
-#include "pb_global.h"
-#include "pb_roaming.h"
 #include "pb_perception.h"
 
 
@@ -23,7 +21,7 @@ class PB_Combat
 
 public:
 
-	void init( int slot, EDICT *ent, ACTION *act, PB_Roaming *pFinder );
+	void init( int slot, EDICT *ent, ACTION *act, ROAMING *pFinder );
 	// initializes all necessary variables
 
 	float getRating( PB_Percept &perceipt );
@@ -55,7 +53,7 @@ public:
 private:
 	EDICT	 *botEnt;
 	ACTION	*action;
-	PB_Roaming *pathfinder;
+	ROAMING *pathfinder;
 	float		enemyContact;		// worldtime enemy has been registered
 	
 	int strafeState;			

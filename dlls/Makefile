@@ -126,7 +126,7 @@ SRC =		../bot/bot.cpp \
 		../bot/pb_observer.cpp \
 		../bot/pb_path.cpp \
 		../bot/pb_perception.cpp \
-		../bot/pb_roaming.cpp \
+		../bot/roaming.cpp \
 		../bot/sectors.cpp \
 		../bot/vistable.cpp \
 		../bot/weapon.cpp \

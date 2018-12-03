@@ -70,7 +70,7 @@ void CParabot::initAfterRespawn()
 	lastRespawn = worldtime();
 
 	action_init(&action, ent);
-	pathfinder.init( ent, &action );
+	roaming_init(&pathfinder, ent, &action );
 	combat.init( slot, ent, &action, &pathfinder );
 	senses.init( ent );
 	needs_init(&needs, this);
@@ -369,7 +369,7 @@ void CParabot::getRoamingTarget()
 		}
 	}
 	assert( roamingTarget != 0 );
-	pathfinder.reset( roamingTarget->pos() );
+	roaming_reset(&pathfinder, roamingTarget->pos() );
 	roamingCount = PB_ROAMING_COUNT;
 	botState = PB_ROAMING;
 	// DEBUG_MSG( "Switched to ROAMING, approach " );
@@ -403,9 +403,9 @@ void CParabot::approachRoamingTarget()
 			Vec3D rtPos;
 
 			roamingTarget->pos(ent, &rtPos);
-			pathfinder.checkWay(&rtPos);
+			roaming_checkway(&pathfinder, &rtPos);
 			action_setviewlikemove(&action);
-			if (action_gotstuck(&action) || pathfinder.targetNotReachable()) {
+			if (action_gotstuck(&action) || roaming_targetnotreachable(&pathfinder)) {
 				roamingTarget->doNotVisitBefore(ent, worldtime() + 10.0f);
 				roamingTarget = 0;
 				action_resetstuck(&action);
