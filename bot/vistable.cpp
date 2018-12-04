@@ -10,6 +10,7 @@
 #include "parabot.h"
 #include "sectors.h"
 #include "vistable.h"
+#include "cell.h"
 #include "pb_mapcells.h"
 class PB_MapCells;
 extern PB_MapCells map;

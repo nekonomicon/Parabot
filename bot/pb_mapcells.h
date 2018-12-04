@@ -2,7 +2,6 @@
 #if !defined( PB_MapCells_H )
 #define PB_MapCells_H
 
-#include "pb_cell.h"
 #include "pbt_priorityqueue.h"
 #include "pbt_dynarray.h"
 
@@ -33,7 +32,7 @@ public:
 	PB_MapCells();
 	~PB_MapCells();
 	
-	PB_Cell& cell( int index ) {  return cellArray[index];  }
+	CELL *cell( int index ) {  return &cellArray[index];  }
 
 	int getCellId(const Vec3D *pos, float maxDist=CELL_SIZE);
 	int getCellId(EDICT *pEdict) {
@@ -44,7 +43,7 @@ public:
 	}
 	
 	// returns index of newCell:
-	int addCell( PB_Cell newCell, bool initNbs, int addedFrom=NO_CELL_FOUND );	
+	int addCell( CELL newCell, bool initNbs, int addedFrom=NO_CELL_FOUND );	
 	// returns number of found neighbours:
 	int initNeighbours( int cellIndex, int firstNb  );
 	int numberOfCells() { return numCells; }
@@ -72,7 +71,7 @@ public:
 
 private:
 
-	PBT_DynArray<PB_Cell> cellArray;
+	PBT_DynArray<CELL> cellArray;
 
 	short		cellHash[4096];
 	int			numCells;

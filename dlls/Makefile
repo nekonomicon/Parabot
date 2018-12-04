@@ -106,7 +106,7 @@ SRC =		../bot/bot.cpp \
 		../bot/marker.cpp \
 		../bot/parabot.cpp \
 		../bot/action.cpp \
-		../bot/pb_cell.cpp \
+		../bot/cell.cpp \
 		../bot/menu.cpp \
 		../bot/chat.cpp \
 		../bot/combat.cpp \

@@ -3,6 +3,7 @@
 #include "pb_observer.h"
 #include "sectors.h"
 #include "vistable.h"
+#include "cell.h"
 #include "pb_mapcells.h"
 
 extern int mod_id;

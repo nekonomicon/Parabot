@@ -7,6 +7,7 @@
 #include "sectors.h"
 #include "kills.h"
 #include "vistable.h"
+#include "cell.h"
 #include "pb_mapcells.h"
 
 
@@ -144,7 +145,7 @@ void CParabot::registerDamage( int amount, Vec3D *origin, int type )
 	if (type & IGNORE_DAMAGE) {
 		int ci = map.getCellId( ent );
 		if ( ci != NO_CELL_FOUND) {
-			map.cell( ci ).addEnvDamage( amount );
+			cell_addenvdamage(map.cell(ci), amount);
 			DEBUG_MSG( "ENV_DAMAGE!\n" );
 		}
 	}
@@ -237,7 +238,7 @@ void CParabot::registerDeath( EDICT *killer, const char *wpnName )
 			Vec3D dir;
 
 			vadd(&killer->v.origin, botPos(), &dir);
-			kills_adddir(&dir, map.cell(botCell).data.sectors);
+			kills_adddir(&dir, map.cell(botCell)->data.sectors);
 		}
 		chat_registergotkilled(ent, killer, wpnName);
 	}
@@ -361,7 +362,7 @@ void CParabot::getRoamingTarget()
 		if (start >= 0) {
 			setRoamingIndex(map.getPathToRoamingTarget(start, ent, roamingRoute));
 			if (roamingIndex >= 0) {
-				roamingTarget = map.cell(roamingRoute[0]).getNavpoint();
+				roamingTarget = cell_getnavpoint(map.cell(roamingRoute[0]));
 			} else {	// no path found:
 				roamingTarget = mapGraph.getNearestRoamingNavpoint(ent, actualNavpoint);
 				// DEBUG_MSG(" E!" );
@@ -724,7 +725,7 @@ void CParabot::followActualRoute()
 	}
 	Vec3D target;
 
-	vcopy(map.cell(targetCell).pos(), &target);
+	cell_pos(map.cell(targetCell), &target);
 
 	// DEBUG_MSG( "." );
 	if (botCell == targetCell) {
@@ -734,7 +735,7 @@ void CParabot::followActualRoute()
 			debugBeam( target, map.cell( roamingRoute[roamingIndex] ).pos(), 50, 2 );
 		} else {
 			// DEBUG_MSG( "TARGET REACHED.\n" );
-			PB_Navpoint *nav = map.cell( botCell ).getNavpoint();
+			PB_Navpoint *nav = cell_getnavpoint(map.cell(botCell));
 			if ( nav && nav == roamingTarget ) {
 				nav->pos(ent, &target);
 				if (nav->reached(ent)) {
@@ -754,14 +755,14 @@ void CParabot::followActualRoute()
 		Vec3D dir;
 		float dist2target, normDist;
 
-		vsub(&target, map.cell(botCell).pos(), &dir);
+		vsub(&target, cell_pos2(map.cell(botCell)), &dir);
 		dist2target = vlen(&dir);
-		vsub(&target, map.cell(roamingRoute[roamingIndex + 1]).pos(), &dir);
+		vsub(&target, cell_pos2(map.cell(roamingRoute[roamingIndex + 1])), &dir);
 		normDist = vlen(&dir);
 		if (dist2target > (normDist + 250)) {
 			//botNr = slot;
 			DEBUG_MSG( "ROUTE ERROR in %s!\n", goalMove );
-			debugBeam( target, map.cell( botCell ).pos(), 250, 0 );
+			debugBeam( target, cell_pos(map.cell(botCell)), 250, 0 );
 			setRoamingIndex( -1 );
 			return;
 		}
@@ -794,29 +795,29 @@ void CParabot::followActualRoute()
 			cellTimeOut = worldtime() + 1.0;
 		} else {
 			// bisherigen traffic auf Teilstrecke auswerten, falls <3 Verbindung löschen
-			if ( map.cell( botCell ).getTraffic( targetCell ) < 3 ) {
-				if ( map.cell( botCell ).delNeighbour( targetCell ) ) {
+			if ( cell_gettraffic(map.cell(botCell), targetCell) < 3 ) {
+				if (cell_delneighbour(map.cell(botCell), targetCell)) {
 #if _DEBUG
 					DEBUG_MSG( "Deleted cell neighbour.\n" );
-					Vec3D c1 = map.cell( botCell ).pos() +Vector(0,0,8);
-					Vec3D c2 = map.cell( targetCell ).pos();
+					Vec3D c1 = cell_pos(map.cell(botCell)) + Vector(0,0,8);
+					Vec3D c2 = cell_pos(map.cell(targetCell));
 					debugBeam( c1, c2, 250, 0 );
 					debugMarker( c2, 250 );
 #endif
 				} else {
 #if _DEBUG
 					DEBUG_MSG( "Could not delete cell neighbour.\n" );
-					Vec3D c0 = map.cell( botCell ).pos() -Vector(0,0,8);
-					Vec3D c1 = map.cell( roamingRoute[roamingIndex+1] ).pos() +Vector(0,0,8);
-					Vec3D c2 = map.cell( targetCell ).pos();
+					Vec3D c0 = cell_pos(map.cell(botCell)) -Vector(0,0,8);
+					Vec3D c1 = cell_pos(map.cell(roamingRoute[roamingIndex + 1])) +Vector(0,0,8);
+					Vec3D c2 = cell_pos(map.cell(targetCell));
 					debugBeam( c1, c2, 250, 0 );	// rot vom Vorgänger
 					debugBeam( c0, c2, 250, 1 );	// grün vom bot aus
 					debugMarker( c2, 250 );
 #endif
-					map.cell( roamingRoute[roamingIndex+1] ).delNeighbour( targetCell );
+					cell_delneighbour(map.cell(roamingRoute[roamingIndex + 1]), targetCell);
 				}
 			}
-			PB_Cell tc = map.cell( botCell );
+			// PB_Cell tc = map.cell( botCell );
 			if (roamingTarget) roamingTarget->doNotVisitBefore( ent, worldtime()+10.0 );
 			lastJumpPos = zerovector;
 			roamingTarget = 0;

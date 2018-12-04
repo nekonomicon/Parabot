@@ -3,6 +3,7 @@
 #include "sectors.h"
 #include "pb_mapgraph.h"
 #include "vistable.h"
+#include "cell.h"
 #include "pb_mapcells.h"
 #include "bot.h"
 

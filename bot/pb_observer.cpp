@@ -5,6 +5,7 @@
 #include "focus.h"
 #include "pb_mapgraph.h"
 #include "vistable.h"
+#include "cell.h"
 #include "pb_mapcells.h"
 #include "bot.h"
 #include "sounds.h"
@@ -662,8 +663,11 @@ void PB_Observer::updateCellInfo( int i )
 		if ((obs[i].player->v.waterlevel > 0)			// or in water
 		    || (is_onladder(obs[i].player)) 		// or on ladder
 		    || ((obs[i].player->v.flags & FL_ONGROUND)	// on ground
-		    && (pointcontents(&obsPos) != CONTENTS_SOLID)))	// Bugfix!!!
-			obsCell = map.addCell( PB_Cell(obs[i].player), true, obs[i].lastCell );
+		    && (pointcontents(&obsPos) != CONTENTS_SOLID))) {	// Bugfix!!!
+			CELL cell;
+			cell_construct(&cell, obs[i].player);
+			obsCell = map.addCell(cell, true, obs[i].lastCell);
+		}
 	}
 
 	// init lastCell (after spawning)
@@ -671,40 +675,39 @@ void PB_Observer::updateCellInfo( int i )
 
 	// currentCell still holds value from last frame!
 	if (obs[i].currentCell != NO_CELL_FOUND) {
-
-		vsub(&obsPos, map.cell(obs[i].currentCell).pos(), &dir);
+		vsub(&obsPos, cell_pos2(map.cell(obs[i].currentCell)), &dir);
 		float distToCurrentCell = vlen(&dir);
-		vsub(&obsPos, map.cell(obs[i].lastCell).pos(), &dir);
+		vsub(&obsPos, cell_pos2(map.cell(obs[i].lastCell)), &dir);
 		float distToLastCell = vlen(&dir);
 		// client has reached a new cell
 		if ((obs[i].lastCell != obs[i].currentCell && distToCurrentCell < 25)
 		    || (distToLastCell >= 1.5 * CELL_SIZE) ) {
 			// transversal from one cell to another
 			float neededTime = worldtime() - obs[i].lastCellTime;
-			map.cell( obs[i].lastCell ).addTraffic( obs[i].currentCell, neededTime );
+			cell_addtraffic(map.cell(obs[i].lastCell), obs[i].currentCell, neededTime);
 
 			// set new viewdir for bots:
 			int bNr = getbotindex(obs[i].player);
 			if (bNr>=0) {
 				Vec3D moveDir, area = {1.0f, 0.0f, 0.0f};
 				action_getmovedir(&bots[bNr].parabot->action, &moveDir);
-				float fd1 = (focus_cellsfordir(&area, map.cell(obs[i].currentCell).data.sectors)
-				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentCell).data.sectors))
+				float fd1 = (focus_cellsfordir(&area, map.cell(obs[i].currentCell)->data.sectors)
+				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentCell)->data.sectors))
 				    * (1.5f + moveDir.x);
 				area.x = 0.0f;
 				area.y = 1.0f;
-				float fd2 = (focus_cellsfordir(&area, map.cell(obs[i].currentCell).data.sectors)
-				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentCell).data.sectors))
+				float fd2 = (focus_cellsfordir(&area, map.cell(obs[i].currentCell)->data.sectors)
+				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentCell)->data.sectors))
 				    * (1.5f + moveDir.y);
 				area.x = -1.0f;
 				area.y = 0.0f;
-				float fd3 = (focus_cellsfordir(&area, map.cell(obs[i].currentCell).data.sectors)
-				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentCell).data.sectors))
+				float fd3 = (focus_cellsfordir(&area, map.cell(obs[i].currentCell)->data.sectors)
+				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentCell)->data.sectors))
 				    * (1.5f - moveDir.x);
 				area.x = 0.0f;
 				area.y = -1.0f;
-				float fd4 = (focus_cellsfordir(&area, map.cell(obs[i].currentCell).data.sectors)
-				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentCell).data.sectors))
+				float fd4 = (focus_cellsfordir(&area, map.cell(obs[i].currentCell)->data.sectors)
+				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentCell)->data.sectors))
 				    * (1.5f - moveDir.y);
 
 				Vec3D bp = obs[i].player->v.origin;

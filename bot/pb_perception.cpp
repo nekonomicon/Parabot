@@ -6,6 +6,7 @@
 #include "sounds.h"
 #include "sectors.h"
 #include "vistable.h"
+#include "cell.h"
 #include "pb_mapcells.h"
 
 
@@ -126,17 +127,17 @@ Vec3D *PB_Percept::predictedAppearance( const Vec3D *botPos )
 			// bot is maintaining LOS -> probably enemy is searching cover!
 			// first check if he might run through...
 			if (map.getDirectedPathToAttack(start, target, &lastSeenVelocity, predictedPath) > 0)
-				vcopy(map.cell(predictedPath[0]).pos(), &predAppearance);
+				cell_pos(map.cell(predictedPath[0]), &predAppearance);
 			// if not, just pick shortest path
 			else if (map.getPathToAttack( start, target, predictedPath) > 0)
-				vcopy(map.cell(predictedPath[0]).pos(), &predAppearance);
+				cell_pos(map.cell(predictedPath[0]), &predAppearance);
 			else
 				vcopy(&lastPos, &predAppearance);
 		} else {
 			// either enemy was never visible or bot has moved and lost LOS...
 			// assume enemy is heading towards bot:
 			if (map.getPathToAttack(start, target, predictedPath) > 0 )
-				vcopy(map.cell(predictedPath[0]).pos(), &predAppearance);
+				cell_pos(map.cell(predictedPath[0]), &predAppearance);
 			else
 				vcopy(&lastPos, &predAppearance);
 		}
