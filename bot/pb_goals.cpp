@@ -494,7 +494,7 @@ void goalUseTank( CParabot *pb, PB_Percept*item )
 	if (!pb->ent->v.viewmodel) {		// use tank!
 		if (item) {
 			if ( item->isVisible() ) {
-				pb->combat.shootAtEnemy(&item->lastPos, 0.1f);
+				combat_shootatenemy(&pb->combat,&item->lastPos, 0.1f);
 				pb->setGoalMoveDescr( "UseTank (Shoot)" );
 			} else {
 				action_setaimdir(&pb->action, item->predictedAppearance(pb->botPos()), NULL);

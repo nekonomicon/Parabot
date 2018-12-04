@@ -109,7 +109,7 @@ SRC =		../bot/bot.cpp \
 		../bot/pb_cell.cpp \
 		../bot/menu.cpp \
 		../bot/chat.cpp \
-		../bot/pb_combat.cpp \
+		../bot/combat.cpp \
 		../bot/pb_combatgoals.cpp \
 		../bot/pb_configuration.cpp \
 		../bot/focus.cpp \

@@ -242,7 +242,7 @@ void goalSilentAttack( CParabot *pb, PB_Percept*item )
 	if (item->distance > 500) {		// too far to approach, just fire from current position
 		action_add(&pb->action, BOT_DUCK, NULL);
 		if (item->canBeAttackedBest()) {
-			pb->combat.shootAtEnemy(&item->lastSeenPos, 0.8);
+			combat_shootatenemy(&pb->combat, &item->lastSeenPos, 0.8);
 			pb->setGoalMoveDescr("SilentAttack (ShootDistance)");
 		} else {
 			pb->setGoalMoveDescr("SilentAttack (SwitchingWpn)");
@@ -266,7 +266,7 @@ void goalSilentAttack( CParabot *pb, PB_Percept*item )
 			action_add(&pb->action, BOT_DUCK, NULL);
 			if (item->canBeAttackedBest()) {	// ...and attack from there
 				//bool shot = pb->combat.shootAtEnemy(item->lastSeenPos, weaponhandling_currenthighaimprob(&pb->combat.weapon));
-				pb->combat.shootAtEnemy(&item->lastSeenPos, weaponhandling_currenthighaimprob(&pb->combat.weapon));
+				combat_shootatenemy(&pb->combat, &item->lastSeenPos, weaponhandling_currenthighaimprob(&pb->combat.weapon));
 				pb->setGoalMoveDescr("SilentAttack (ShootClose)");
 			} else {
 				pb->setGoalMoveDescr("SilentAttack (SwitchingWpn)");
@@ -312,12 +312,12 @@ void goalShootAtEnemy( CParabot *pb, PB_Percept*item )
 	if (item->isVisible()) {
 		if (item->isAimingAtBot() || item->isAlert())	{
 		// enemy is aiming or alert: shoot with low accuracy
-			fired = pb->combat.shootAtEnemy(item->entity, (weaponhandling_currenthighaimprob(&pb->combat.weapon) - 0.2f) / 2.0f );
+			fired = combat_shootatenemy2(&pb->combat, item->entity, (weaponhandling_currenthighaimprob(&pb->combat.weapon) - 0.2f) / 2.0f );
 			pb->setGoalViewDescr( "ShootAtEnemy (LowAcc)" );
 		} else {
 		// else take time to aim well
 			if (item->canBeAttackedBest()) {
-				fired = pb->combat.shootAtEnemy(item->entity, weaponhandling_currenthighaimprob(&pb->combat.weapon));
+				fired = combat_shootatenemy2(&pb->combat, item->entity, weaponhandling_currenthighaimprob(&pb->combat.weapon));
 				pb->setGoalViewDescr("ShootAtEnemy (HighAcc)");
 			} else {
 				pb->setGoalViewDescr("ShootAtEnemy (SwitchingWpn)");
@@ -391,7 +391,7 @@ void goalShootAtEnemy( CParabot *pb, PB_Percept*item )
 			Vec3D prePos;
 			vma(&item->lastSeenPos, -0.05f, &item->lastSeenVelocity, &prePos);
 			if (item->canBeAttackedBest()) {
-				fired = pb->combat.shootAtEnemy(&prePos, 0.5f);
+				fired = combat_shootatenemy(&pb->combat, &prePos, 0.5f);
 				if (fired) pb->preemptiveFire = false;	// shoot only once
 				pb->setGoalViewDescr("ShootAtEnemy (Preemptive:Shoot)");
 			} else {
@@ -488,11 +488,11 @@ void goalArmBestWeapon( CParabot *pb, PB_Percept*item )
 		vcopy(pb->botPos(), &botPos);
 		if (item->predictedAppearance(&botPos)->z > (botPos.z + 20)) botFlags |= WF_ENEMY_ABOVE;
 		else if (item->predictedAppearance(&botPos)->z < (botPos.z - 80)) botFlags |= WF_ENEMY_ABOVE;
-		pb->combat.nextWeaponCheck = worldtime() + CHECK_WEAPON_COMBAT;
+		pb->combat.nextweaponcheck = worldtime() + CHECK_WEAPON_COMBAT;
 	} else {
 		dist = 250;		// expect medium distance
 		hitProb = 0.2;	// and low accuracy
-		pb->combat.nextWeaponCheck = worldtime() + CHECK_WEAPON_IDLE;
+		pb->combat.nextweaponcheck = worldtime() + CHECK_WEAPON_IDLE;
 	}
 
 	if (pb->ent->v.waterlevel == 3) botFlags |= WF_UNDERWATER;
@@ -500,7 +500,7 @@ void goalArmBestWeapon( CParabot *pb, PB_Percept*item )
 	// if best weapon already armed, store in item:
 	checkForBreakpoint( BREAK_WEAPON );
 	bool bestArmed = weaponhandling_armbestweapon(&pb->combat.weapon, dist, hitProb, botFlags );
-	if (!bestArmed) pb->combat.nextWeaponCheck = worldtime() + CHANGE_WEAPON_DELAY;
+	if (!bestArmed) pb->combat.nextweaponcheck = worldtime() + CHANGE_WEAPON_DELAY;
 	if (bestArmed && item) item->flags |= PI_BEST_ARMED;
 	pb->setGoalActDescr( "ArmBestWeapon" );
 }
@@ -511,11 +511,11 @@ float weightArmBestWeapon( CParabot *pb, PB_Percept*item )
 
 	if (item && item->isTrackable() &&
 		 (worldtime() - item->firstDetection > 0.5f)) {	// aim a while before decision
-		if (((worldtime() + CHECK_WEAPON_COMBAT) < pb->combat.nextWeaponCheck) ||
-		     (worldtime() > pb->combat.nextWeaponCheck ) ) weight = 5;
+		if (((worldtime() + CHECK_WEAPON_COMBAT) < pb->combat.nextweaponcheck) ||
+		     (worldtime() > pb->combat.nextweaponcheck ) ) weight = 5;
 		if (item->hasFocus()) weight = 10;
 	} else {
-		if (worldtime() > pb->combat.nextWeaponCheck) weight = 5;
+		if (worldtime() > pb->combat.nextweaponcheck) weight = 5;
 	}
 	return weight;
 }

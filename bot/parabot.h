@@ -15,8 +15,8 @@
 #include "roaming.h"
 #include "weapon.h"
 #include "weaponhandling.h"
-#include "pb_combat.h"
 #include "pb_perception.h"
+#include "combat.h"
 #include "pb_goalfinder.h"
 
 
@@ -77,7 +77,7 @@ public:
 	EDICT		*partner;			// player the bot is following
 	
 	// used in IN_COMBAT
-	PB_Combat	combat;
+	COMBAT	combat;
 	
 	// Perception module
 	PB_Perception senses;

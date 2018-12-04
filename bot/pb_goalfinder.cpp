@@ -57,7 +57,7 @@ void PB_GoalFinder::analyze( PB_Perception &senses )
 				pli->orientation = dotproduct(&com.globals->fwd, &dir);
 				// weapon rating ( -5 .. +5 )
 				if (pli->hasBeenSpotted())
-					pli->rating = bot->combat.getRating((*pli)); 
+					pli->rating = combat_getrating(&bot->combat, (*pli)); 
 				else
 					pli->rating = 0;
 				

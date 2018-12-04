@@ -71,7 +71,7 @@ void CParabot::initAfterRespawn()
 
 	action_init(&action, ent);
 	roaming_init(&pathfinder, ent, &action );
-	combat.init( slot, ent, &action, &pathfinder );
+	combat_init(&combat, slot, ent, &action, &pathfinder );
 	senses.init( ent );
 	needs_init(&needs, this);
 	
@@ -296,8 +296,11 @@ bool CParabot::getJourneyTarget()
 
 	int pathMask = PATH_NORMAL;
 	if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) {
-		if (hasLongJump()) pathMask |= PATH_NEED_LONGJUMP;
-		if (combat.hasWeapon( VALVE_WEAPON_GAUSS )) pathMask |= PATH_NEED_GAUSSJUMP;
+		if (hasLongJump())
+			pathMask |= PATH_NEED_LONGJUMP;
+
+		if (combat_hasweapon(&combat, VALVE_WEAPON_GAUSS))
+			pathMask |= PATH_NEED_GAUSSJUMP;
 	}
 	if (ent->v.health > 80) pathMask |= PATH_CAUSES_DAMAGE;
 
