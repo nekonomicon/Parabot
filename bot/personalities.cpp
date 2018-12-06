@@ -1,83 +1,26 @@
 #include "parabot.h"
-#include "pb_configuration.h"
-#include "pb_global.h"
-#include "bot.h"
+#include "personalities.h"
 #include <ctype.h>
 #include <dirent.h>
 
-extern int mod_id;
+static bool	personalities_loadmodellist(const char *gamedir);
+static void	personalities_clearmodellist();
+static void	personalities_getcolor(int persNr, int modulo, char *color);
+static bool	personalities_create(const char *personalityFile);
+static bool	personalities_save(const char *personalityFile);
 
-CVAR bot_num = { "bot_num", "5" };
-CVAR bot_minnum = { "bot_minnum", "4" };
-CVAR bot_maxnum = { "bot_maxnum", "6" };
-CVAR bot_realgame = { "bot_realgame", "1" };
-CVAR bot_staytime = { "bot_staytime", "20" };
-CVAR bot_chatenabled = { "bot_chat_enabled", "1" };
-CVAR bot_chatlang = { "bot_chatlang", "en_US" };
-CVAR bot_chatlog = { "bot_chatlog", "0" };
-CVAR bot_chatrespond = { "bot_chatrespond", "1" };
-CVAR bot_peacemode = { "bot_peacemode", "0" };
-CVAR bot_restrictedweapons = { "bot_restrictedweapons", "0" };
-CVAR bot_touringmode = { "bot_touringmode", "0" };
-CVAR bot_maxaimskill = { "bot_maxaimskill", "10" };
-CVAR bot_minaimskill = { "bot_minaimskill", "1" };
+static std::vector<PERSONALITY> character;
+static std::vector<char*> playermodellist;
 
-PB_Configuration::PB_Configuration()
-{
-}
-
-PERSONALITY PB_Configuration::personality( int index )
+PERSONALITY
+personalities_get(int index)
 { 
 	debugFile( "  %i: %s  ", index, character[index].name );
 	return character[index]; 
 }
 
-bool PB_Configuration::initConfiguration( const char *configPath )
-{
-	char filename[64], cmd[64];
-
-	registerVars();
-
-	strcpy( filename, configPath );
-	strcat( filename, "parabot.cfg" );
-
-	if( !fileexists( filename ) )
-	{
-		INFO_MSG( "Missing %s\n", filename );
-
-		CreateDirectory( configPath, NULL );
-		return createConfiguration( filename );
-	}
-
-	strcpy( cmd, "exec ");
-	strcat( cmd, &filename[strlen( com.modname ) + 1] );
-	strcat( cmd, "\n" );
-
-	servercommand( cmd );
-//	SERVER_EXECUTE;
-
-	return true;
-}
-
-void PB_Configuration::registerVars()
-{
-	cvar_register( &bot_num );
-	cvar_register( &bot_minnum );
-	cvar_register( &bot_maxnum );
-	cvar_register( &bot_realgame );
-	cvar_register( &bot_staytime );
-	cvar_register( &bot_chatenabled );
-	cvar_register( &bot_chatlang );
-	cvar_register( &bot_chatlog );
-	cvar_register( &bot_chatrespond );
-	cvar_register( &bot_peacemode );
-	cvar_register( &bot_restrictedweapons );
-	cvar_register( &bot_touringmode );
-	cvar_register( &bot_maxaimskill );
-	cvar_register( &bot_minaimskill );
-}
-
-bool PB_Configuration::initPersonalities( const char *personalityPath )
+bool
+personalities_init(const char *personalityPath)
 {
 	byte *pMemFile;
 	int fileSize, filePos = 0;
@@ -93,7 +36,7 @@ bool PB_Configuration::initPersonalities( const char *personalityPath )
 	if( !pMemFile )
 	{
 		INFO_MSG( "failed\n" );
-		return createPersonalities( filename );
+		return personalities_create( filename );
 	}
 
 	while( ( pBuffer = memfgets( pMemFile, fileSize, &filePos ) ) )
@@ -115,7 +58,7 @@ bool PB_Configuration::initPersonalities( const char *personalityPath )
 		if( 8 > sscanf( pBuffer, "\"%31[^\"]\" \"%31[^\"]\" %2i%2i%2i%2i%3i%3i",
 		    newPers.name,		// read entire name
 		    newPers.model,		// read entire model
-		    &newPers.aimSkill,		// aim skill
+		    &newPers.aimskill,		// aim skill
 		    &newPers.aggression,	// aggression
 		    &newPers.sensitivity,	// sensitivity
 		    &newPers.communication,	// communication
@@ -124,14 +67,14 @@ bool PB_Configuration::initPersonalities( const char *personalityPath )
 			continue;
 		}
 
-		newPers.aimSkill = clamp( newPers.aimSkill, 1, 10 );
+		newPers.aimskill = clamp( newPers.aimskill, 1, 10 );
 		newPers.aggression = clamp( newPers.aggression, 1, 10 );
 		newPers.sensitivity = clamp( newPers.sensitivity, 1, 10 );
 		newPers.communication = clamp( newPers.communication, 1, 10 );
 		iTopColor = clamp( iTopColor, 0, 255 );
 		iBottomColor = clamp( iBottomColor, 0, 255 );
-		sprintf( newPers.topColor,"%i", iTopColor );
-		sprintf( newPers.bottomColor,"%i", iBottomColor );
+		sprintf( newPers.topcolor,"%i", iTopColor );
+		sprintf( newPers.bottomcolor,"%i", iBottomColor );
 		character.push_back( newPers );
 	}
 
@@ -141,47 +84,15 @@ bool PB_Configuration::initPersonalities( const char *personalityPath )
 	{
 		INFO_MSG( "failed\n" );
 		ERROR_MSG( "Empty or broken %s\n", filename );
-		return createPersonalities( filename );
+		return personalities_create( filename );
 	}
 
 	INFO_MSG( "OK!\n" );
 	return true;
 }
 
-bool PB_Configuration::createConfiguration( const char *configFile )
-{
-	FILE *file;
-	CVAR *list;
-	INFO_MSG( "Creating %s... ", configFile  );
-	file = fopen( configFile, "wt" );
-
-	if( !file )
-	{
-		INFO_MSG( "failed!\n" );
-		return false;
-	}
-
-#define PARABOT_PREAMBULA "//=======================================================================\n" \
-			"//\t\tparabot.cfg - the main configuration file for the Parabot.\n" \
-			"//=======================================================================\n"
-
-	fputs( PARABOT_PREAMBULA, file );
-
-	for( list = &bot_chatenabled; list; list = list->next )
-	{
-		if( strncmp( list->name, "bot_", 4 ) )
-			break;
-
-		fprintf( file,"%s \"%s\"\n", list->name, list->string );
-	}
-
-	fclose( file );
-
-	INFO_MSG( "OK!\n" );
-	return true;
-}
-
-bool PB_Configuration::createPersonalities( const char *personalityFile )
+bool
+personalities_create(const char *personalityFile)
 {
 	byte *pMemFile;
 	int fileSize, filePos = 0;
@@ -197,7 +108,7 @@ bool PB_Configuration::createPersonalities( const char *personalityFile )
 		return false;
 	}
 
-	if( !loadModelList( com.modname ) )
+	if( !personalities_loadmodellist( com.modname ) )
 		return false;
 
 	INFO_MSG( "Reading %s... ", filename );
@@ -206,7 +117,7 @@ bool PB_Configuration::createPersonalities( const char *personalityFile )
 	if( !pMemFile )
 	{
 		INFO_MSG( "failed\n" );
-		clearModelList();
+		personalities_clearmodellist();
 		return false;
 	}
 
@@ -249,27 +160,28 @@ bool PB_Configuration::createPersonalities( const char *personalityFile )
 		if( args == 0 )
 			continue;
 		else if( args < 2 )
-			strcpy(newPers.model, playerModelList[randomint(0, playerModelList.size() - 1)]);
+			strcpy(newPers.model, playermodellist[randomint(0, playermodellist.size() - 1)]);
 
-		newPers.aimSkill = randomint(1, 10);
+		newPers.aimskill = randomint(1, 10);
 		newPers.aggression = randomint(1, 10 );
 		newPers.sensitivity = randomint( 1, 10 );
 		newPers.communication = randomint( 1, 10 );
 		character.push_back(newPers);
-		strcpy( character[character.size() - 1].topColor, getColor( character.size() - 1, 371 ) );
-		strcpy( character[character.size() - 1].bottomColor, getColor( character.size() - 1, 97 ) );
+		personalities_getcolor(character.size() - 1, 371, character[character.size() - 1].topcolor);
+		personalities_getcolor(character.size() - 1, 97, character[character.size() - 1].bottomcolor);
 	}
 	
 	freefile( pMemFile );
 
 	INFO_MSG( "OK!\n" );
 
-	clearModelList();
+	personalities_clearmodellist();
 
-	return savePersonalities( personalityFile );
+	return personalities_save( personalityFile );
 }
 
-bool PB_Configuration::savePersonalities( const char *personalityFile )
+bool
+personalities_save(const char *personalityFile)
 {
 	int i;
 	FILE *file;
@@ -309,12 +221,12 @@ bool PB_Configuration::savePersonalities( const char *personalityFile )
 	for( i = 0; i < character.size(); i++ ) {
 		fprintf( file, "\"%s\"\t\"%s\"\t%i\t%i\t%i\t%i\t%s\t%s\n", character[i].name,
 		    character[i].model,
-		    character[i].aimSkill,
+		    character[i].aimskill,
 		    character[i].aggression,
 		    character[i].sensitivity,
 		    character[i].communication,
-		    character[i].topColor,
-		    character[i].bottomColor );
+		    character[i].topcolor,
+		    character[i].bottomcolor );
 	}
 
 	fclose( file );
@@ -323,7 +235,8 @@ bool PB_Configuration::savePersonalities( const char *personalityFile )
 	return true;
 }
 
-bool PB_Configuration::loadModelList( const char *gamedir )
+bool
+personalities_loadmodellist(const char *gamedir)
 {
 	char filePath[64];
 	DIR *dfd;
@@ -344,44 +257,75 @@ bool PB_Configuration::loadModelList( const char *gamedir )
 		if( Q_STREQ( model->d_name, "..") )
 			continue;
 
-		playerModelList.push_back(strdup(model->d_name));
+		playermodellist.push_back(strdup(model->d_name));
 	}
 	closedir(dfd);
 
-	if( !playerModelList.size() ) {
+	if( !playermodellist.size() ) {
 		INFO_MSG( "failed!\n" );
 
 		if( bGamedirIsEmpty )
 			return false;
 
 		bGamedirIsEmpty = true;
-		return loadModelList( "valve" ); // TODO: add check for fallback_dir
+		return personalities_loadmodellist( "valve" ); // TODO: add check for fallback_dir
 	}
 
 	INFO_MSG( "OK!\n" );
 	return true;
 }
 
-void PB_Configuration::clearModelList()
+void
+personalities_clearmodellist()
 {
 	int i;
 
-	for(i = 0; i < playerModelList.size(); i++)
+	for(i = 0; i < playermodellist.size(); i++)
 	{
-		free( playerModelList[i] );
+		free( playermodellist[i] );
 	}
 
-	playerModelList.clear();
+	playermodellist.clear();
 }
 
-const char* PB_Configuration::getColor(int persNr, int modulo)
+void
+personalities_getcolor(int persNr, int modulo, char *color)
 {
-	static char color[4];
 	int code = 0;
-	int nameLen = strlen( character[persNr].name );
-	for (int i=0; i<nameLen; i++) 
-		code += ((int)character[persNr].name[i] * (729+i)) % modulo;
+
+	int nameLen = strlen(character[persNr].name);
+	for (int i = 0; i < nameLen; i++) 
+		code += ((int)character[persNr].name[i] * (729 + i)) % modulo;
 	code = (code % 255) + 1;
-	sprintf( color, "%i", code );
-	return color;
+	sprintf(color, "%i", code);
+}
+
+const char *
+personalities_gettopcolor(int index)
+{
+	return character[index].topcolor;
+}
+
+const char *
+personalities_getbottomcolor(int index)
+{
+	return character[index].bottomcolor;
+}
+
+void
+personalities_joins(int index)
+{
+	character[index].inuse = true;
+}
+
+void
+personalities_leave(int index)
+{
+	character[index].inuse = false;
+}
+
+int
+personalities_count()
+{
+	return character.size();
 }

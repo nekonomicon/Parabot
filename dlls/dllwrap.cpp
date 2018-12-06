@@ -16,7 +16,8 @@
 #include "vistable.h"
 #include "cell.h"
 #include "pb_mapcells.h"
-#include "pb_configuration.h"
+#include "configuration.h"
+#include "personalities.h"
 #include "pb_observer.h"
 #include "dllwrap.h"
 #include "sounds.h"
@@ -28,7 +29,6 @@ void BotUnPause();
 
 extern bool fatalParabotError;
 extern bot_t bots[32];
-PB_Configuration pbConfig;
 extern int activeBot;
 extern int botNr;
 
@@ -111,8 +111,8 @@ gameinit_wrap()
 	strcat( filePath, "/addons/parabot/config/" );
 	strcat( filePath, com.modname );
 	strcat( filePath, "/" );
-	pbConfig.initConfiguration(filePath);
-	if(!pbConfig.initPersonalities(filePath)) {
+	configuration_init(filePath);
+	if(!personalities_init(filePath)) {
 		ERROR_MSG( "Couldn't read/write configuration files correctly. Check your write permissions and/or file contents.");
 		exit(0);
 	}
@@ -255,7 +255,7 @@ clientdisconnect_wrap(EDICT *player)
 
 		bots[index].is_used = false;  // this slot is now free to use
 		bots[index].e = 0;
-		pbConfig.personalityLeaves( bots[index].personality );
+		personalities_leave( bots[index].personality );
 		delete (bots[index].parabot);
 		bots[index].parabot = 0;			
 	}

@@ -1,12 +1,11 @@
 #include "parabot.h"
 #include "bot.h"
 #include "bot_weapons.h"
-#include "pb_configuration.h"
+#include "configuration.h"
 
 extern bot_t bots[32];
 extern int mod_id;
 extern bot_weapon_t weapon_defs[MAX_WEAPONS];
-extern PB_Configuration pbConfig;	// from configfiles.cpp
 /*
 PB_WeaponHandling::PB_WeaponHandling()
 {
@@ -123,7 +122,7 @@ weaponhandling_currentweapon(WEAPONHANDLING *wh)
 bool
 weaponhandling_available(WEAPONHANDLING *wh, int wId)
 {
-	if (pbConfig.onRestrictedWeaponMode()) {
+	if (configuration_onrestrictedweaponmode()) {
 		// exclude powerful weapons
 		switch (mod_id) {
 		case AG_DLL:

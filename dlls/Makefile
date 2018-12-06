@@ -111,7 +111,7 @@ SRC =		../bot/bot.cpp \
 		../bot/chat.cpp \
 		../bot/combat.cpp \
 		../bot/pb_combatgoals.cpp \
-		../bot/pb_configuration.cpp \
+		../bot/configuration.cpp \
 		../bot/focus.cpp \
 		../bot/pb_global.cpp \
 		../bot/pb_goalfinder.cpp \
@@ -126,6 +126,7 @@ SRC =		../bot/bot.cpp \
 		../bot/pb_observer.cpp \
 		../bot/pb_path.cpp \
 		../bot/pb_perception.cpp \
+		../bot/personalities.cpp \
 		../bot/roaming.cpp \
 		../bot/sectors.cpp \
 		../bot/vistable.cpp \

@@ -1,5 +1,5 @@
 #include "parabot.h"
-#include "pb_configuration.h"
+#include "configuration.h"
 enum {
 	NO_MENU,
 	MAIN_MENU,
@@ -14,7 +14,6 @@ char dynMenu[512];
 int currentMenu;
 int menuState = NO_MENU;
 int menuChoice;
-extern PB_Configuration pbConfig;
 extern float bot_check_time;
 extern int message_ShowMenu;
 extern int oldBotStop;
@@ -62,13 +61,13 @@ menu_gamemode( EDICT *player )
 	const char *pszString;
 
 	strcpy( dynMenu, "Change Gamemodes\n\n" );
-	if( pbConfig.onRestrictedWeaponMode() ) 
+	if(configuration_onrestrictedweaponmode()) 
 		pszString = "1. Disable RestrictedWeapons\n";
 	else
 		pszString = "1. Enable RestrictedWeapons\n";
 
 	strcat( dynMenu, pszString );
-	if( pbConfig.onPeaceMode() )
+	if(configuration_onpeacemode())
 		pszString = "2. Disable PeaceMode\n";
 	else
 		pszString = "2. Enable PeaceMode\n";
@@ -86,15 +85,15 @@ menu_chat( EDICT *player )
 	const char *pszString;
 
 	strcpy( dynMenu, "Configure Botchat\n\n" );
-	if ( pbConfig.usingChat() ) {
+	if (configuration_usingchat()) {
 		strcat( dynMenu, "1. Disable Botchat\n" );
-		if( pbConfig.onAlwaysRespond() ) 
+		if (configuration_onalwaysrespond() ) 
 			pszString = "2. Disable AlwaysRespond\n";
 		else
 			pszString = "2. Enable AlwaysRespond\n";
 
 		strcat( dynMenu, pszString );
-		if( pbConfig.onChatLog() ) 
+		if(configuration_onchatlog() ) 
 			pszString = "3. Disable ChatLog\n";
 		else
 			pszString = "3. Enable ChatLog\n";
@@ -116,17 +115,17 @@ menu_botcount( EDICT *player )
 	char buffer[64];
 
 	strcpy( dynMenu, "Configure Number of Bots\n\n" );
-	if (pbConfig.onServerMode()) {
-		sprintf( buffer, "MinBots is %i\n", pbConfig.minBots() );
+	if (configuration_onservermode()) {
+		sprintf( buffer, "MinBots is %i\n", configuration_minbots() );
 		strcat( dynMenu, buffer );
 		strcat( dynMenu, "  1. -    2. +\n");
-		sprintf( buffer, "MaxBots is %i\n", pbConfig.maxBots() );
+		sprintf( buffer, "MaxBots is %i\n", configuration_maxbots() );
 		strcat( dynMenu, buffer );
 		strcat( dynMenu, "  3. -    4. +\n");
 		strcat( dynMenu, "5. Disable");
 	}
 	else {
-		sprintf( buffer, "NumBots is %i\n", pbConfig.numBots() );
+		sprintf( buffer, "NumBots is %i\n", configuration_numbots() );
 		strcat( dynMenu, buffer );
 		strcat( dynMenu, "  1. -    2. +\n" );
 		strcat( dynMenu, "\n\n5. Enable");
@@ -143,10 +142,10 @@ menu_skill( EDICT *player )
 	char buffer[64];
 
 	strcpy( dynMenu, "Configure Bot Aimskill\n\n" );
-	sprintf( buffer, "MinSkill is %i\n", pbConfig.minSkill() );
+	sprintf( buffer, "MinSkill is %i\n", configuration_minskill() );
 	strcat( dynMenu, buffer );
 	strcat( dynMenu, "  1. -    2. +\n");
-	sprintf( buffer, "MaxSkill is %i\n", pbConfig.maxSkill() );
+	sprintf( buffer, "MaxSkill is %i\n", configuration_maxskill() );
 	strcat( dynMenu, buffer );
 	strcat( dynMenu, "  3. -    4. +\n");
 	strcat( dynMenu, "5. Exit\n" );
@@ -158,11 +157,13 @@ menu_skill( EDICT *player )
 void
 menu_selectitem( EDICT *player, int menuChoice )
 {
-	switch( currentMenu )
-	{
+	const char *cvarname = NULL;
+	float value = 0.0f;
+	int maxvalue = 1, minvalue = 0;
+
+	switch (currentMenu) {
 	case MAIN_MENU:
-		switch( menuChoice )
-		{
+		switch(menuChoice) {
 		case 1:
 			menuChoice = NUMBER_MENU;
 			break;
@@ -182,28 +183,35 @@ menu_selectitem( EDICT *player, int menuChoice )
 		}
 		break;
 	case NUMBER_MENU:
-		if( pbConfig.onServerMode() )
-		{
-			switch( menuChoice )
-			{
+		if (configuration_onservermode()) {
+			switch(menuChoice) {
 			case 1:
-				pbConfig.setFloatVar( "bot_minnum", pbConfig.minBots()-1, com.globals->maxclients );
+				cvarname = "bot_minnum";
+				value = configuration_minbots() - 1;
+				maxvalue = com.globals->maxclients;
 				menuChoice = NUMBER_MENU;
 				break;
 			case 2:
-				pbConfig.setFloatVar( "bot_minnum", pbConfig.minBots()+1, pbConfig.maxBots() );
+				cvarname = "bot_minnum";
+				value = configuration_minbots() + 1;
+				maxvalue = configuration_maxbots();
 				menuChoice = NUMBER_MENU;
 				break;
 			case 3:
-				pbConfig.setFloatVar( "bot_maxnum", pbConfig.maxBots()-1, com.globals->maxclients , pbConfig.minBots() );
+				cvarname = "bot_maxnum";
+				value = configuration_maxbots() - 1;
+				maxvalue = com.globals->maxclients;
+				minvalue = configuration_minbots();
 				menuChoice = NUMBER_MENU;
 				break;
 			case 4:
-				pbConfig.setFloatVar( "bot_maxnum", pbConfig.maxBots()+1, com.globals->maxclients );
+				cvarname = "bot_maxnum";
+				value = configuration_maxbots() + 1;
+				maxvalue = com.globals->maxclients;
 				menuChoice = NUMBER_MENU;
 				break;
 			case 5:
-				pbConfig.setFloatVar( "bot_realgame" );
+				cvarname = "bot_realgame";
 				bot_check_time = com.globals->time + 5.0;
 				menuChoice = NUMBER_MENU;
 				break;
@@ -211,17 +219,18 @@ menu_selectitem( EDICT *player, int menuChoice )
 				menuChoice = MAIN_MENU;
 				break;
 			}
-		}
-		else
-		{
-			switch( menuChoice )
-			{
+		} else {
+			switch(menuChoice) {
 			case 1:
-				pbConfig.setFloatVar( "bot_num", pbConfig.numBots()-1, com.globals->maxclients );
+				cvarname = "bot_num";
+				value = configuration_numbots() - 1;
+				maxvalue = com.globals->maxclients;
 				menuChoice = NUMBER_MENU;
 				break;
 			case 2:
-				pbConfig.setFloatVar( "bot_num", pbConfig.numBots()+1, com.globals->maxclients );
+				cvarname = "bot_num";
+				value = configuration_numbots() + 1;
+				maxvalue = com.globals->maxclients;
 				menuChoice = NUMBER_MENU;
 				break;
 			case 3: 
@@ -229,7 +238,8 @@ menu_selectitem( EDICT *player, int menuChoice )
 				menuChoice = NUMBER_MENU;
 				break;
 			case 5:
-				pbConfig.setFloatVar( "bot_realgame", 1 );
+				cvarname = "bot_realgame";
+				value = 1.0f;
 				bot_check_time = com.globals->time + 5.0;
 				menuChoice = NUMBER_MENU;
 				break;
@@ -240,39 +250,50 @@ menu_selectitem( EDICT *player, int menuChoice )
 			break;
 		}
 	case SKILL_MENU:
-		switch( menuChoice )
-		{
+		switch(menuChoice) {
 		case 1:
-			pbConfig.setFloatVar( "bot_minaimskill", pbConfig.minSkill()-1, 10, 1 );
+			cvarname = "bot_minaimskill";
+			value = configuration_minskill() - 1;
+			maxvalue = 10;
+			minvalue = 1;
 			menuChoice = SKILL_MENU;
 			break;
 		case 2:
-			pbConfig.setFloatVar( "bot_minaimskill", pbConfig.minSkill()+1, pbConfig.maxSkill(), 1 );
+			cvarname = "bot_minaimskill";
+			value = configuration_minskill() + 1;
+			maxvalue = configuration_maxskill();
+			minvalue = 1;
 			menuChoice = SKILL_MENU;
 			break;
 		case 3:
-			pbConfig.setFloatVar( "bot_maxaimskill", pbConfig.maxSkill()-1, 10, pbConfig.minSkill() );
+			cvarname = "bot_maxaimskill";
+			value = configuration_maxskill() - 1;
+			maxvalue = 10;
+			minvalue = configuration_minskill();
 			menuChoice = SKILL_MENU;
 			break;
 		case 4:
-			pbConfig.setFloatVar( "bot_maxaimskill", pbConfig.maxSkill()+1, 10, 1 );
+			cvarname = "bot_maxaimskill";
+			value = configuration_maxskill() + 1;
+			maxvalue = 10;
+			minvalue = 1;
 			menuChoice = SKILL_MENU;
 			break;
 		default:
 			menuChoice = MAIN_MENU;
 			break;
 		}
-		adjustAimSkills();
 		break;
 	case MODE_MENU:
-		switch( menuChoice )
-		{
+		switch (menuChoice) {
 		case 1: 
-			pbConfig.setFloatVar( "bot_restrictedweapons", pbConfig.onRestrictedWeaponMode() ? 0 : 1 );
+			cvarname = "bot_restrictedweapons";
+			value = configuration_onrestrictedweaponmode() ? 0 : 1;
 			menuChoice = MODE_MENU;
 			break;
 		case 2:
-			pbConfig.setFloatVar( "bot_peacemode", pbConfig.onPeaceMode() ? 0 : 1 );
+			cvarname = "bot_peacemode";
+			value = configuration_onpeacemode() ? 0 : 1;
 			menuChoice = MODE_MENU;
 			break;
 		default:
@@ -281,20 +302,24 @@ menu_selectitem( EDICT *player, int menuChoice )
 		}
 		break;
 	case CHAT_MENU:
-		switch( menuChoice )
-		{
+		switch (menuChoice) {
 		case 1:
-			pbConfig.setFloatVar( "bot_chat_enabled", pbConfig.usingChat() ? 0 : 1 );
+			cvarname = "bot_chat_enabled";
+			value = configuration_usingchat() ? 0 : 1;
 			menuChoice = CHAT_MENU;
 			break;
 		case 2:
-			if( pbConfig.usingChat() )
-				pbConfig.setFloatVar( "bot_chatrespond", pbConfig.onAlwaysRespond() ? 0 : 1 );
+			if (configuration_usingchat()) {
+				cvarname = "bot_chatrespond";
+				value = configuration_onalwaysrespond() ? 0 : 1;
+			}
 			menuChoice = CHAT_MENU;
 			break;
 		case 3:
-			if( pbConfig.usingChat() )
-				pbConfig.setFloatVar( "bot_chatlog", pbConfig.onChatLog() ? 0 : 1 );
+			if (configuration_usingchat()) {
+				cvarname = "bot_chatlog";
+                                value = configuration_onchatlog() ? 0 : 1;
+			}
 			menuChoice = CHAT_MENU;
 			break;
 		default:
@@ -306,8 +331,12 @@ menu_selectitem( EDICT *player, int menuChoice )
 		break;
 	}
 
-	switch( menuChoice )
-	{
+	if (cvarname) {
+		configuration_setfloatconvar(cvarname, value, maxvalue, minvalue);
+		adjustAimSkills();
+	}
+
+	switch (menuChoice) {
 	case MAIN_MENU:
 		menu_main(player);
 		break;

@@ -1,12 +1,12 @@
 #include "parabot.h"
 #include "chat.h"
-#include "pb_configuration.h"
+#include "configuration.h"
+#include "personalities.h"
 #include "bot.h"
 #include "weapon.h"
 #include "utf8_strfunc.h"
 #include <ctype.h>
 #include <stdio.h>
-extern PB_Configuration pbConfig;	// from configfiles.cpp
 extern bot_t bots[32];   // from bot.cpp
 extern int clientWeapon[32];	// from combat.cpp
 static CHAT chat;
@@ -74,7 +74,7 @@ chat_load()
 	REPLYLIST *nextReplyList;
 
 	strcpy( filename, "addons/parabot/config/lang/chat/" );
-	strcat( filename, pbConfig.chatFile() );
+	strcat( filename, configuration_chatfile() );
 	strcat( filename, ".txt" );
 
 	INFO_MSG("Reading %s... ", filename);
@@ -316,7 +316,7 @@ chat_findnameinmsg( const char *msg, bool forceReply )
 			// check if one of the two parts appears in msg and return botedict
 			if (strstr(msg, firstName)
 			    || (space && strstr(msg, name2))) {
-				int chatRate = pbConfig.personality(bots[i].personality).communication;
+				int chatRate = personalities_get(bots[i].personality).communication;
 				int rand = randomint(1, PERSONAL_REPLY_CHAT);
 				if ((rand < chatRate) || forceReply)
 					return bots[i].e;
@@ -404,7 +404,7 @@ chat_getrandomresponder(EDICT *excluding, bool forcereply)
 
 	for (i = 0; i < com.globals->maxclients; i++) {
 		if (bots[i].is_used && bots[i].e != excluding) {
-			chatrate = pbConfig.personality(bots[i].personality).communication;
+			chatrate = personalities_get(bots[i].personality).communication;
 			rand = randomint(1, REPLY_CHAT);
 			if ((rand < chatrate) || forcereply) {
 				replycandidate[numcandidates] = i;
@@ -457,7 +457,7 @@ chat_parsemsg(EDICT *speaker, const char *msg)
 	REPLYLIST *nextreply;
 	if ( speaker == 0 || msg == 0 ) return;
 
-	if (pbConfig.onChatLog()) {
+	if (configuration_onchatlog()) {
 		char logfile[64];
 		sprintf(logfile, "%s/addons/parabot/log/chat.txt", com.modname);
 		FILE *fp = fopen(logfile, "a");
@@ -467,7 +467,7 @@ chat_parsemsg(EDICT *speaker, const char *msg)
 		fclose(fp);
 	}
 
-	if (!pbConfig.usingChat())
+	if (!configuration_usingchat())
 		return;
 
 	// delete old messages from queue:
@@ -496,7 +496,7 @@ chat_parsemsg(EDICT *speaker, const char *msg)
 
 	// check if this has to be answered in any case:
 	bool forceAnswer = false;
-	if (pbConfig.onAlwaysRespond()
+	if (configuration_onalwaysrespond()
 	    && !(speaker->v.flags & FL_FAKECLIENT))
 		forceAnswer = true;
 	// find answer:
@@ -520,7 +520,7 @@ void
 chat_check()
 // checks if the next chat message should get displayed
 {
-	if (!pbConfig.usingChat())
+	if (!configuration_usingchat())
 		return;
 
 	if (chat.nexttime > 0) {
@@ -538,14 +538,14 @@ chat_check()
 void
 chat_registergotkilled( EDICT *victim, EDICT *killer, const char *wpnName )
 {
-	if (!pbConfig.usingChat())
+	if (!configuration_usingchat())
 		return;
 
 	if (chat.gotkilled.message.text) {
 		bot_t *bot = getbotpointer(victim);
 		if (bot == 0)
 			return;
-		int chatrate = pbConfig.personality(bot->personality).communication;
+		int chatrate = personalities_get(bot->personality).communication;
 		int rand = randomint(1, GOT_KILLED_CHAT);
 		if (rand < chatrate) {
 			CHATMESSAGE *msg = chat_getmsgfromlist(&chat.gotkilled, false);
@@ -561,14 +561,14 @@ chat_registergotkilled( EDICT *victim, EDICT *killer, const char *wpnName )
 void
 chat_registerkilledplayer( EDICT *victim, EDICT *killer, const char *wpnName )
 {
-	if (!pbConfig.usingChat())
+	if (!configuration_usingchat())
 		return;
 
 	if (chat.killedplayer.message.text) {
 		bot_t *bot = getbotpointer(killer);
 		if (!bot)
 			return;
-		int chatRate = pbConfig.personality(bot->personality).communication;
+		int chatRate = personalities_get(bot->personality).communication;
 		int rand = randomint(1, KILLED_CHAT);
 		if (rand < chatRate) {
 			CHATMESSAGE *msg = chat_getmsgfromlist(&chat.killedplayer, false);
@@ -584,14 +584,14 @@ chat_registerkilledplayer( EDICT *victim, EDICT *killer, const char *wpnName )
 void
 chat_registergotweapon(EDICT *finder, const char *wpnName)
 {
-	if (!pbConfig.usingChat()
+	if (!configuration_usingchat()
 	    || !(finder->v.flags & FL_FAKECLIENT))
 		return;
 
 	bot_t *bot = getbotpointer(finder);
 	if (!bot)
 		return;
-	int chatRate = pbConfig.personality(bot->personality).communication;
+	int chatRate = personalities_get(bot->personality).communication;
 	int rand = randomint(1, WEAPON_CHAT);
 	if (rand < chatRate) {
 		CHATMESSAGE *msg = chat_getmsgfromlist(&chat.gotweapon, false);
@@ -606,7 +606,7 @@ chat_registergotweapon(EDICT *finder, const char *wpnName)
 void
 chat_registerjoin(EDICT *joiner)
 {
-	if (!pbConfig.usingChat()
+	if (!configuration_usingchat()
 	    || !(joiner->v.flags & FL_FAKECLIENT)
 	    || worldtime() < 30.0f)	// don't greet at mapstart (just respawn, no new connect)
 		return;
@@ -614,7 +614,7 @@ chat_registerjoin(EDICT *joiner)
 	bot_t *bot = getbotpointer(joiner);
 	if (!bot)
 		return;
-	int chatRate = pbConfig.personality(bot->personality).communication;
+	int chatRate = personalities_get(bot->personality).communication;
 	int rand = randomint(1, JOIN_CHAT);
 	if (rand < chatRate) {
 		CHATMESSAGE *msg = chat_getmsgfromlist(&chat.join, false);

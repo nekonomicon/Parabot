@@ -2,7 +2,7 @@
 #include "pb_perception.h"
 #include "bot.h"
 #include "weapon.h"
-#include "pb_configuration.h"
+#include "configuration.h"
 #include "sounds.h"
 #include "sectors.h"
 #include "vistable.h"
@@ -13,7 +13,6 @@
 extern int mod_id;
 extern int clientWeapon[32];
 extern bool haloOnBase;
-extern PB_Configuration pbConfig;	// from configfiles.cpp
 // extern Sounds playerSounds;
 extern PB_MapCells map;
 
@@ -248,7 +247,7 @@ bool PB_Perception::classify( PB_Percept &perc )
 {
 	Vec3D dir;
 
-	if (pbConfig.onPeaceMode()) {	
+	if (configuration_onpeacemode()) {	
 		perc.pClass = PI_FRIEND;	// yeah, we love everybody (until he hurts us)
 		return true;
 	}

@@ -12,14 +12,14 @@
 #include "bot_weapons.h"
 #include "pb_goals.h"
 #include "chat.h"
-#include "pb_configuration.h"
+#include "configuration.h"
+#include "personalities.h"
 #include "pb_observer.h"
 #include "sounds.h"
 #include "dllwrap.h"
 
 extern int mod_id;
 extern float roundStartTime;
-extern PB_Configuration pbConfig;
 //extern int maxPers;
 //extern PB_Personality personality[MAX_PERS];	// stores different bot personalities
 //extern bool personalityUsed[MAX_PERS];			// true if bot exists using this personality
@@ -47,7 +47,6 @@ extern float			bot_check_time;			// for checking if new bots should be created
 extern bool				g_GameRules;
 //extern int				min_bots;
 extern bool				pb_pause;
-extern PB_Configuration pbConfig;
 extern int				numberOfClients;
 extern float airStrikeTime;
 void saveLevelData();
@@ -131,7 +130,7 @@ void BotCreate( int fixedPersNr )
 		persNr = fixedPersNr;
 	} else {
 		// search for personality
-		int maxPers = pbConfig.numberOfPersonalities();
+		int maxPers = personalities_count();
 		int count = 0;
 		do {
 			count++;
@@ -139,7 +138,7 @@ void BotCreate( int fixedPersNr )
 				persNr = 0;
 			}*/
 			persNr = randomint(0, maxPers - 1);
-		} while (pbConfig.personality( persNr ).inUse && (numBots < maxPers) && (count < 1000));
+		} while (personalities_get( persNr ).inuse && (numBots < maxPers) && (count < 1000));
 
 		/*if (count>=1000) {
 			FILE *dfp=fopen( "parabot/crashlog.txt", "a" ); 
@@ -150,7 +149,7 @@ void BotCreate( int fixedPersNr )
 	}
 	
 	// try to create entity
-	botEnt = createfakeclient(pbConfig.personality(persNr).name);
+	botEnt = createfakeclient(personalities_get(persNr).name);
 
 	if (!playerexists(botEnt)) {	// if NULL entity return
 		INFO_MSG("Max. Players reached. Can't create bot!\n");
@@ -159,7 +158,7 @@ void BotCreate( int fixedPersNr )
 
 	debugFile( "%.f: BotCreate() fixedPersNr = %i, persNr = %i, botname = %s\n", worldtime(), fixedPersNr, persNr, botName );
 
-	pbConfig.personalityJoins(persNr);	// now we know the bot can be created
+	personalities_joins(persNr);	// now we know the bot can be created
 
 	char ptr[128];  // allocate space for message from ClientConnect
 	const char *infobuffer;
@@ -182,11 +181,11 @@ void BotCreate( int fixedPersNr )
 
 	clientIndex = indexofedict( botEnt );
 
-	setclientkeyvalue(clientIndex, infobuffer, "model", pbConfig.personality( persNr ).model);
+	setclientkeyvalue(clientIndex, infobuffer, "model", personalities_get( persNr ).model);
 	
 	if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == DMC_DLL || mod_id == GEARBOX_DLL) {	// set colors
-		setclientkeyvalue( clientIndex, infobuffer, "topcolor", pbConfig.getTopColor( persNr ) );
-		setclientkeyvalue( clientIndex, infobuffer, "bottomcolor", pbConfig.getBottomColor( persNr )  );
+		setclientkeyvalue( clientIndex, infobuffer, "topcolor", personalities_gettopcolor( persNr ) );
+		setclientkeyvalue( clientIndex, infobuffer, "bottomcolor", personalities_getbottomcolor( persNr )  );
 	} else if (mod_id == CSTRIKE_DLL) {
 		setclientkeyvalue( clientIndex, infobuffer, "rate", "3500.000000");
 		setclientkeyvalue( clientIndex, infobuffer, "cl_updaterate", "20");
@@ -200,7 +199,7 @@ void BotCreate( int fixedPersNr )
 		setclientkeyvalue( clientIndex, infobuffer, "ah", "1");
 	}
 
-	clientconnect( botEnt, pbConfig.personality( persNr ).name, "127.0.0.1", ptr );
+	clientconnect( botEnt, personalities_get( persNr ).name, "127.0.0.1", ptr );
 
 	numberOfClients++;
 
@@ -231,10 +230,10 @@ void BotCreate( int fixedPersNr )
 	// make instance of parabot
 	if (pBot->parabot != 0) delete pBot->parabot;
 	pBot->parabot = ::new CParabot( botEnt, slot );
-	action_setaimskill(&pBot->parabot->action, pbConfig.personality( persNr ).aimSkill );
-	pBot->parabot->setAggression( pbConfig.personality( persNr ).aggression );
-	pBot->parabot->senses.setSensitivity( pbConfig.personality( persNr ).sensitivity );
-	pBot->parabot->setCommunication( pbConfig.personality( persNr ).communication );
+	action_setaimskill(&pBot->parabot->action, personalities_get( persNr ).aimskill );
+	pBot->parabot->setAggression( personalities_get( persNr ).aggression );
+	pBot->parabot->senses.setSensitivity( personalities_get( persNr ).sensitivity );
+	pBot->parabot->setCommunication( personalities_get( persNr ).communication );
 	
 	pBot->personality = persNr;
 
@@ -968,7 +967,7 @@ void sendWelcomeToNewClients()
 			pPlayer = edictofindex(welcome_index);
 			if (worldtime() > 30.0)		// if game has already started
 				chat_parsemsg( pPlayer, " Hi " );	// make bots chat
-			if (!pbConfig.onTouringMode()) {
+			if (!configuration_ontouringmode()) {
 				if (gmsgHudText == 0)
 					gmsgHudText = RegUserMSG("HudText", -1);
 				MSG_Begin(MSG_ONE, gmsgHudText, NULL, pPlayer);
@@ -1032,7 +1031,7 @@ void kickRandomBot()
 void checkForBotCreation()
 // check if time to see if a bot needs to be created...
 {
-	if ( !pbConfig.onServerMode() ) {
+	if ( !configuration_onservermode() ) {
 		// standard mode with fixed number of bots:
 		if (bot_check_time < com.globals->time) {
 			bot_check_time = com.globals->time + 5.0;		// add/kick bots with 5 sec. delay
@@ -1042,9 +1041,9 @@ void checkForBotCreation()
 				if (bots[b].is_used)
 					numBots++;
 
-			if (numBots < pbConfig.numBots() && numberOfClients < com.globals->maxclients)
+			if (numBots < configuration_numbots() && numberOfClients < com.globals->maxclients)
 				addRandomBot();
-			else if (numBots > pbConfig.numBots())
+			else if (numBots > configuration_numbots())
 				kickRandomBot();
 		}
 	} else {
@@ -1055,29 +1054,29 @@ void checkForBotCreation()
 				if (bots[b].is_used)
 					numBots++;
 
-			float avgTime = 2.0f * pbConfig.stayTime() / ( pbConfig.minBots() + pbConfig.maxBots() );
+			float avgTime = 2.0f * configuration_staytime() / ( configuration_minbots() + configuration_maxbots() );
 			bot_check_time = com.globals->time + randomfloat( 0.5f * avgTime, 1.5f * avgTime );
 			float rnd = randomfloat(0.0f, 100.0f);
 
 			if ( numberOfClients == com.globals->maxclients ) {
 				// hold one slot free for human players
 				if ( numBots > 0 ) kickRandomBot();
-			} else if ( numBots < pbConfig.minBots() ) {
+			} else if ( numBots < configuration_minbots() ) {
 				if ( numberOfClients < (com.globals->maxclients - 1) ) {
 					addRandomBot();
-					if ( numBots < (pbConfig.minBots() - 1) )
+					if ( numBots < (configuration_minbots() - 1) )
 						bot_check_time = com.globals->time + 5.0;		// add bots faster
 				}
-			} else if ( numBots == pbConfig.minBots() ) {
+			} else if ( numBots == configuration_minbots() ) {
 				if ( rnd < 50 && numberOfClients < (com.globals->maxclients - 1) ) addRandomBot(); 
-			} else if ( numBots < pbConfig.maxBots() ) {
+			} else if ( numBots < configuration_maxbots() ) {
 				if ( rnd < 30 && numberOfClients < (com.globals->maxclients - 1) ) addRandomBot();
 				else if ( rnd > 70 && numBots > 0 ) kickRandomBot();
-			} else if ( numBots == pbConfig.maxBots() ) {
+			} else if ( numBots == configuration_maxbots() ) {
 				if ( rnd < 50 && numBots > 0 ) kickRandomBot();
-			} else if ( numBots > pbConfig.maxBots() ) {
+			} else if ( numBots > configuration_maxbots() ) {
 				kickRandomBot();
-				if ( numBots > (pbConfig.maxBots() + 1) )
+				if ( numBots > (configuration_maxbots() + 1) )
 					bot_check_time = com.globals->time + 5.0;		// kick bots faster
 			}
 		}
@@ -1137,11 +1136,11 @@ void checkForAirStrike()
 
 void adjustAimSkills()
 {
-	int minAimSkill = pbConfig.minSkill();
-	int maxAimSkill = pbConfig.maxSkill();
+	int minAimSkill = configuration_minskill();
+	int maxAimSkill = configuration_maxskill();
 
 	for (int i=0; i<32; i++) if (bots[i].is_used) {
-		int aimSkill = pbConfig.personality( bots[i].personality ).aimSkill;
+		int aimSkill = personalities_get( bots[i].personality ).aimskill;
 		action_setaimskill(&bots[i].parabot->action,  clamp( aimSkill, maxAimSkill, minAimSkill ) );
 	}
 }
