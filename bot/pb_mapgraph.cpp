@@ -402,13 +402,14 @@ float PB_MapGraph::shortestJourney( int start, int target, int mode, std::deque<
 }
 
 
-bool PB_MapGraph::getJourney( int start, int target, int mode, PB_Journey &journey )
+bool PB_MapGraph::getJourney( int start, int target, int mode, JOURNEY *journey )
 // returns a journey from start to target or false if none available in mode
 {
 	//journey.pathList.clear();	now in function
-	shortestJourney( start, target, mode, journey.pathList );
-	if (journey.pathList.empty()) return false;
-	else return true;
+	shortestJourney( start, target, mode, journey->pathlist );
+	if (journey->pathlist.empty())
+		return false;
+	return true;
 }
 
 
@@ -480,11 +481,11 @@ int PB_MapGraph::DijkstraToWish( std::vector<float>& dist, std::vector<int>& pat
 	return targetNav;
 }
 
-int PB_MapGraph::getWishJourney( int start, NEEDS *needs, int mode, PB_Journey &journey, EDICT *traveller)
+int PB_MapGraph::getWishJourney( int start, NEEDS *needs, int mode, JOURNEY *journey, EDICT *traveller)
 // returns the nav-id that according to wishList is the best to head for and the best
 // journey to get there if possible in mode, if not returns -1 and an empty journey
 {
-	journey.pathList.clear();
+	journey->pathlist.clear();
 
 	std::vector<float> dist;
 	std::vector<int> lastPath;
@@ -495,15 +496,15 @@ int PB_MapGraph::getWishJourney( int start, NEEDS *needs, int mode, PB_Journey &
 
 	int target = bestTarget;
 	while (lastPath[target] >= 0) {
-		journey.pathList.push_back(lastPath[target]);
+		journey->pathlist.push_back(lastPath[target]);
 		path = findPath(lastPath[target]);
 		if (path)
 			target = path->startId();
 		else
 			break;
 	}
-	if (journey.pathList.empty()) return -1;
-	else return bestTarget;
+	if (journey->pathlist.empty()) return -1;
+	return bestTarget;
 }
 
 void PB_MapGraph::initBackwardPaths()

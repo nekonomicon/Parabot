@@ -197,9 +197,9 @@ void goalCollectItems( CParabot *pb, PB_Percept*item )
 		char buffer[256];
 		strcpy( buffer, "CollectItems (" );
 		strcat( buffer, pb->actualPath->endNav().classname() );
-		if (pb->actualJourney.continues()) {
+		if (journey_continues(&pb->actualJourney)) {
 			strcat( buffer, ", " );
-			int pathId = pb->actualJourney.pathList.back();
+			int pathId = pb->actualJourney.pathlist.back();
 			strcat( buffer, getPath( pathId )->endNav().classname() );
 		}
 		strcat( buffer, ")" );

@@ -46,7 +46,7 @@ CParabot::CParabot( EDICT *botEnt, int botSlot )
 
 CParabot::~CParabot()
 {
-	actualJourney.cancel();
+	journey_cancel(&actualJourney);
 	senses.init( ent );
 }
 
@@ -80,10 +80,10 @@ void CParabot::initAfterRespawn()
 	stoppedForPlat = false;
 	if (actualPath) {
 		actualPath->reportTargetFailed();
-		actualJourney.savePathData();
+		journey_savepathdata(&actualJourney);
 		actualPath = 0;
 	}
-	actualJourney.cancel();
+	journey_cancel(&actualJourney);
 	actualNavpoint = getNearestNavpoint( ent );
 	
 	if (!actualNavpoint) DEBUG_MSG( "CParabot::initAfterRespawn() : navpoint=0!\n" );
@@ -272,8 +272,8 @@ void CParabot::reportEnemySpotted()
 	if (actualPath) {
 		actualPath->reportEnemySpotted();
 		actualPath->cancelAttempt();
-		actualJourney.savePathData();
-		actualJourney.cancel();
+		journey_savepathdata(&actualJourney);
+		journey_cancel(&actualJourney);
 		actualPath = 0;
 	}
 }
@@ -317,18 +317,18 @@ bool CParabot::getJourneyTarget()
 	// check if this bot has been assigned a reachable target
 	if ((botNr == slot)
 	    && (botTarget >= 0)
-	    && (mapGraph.getJourney(actualNavpoint->id(), botTarget, pathMask, actualJourney))) {
+	    && (mapGraph.getJourney(actualNavpoint->id(), botTarget, pathMask, &actualJourney))) {
 		DEBUG_MSG("Trying to reach assigned target:\n");
 		targetNav = botTarget;
 		botTarget = -1;
 	} else { // if not, find a wish target
 		//initWishList();	// not necessary, but more accurate
-		targetNav = mapGraph.getWishJourney( actualNavpoint->id(), &needs, pathMask, actualJourney, ent );
+		targetNav = mapGraph.getWishJourney( actualNavpoint->id(), &needs, pathMask, &actualJourney, ent );
 	}
 
 	if (targetNav >= 0) {	// found a journey
 		PB_Navpoint nav = getNavpoint( targetNav );
-		actualPath = actualJourney.getNextPath();
+		actualPath = journey_getnextpath(&actualJourney);
 		assert( actualPath != 0 );
 		actualPath->startAttempt( worldtime() );
 		waypoint = actualPath->getNextWaypoint();
@@ -424,15 +424,15 @@ void CParabot::pathFinished()
 	// DEBUG_MSG( "Path finished\n" );
 	assert(actualPath != 0);
 	actualPath->reportTargetReached( ent, worldtime() );
-	actualJourney.savePathData();
+	journey_savepathdata(&actualJourney);
 	actualNavpoint = &(actualPath->endNav());
 	if (needs_newpriorities(&needs)) {
-		actualJourney.cancel();		// cancel current journey
+		journey_cancel(&actualJourney);		// cancel current journey
 		actualPath = 0;				// set actualPath to 0 to invoke new journey
 		needs_affirmpriorities(&needs);	// do this only once
 		DEBUG_MSG("Found new item priorities, canceling journey!\n");
-	} else if (actualJourney.continues()) {
-		actualPath = actualJourney.getNextPath();
+	} else if (journey_continues(&actualJourney)) {
+		actualPath = journey_getnextpath(&actualJourney);
 		assert(actualPath != 0);
 		actualPath->startAttempt(worldtime());
 		waypoint = actualPath->getNextWaypoint();
@@ -459,10 +459,10 @@ void CParabot::pathFailed()
 	DEBUG_MSG( " failed\n" );
 #endif
 	actualPath->reportTargetFailed();
-	actualJourney.savePathData();
+	journey_savepathdata(&actualJourney);
 	actualNavpoint = 0;
 	actualPath = 0;
-	actualJourney.cancel();
+	journey_cancel(&actualJourney);
 }
 
 

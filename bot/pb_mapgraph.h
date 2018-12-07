@@ -6,7 +6,6 @@
 #include <map>
 #include <stack>
 #include "pbt_dynarray.h"
-#include "pb_journey.h"
 
 
 
@@ -72,10 +71,10 @@ public:
 	// that are z-reachable, nextVisit-Time is required to be reached
 	// should never return zero
 
-	bool getJourney( int start, int target, int mode, PB_Journey &journey );
+	bool getJourney( int start, int target, int mode, JOURNEY *journey );
 	// returns a journey from start to target or false if none available in mode
 
-	int getWishJourney( int start, NEEDS *needs, int mode, PB_Journey &journey, EDICT *traveller );
+	int getWishJourney( int start, NEEDS *needs, int mode, JOURNEY *journey, EDICT *traveller );
 	// returns the nav-id that according to wishList is the best to head for and the best
 	// journey to get there if possible in mode, if not returns -1 and an empty journey
 

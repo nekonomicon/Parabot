@@ -11,6 +11,7 @@
 #include "bot.h"
 #include "utilityfuncs.h"
 #include "needs.h"
+#include "journey.h"
 #include "pb_mapgraph.h"
 #include "roaming.h"
 #include "weapon.h"
@@ -51,7 +52,7 @@ public:
 	char		goalMove[80], goalView[80], goalAct[80];	// set when goals are executed
 
 	// used in ON_TOUR
-	PB_Journey	actualJourney;		// journey bot is traveling
+	JOURNEY		actualJourney;		// journey bot is traveling
 	PB_Path		*actualPath;		// path bot is currently on
 	PB_Path_Waypoint waypoint;		// waypoint bot is approaching
 	PB_Navpoint	*actualNavpoint;	// navpoint bot is on, 0 if not on any navpoint
