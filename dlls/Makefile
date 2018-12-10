@@ -114,7 +114,7 @@ SRC =		../bot/bot.cpp \
 		../bot/configuration.cpp \
 		../bot/focus.cpp \
 		../bot/pb_global.cpp \
-		../bot/pb_goalfinder.cpp \
+		../bot/goalfinder.cpp \
 		../bot/pb_goals.cpp \
 		../bot/journey.cpp \
 		../bot/kills.cpp \

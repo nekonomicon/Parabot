@@ -832,16 +832,16 @@ void CParabot::executeGoals()
 	tGoalFunc	goalFunction;
 	PB_Percept	*trigger;
 
-	goalFinder.check();
-	goalFinder.synchronize();
+	goalfinder_check(&goalFinder);
+	goalfinder_synchronize(&goalFinder);
 	
 	checkForBreakpoint( BREAK_GOALS );
 
 	//debugFile( STRING(ent->v.netname) );
 	for (int i=0; i<MAX_GOALS; i++) {
-		goalFunction = goalFinder.bestGoal( i );
+		goalFunction = goalfinder_bestgoal(&goalFinder, i);
 		if (goalFunction) {
-			trigger		 = goalFinder.trigger( i );
+			trigger		 = goalfinder_trigger(&goalFinder, i);
 			if (trigger!=0) assert( trigger->pClass > 0 && trigger->pClass <= MAX_PERCEPTION );
 			(*goalFunction)( this, trigger );
 		}
@@ -881,10 +881,10 @@ void CParabot::botThink()
 	action_reset(&action);		// initializes action flag and other variables
 
 	senses.collectData();
-	goalFinder.init( this );
-	goalFinder.analyzeUnconditionalGoals();
-	goalFinder.analyze( senses );
-	//goalFinder.analyze( tactics );
+	goalfinder_init(&goalFinder, this);
+	goalfinder_analyzeunconditionalgoals(&goalFinder);
+	goalfinder_analyze(&goalFinder, senses);
+	//goalfinder_analyze(&goalFinder, tactics);
 
 	executeGoals();
 	// DEBUG_MSG( "%i enemies\n", senses.numEnemies );

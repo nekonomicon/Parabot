@@ -18,7 +18,7 @@
 #include "weaponhandling.h"
 #include "pb_perception.h"
 #include "combat.h"
-#include "pb_goalfinder.h"
+#include "goalfinder.h"
 
 
 
@@ -84,7 +84,7 @@ public:
 	PB_Perception senses;
 
 	// GoalFinder module
-	PB_GoalFinder goalFinder;
+	GOALFINDER goalFinder;
 
 	// character variables
 	float	aggression;
