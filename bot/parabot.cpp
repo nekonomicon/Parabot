@@ -1,7 +1,7 @@
 #pragma warning( disable : 4786 )	// disable graph warnings
 
 #include "parabot.h"
-#include "pb_observer.h"
+#include "observer.h"
 #include "bot.h"
 #include "chat.h"
 #include "sectors.h"
@@ -13,7 +13,6 @@
 
 extern PB_MapGraph mapGraph;
 extern PB_MapCells map;
-extern PB_Observer observer;
 int botNr;				// bot to debug
 extern int activeBot;			// bot that's thinking
 extern int botTarget;			// target nav id to approach (-1 = nothing)

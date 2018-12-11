@@ -18,7 +18,7 @@
 #include "pb_mapcells.h"
 #include "configuration.h"
 #include "personalities.h"
-#include "pb_observer.h"
+#include "observer.h"
 #include "dllwrap.h"
 #include "sounds.h"
 #include "menu.h"
@@ -38,7 +38,6 @@ extern int mod_id;
 int botTarget;
 bool oldBotStop;
 extern bool pb_pause;
-PB_Observer observer;
 extern float observerUpdate;
 //#include "hl_game.h"
 //extern HL_Game game;
@@ -325,7 +324,7 @@ startframe_wrap()
 		activeBot = botNr;	// print out global debug messages
 		
 		if (worldtime() > observerUpdate) {
-			observer.registerClients();
+			observer_registerclients();
 			observerUpdate = worldtime() + 3.0;//0.5;
 			/*
 			// PIA Test
@@ -342,7 +341,7 @@ startframe_wrap()
 			}
 			*/
 		}
-		observer.observeAll();
+		observer_observeall();
 		updateVisTable();
 		checkForAirStrike();
 		sendWelcomeToNewClients();

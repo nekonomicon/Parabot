@@ -1,6 +1,6 @@
 #include "pb_goals.h"
 #include "parabot.h"
-#include "pb_observer.h"
+#include "observer.h"
 #include "sectors.h"
 #include "vistable.h"
 #include "cell.h"
@@ -9,7 +9,6 @@
 extern int mod_id;
 extern PB_MapGraph mapGraph;
 extern PB_MapCells map;
-extern PB_Observer observer;
 extern int botNr;
 extern EDICT *camPlayer;
 extern bool haloOnBase;
@@ -571,37 +570,37 @@ void goalFollow( CParabot *pb, PB_Percept*item )
 	// DEBUG_MSG( "FollowAndAssistLeader\n" );
 	if (pb->partner==0) DEBUG_MSG( "WARNING: partner == 0!\n" );
 	if ( (pb->partner == 0 ) || (pb->partner != item->entity ) ) {
-		int partnerId = observer.playerId( item->entity );
+		int partnerId = observer_playerid( item->entity );
 		if (partnerId >= 0) {
-			observer.reportPartner( pb->slot, partnerId );
+			observer_reportpartner( pb->slot, partnerId );
 			pb->partner = item->entity;
 			pb->actualPath = 0;
 		}
 	}
 	
-	if ( !observer.partnerValid( pb->slot ) ) {
+	if ( !observer_partnervalid( pb->slot ) ) {
 		pb->partner = 0;
 		return;
 	}
 	
-	if ( observer.shouldFollow( pb->slot, pb->ent ) ) {
-		PB_Path_Waypoint wp = observer.getNextWaypoint( pb->slot );
+	if ( observer_shouldfollow( pb->slot, pb->ent ) ) {
+		PB_Path_Waypoint wp = observer_getnextwaypoint( pb->slot );
 		if (wp.reached( pb->ent )) {
 			// DEBUG_MSG( "WP reached, act=%i\n", wp.action() );
 			action_add(&pb->action, wp.action(), wp.pos() );	// if there's something to do...
-			observer.reportWaypointReached( pb->slot );		// confirm waypoint
+			observer_reportwaypointreached( pb->slot );		// confirm waypoint
 		}
 		
 		action_setviewdir(&pb->action, &pb->partner->v.origin, 0);		// set viewAngle
 		action_setmovedir(&pb->action, wp.pos(pb->ent), 0);				// set moveAngle and speed
 		action_setmaxspeed(&pb->action);
 		pb->pathCheckWay();	
-		if (observer.canNotFollow( pb->slot )) {
+		if (observer_cannotfollow( pb->slot )) {
 			DEBUG_MSG( "Cannot follow\n" );
 			pb->partner = 0;
 		}
 	}
-/*	if ( observer.partnerInCombat( pb->slot ) ) {	// partner involved in combat
+/*	if ( observer_partnerincombat( pb->slot ) ) {	// partner involved in combat
 		DEBUG_MSG( "I assist!\n" );
 		//botState = PB_IN_COMBAT;
 	}*/

@@ -123,7 +123,7 @@ SRC =		../bot/bot.cpp \
 		../bot/pb_mapimport.cpp \
 		../bot/pb_navpoint.cpp \
 		../bot/needs.cpp \
-		../bot/pb_observer.cpp \
+		../bot/observer.cpp \
 		../bot/pb_path.cpp \
 		../bot/pb_perception.cpp \
 		../bot/personalities.cpp \

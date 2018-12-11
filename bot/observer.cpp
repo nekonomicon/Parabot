@@ -1,5 +1,5 @@
 #include "parabot.h"
-#include "pb_observer.h"
+#include "observer.h"
 #include "sectors.h"
 #include "kills.h"
 #include "focus.h"
@@ -26,10 +26,11 @@ extern float roundStartTime;
 extern bool visualizeCellConnections;
 extern bot_t bots[32];
 
+static OBSERVER obs[32];
 PB_Navpoint* getNearestNavpoint( EDICT *pEdict );
 
 
-
+/*
 PB_Observer::PB_Observer()
 {
 	init();
@@ -40,15 +41,16 @@ PB_Observer::~PB_Observer()
 {
 	init();
 }
+*/
 
-
-void PB_Observer::clear( int oId )
+static void
+observer_clear(int oId)
 // clears all records for observer oid and sets active to false
 {
 	obs[oId].active = false;
 	
-	for (int i=0; i < MAX_WPTS; i++) {
-		waypoint[oId][i].reset();
+	for (int i = 0; i < MAX_WPTS; i++) {
+		obs[oId].waypoint[i].reset();
 	}
 #if _DEBUG
 	trail[oId].deleteAll();
@@ -56,47 +58,48 @@ void PB_Observer::clear( int oId )
 #endif //_DEBUG
 }
 
-
-void PB_Observer::init()
+void
+observer_init()
 {
 	// DEBUG_MSG( "Init all observation-records\n" );
-	for (int i = 0; i<MAX_OBS; i++) {
-		clear( i );
+	for (int i = 0; i < MAX_OBS; i++) {
+		observer_clear(i);
 		obs[i].player = 0;
 	}
 }
 
-
-void PB_Observer::startObservation( int oId )
+static void
+observer_startobservation(int oId)
 {
-	clear( oId );	// clear linked lists for markers etc.
+	observer_clear(oId);	// clear linked lists for markers etc.
 
 	obs[oId].active = true;
 	
-	obs[oId].leadWaypoint = -1;
-	obs[oId].lastPlatId = -1;
+	obs[oId].leadwaypoint = -1;
+	obs[oId].lastplatid = -1;
 	obs[oId].platform = 0;
-	obs[oId].lastReachedNav = 0;
+	obs[oId].lastreachednav = 0;
 
 	assert(obs[oId].player != 0);
-	vcopy(&obs[oId].player->v.origin, &obs[oId].lastFramePos);
-	vcopy(&obs[oId].player->v.velocity, &obs[oId].lastFrameVel);
+	vcopy(&obs[oId].player->v.origin, &obs[oId].lastframepos);
+	vcopy(&obs[oId].player->v.velocity, &obs[oId].lastframevel);
 	obs[oId].frags = obs[oId].player->v.frags;
 	obs[oId].health = obs[oId].player->v.health;
 
-	obs[oId].jumpPressed = false;
-	obs[oId].usePressed = false;
-	obs[oId].inCombat = false;
-	obs[oId].fallTime = 0;
+	obs[oId].jumppressed = false;
+	obs[oId].usepressed = false;
+	obs[oId].incombat = false;
+	obs[oId].falltime = 0;
 
-	obs[oId].currentCell = NO_CELL_FOUND;
-	obs[oId].lastCell = NO_CELL_FOUND;
-	obs[oId].lastCellTime = 0;
+	obs[oId].currentcell = NO_CELL_FOUND;
+	obs[oId].lastcell = NO_CELL_FOUND;
+	obs[oId].lastcelltime = 0;
 	
-	addWaypoint( oId, &obs[oId].player->v.origin );	// add first waypoint
+	observer_addwaypoint(oId, &obs[oId].player->v.origin);	// add first waypoint
 }
 
-int PB_Observer::registerPlayer( EDICT *player )
+static int
+observer_registerplayer(EDICT *player)
 {
 	// search free slot
 	int i = 0;
@@ -110,25 +113,26 @@ int PB_Observer::registerPlayer( EDICT *player )
 	obs[i].player = player;
 	if (obs[i].player != 0) {
 		// init vars:
-		startObservation(i);
+		observer_startobservation(i);
 		DEBUG_MSG("PB_Observer registered %s\n", STRING(obs[i].player->v.netname));
 		return i;
 	}
 	return -1;
 }
 
-
-int PB_Observer::playerId( EDICT *player )
+int
+observer_playerid(EDICT *player)
 // returns the observer id of player
 {
 	for (int i = 0; i < MAX_OBS; i++)
 		if (obs[i].player == player)
 			return i;
 
-	return registerPlayer(player);	// if not in list, register for observing
+	return observer_registerplayer(player);	// if not in list, register for observing
 }
 
-void PB_Observer::registerClients()
+void
+observer_registerclients()
 {
 	EDICT *player;
 
@@ -139,12 +143,12 @@ void PB_Observer::registerClients()
 		    || !is_alive(player))
 			continue;
 
-		playerId(player);		// register if not observing yet
+		observer_playerid(player);		// register if not observing yet
 	}
 }
 
-
-int PB_Observer::checkGround( int oId, EDICT **plat )
+static int
+observer_checkground(int oId, EDICT **plat)
 // checks if bot is standing on a ladder or a moving platform, in latter case adds
 // the necessary information to the path
 // returns the corresponding Waypoint-Flag (WP_ON_LADDER, WP_ON_PLATFORM or 0)
@@ -167,7 +171,7 @@ int PB_Observer::checkGround( int oId, EDICT **plat )
 				 (Q_STREQ( groundName, "func_train" ) )   ) 
 			{
 				// try to find the corresponding navpoint for this groundentity:
-				int sId = obs[oId].lastPlatId;
+				int sId = obs[oId].lastplatid;
 				if (sId >= 0) {	// have we got the right one?
 					if (getNavpoint(sId).entity() != ground)
 						sId = -1;
@@ -180,7 +184,7 @@ int PB_Observer::checkGround( int oId, EDICT **plat )
 					// navpoint found, adding necessary information to path:
 					flags |= WP_ON_PLATFORM;
 					if (obs[oId].platform==0) flags |= WP_AT_PLATFORM_START;
-					obs[oId].lastPlatId = sId;
+					obs[oId].lastplatid = sId;
 					*plat = ground;
 //					if (observedPath[oId].isRecording()) 
 //						observedPath[oId].addPlatformInfo( sId, ground->v.absmin );
@@ -211,7 +215,7 @@ int PB_Observer::checkGround( int oId, EDICT **plat )
 			// we are on normal ground, check if we just left a platform:
 			if (obs[oId].platform) {
 				// try to find the corresponding navpoint for this platform:
-				int sId = obs[oId].lastPlatId;
+				int sId = obs[oId].lastplatid;
 				if (sId >= 0) {	// have we got the right one?
 					if (getNavpoint(sId).entity() != obs[oId].platform) sId = -1;
 				}
@@ -233,8 +237,8 @@ int PB_Observer::checkGround( int oId, EDICT **plat )
 	return flags;
 }
 
-
-bool PB_Observer::shouldObservePlayer( int oId )
+static bool
+observer_shouldobserveplayer(int oId)
 // determines if player oId should be observed or not and returns the result
 {
 	if (obs[oId].player != 0) {
@@ -262,17 +266,18 @@ bool PB_Observer::shouldObservePlayer( int oId )
 		if ((obs[oId].player->v.health >= 1)	&& 
 		    (obs[oId].player->v.solid != SOLID_NOT)) {
 			// DEBUG_MSG("Continue observation...\n");
-			startObservation(oId);	// sets active[i] to true
+			observer_startobservation(oId);	// sets active[i] to true
 		}
 	}
 	return obs[oId].active;
 }
 
-int PB_Observer::getStartIndex( int oId, PB_Navpoint *endNav )
+static int
+observer_getstartindex(int oId, PB_Navpoint *endNav)
 {
 	#define MAX_TRIGGERS 16
 
-	int currentIndex = obs[oId].leadWaypoint;
+	int currentIndex = obs[oId].leadwaypoint;
 	int lastIndex = currentIndex+1;  if (lastIndex==MAX_WPTS) lastIndex = 0;
 	int foundIndex = -1;
 
@@ -289,10 +294,10 @@ int PB_Observer::getStartIndex( int oId, PB_Navpoint *endNav )
 	int dbgCnt1 = 0;
 	while (foundIndex < 0 && currentIndex != lastIndex && dbgCnt1++ < 1000) {
 		int dbgCnt2 = 0;
-		while (!waypoint[oId][currentIndex].isNavpoint() && currentIndex != lastIndex && dbgCnt2++ < 1000) {
-			if (waypoint[oId][currentIndex].needsTriggerForPlat()) {
-				//PB_Navpoint *plat = &(mapGraph[platInfo[oId][currentIndex].data.navId].first);
-				PB_Navpoint *plat = &(getNavpoint(platInfo[oId][currentIndex].data.navId));
+		while (!obs[oId].waypoint[currentIndex].isNavpoint() && currentIndex != lastIndex && dbgCnt2++ < 1000) {
+			if (obs[oId].waypoint[currentIndex].needsTriggerForPlat()) {
+				//PB_Navpoint *plat = &(mapGraph[obs[oId].platinfo[currentIndex].data.navId].first);
+				PB_Navpoint *plat = &(getNavpoint(obs[oId].platinfo[currentIndex].data.navId));
 				bool platRegistered = false;
 				for (int i = (triggerCount - 1); i >= 0; i--) {
 					if (trigger[i] == plat) {
@@ -310,13 +315,14 @@ int PB_Observer::getStartIndex( int oId, PB_Navpoint *endNav )
 			if (currentIndex < 0)
 				currentIndex = MAX_WPTS - 1;
 		}
-		if (waypoint[oId][currentIndex].isNavpoint()) {
-			PB_Navpoint *currentNav = mapGraph.getNearestNavpoint(&waypoint[oId][currentIndex].data.pos);
+		if (obs[oId].waypoint[currentIndex].isNavpoint()) {
+			PB_Navpoint *currentNav = mapGraph.getNearestNavpoint(&obs[oId].waypoint[currentIndex].data.pos);
 			bool allTriggersOk = true;
-			for (int i=0; i < triggerCount; i++) {
+			for (int i = 0; i < triggerCount; i++) {
 				if (currentNav->isTriggerFor((*trigger[i])))
 					triggerOk[i] = true;
-				else if (!triggerOk[i]) allTriggersOk = false;
+				else if (!triggerOk[i])
+					allTriggersOk = false;
 			}
 			if (allTriggersOk) {
 				foundIndex = currentIndex;
@@ -336,7 +342,8 @@ int PB_Observer::getStartIndex( int oId, PB_Navpoint *endNav )
 	return foundIndex;
 }
 
-void PB_Observer::newNavpointReached( int oId, Vec3D *pos, PB_Navpoint *endNav )
+static void
+observer_newnavpointreached(int oId, Vec3D *pos, PB_Navpoint *endNav)
 {
 	Vec3D dir;
 	PB_Path newPath;
@@ -345,12 +352,12 @@ void PB_Observer::newNavpointReached( int oId, Vec3D *pos, PB_Navpoint *endNav )
 
 	// have we been beamed and need a hint-waypoint for the teleporter?
 	if (endNav->type() == NAV_INFO_TELEPORT_DEST) {
-		vsub(&obs[oId].lastFramePos, pos, &dir);
+		vsub(&obs[oId].lastframepos, pos, &dir);
 		if(vlen(&dir) > 100) {
 			// add waypoint pointing in right direction
 			Vec3D hintPos;
-			vma(&obs[oId].lastFramePos, 2.0f, &obs[oId].lastFrameVel, &hintPos);
-			addWaypoint(oId, &hintPos, WP_TELEPORTER_HINT);
+			vma(&obs[oId].lastframepos, 2.0f, &obs[oId].lastframevel, &hintPos);
+			observer_addwaypoint(oId, &hintPos, WP_TELEPORTER_HINT);
 			DEBUG_MSG("adding hintpoint\n");
 			passingTeleporter = true;
 		}
@@ -359,28 +366,28 @@ void PB_Observer::newNavpointReached( int oId, Vec3D *pos, PB_Navpoint *endNav )
 	// only add new paths for human clients:
 	if (!(obs[oId].player->v.flags & FL_FAKECLIENT)) {
 		// search beginning of path
-		int startIndex = getStartIndex( oId, endNav );
+		int startIndex = observer_getstartindex( oId, endNav );
 		if (startIndex != -1) {	// beginning of this path was recorded
 			int pathMode = PATH_NORMAL;
-			PB_Navpoint *startNav = mapGraph.getNearestNavpoint(&waypoint[oId][startIndex].data.pos);
-			newPath.startRecord( startNav->id(), waypoint[oId][startIndex].data.arrival );
+			PB_Navpoint *startNav = mapGraph.getNearestNavpoint(&obs[oId].waypoint[startIndex].data.pos);
+			newPath.startRecord( startNav->id(), obs[oId].waypoint[startIndex].data.arrival );
 			int currentIndex = startIndex;
 			int dbgCnt = 0;
-			while (currentIndex != obs[oId].leadWaypoint && dbgCnt++ < 1000) {
+			while (currentIndex != obs[oId].leadwaypoint && dbgCnt++ < 1000) {
 				currentIndex++;
 				if (currentIndex == MAX_WPTS)
 					currentIndex = 0;
-				newPath.addWaypoint(&waypoint[oId][currentIndex].data.pos, 
-									 waypoint[oId][currentIndex].data.act, 
-									 waypoint[oId][currentIndex].data.arrival );
-				if (waypoint[oId][currentIndex].isOnPlatform()) {
+				newPath.addWaypoint(&obs[oId].waypoint[currentIndex].data.pos, 
+									 obs[oId].waypoint[currentIndex].data.act, 
+									 obs[oId].waypoint[currentIndex].data.arrival );
+				if (obs[oId].waypoint[currentIndex].isOnPlatform()) {
 					passingPlatform = true;
-					newPath.addPlatformInfo(platInfo[oId][currentIndex].data.navId,
-					&platInfo[oId][currentIndex].data.pos);
+					newPath.addPlatformInfo(obs[oId].platinfo[currentIndex].data.navId,
+					&obs[oId].platinfo[currentIndex].data.pos);
 				}
-				if (waypoint[oId][currentIndex].action() == BOT_LONGJUMP) 
+				if (obs[oId].waypoint[currentIndex].action() == BOT_LONGJUMP) 
 					pathMode |= PATH_NEED_LONGJUMP;
-				if (waypoint[oId][currentIndex].causedDamage() )
+				if (obs[oId].waypoint[currentIndex].causedDamage() )
 					pathMode |= PATH_CAUSES_DAMAGE;
 			}
 			/*if (dbgCnt == 1000) {
@@ -403,16 +410,17 @@ void PB_Observer::newNavpointReached( int oId, Vec3D *pos, PB_Navpoint *endNav )
 	}
 
 	// add this navpoint to waypoint-list:
-	addWaypoint( oId, endNav->pos(), WP_IS_NAVPOINT, 2 );				
-	obs[oId].lastReachedNav = endNav;	
+	observer_addwaypoint( oId, endNav->pos(), WP_IS_NAVPOINT, 2 );				
+	obs[oId].lastreachednav = endNav;	
 }
 
-void PB_Observer::checkForJump( int oId, Vec3D *pos )
+static void
+observer_checkforjump(int oId, Vec3D *pos)
 {
-	if (obs[oId].jumpPressed && !(obs[oId].player->v.button & ACTION_JUMP)) {
-		obs[oId].jumpPressed = false;		// jump ended
-	} else if (!obs[oId].jumpPressed && (obs[oId].player->v.button & ACTION_JUMP)) {
-		obs[oId].jumpPressed = true;		// jump started
+	if (obs[oId].jumppressed && !(obs[oId].player->v.button & ACTION_JUMP)) {
+		obs[oId].jumppressed = false;		// jump ended
+	} else if (!obs[oId].jumppressed && (obs[oId].player->v.button & ACTION_JUMP)) {
+		obs[oId].jumppressed = true;		// jump started
 
 		int jumpType = 1;
 
@@ -426,31 +434,32 @@ void PB_Observer::checkForJump( int oId, Vec3D *pos )
 		if (jumpType == 1) {
 			// normal jump, check if bot should stop before jumping:
 			if (vlen2d((Vec2D *)&obs[oId].player->v.velocity) < 50) {
-				addWaypoint( oId, pos, BOT_DELAYED_JUMP );
+				observer_addwaypoint( oId, pos, BOT_DELAYED_JUMP );
 				// DEBUG_MSG( "Stored delayed jump!\n" );
 			} else {
-				addWaypoint( oId, pos, BOT_JUMP );
+				observer_addwaypoint( oId, pos, BOT_JUMP );
 				// DEBUG_MSG( "Stored Jump\n" );
 			}
 		} else if (jumpType == 2) {
 			// longjump has to start earlier:
 			vma(pos, -getframerate(), &obs[oId].player->v.velocity, pos);
 			//glMarker.newMarker( pos, 1 );
-			addWaypoint( oId, pos, BOT_LONGJUMP );
+			observer_addwaypoint( oId, pos, BOT_LONGJUMP );
 			// DEBUG_MSG( "Stored Longjump=\n" );
 		}
 	}
 }
 
-void PB_Observer::checkForUse( int oId, Vec3D *pos )
+static void
+observer_checkforuse(int oId, Vec3D *pos)
 {
-	if (obs[oId].usePressed && !(obs[oId].player->v.button & ACTION_USE)) {
-		obs[oId].usePressed = false;		// use ended
-	} else if (!obs[oId].usePressed && (obs[oId].player->v.button & ACTION_USE)) {
-		obs[oId].usePressed = true;		// use started
+	if (obs[oId].usepressed && !(obs[oId].player->v.button & ACTION_USE)) {
+		obs[oId].usepressed = false;		// use ended
+	} else if (!obs[oId].usepressed && (obs[oId].player->v.button & ACTION_USE)) {
+		obs[oId].usepressed = true;		// use started
 		
 		int navType = -1; 
-		if (obs[oId].lastReachedNav) navType = obs[oId].lastReachedNav->type();
+		if (obs[oId].lastreachednav) navType = obs[oId].lastreachednav->type();
 		// don't store charger uses
 		if (navType == NAV_F_BUTTON || navType == NAV_F_ROT_BUTTON) {
 			//int flags = checkGround( oId );
@@ -463,43 +472,45 @@ void PB_Observer::checkForUse( int oId, Vec3D *pos )
 			if (nearestButton) {	// TODO: check if looking at button!!!
 				Vec3D usedItemPos;
 				vcopy(nearestButton->pos(), &usedItemPos);
-				addWaypoint( oId, &usedItemPos, BOT_USE );
+				observer_addwaypoint( oId, &usedItemPos, BOT_USE );
 			}
 		}
 		// DEBUG_MSG( "Stored Use\n" );
 	}
 }
 
-void PB_Observer::checkForMove( int oId, Vec3D *pos )
+static void
+observer_checkformove(int oId, Vec3D *pos)
 {
 	Vec3D dir;
 	float dist;
 	bool sharpTurn;
 
-	vsub(pos, &obs[oId].lastWpPos, &dir);
+	vsub(pos, &obs[oId].lastwppos, &dir);
 	dist = vlen(&dir);
 
 	if ((dist > MIN_WAYPOINT_DIST)	// sharp turn means >90 degrees yaw change and moved >10 units:
-	    || ((fabsf(anglediff(obs[oId].lastWpYaw, obs[oId].player->v.v_angle.y)) > 90)
+	    || ((fabsf(anglediff(obs[oId].lastwpyaw, obs[oId].player->v.v_angle.y)) > 90)
 	    && (dist > 10))) {	// distance reached or angle too big
 		// DEBUG_MSG( "x" );
 		if ((obs[oId].player->v.flags & FL_ONGROUND)	// on ground
 			|| (obs[oId].player->v.waterlevel > 0)	// or in water
 			|| (is_onladder(obs[oId].player))) {	// or on ladder
 			//int flags = checkGround( oId );
-			addWaypoint(oId, pos, 0);
+			observer_addwaypoint(oId, pos, 0);
 		}
 	}
 }
-	
-void PB_Observer::checkForCamping(int oId, Vec3D *pos)
+
+static void
+observer_checkforcamping(int oId, Vec3D *pos)
 {
 	Vec3D dircamp, dirtank;
 
 	if (obs[oId].player->v.frags != obs[oId].frags ) {
 		if (obs[oId].player->v.frags > obs[oId].frags) {
 			// player has a frag more than before...
-			if ((worldtime() - obs[oId].lastWpTime) > MIN_CAMP_TIME) {
+			if ((worldtime() - obs[oId].lastwptime) > MIN_CAMP_TIME) {
 				// ... and he seems to be camping
 				PB_Navpoint *nearestCamp = mapGraph.getNearestNavpoint( pos, NAV_S_CAMPING );
 				PB_Navpoint *nearestTank = mapGraph.getNearestNavpoint( pos, NAV_F_TANKCONTROLS );
@@ -529,8 +540,8 @@ void PB_Observer::checkForCamping(int oId, Vec3D *pos)
 	}
 }
 
-
-void PB_Observer::checkForTripmines( int oId, Vec3D *pos )
+static void
+observer_checkfortripmines(int oId, Vec3D *pos)
 // check for setting up tripmine
 {
 	Vec3D dir;
@@ -575,7 +586,8 @@ void PB_Observer::checkForTripmines( int oId, Vec3D *pos )
 	}
 }
 
-void PB_Observer::checkForButtonShot( int oId, Vec3D *pos )
+static void
+observer_checkforbuttonshot(int oId, Vec3D *pos)
 // check for setting up tripmine
 {
 	Vec3D dir;
@@ -604,8 +616,8 @@ void PB_Observer::checkForButtonShot( int oId, Vec3D *pos )
 					if (nearest && (vlen(&dir)) < 128) {
 						DEBUG_MSG( "Buttonshot stored nearby!\n" );
 						// set this navpoint in path:
-						addWaypoint( oId, nearest->pos(), WP_IS_NAVPOINT, 2 );				
-						obs[oId].lastReachedNav = nearest;
+						observer_addwaypoint( oId, nearest->pos(), WP_IS_NAVPOINT, 2 );				
+						obs[oId].lastreachednav = nearest;
 					} else {
 						// ...no -> add new navpoint
 						DEBUG_MSG( "Adding Buttonshot!\n" );
@@ -621,24 +633,24 @@ void PB_Observer::checkForButtonShot( int oId, Vec3D *pos )
 	}
 }
 
-
-void PB_Observer::checkPlayerHealth( int oId )
+static void
+observer_checkplayerhealth(int oId)
 // check if player lost health by fall-damage or attack
-// sets PATH_CAUSES_DAMAGE-flag and the inCombat-variable
+// sets PATH_CAUSES_DAMAGE-flag and the incombat-variable
 {
 	// check for fall damage
 	if (obs[oId].player->v.FallVelocity > CRITICAL_FALL_VELOCITY) {
-		obs[oId].fallTime = worldtime();
+		obs[oId].falltime = worldtime();
 		//DEBUG_MSG( "falling at %.f\n", observedPlayer->pev->FallVelocity);
 	}
 	if (obs[oId].player->v.dmg_take > 0) {
-		if ((worldtime() - obs[oId].fallTime) < 0.3f) {
-			waypoint[oId][obs[oId].leadWaypoint].data.act |= WP_DMG_OCURRED;
+		if ((worldtime() - obs[oId].falltime) < 0.3f) {
+			obs[oId].waypoint[obs[oId].leadwaypoint].data.act |= WP_DMG_OCURRED;
 			//observedPathMode[oId] |= PATH_CAUSES_DAMAGE;
 			//DEBUG_MSG( "Fall " );
 		} else if ((obs[oId].player->v.watertype == CONTENTS_LAVA) ||
 			(obs[oId].player->v.watertype == CONTENTS_SLIME)) {
-			waypoint[oId][obs[oId].leadWaypoint].data.act |= WP_DMG_OCURRED;
+			obs[oId].waypoint[obs[oId].leadwaypoint].data.act |= WP_DMG_OCURRED;
 			//observedPathMode[oId] |= PATH_CAUSES_DAMAGE;
 			//DEBUG_MSG( "Slime/Lava " );
 		}
@@ -647,13 +659,14 @@ void PB_Observer::checkPlayerHealth( int oId )
 	} else if (obs[oId].player->v.health < obs[oId].health) {
 		// must have some cause
 		obs[oId].health = obs[oId].player->v.health;
-		obs[oId].inCombat = true;
+		obs[oId].incombat = true;
 	}
 }
 
 void drawCube( EDICT *ent, Vec3D pos, float size );
 
-void PB_Observer::updateCellInfo( int i )
+static void
+observer_updatecellinfo(int i)
 {
 	Vec3D obsPos, dir;
 	eyepos(obs[i].player, &obsPos);
@@ -666,48 +679,48 @@ void PB_Observer::updateCellInfo( int i )
 		    && (pointcontents(&obsPos) != CONTENTS_SOLID))) {	// Bugfix!!!
 			CELL cell;
 			cell_construct(&cell, obs[i].player);
-			obsCell = map.addCell(cell, true, obs[i].lastCell);
+			obsCell = map.addCell(cell, true, obs[i].lastcell);
 		}
 	}
 
-	// init lastCell (after spawning)
-	if (obs[i].lastCell == NO_CELL_FOUND) obs[i].lastCell = obsCell;
+	// init lastcell (after spawning)
+	if (obs[i].lastcell == NO_CELL_FOUND) obs[i].lastcell = obsCell;
 
-	// currentCell still holds value from last frame!
-	if (obs[i].currentCell != NO_CELL_FOUND) {
-		vsub(&obsPos, cell_pos2(map.cell(obs[i].currentCell)), &dir);
+	// currentcell still holds value from last frame!
+	if (obs[i].currentcell != NO_CELL_FOUND) {
+		vsub(&obsPos, cell_pos2(map.cell(obs[i].currentcell)), &dir);
 		float distToCurrentCell = vlen(&dir);
-		vsub(&obsPos, cell_pos2(map.cell(obs[i].lastCell)), &dir);
+		vsub(&obsPos, cell_pos2(map.cell(obs[i].lastcell)), &dir);
 		float distToLastCell = vlen(&dir);
 		// client has reached a new cell
-		if ((obs[i].lastCell != obs[i].currentCell && distToCurrentCell < 25)
+		if ((obs[i].lastcell != obs[i].currentcell && distToCurrentCell < 25)
 		    || (distToLastCell >= 1.5 * CELL_SIZE) ) {
 			// transversal from one cell to another
-			float neededTime = worldtime() - obs[i].lastCellTime;
-			cell_addtraffic(map.cell(obs[i].lastCell), obs[i].currentCell, neededTime);
+			float neededTime = worldtime() - obs[i].lastcelltime;
+			cell_addtraffic(map.cell(obs[i].lastcell), obs[i].currentcell, neededTime);
 
 			// set new viewdir for bots:
 			int bNr = getbotindex(obs[i].player);
 			if (bNr>=0) {
 				Vec3D moveDir, area = {1.0f, 0.0f, 0.0f};
 				action_getmovedir(&bots[bNr].parabot->action, &moveDir);
-				float fd1 = (focus_cellsfordir(&area, map.cell(obs[i].currentCell)->data.sectors)
-				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentCell)->data.sectors))
+				float fd1 = (focus_cellsfordir(&area, map.cell(obs[i].currentcell)->data.sectors)
+				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentcell)->data.sectors))
 				    * (1.5f + moveDir.x);
 				area.x = 0.0f;
 				area.y = 1.0f;
-				float fd2 = (focus_cellsfordir(&area, map.cell(obs[i].currentCell)->data.sectors)
-				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentCell)->data.sectors))
+				float fd2 = (focus_cellsfordir(&area, map.cell(obs[i].currentcell)->data.sectors)
+				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentcell)->data.sectors))
 				    * (1.5f + moveDir.y);
 				area.x = -1.0f;
 				area.y = 0.0f;
-				float fd3 = (focus_cellsfordir(&area, map.cell(obs[i].currentCell)->data.sectors)
-				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentCell)->data.sectors))
+				float fd3 = (focus_cellsfordir(&area, map.cell(obs[i].currentcell)->data.sectors)
+				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentcell)->data.sectors))
 				    * (1.5f - moveDir.x);
 				area.x = 0.0f;
 				area.y = -1.0f;
-				float fd4 = (focus_cellsfordir(&area, map.cell(obs[i].currentCell)->data.sectors)
-				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentCell)->data.sectors))
+				float fd4 = (focus_cellsfordir(&area, map.cell(obs[i].currentcell)->data.sectors)
+				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentcell)->data.sectors))
 				    * (1.5f - moveDir.y);
 
 				Vec3D bp = obs[i].player->v.origin;
@@ -737,15 +750,15 @@ void PB_Observer::updateCellInfo( int i )
 				Vec3D start, end;
 
 				// draw traffic beam
-				vcopy(map.cell(obs[i].currentCell).pos(), &start);
-				vcopy(map.cell(obs[i].lastCell).pos(), &end);
+				vcopy(map.cell(obs[i].currentcell).pos(), &start);
+				vcopy(map.cell(obs[i].lastcell).pos(), &end);
 				start.z -= 30;
 				end.z -= 30;
 				debugBeam(&start, &end, 100, 0);
 				// draw beams to neighbours
-				if (obs[i].currentCell != NO_CELL_FOUND && obs[i].currentCell != obs[i].lastCell) {
+				if (obs[i].currentcell != NO_CELL_FOUND && obs[i].currentcell != obs[i].lastcell) {
 					for (int nb = 0; nb < 10; nb++) {
-						short nbId = map.cell(obs[i].currentCell).getNeighbour(nb);
+						short nbId = map.cell(obs[i].currentcell).getNeighbour(nb);
 						if (nbId == -1)
 							break;
 						vcopy(map.cell(nbId).pos(), &end);
@@ -756,14 +769,14 @@ void PB_Observer::updateCellInfo( int i )
 				}
 			}
 #endif // _DEBUG
-			obs[i].lastCell = obs[i].currentCell;
-			obs[i].lastCellTime = worldtime();
+			obs[i].lastcell = obs[i].currentcell;
+			obs[i].lastcelltime = worldtime();
 		}
 	}
-	obs[i].currentCell = obsCell;
+	obs[i].currentcell = obsCell;
 }
 
-void PB_Observer::observeAll()
+void observer_observeall()
 // observes all human clients currently registered
 {
 	Vec3D		pos;	// current position of observed player
@@ -773,9 +786,9 @@ void PB_Observer::observeAll()
 	if (worldtime() < roundStartTime) return;
 
 	for (int i = 0; i < MAX_OBS; i++) {		
-		if (shouldObservePlayer( i )) {	// still observing this one
+		if (observer_shouldobserveplayer(i)) {	// still observing this one
 			assert (obs[i].player != 0 );
-			obs[i].inCombat = false;	// only true for one frame
+			obs[i].incombat = false;	// only true for one frame
 
 			pos = obs[i].player->v.origin;
 			nav = getNearestNavpoint( obs[i].player );
@@ -785,26 +798,26 @@ void PB_Observer::observeAll()
 				continue;
 			if (nav->reached(obs[i].player)) {
 				// check if reached new navpoint	
-				if ((nav != obs[i].lastReachedNav) &&
+				if ((nav != obs[i].lastreachednav) &&
 				    (nav->entity() != obs[i].player->v.groundentity)) {	// take care with plats,
-					newNavpointReached(i, &pos, nav);		// bot has to wait before approaching
+					observer_newnavpointreached(i, &pos, nav);		// bot has to wait before approaching
 				}
 			}
 
-			updateCellInfo( i );
+			observer_updatecellinfo(i);
 
 			// insert waypoints?
-			checkForJump( i, &pos );
-			checkForUse( i, &pos );
-			checkForMove( i, &pos );
-			
+			observer_checkforjump(i, &pos);
+			observer_checkforuse(i, &pos);
+			observer_checkformove(i, &pos);
+
 			// insert navpoints?
-			checkForCamping( i, &pos );
-			checkForTripmines( i, &pos );
-			checkForButtonShot( i, &pos );
+			observer_checkforcamping(i, &pos);
+			observer_checkfortripmines(i, &pos);
+			observer_checkforbuttonshot(i, &pos);
 
 			// modify path-flags?
-			checkPlayerHealth( i );
+			observer_checkplayerhealth(i);
 
 		/*	if (obs[i].player->v.groundentity) {
 				const char *ground = STRING(obs[i].player->v.groundentity->v.classname);
@@ -816,38 +829,40 @@ void PB_Observer::observeAll()
 			*/
 
 			// remember these things for teleporters:
-			obs[i].lastFramePos = obs[i].player->v.origin;
-			obs[i].lastFrameVel = obs[i].player->v.velocity;
+			obs[i].lastframepos = obs[i].player->v.origin;
+			obs[i].lastframevel = obs[i].player->v.velocity;
 		}
 	}
 }
 
-void PB_Observer::reportPartner( int botId, int oId )
+void
+observer_reportpartner(int botId, int oId)
 // links botId with oId
 {
-	partner[botId] = oId;
+	obs[botId].partner = oId;
 	//assert( !waypoint[observerId].empty() );
-	currentWaypoint[botId] = obs[oId].leadWaypoint;
+	obs[botId].currentwaypoint = obs[oId].leadwaypoint;
 }
 
-void PB_Observer::addWaypoint( int oId, Vec3D *pos, int action, int col )
+void
+observer_addwaypoint(int oId, Vec3D *pos, int action, int col)
 // adds a waypoint for followers
 {
 	EDICT *plat;
-	int flags = checkGround( oId, &plat );
+	int flags = observer_checkground(oId, &plat);
 	PB_Path_Waypoint wp( pos, (action | flags), worldtime() );
-	obs[oId].leadWaypoint++;
-	if (obs[oId].leadWaypoint==MAX_WPTS) obs[oId].leadWaypoint = 0;
-	// DEBUG_MSG( "Added WP %i at (%.f, %.f)\n", obs[oId].leadWaypoint, pos.x, pos.y );
-	waypoint[oId][obs[oId].leadWaypoint] = wp;
+	obs[oId].leadwaypoint++;
+	if (obs[oId].leadwaypoint==MAX_WPTS) obs[oId].leadwaypoint = 0;
+	// DEBUG_MSG( "Added WP %i at (%.f, %.f)\n", obs[oId].leadwaypoint, pos.x, pos.y );
+	obs[oId].waypoint[obs[oId].leadwaypoint] = wp;
 	if( wp.isOnPlatform() && plat )
 	{
-		PB_Path_Platform pf(obs[oId].lastPlatId, &plat->v.absmin );
-		platInfo[oId][obs[oId].leadWaypoint] = pf;
+		PB_Path_Platform pf(obs[oId].lastplatid, &plat->v.absmin );
+		obs[oId].platinfo[obs[oId].leadwaypoint] = pf;
 	}
-	obs[oId].lastWpTime = worldtime();
-	obs[oId].lastWpPos = obs[oId].player->v.origin;
-	obs[oId].lastWpYaw = obs[oId].player->v.v_angle.y;
+	obs[oId].lastwptime = worldtime();
+	obs[oId].lastwppos = obs[oId].player->v.origin;
+	obs[oId].lastwpyaw = obs[oId].player->v.v_angle.y;
 	/*
 	if (action & WP_ON_PLATFORM) col = 1;
 	else col = 2;
@@ -862,50 +877,53 @@ void PB_Observer::addWaypoint( int oId, Vec3D *pos, int action, int col )
 	*/
 }
 
-PB_Path_Waypoint PB_Observer::getNextWaypoint( int botId )
+PB_Path_Waypoint
+observer_getnextwaypoint(int botId)
 // returns the next waypoint to follow player with observer id
 {
-	int nr = partner[botId];
+	int nr = obs[botId].partner;
 	assert( obs[nr].player != 0 );
 	/*
-	if ( currentWaypoint[botId] > leadWaypoint[nr] ) {
+	if ( obs[botId].currentwaypoint > leadwaypoint[nr] ) {
 		DEBUG_MSG( " NoWP " );
 		return PB_Path_Waypoint( observedPlayer[nr]->pev->origin, WP_NOT_REACHABLE );
 	}*/
-	return waypoint[nr][currentWaypoint[botId]];
+	return obs[nr].waypoint[obs[botId].currentwaypoint];
 }
 
-void PB_Observer::reportWaypointReached( int botId )
+void
+observer_reportwaypointreached(int botId)
 {
-	int nr = partner[botId];
-	if (currentWaypoint[botId] != obs[nr].leadWaypoint) {
-//		DEBUG_MSG( "Reached FWP %i\n", currentWaypoint[botId] );
-		currentWaypoint[botId]++;
-		if (currentWaypoint[botId]==MAX_WPTS) currentWaypoint[botId] = 0;
+	int nr = obs[botId].partner;
+	if (obs[botId].currentwaypoint != obs[nr].leadwaypoint) {
+//		DEBUG_MSG("Reached FWP %i\n", obs[botId].currentwaypoint);
+		obs[botId].currentwaypoint++;
+		if (obs[botId].currentwaypoint == MAX_WPTS) obs[botId].currentwaypoint = 0;
 	}
-	/*	int nr = partner[botId];
-	assert( !waypoint[nr].empty() );
+	/*	int nr = obs[botId].partner;
+	assert(!waypoint[nr].empty());
 	waypoint[nr].pop_front();
 	int mid = markerId[nr].front();
-	trail[nr].deleteMarker( mid );
+	trail[nr].deleteMarker(mid);
 	markerId[nr].pop();		*/
 	// DEBUG_MSG( " r%i ", waypoint[nr].size() );
 }
 
-bool PB_Observer::shouldFollow( int botId, EDICT *bot )
+bool
+observer_shouldfollow(int botId, EDICT *bot)
 // returns true if bot should move towards partner
 {
 	Vec3D dir;
 
 	// always execute jump to avoid slow-downs
-	assert( bot != 0 );
-	if ((getNextWaypoint( botId ).action() == BOT_JUMP) ||
+	assert(bot != 0);
+	if ((observer_getnextwaypoint(botId).action() == BOT_JUMP) ||
 	    !(bot->v.flags & FL_ONGROUND))
 		return true;
 
-	int nr = partner[botId];
+	int nr = obs[botId].partner;
 	// if partner not valid don't follow
-	if (!partnerValid(nr))
+	if (!observer_partnervalid(nr))
 		return false;
 
 	vsub(&obs[nr].player->v.origin, &bot->v.origin, &dir);
@@ -917,33 +935,34 @@ bool PB_Observer::shouldFollow( int botId, EDICT *bot )
 	return false;	
 }
 
-bool PB_Observer::canNotFollow( int botId )
+bool
+observer_cannotfollow(int botId)
 // if bot isn't succesful in following frees waypoints and returns true
 {
-	int nr = partner[botId];
-	int nextLeadWpt = obs[nr].leadWaypoint + 1;
+	int nr = obs[botId].partner;
+	int nextLeadWpt = obs[nr].leadwaypoint + 1;
 	if (nextLeadWpt==MAX_WPTS) nextLeadWpt = 0;
-	if (currentWaypoint[botId] == nextLeadWpt) {
+	if (obs[botId].currentwaypoint == nextLeadWpt) {
 		DEBUG_MSG( "Following queue near overflow!\n");
 		return true;
 	}
 	return false;
 }
 
-
-bool PB_Observer::partnerInCombat( int botId )
+bool
+observer_partnerincombat(int botId)
 // returns true if bots registered partner is involved in a combat
 {
-	int nr = partner[botId];
-	return obs[nr].inCombat;
+	int nr = obs[botId].partner;
+	return obs[nr].incombat;
 }
 
-
-bool PB_Observer::partnerValid( int botId )
+bool
+observer_partnervalid(int botId)
 // returns true if bots registered partner is valid
 {
-	int nr = partner[botId];
-	if ( obs[nr].active && (obs[nr].player != 0) )
+	int nr = obs[botId].partner;
+	if (obs[nr].active && (obs[nr].player != 0))
 		return true;
 
 	return false;

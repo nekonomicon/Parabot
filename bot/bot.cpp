@@ -12,9 +12,9 @@
 #include "bot_weapons.h"
 #include "pb_goals.h"
 #include "chat.h"
+#include "observer.h"
 #include "configuration.h"
 #include "personalities.h"
-#include "pb_observer.h"
 #include "sounds.h"
 #include "dllwrap.h"
 
@@ -28,7 +28,6 @@ class PB_MapCells;
 extern PB_MapGraph mapGraph;	// mapgraph for waypoints
 extern PB_MapCells map;
 // extern Sounds playerSounds;
-extern PB_Observer observer;
 float observerUpdate;
 bool fatalParabotError = false;
 extern bool g_meta_init;
@@ -866,7 +865,7 @@ void checkForMapChange()
 		if (fatalParabotError) {
 			ERROR_MSG( "The map %s is corrupt and cannot be played with bots!\nPlease exit and pick another one.", STRING(com.globals->mapname) );
 		}
-		observer.init();
+		observer_init();
 		observerUpdate = worldtime() + 0.5;
 		// 4..14 minutes
 		nextAirstrikeTime = worldtime() + 240.0 + randomfloat( 0.0f, 600.0f );
