@@ -27,7 +27,7 @@ extern bool visualizeCellConnections;
 extern bot_t bots[32];
 
 static OBSERVER obs[32];
-PB_Navpoint* getNearestNavpoint( EDICT *pEdict );
+NAVPOINT *getNearestNavpoint( EDICT *pEdict );
 
 
 /*
@@ -173,7 +173,7 @@ observer_checkground(int oId, EDICT **plat)
 				// try to find the corresponding navpoint for this groundentity:
 				int sId = obs[oId].lastplatid;
 				if (sId >= 0) {	// have we got the right one?
-					if (getNavpoint(sId).entity() != ground)
+					if (navpoint_entity(getNavpoint(sId)) != ground)
 						sId = -1;
 				}
 				if (sId < 0)
@@ -190,14 +190,14 @@ observer_checkground(int oId, EDICT **plat)
 //						observedPath[oId].addPlatformInfo( sId, ground->v.absmin );
 					// DEBUG_MSG( "Added Platform Info!\n" );
 					// check if the platform needs a triggering to be valid
-					PB_Navpoint platNav = getNavpoint( sId );
-					if (platNav.needsTriggering() && platNav.isTriggered()) {
+					NAVPOINT *platNav = getNavpoint( sId );
+					if (navpoint_needstriggering(platNav) && navpoint_istriggered(platNav)) {
 						flags |= WP_PLAT_NEEDS_TRIGGER;
 #if _DEBUG
 						debugsound((obs[oId].player), "weapons/mine_activate.wav");
 						DEBUG_MSG("Plat needs triggering by ");
 						for (int ni = 0; ni < mapGraph.numberOfNavpoints(); ni++) {
-							PB_Navpoint t = getNavpoint( ni );
+							NAVPOINT t = getNavpoint( ni );
 							if (t.isTriggerFor(platNav)) {
 								t.print();
 								DEBUG_MSG("\n");
@@ -217,7 +217,7 @@ observer_checkground(int oId, EDICT **plat)
 				// try to find the corresponding navpoint for this platform:
 				int sId = obs[oId].lastplatid;
 				if (sId >= 0) {	// have we got the right one?
-					if (getNavpoint(sId).entity() != obs[oId].platform) sId = -1;
+					if (navpoint_entity(getNavpoint(sId)) != obs[oId].platform) sId = -1;
 				}
 				if (sId < 0)
 					sId = getNavpointIndex(obs[oId].platform);
@@ -273,7 +273,7 @@ observer_shouldobserveplayer(int oId)
 }
 
 static int
-observer_getstartindex(int oId, PB_Navpoint *endNav)
+observer_getstartindex(int oId, NAVPOINT *endNav)
 {
 	#define MAX_TRIGGERS 16
 
@@ -282,9 +282,9 @@ observer_getstartindex(int oId, PB_Navpoint *endNav)
 	int foundIndex = -1;
 
 	int triggerCount = 0;
-	PB_Navpoint *trigger[MAX_TRIGGERS] = {0,};
+	NAVPOINT *trigger[MAX_TRIGGERS] = {0,};
 	bool triggerOk[MAX_TRIGGERS] = {false,};
-	if (endNav->needsTriggering()) {
+	if (navpoint_needstriggering(endNav)) {
 		debugSound( (obs[oId].player), "weapons/mine_activate.wav" );
 		trigger[triggerCount] = endNav;	
 		triggerOk[triggerCount] = false;
@@ -296,8 +296,8 @@ observer_getstartindex(int oId, PB_Navpoint *endNav)
 		int dbgCnt2 = 0;
 		while (!obs[oId].waypoint[currentIndex].isNavpoint() && currentIndex != lastIndex && dbgCnt2++ < 1000) {
 			if (obs[oId].waypoint[currentIndex].needsTriggerForPlat()) {
-				//PB_Navpoint *plat = &(mapGraph[obs[oId].platinfo[currentIndex].data.navId].first);
-				PB_Navpoint *plat = &(getNavpoint(obs[oId].platinfo[currentIndex].data.navId));
+				//NAVPOINT *plat = &mapGraph[obs[oId].platinfo[currentIndex].data.navId].first;
+				NAVPOINT *plat = getNavpoint(obs[oId].platinfo[currentIndex].data.navId);
 				bool platRegistered = false;
 				for (int i = (triggerCount - 1); i >= 0; i--) {
 					if (trigger[i] == plat) {
@@ -316,10 +316,10 @@ observer_getstartindex(int oId, PB_Navpoint *endNav)
 				currentIndex = MAX_WPTS - 1;
 		}
 		if (obs[oId].waypoint[currentIndex].isNavpoint()) {
-			PB_Navpoint *currentNav = mapGraph.getNearestNavpoint(&obs[oId].waypoint[currentIndex].data.pos);
+			NAVPOINT *currentNav = mapGraph.getNearestNavpoint(&obs[oId].waypoint[currentIndex].data.pos);
 			bool allTriggersOk = true;
 			for (int i = 0; i < triggerCount; i++) {
-				if (currentNav->isTriggerFor((*trigger[i])))
+				if (navpoint_istriggerfor(currentNav, trigger[i]))
 					triggerOk[i] = true;
 				else if (!triggerOk[i])
 					allTriggersOk = false;
@@ -343,7 +343,7 @@ observer_getstartindex(int oId, PB_Navpoint *endNav)
 }
 
 static void
-observer_newnavpointreached(int oId, Vec3D *pos, PB_Navpoint *endNav)
+observer_newnavpointreached(int oId, Vec3D *pos, NAVPOINT *endNav)
 {
 	Vec3D dir;
 	PB_Path newPath;
@@ -351,7 +351,7 @@ observer_newnavpointreached(int oId, Vec3D *pos, PB_Navpoint *endNav)
 	bool passingTeleporter = false;
 
 	// have we been beamed and need a hint-waypoint for the teleporter?
-	if (endNav->type() == NAV_INFO_TELEPORT_DEST) {
+	if (navpoint_type(endNav) == NAV_INFO_TELEPORT_DEST) {
 		vsub(&obs[oId].lastframepos, pos, &dir);
 		if(vlen(&dir) > 100) {
 			// add waypoint pointing in right direction
@@ -369,8 +369,8 @@ observer_newnavpointreached(int oId, Vec3D *pos, PB_Navpoint *endNav)
 		int startIndex = observer_getstartindex( oId, endNav );
 		if (startIndex != -1) {	// beginning of this path was recorded
 			int pathMode = PATH_NORMAL;
-			PB_Navpoint *startNav = mapGraph.getNearestNavpoint(&obs[oId].waypoint[startIndex].data.pos);
-			newPath.startRecord( startNav->id(), obs[oId].waypoint[startIndex].data.arrival );
+			NAVPOINT *startNav = mapGraph.getNearestNavpoint(&obs[oId].waypoint[startIndex].data.pos);
+			newPath.startRecord( navpoint_id(startNav), obs[oId].waypoint[startIndex].data.arrival );
 			int currentIndex = startIndex;
 			int dbgCnt = 0;
 			while (currentIndex != obs[oId].leadwaypoint && dbgCnt++ < 1000) {
@@ -397,7 +397,7 @@ observer_newnavpointreached(int oId, Vec3D *pos, PB_Navpoint *endNav)
 			}*/
 			if (pathMode & PATH_NEED_LONGJUMP) DEBUG_MSG( "PATH NEEDS LONGJUMP!\n" );
 			if (pathMode & PATH_CAUSES_DAMAGE) DEBUG_MSG( "PATH CAUSES DAMAGE!\n" );
-			newPath.stopRecord( endNav->id(), worldtime(), pathMode );
+			newPath.stopRecord(navpoint_id(endNav), worldtime(), pathMode );
 			// don't add return paths for teleporters and platforms
 			if (passingPlatform || passingTeleporter) 
 				mapGraph.addIfImprovement( newPath, false );
@@ -406,11 +406,11 @@ observer_newnavpointreached(int oId, Vec3D *pos, PB_Navpoint *endNav)
 		}
 
 		// bots report visits in their movement-code, so this is for players only:
-		endNav->reportVisit( (obs[oId].player), worldtime() );
+		navpoint_reportvisit(endNav, obs[oId].player, worldtime() );
 	}
 
 	// add this navpoint to waypoint-list:
-	observer_addwaypoint( oId, endNav->pos(), WP_IS_NAVPOINT, 2 );				
+	observer_addwaypoint( oId, navpoint_pos(endNav), WP_IS_NAVPOINT, 2 );				
 	obs[oId].lastreachednav = endNav;	
 }
 
@@ -459,19 +459,19 @@ observer_checkforuse(int oId, Vec3D *pos)
 		obs[oId].usepressed = true;		// use started
 		
 		int navType = -1; 
-		if (obs[oId].lastreachednav) navType = obs[oId].lastreachednav->type();
+		if (obs[oId].lastreachednav) navType = navpoint_type(obs[oId].lastreachednav);
 		// don't store charger uses
 		if (navType == NAV_F_BUTTON || navType == NAV_F_ROT_BUTTON) {
 			//int flags = checkGround( oId );
 			// assume that player has used a button
-			PB_Navpoint *nearestButton;
+			NAVPOINT *nearestButton;
 			if (navType == NAV_F_BUTTON)
 				nearestButton = mapGraph.getNearestNavpoint( pos, NAV_F_BUTTON );
 			else
 				nearestButton = mapGraph.getNearestNavpoint( pos, NAV_F_ROT_BUTTON );
 			if (nearestButton) {	// TODO: check if looking at button!!!
 				Vec3D usedItemPos;
-				vcopy(nearestButton->pos(), &usedItemPos);
+				vcopy(navpoint_pos(nearestButton), &usedItemPos);
 				observer_addwaypoint( oId, &usedItemPos, BOT_USE );
 			}
 		}
@@ -512,10 +512,10 @@ observer_checkforcamping(int oId, Vec3D *pos)
 			// player has a frag more than before...
 			if ((worldtime() - obs[oId].lastwptime) > MIN_CAMP_TIME) {
 				// ... and he seems to be camping
-				PB_Navpoint *nearestCamp = mapGraph.getNearestNavpoint( pos, NAV_S_CAMPING );
-				PB_Navpoint *nearestTank = mapGraph.getNearestNavpoint( pos, NAV_F_TANKCONTROLS );
-				vsub(nearestCamp->pos(), pos, &dircamp);
-				vsub(nearestTank->pos(), pos, &dirtank);
+				NAVPOINT *nearestCamp = mapGraph.getNearestNavpoint( pos, NAV_S_CAMPING );
+				NAVPOINT *nearestTank = mapGraph.getNearestNavpoint( pos, NAV_F_TANKCONTROLS );
+				vsub(navpoint_pos(nearestCamp), pos, &dircamp);
+				vsub(navpoint_pos(nearestTank), pos, &dirtank);
 				// check if we know the location:
 				if( ( nearestCamp && (vlen(&dircamp) < 128 ) )
 				    || (nearestTank && (vlen(&dirtank) < 128 ) ) ) 
@@ -524,13 +524,13 @@ observer_checkforcamping(int oId, Vec3D *pos)
 					if (bot) bot->parabot->campTime = 0;	
 				} else {
 					// ...no -> insert new camping navpoint:
-					PB_Navpoint campNav;
+					NAVPOINT campNav;
 					int angleX = (short) obs[oId].player->v.v_angle.x + 360;
 					int angleY = (short) obs[oId].player->v.v_angle.y + 360;
 					angleY <<= 16;
 					int campAngle = angleY | angleX;
-					campNav.init( pos, NAV_S_CAMPING, campAngle );
-					mapGraph.addNavpoint( campNav );
+					navpoint_init(&campNav, pos, NAV_S_CAMPING, campAngle );
+					mapGraph.addNavpoint(&campNav);
 				}
 				DEBUG_MSG( "Player is a camper!\n" );
 			}
@@ -569,16 +569,16 @@ observer_checkfortripmines(int oId, Vec3D *pos)
 				// ...yes -> check if we know this spot: 
 				Vec3D minePos = tr.endpos;
 				vcopy(&tr.endpos, &minePos);
-				PB_Navpoint *nearest = mapGraph.getNearestNavpoint(&minePos, NAV_S_USE_TRIPMINE);
-				vsub(nearest->pos(), &minePos, &dir);
+				NAVPOINT *nearest = mapGraph.getNearestNavpoint(&minePos, NAV_S_USE_TRIPMINE);
+				vsub(navpoint_pos(nearest), &minePos, &dir);
 				if (nearest && (vlen(&dir) < 128) ) {
 					DEBUG_MSG( "Tripmine usage stored nearby!\n" );
 				} else {
 					// new position for setting up a tripmine: store this!
 					DEBUG_MSG( "Adding tripmine hint!\n" );
-					PB_Navpoint mineNav;
-					mineNav.init(&minePos, NAV_S_USE_TRIPMINE, 0);
-					mapGraph.addNavpoint( mineNav );
+					NAVPOINT mineNav;
+					navpoint_init(&mineNav, &minePos, NAV_S_USE_TRIPMINE, 0);
+					mapGraph.addNavpoint(&mineNav);
 				}
 			} else
 				DEBUG_MSG( "No wall in front!\n" );
@@ -611,21 +611,21 @@ observer_checkforbuttonshot(int oId, Vec3D *pos)
 				const char *hitClass = STRING( tr.hit->v.classname );
 				if (tr.hit->v.health > 0 && Q_STREQ(hitClass, "func_button")) {
 					// player shot at button, check if navpoint is already stored nearby
-					PB_Navpoint *nearest = mapGraph.getNearestNavpoint( pos, NAV_S_BUTTON_SHOT );
-					vsub(nearest->pos(), pos, &dir);
+					NAVPOINT *nearest = mapGraph.getNearestNavpoint( pos, NAV_S_BUTTON_SHOT );
+					vsub(navpoint_pos(nearest), pos, &dir);
 					if (nearest && (vlen(&dir)) < 128) {
 						DEBUG_MSG( "Buttonshot stored nearby!\n" );
 						// set this navpoint in path:
-						observer_addwaypoint( oId, nearest->pos(), WP_IS_NAVPOINT, 2 );				
+						observer_addwaypoint( oId, navpoint_pos(nearest), WP_IS_NAVPOINT, 2 );				
 						obs[oId].lastreachednav = nearest;
 					} else {
 						// ...no -> add new navpoint
 						DEBUG_MSG( "Adding Buttonshot!\n" );
-						PB_Navpoint *button = mapGraph.getNearestNavpoint(&tr.endpos, NAV_F_BUTTON);
+						NAVPOINT *button = mapGraph.getNearestNavpoint(&tr.endpos, NAV_F_BUTTON);
 						assert( button != 0 );
-						PB_Navpoint shotNav;
-						shotNav.init( pos, NAV_S_BUTTON_SHOT, button->id() );
-						mapGraph.addNavpoint( shotNav );
+						NAVPOINT shotNav;
+						navpoint_init(&shotNav, pos, NAV_S_BUTTON_SHOT, navpoint_id(button) );
+						mapGraph.addNavpoint( &shotNav );
 					}
 				}
 			}
@@ -780,7 +780,7 @@ void observer_observeall()
 // observes all human clients currently registered
 {
 	Vec3D		pos;	// current position of observed player
-	PB_Navpoint *nav;	// nearest navpoint to observed player
+	NAVPOINT *nav;	// nearest navpoint to observed player
 
 	// don't observe while round not started
 	if (worldtime() < roundStartTime) return;
@@ -796,10 +796,10 @@ void observer_observeall()
 
 			if( !nav )
 				continue;
-			if (nav->reached(obs[i].player)) {
+			if (navpoint_reached(nav, obs[i].player)) {
 				// check if reached new navpoint	
 				if ((nav != obs[i].lastreachednav) &&
-				    (nav->entity() != obs[i].player->v.groundentity)) {	// take care with plats,
+				    (navpoint_entity(nav) != obs[i].player->v.groundentity)) {	// take care with plats,
 					observer_newnavpointreached(i, &pos, nav);		// bot has to wait before approaching
 				}
 			}

@@ -1066,7 +1066,7 @@ void checkForAirStrike()
 
 		Vec3D pos;
 		vcopy(&pPlayer->v.origin, &pos);
-		PB_Navpoint *nearest = mapGraph.getNearestNavpoint(&pos, NAV_S_AIRSTRIKE_COVER);
+		NAVPOINT *nearest = mapGraph.getNearestNavpoint(&pos, NAV_S_AIRSTRIKE_COVER);
 		if (nearest) {
 #if _DEBUG
 			vsub(nearest->pos(), &pos, &dir);
@@ -1078,14 +1078,14 @@ void checkForAirStrike()
 		} else {
 			nearest = mapGraph.getNearestNavpoint(&pos, NAV_INFO_PLAYER_DM);
 			if(nearest) {
-				vsub(nearest->pos(), &pos, &dir);
+				vsub(navpoint_pos(nearest), &pos, &dir);
 				dist = vlen(&dir);
 			}
 			if (!nearest || dist > 64) {
 				DEBUG_MSG("Adding airstrike cover!\n");
-				PB_Navpoint coverNav;
-				coverNav.init(&pos, NAV_S_AIRSTRIKE_COVER, 0);
-				mapGraph.addNavpoint(coverNav);
+				NAVPOINT coverNav;
+				navpoint_init(&coverNav, &pos, NAV_S_AIRSTRIKE_COVER, 0);
+				mapGraph.addNavpoint(&coverNav);
 			}
 		}
 	}

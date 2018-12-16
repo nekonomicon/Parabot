@@ -11,7 +11,7 @@ extern int mod_id;
 extern int clientWeapon[32];
 extern PB_MapGraph mapGraph;	// mapgraph for waypoints
 extern bool fatalParabotError;
-extern PB_Navpoint* getNearestNavpoint( EDICT *pEdict );
+extern NAVPOINT* getNearestNavpoint( EDICT *pEdict );
 STEPSOUNDS players[32];
 
 bool headToBunker;
@@ -317,10 +317,10 @@ void sounds_parseSound( EDICT *player, const char *sample, float vol )
 			players[clientIndex].itemTrackableDist = AMMO_TRACK_DIST;
 			players[clientIndex].timeItemSound = worldtime() + 0.3;
 			//DEBUG_MSG( "%s picked up gun!\n", STRING(player->v.netname) );
-			PB_Navpoint *nearest = getNearestNavpoint( player );
+			NAVPOINT *nearest = getNearestNavpoint( player );
 			//assert( nearest != 0 );
 			if (!nearest) return;	// listen server before map is loaded
-			const char *wpnName = nearest->classname();
+			const char *wpnName = navpoint_classname(nearest);
 			if (mod_id==VALVE_DLL || mod_id==AG_DLL || mod_id==HUNGER_DLL || mod_id==GEARBOX_DLL) {
 				if ( Q_STREQ( wpnName, "weapon_rpg"      ) ||
 					 Q_STREQ( wpnName, "weapon_gauss"    ) ||

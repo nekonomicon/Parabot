@@ -22,10 +22,7 @@ extern int clientWeapon[32];
 
 //extern ChatList chatGotKilled, chatKilledPlayer, chatGotWeapon;
 //extern bool botChat;	// from configfiles.cpp
-PB_Navpoint* getNearestNavpoint( EDICT *pEdict );
-
-
-
+NAVPOINT *getNearestNavpoint( EDICT *pEdict );
 
 CParabot::CParabot( EDICT *botEnt, int botSlot )
 {
@@ -85,9 +82,9 @@ void CParabot::initAfterRespawn()
 	journey_cancel(&actualJourney);
 	actualNavpoint = getNearestNavpoint( ent );
 	
-	if (!actualNavpoint) DEBUG_MSG( "CParabot::initAfterRespawn() : navpoint=0!\n" );
-	else
-	if (!actualNavpoint->reached( ent )) {
+	if (!actualNavpoint)
+		DEBUG_MSG( "CParabot::initAfterRespawn() : navpoint=0!\n" );
+	else if (!navpoint_reached(actualNavpoint, ent)) {
 		actualNavpoint = 0;
 		DEBUG_MSG( "Not respawned at navpoint!\n" );
 	}
@@ -248,7 +245,7 @@ void CParabot::registerKill( EDICT *victim, const char *wpnName )
 {
 	chat_registerkilledplayer(victim, ent, wpnName);
 	// check if bot was camping and should camp longer:
-	if (actualNavpoint && actualNavpoint->type() == NAV_S_CAMPING) {
+	if (actualNavpoint && navpoint_type(actualNavpoint) == NAV_S_CAMPING) {
 		campTime = 0;
 	}
 }
@@ -316,17 +313,17 @@ bool CParabot::getJourneyTarget()
 	// check if this bot has been assigned a reachable target
 	if ((botNr == slot)
 	    && (botTarget >= 0)
-	    && (mapGraph.getJourney(actualNavpoint->id(), botTarget, pathMask, &actualJourney))) {
+	    && (mapGraph.getJourney(navpoint_id(actualNavpoint), botTarget, pathMask, &actualJourney))) {
 		DEBUG_MSG("Trying to reach assigned target:\n");
 		targetNav = botTarget;
 		botTarget = -1;
 	} else { // if not, find a wish target
 		//initWishList();	// not necessary, but more accurate
-		targetNav = mapGraph.getWishJourney( actualNavpoint->id(), &needs, pathMask, &actualJourney, ent );
+		targetNav = mapGraph.getWishJourney(navpoint_id(actualNavpoint), &needs, pathMask, &actualJourney, ent );
 	}
 
 	if (targetNav >= 0) {	// found a journey
-		PB_Navpoint nav = getNavpoint( targetNav );
+		// NAVPOINT *nav = getNavpoint( targetNav );
 		actualPath = journey_getnextpath(&actualJourney);
 		assert( actualPath != 0 );
 		actualPath->startAttempt( worldtime() );
@@ -349,7 +346,7 @@ void CParabot::getRoamingTarget()
 
 	// check if this bot has been assigned a target
 	if ((botNr == slot) && (botTarget >= 0)) { 
-		roamingTarget = &(getNavpoint(botTarget));
+		roamingTarget = getNavpoint(botTarget);
 		botTarget = -1;
 		DEBUG_MSG( "Trying to reach assigned target:\n" );
 	} else { // if not, find a roaming navpoint
@@ -372,7 +369,7 @@ void CParabot::getRoamingTarget()
 		}
 	}
 	assert( roamingTarget != 0 );
-	roaming_reset(&pathfinder, roamingTarget->pos() );
+	roaming_reset(&pathfinder, navpoint_pos(roamingTarget));
 	roamingCount = PB_ROAMING_COUNT;
 	botState = PB_ROAMING;
 	// DEBUG_MSG( "Switched to ROAMING, approach " );
@@ -392,9 +389,9 @@ void CParabot::approachRoamingTarget()
 		followActualRoute();
 		return;
 	}
-	if (roamingTarget->reached(ent)) {
+	if (navpoint_reached(roamingTarget, ent)) {
 		// DEBUG_MSG( "Roaming target reached\n" );
-		roamingTarget->reportVisit(ent, worldtime()); //now in observer
+		navpoint_reportvisit(roamingTarget, ent, worldtime()); //now in observer
 		actualNavpoint = roamingTarget;
 		roamingTarget = 0;
 	} else {
@@ -405,11 +402,11 @@ void CParabot::approachRoamingTarget()
 		} else {
 			Vec3D rtPos;
 
-			roamingTarget->pos(ent, &rtPos);
+			navpoint_pos(roamingTarget, ent, &rtPos);
 			roaming_checkway(&pathfinder, &rtPos);
 			action_setviewlikemove(&action);
 			if (action_gotstuck(&action) || roaming_targetnotreachable(&pathfinder)) {
-				roamingTarget->doNotVisitBefore(ent, worldtime() + 10.0f);
+				navpoint_donotvisitbefore(roamingTarget, ent, worldtime() + 10.0f);
 				roamingTarget = 0;
 				action_resetstuck(&action);
 			}
@@ -424,7 +421,7 @@ void CParabot::pathFinished()
 	assert(actualPath != 0);
 	actualPath->reportTargetReached( ent, worldtime() );
 	journey_savepathdata(&actualJourney);
-	actualNavpoint = &(actualPath->endNav());
+	actualNavpoint = actualPath->endNav();
 	if (needs_newpriorities(&needs)) {
 		journey_cancel(&actualJourney);		// cancel current journey
 		actualPath = 0;				// set actualPath to 0 to invoke new journey
@@ -435,10 +432,10 @@ void CParabot::pathFinished()
 		assert(actualPath != 0);
 		actualPath->startAttempt(worldtime());
 		waypoint = actualPath->getNextWaypoint();
-		if (actualPath->startNav().type() == NAV_S_BUTTON_SHOT) {
-			if (actualPath->startNav().isTriggerFor(actualPath->endNav())) {
+		if (navpoint_type(actualPath->startNav()) == NAV_S_BUTTON_SHOT) {
+			if (navpoint_istriggerfor(actualPath->startNav(), actualPath->endNav())) {
 				// bot must shoot this button!
-				vcopy(getNavpoint(actualPath->startNav().special()).pos(), &shootObjectPos);
+				vcopy(navpoint_pos(getNavpoint(navpoint_special(actualPath->startNav()))), &shootObjectPos);
 				mustShootObject = true;
 			}
 		}
@@ -531,16 +528,16 @@ void CParabot::pathCheckWay()
 
 	if ( actualPath ) {
 		// check if some breakable object needs to be destroyed
-		PB_Navpoint *target = &(actualPath->endNav());
+		NAVPOINT *target = actualPath->endNav();
 		assert( target != 0 );
-		if (target->type() == NAV_F_BREAKABLE ) {
-			if (!target->entity()) {
+		if (navpoint_type(target) == NAV_F_BREAKABLE ) {
+			if (!navpoint_entity(target)) {
 				DEBUG_MSG( "ERROR in pathCheckWay: No entity found!\n" );
 				return;
 			}
-			if (target->entity()->v.health > 0) {	// has to be destroyed
-				if (target->visible( ent )) {
-					weaponhandling_attack(&combat.weapon, target->pos(), 0.3f, NULL);
+			if (navpoint_entity(target)->v.health > 0) {	// has to be destroyed
+				if (navpoint_visible(target, ent )) {
+					weaponhandling_attack(&combat.weapon, navpoint_pos(target), 0.3f, NULL);
 				}
 				//else DEBUG_MSG( "Can't see breakable\n" );
 			}
@@ -614,12 +611,12 @@ void CParabot::checkForTripmines()
 	}
 
 	if (actualPath) {	// check if tripmine pathtarget
-		if (actualPath->endNav().type() == NAV_S_USE_TRIPMINE) {
+		if (navpoint_type(actualPath->endNav()) == NAV_S_USE_TRIPMINE) {
 			Vec3D dir;
 			float mineDist, botDist;
-			vsub(actualPath->endNav().pos(), &mine->v.origin, &dir);
+			vsub(navpoint_pos(actualPath->endNav()), &mine->v.origin, &dir);
 			mineDist = vlen(&dir);
-			vsub(actualPath->endNav().pos(), &ent->v.origin, &dir);
+			vsub(navpoint_pos(actualPath->endNav()), &ent->v.origin, &dir);
 			botDist = vlen(&dir);
 			if ( (mineDist < 50) && (botDist < 100) ) {
 				DEBUG_MSG( "Canceling path - tripmine found at end!\n" );
@@ -734,11 +731,11 @@ void CParabot::followActualRoute()
 			debugBeam( target, map.cell( roamingRoute[roamingIndex] ).pos(), 50, 2 );
 		} else {
 			// DEBUG_MSG( "TARGET REACHED.\n" );
-			PB_Navpoint *nav = cell_getnavpoint(map.cell(botCell));
+			NAVPOINT *nav = cell_getnavpoint(map.cell(botCell));
 			if ( nav && nav == roamingTarget ) {
-				nav->pos(ent, &target);
-				if (nav->reached(ent)) {
-					nav->reportVisit( ent, worldtime() );
+				navpoint_pos(nav, ent, &target);
+				if (navpoint_reached(nav, ent)) {
+					navpoint_reportvisit(nav, ent, worldtime());
 					actualNavpoint = nav;
 					roamingTarget = 0;
 					setRoamingIndex( -1 );
@@ -817,7 +814,8 @@ void CParabot::followActualRoute()
 				}
 			}
 			// PB_Cell tc = map.cell( botCell );
-			if (roamingTarget) roamingTarget->doNotVisitBefore( ent, worldtime()+10.0 );
+			if (roamingTarget)
+				navpoint_donotvisitbefore(roamingTarget, ent, worldtime() + 10.0f);
 			lastJumpPos = zerovector;
 			roamingTarget = 0;
 			setRoamingIndex( -1 );
@@ -870,7 +868,7 @@ void CParabot::botThink()
 	lastThink = worldtime();
 	
 	if (actualNavpoint) {	// check for navpoint
-		if (!actualNavpoint->reached( ent )) actualNavpoint = 0;
+		if (!navpoint_reached(actualNavpoint, ent)) actualNavpoint = 0;
 	}
 
 	weaponhandling_initcurrentweapon(&combat.weapon);

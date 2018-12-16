@@ -177,80 +177,67 @@ enum {
 	MAX_NAV_TYPES = NAV_AGI_DOM_CONTROLPOINT + 1		// keep up to date!!!
 };
 
-class PB_Navpoint
-{
+typedef struct navpoint_savedata {
+	int	privateid;
+	int	type;		// type of navpoint
+	Vec3D	pos;		// position
+	int	visits;		// number of visits
+	int	special;	// e.g. viewangle for camping-spots
+	float	damagecomp;	// ((damage done to others) - (own damage)) for camping-spots
+} NAVPOINT_SAVEDATA;
 
-public:	
+typedef struct navpoint {
+	NAVPOINT_SAVEDATA	 data;
+	EDICT			*ent;				// pointer to entity
+	float			 lastvisitedat, nextvisitat;	// in worldtime
+	EDICT			*lastvisitor;			// last player visiting this navpoint
+	int			 normalstate;
+	bool			 needstrigger;
+} NAVPOINT;
 
-	static const char* classname( int code );
-	
-	void init( Vec3D *pos, int type, int special );
-	void setId( int id ) { data.privateId = id; }
-	void initEntityPtr();
-	// gets a pointer to the corresponding t_edict if possible and stores it
+const char	*navpoint_classname(int code);
+void		 navpoint_init(NAVPOINT *navpoint, Vec3D *pos, int type, int special);
+void		 navpoint_setid(NAVPOINT *navpoint, int id);
+void		 navpoint_initentityptr(NAVPOINT *navpoint);
+// gets a pointer to the corresponding t_edict if possible and stores it
 
-	int id() { return data.privateId; }
-	int type() { return data.type; }
-	const char* classname();
-	int special() { return data.special; }
-	EDICT* entity() { return ent; }
-	
-	Vec3D *pos() { return &data.pos; }
-	void pos( EDICT *playerEnt, Vec3D *pos);
+int		 navpoint_id(NAVPOINT *navpoint);
+int		 navpoint_type(NAVPOINT *navpoint);
+const char	*navpoint_classname(NAVPOINT *navpoint);
+int		 navpoint_special(NAVPOINT *navpoint);
+EDICT		*navpoint_entity(NAVPOINT *navpoint);
 
-	//bool offers( int classType );
-	// returns true if navpoint is of type or belongs to superclass type
+Vec3D		*navpoint_pos(NAVPOINT *navpoint);
+void		 navpoint_pos(NAVPOINT *navpoint, EDICT *playerEnt, Vec3D *pos);
 
-	bool doorOpen( EDICT *playerEnt );
-	// call only for NAV_F_DOOR and NAV_F_DOOR_ROTATING
-	bool visible( EDICT *playerEnt );
-	bool reached( EDICT *playerEnt );
+// bool offers( int classType );
+// returns true if navpoint is of type or belongs to superclass type
 
-	void reportVisit( EDICT *player, float time );
-	// reports a visit to the navpoint
-	void doNotVisitBefore( EDICT *player, float time );
-	// tells that player should not visit this navpoint before time
-	float nextVisit( EDICT *player );
-	// returns the worldtime after which navpoint can be visited again
+bool		 navpoint_dooropen(NAVPOINT *navpoint, EDICT *playerEnt);
+// call only for NAV_F_DOOR and NAV_F_DOOR_ROTATING
+bool		 navpoint_visible(NAVPOINT *navpoint, EDICT *playerEnt);
+bool		 navpoint_reached(NAVPOINT *navpoint, EDICT *playerEnt);
 
-	bool offersHealth(); 
-	bool offersArmor(); 
-	bool offersCamping() { return (data.type==NAV_S_CAMPING); }
+void		 navpoint_reportvisit(NAVPOINT *navpoint, EDICT *player, float time);
+// reports a visit to the navpoint
+void		 navpoint_donotvisitbefore(NAVPOINT *navpoint, EDICT *player, float time);
+// tells that player should not visit this navpoint before time
+float		 navpoint_nextvisit(NAVPOINT *navpoint, EDICT *player);
+// returns the worldtime after which navpoint can be visited again
 
-	bool needsTriggering() { return needsTrigger; };
-	bool isTriggerFor( PB_Navpoint &wp );
-	bool isTriggered();
-	
-	void load( FILE *fp );
-	void save( FILE *fp );
+bool		 navpoint_offershealth(NAVPOINT *navpoint);
+bool		 navpoint_offersarmor(NAVPOINT *navpoint);
+bool		 navpoint_offerscamping(NAVPOINT *navpoint);
+
+bool		 navpoint_needstriggering(NAVPOINT *navpoint);
+bool		 navpoint_istriggerfor(NAVPOINT *navpoint, NAVPOINT *wp);
+bool		 navpoint_istriggered(NAVPOINT *navpoint);
+
+void		 navpoint_load(NAVPOINT *navpoint, FILE *fp);
+void		 navpoint_save(NAVPOINT *navpoint, FILE *fp);
 #if _DEBUG
-	void print();	// DEBUG_MSG navName
-	void printPos();	// DEBUG_MSG navName
+void		 navpoint_print(NAVPOINT *navpoint);	// DEBUG_MSG navName
+void		 navpoint_printpos(NAVPOINT *navpoint);	// DEBUG_MSG navName
 #endif
-
-	// operators for graph algorithms:
-	bool operator==(const PB_Navpoint& O) const  {  return data.privateId == O.data.privateId; }
-    bool operator<(const PB_Navpoint& O) const   {  return data.privateId < O.data.privateId;  }
 	
-
-private:
-
-	typedef struct {
-		int		privateId;
-		int		type;		// type of navpoint
-		Vec3D	pos;		// position
-		int		visits;		// number of visits
-		int		special;	// e.g. viewangle for camping-spots
-		float	damageComp;	// ((damage done to others) - (own damage)) for camping-spots
-	} TSaveData;
-
-	TSaveData	data;
-	EDICT		*ent;			// pointer to entity
-	float		lastVisitedAt, nextVisitAt;	// in worldtime
-	EDICT		*lastVisitor;	// last player visiting this navpoint
-	bool		needsTrigger;
-	int			normalState;
-};
-
-
 #endif

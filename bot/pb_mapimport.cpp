@@ -38,18 +38,18 @@ void saveLevelData()
 void importNav(int code, const char *modelName)
 {
 	EDICT *pOther = NULL;
-	PB_Navpoint n;
+	NAVPOINT n;
 	Vec3D pos;
 	
-	const char *classname = PB_Navpoint::classname(code);
+	const char *classname = navpoint_classname(code);
 
 	while ((pOther = find_entitybyclassname(pOther, classname))) {
 		if (modelName && !Q_STREQ( STRING(pOther->v.model), modelName ))
 			continue;
 
 		boxcenter(pOther, &pos);
-		n.init(&pos, code, 0);
-		mapGraph.addNavpoint(n);
+		navpoint_init(&n, &pos, code, 0);
+		mapGraph.addNavpoint(&n);
 	}
 }
 
@@ -265,7 +265,7 @@ bool loadLevelData()
 
 	// import ladders
 		EDICT *pOther = NULL;
-		PB_Navpoint n;
+		NAVPOINT n;
 		Vec3D posUp, posDown;
 
 		while ((pOther = find_entitybyclassname(pOther, "func_ladder"))) {
@@ -284,10 +284,10 @@ bool loadLevelData()
 			else				   posDown = posDown + dir; */
 			posUp.z += 36;
 			posDown.z += 36;
-			n.init( &posUp, NAV_F_LADDER_TOP, 0 );
-			mapGraph.addNavpoint( n );
-			n.init( &posDown, NAV_F_LADDER_BOTTOM, 0 );
-			mapGraph.addNavpoint( n );
+			navpoint_init(&n, &posUp, NAV_F_LADDER_TOP, 0 );
+			mapGraph.addNavpoint(&n);
+			navpoint_init(&n, &posDown, NAV_F_LADDER_BOTTOM, 0 );
+			mapGraph.addNavpoint(&n);
 		}
 
 		// import MOD-specifics
@@ -306,8 +306,8 @@ bool loadLevelData()
 		// import specials
 		if ((mod_id==VALVE_DLL || mod_id==AG_DLL) && Q_STREQ( STRING(com.globals->mapname), "crossfire" ) ) {
 			Vec3D v = { 0,-2236,-1852 };
-			n.init( &v, NAV_S_AIRSTRIKE_BUTTON, 0 );
-			mapGraph.addNavpoint( n );
+			navpoint_init(&n, &v, NAV_S_AIRSTRIKE_BUTTON, 0 );
+			mapGraph.addNavpoint(&n);
 		}
 	} else {
 		fileName[strlen( fileName ) - 4] = '\0'; // cut file extention

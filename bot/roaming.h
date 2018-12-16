@@ -2,8 +2,6 @@
 #ifndef PB_ROAMING_H
 #define PB_ROAMING_H
 
-#include "pb_navpoint.h"
-
 typedef struct {
 	int	shouldjump;  // 0=no, 1=slow, 2=fast
 	Vec3D	wallangle;

@@ -350,8 +350,8 @@ int PB_MapCells::getPath( short startId, short targetId, short pathNodes[] )
 				break;
 			if (cell_getenvdamage(&cellArray[nb]) > 20
 			    || (nbg >= 0
-			    && getNavpoint(nbg).needsTriggering()
-			    && !getNavpoint(nbg).isTriggered()))
+			    && navpoint_needstriggering(getNavpoint(nbg))
+			    && !navpoint_istriggered(getNavpoint(nbg))))
 				continue;
 			float value = queue.getValue(currentCell) + cell_getweight(&cellArray[currentCell], n);
 			vsub(cell_pos2(&cellArray[targetId]), cell_pos2(&cellArray[nb]), &dir);
@@ -406,8 +406,8 @@ int PB_MapCells::getPathToCover( short startId, short enemyId, short pathNodes[]
 			if (nb == NO_CELL_REGISTERED) break;
 			if (cell_getenvdamage(&cellArray[nb]) > 20
 			    || (nbg >= 0
-			    && getNavpoint(nbg).needsTriggering()
-			    && !getNavpoint(nbg).isTriggered()))
+			    && navpoint_needstriggering(getNavpoint(nbg))
+			    && !navpoint_istriggered(getNavpoint(nbg))))
 				continue;
 			vsub(cell_pos2(&cellArray[enemyId]), cell_pos2(&cellArray[nb]), &dir);
 			float penalty = 15000 - vlen(&dir);
@@ -458,8 +458,8 @@ int PB_MapCells::getPathForSneakyEscape( short startId, short enemyId, short pat
 			if (nb == NO_CELL_REGISTERED) break;
 			if ( cell_getenvdamage(&cellArray[nb]) > 20
 			    || (nbg >= 0
-			    && getNavpoint(nbg).needsTriggering()
-			    && !getNavpoint(nbg).isTriggered()))
+			    && navpoint_needstriggering(getNavpoint(nbg))
+			    && !navpoint_istriggered(getNavpoint(nbg))))
 				continue;
 			float penalty = (100 * ((int)lineOfSight(nb, enemyId)));
 			float value = queue.getValue(currentCell) + cell_getweight(&cellArray[currentCell], n) + penalty;
@@ -509,8 +509,8 @@ int PB_MapCells::getPathToAttack( short startId, short enemyId, short pathNodes[
 				break;
 			if (cell_getenvdamage(&cellArray[nb]) > 20
 			    || (nbg >= 0
-			    && getNavpoint(nbg).needsTriggering()
-			    && !getNavpoint(nbg).isTriggered()))
+			    && navpoint_needstriggering(getNavpoint(nbg))
+			    && !navpoint_istriggered(getNavpoint(nbg))))
 				continue;
 			float value = queue.getValue(currentCell) + cell_getweight(&cellArray[currentCell], n);
 			float estimate = value;
@@ -565,8 +565,8 @@ int PB_MapCells::getDirectedPathToAttack( short startId, short enemyId, Vec3D *d
 			normalize(&opdir);
 			if ( cell_getenvdamage(&cellArray[nb]) > 20
 			    || (nbg >= 0
-			    && getNavpoint(nbg).needsTriggering()
-			    && !getNavpoint(nbg).isTriggered())
+			    && navpoint_needstriggering(getNavpoint(nbg))
+			    && !navpoint_istriggered(getNavpoint(nbg)))
 			    || dotproduct(&opdir, dir) < 0.7f)
 				continue;
 			float value = queue.getValue(currentCell) + cell_getweight(&cellArray[currentCell], n);
@@ -627,8 +627,8 @@ int PB_MapCells::getOffensivePath( short startId, short enemyId, float minDist, 
 				break;
 			if (cell_getenvdamage(&cellArray[nb]) > 20
 			    || (nbg >= 0
-			    && getNavpoint(nbg).needsTriggering()
-			    && !getNavpoint(nbg).isTriggered()))
+			    && navpoint_needstriggering(getNavpoint(nbg))
+			    && !navpoint_istriggered(getNavpoint(nbg))))
 				continue;
 			float penalty = 0.5f * ((int)(!lineOfSight( nb, enemyId)));
 			float value = queue.getValue(currentCell) + cell_getweight(&cellArray[currentCell], n) + penalty;
@@ -676,8 +676,8 @@ int PB_MapCells::predictPlayerPos( short startId, short ownId, short pathNodes[]
 				break;
 			if (cell_getenvdamage(&cellArray[nb]) > 20
 			    || (nbg >= 0
-			    && getNavpoint(nbg).needsTriggering()
-			    && !getNavpoint(nbg).isTriggered())
+			    && navpoint_needstriggering(getNavpoint(nbg))
+			    && !navpoint_istriggered(getNavpoint(nbg)))
 			    || lineOfSight(ownId, nb))
 				continue;
 			float value = queue.getValue(currentCell) + cell_getweight(&cellArray[currentCell], n);
@@ -727,8 +727,8 @@ int PB_MapCells::getPathToRoamingTarget( short startId, EDICT *botEnt, short pat
 			if (nb == NO_CELL_REGISTERED) break;
 			if (cell_getenvdamage(&cellArray[nb]) > 20
 			    || (nbg >= 0
-			    && getNavpoint(nbg).needsTriggering()
-			    && !getNavpoint(nbg).isTriggered()))
+			    && navpoint_needstriggering(getNavpoint(nbg))
+			    && !navpoint_istriggered(getNavpoint(nbg))))
 				continue;
 			float value = queue.getValue(currentCell) + cell_getweight(&cellArray[currentCell], n);
 			float estimate = value;

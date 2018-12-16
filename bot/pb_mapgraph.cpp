@@ -11,7 +11,7 @@ extern PB_MapGraph mapGraph;
 // id used in waypoint files
 const char *PNFidString = "Parabot Waypoint File 0.8      ";
 
-PB_Navpoint* cashedNavpoint[32+1];
+NAVPOINT* cashedNavpoint[32+1];
 
 void invalidateMapGraphCash()
 {
@@ -29,7 +29,7 @@ void cachePlayerData()
 	}
 }
 
-PB_Navpoint* getNearestNavpoint( EDICT *pEdict )
+NAVPOINT *getNearestNavpoint( EDICT *pEdict )
 {
 	int i = indexofedict(pEdict);
 	if (i < 0 || i > 32) return 0;
@@ -127,7 +127,6 @@ PB_Path* PB_MapGraph::findPath( int id )
 	else return 0;
 }
 
-
 AdjPtr PB_MapGraph::findLinkedPath( int dataId, int startId, bool &found )
 // find path with id beginning at navpoint startId
 {
@@ -144,8 +143,7 @@ AdjPtr PB_MapGraph::findLinkedPath( int dataId, int startId, bool &found )
 	return adj;
 }
 
-
-PB_Navpoint *PB_MapGraph::getNearestNavpoint(const Vec3D *pos)
+NAVPOINT *PB_MapGraph::getNearestNavpoint(const Vec3D *pos)
 // returns the nearest navpoint to pos existing in the graph, NULL if graph is empty
 {
 	float dist, minDist = 999999;
@@ -153,19 +151,18 @@ PB_Navpoint *PB_MapGraph::getNearestNavpoint(const Vec3D *pos)
 	Vec3D dir;
 
 	for (int i = 0; i < numberOfNavpoints(); i++) {
-		vsub(pos, graph[i].first.pos(), &dir);
+		vsub(pos, navpoint_pos(&graph[i].first), &dir);
 		dist = dotproduct(&dir, &dir);
 		if (dist < minDist) {
 			minDist = dist;
 			minId = i;
 		}
 	}
-	if (minId >= 0) return (PB_Navpoint*) &(graph[minId].first);
-	else return 0;
+	if (minId >= 0) return &graph[minId].first;
+	return 0;
 }
 
-
-PB_Navpoint* PB_MapGraph::getNearestNavpoint(const Vec3D *pos, int type)
+NAVPOINT *PB_MapGraph::getNearestNavpoint(const Vec3D *pos, int type)
 // returns the nearest navpoint with given type to pos existing in the graph, 
 // NULL if graph doesn't contain navpoints of the given type
 {
@@ -173,28 +170,30 @@ PB_Navpoint* PB_MapGraph::getNearestNavpoint(const Vec3D *pos, int type)
 	int   minId = -1;
 	Vec3D dir;
 
-	for (int i = 0; i < numberOfNavpoints(); i++) if (graph[i].first.type()==type) {
-		vsub(pos, graph[i].first.pos(), &dir);
-		dist = dotproduct(&dir, &dir);
-		if (dist < minDist) {
-			minDist = dist;
-			minId = i;
+	for (int i = 0; i < numberOfNavpoints(); i++) {
+		if (navpoint_type(&graph[i].first)==type) {
+			vsub(pos, navpoint_pos(&graph[i].first), &dir);
+			dist = dotproduct(&dir, &dir);
+			if (dist < minDist) {
+				minDist = dist;
+				minId = i;
+			}
 		}
 	}
-	if (minId >= 0) return (PB_Navpoint*) &(graph[minId].first);
+	if (minId >= 0) return &graph[minId].first;
 
 	return 0;
 }
 
 
-int PB_MapGraph::linkedNavpointsFrom( PB_Navpoint *nav )
+int PB_MapGraph::linkedNavpointsFrom(NAVPOINT *nav)
 // returns the number of other nodes linked to nav in the graph
 {
 	if (!nav) return 0;
 	else { 
 		int count = 0;
-		AdjPtr adj = graph[nav->id()].second.begin();
-		while (adj != graph[nav->id()].second.end()) {
+		AdjPtr adj = graph[navpoint_id(nav)].second.begin();
+		while (adj != graph[navpoint_id(nav)].second.end()) {
 			if ( !(adj->second.deleted()) ) count++;	// only count valid paths
 			adj++;
 		}
@@ -203,7 +202,7 @@ int PB_MapGraph::linkedNavpointsFrom( PB_Navpoint *nav )
 }
 
 
-PB_Navpoint* PB_MapGraph::getNearestRoamingNavpoint( EDICT *traveller, PB_Navpoint *ignore )
+NAVPOINT *PB_MapGraph::getNearestRoamingNavpoint( EDICT *traveller, NAVPOINT *ignore )
 // returns a navpoint to approach in roaming mode, prefers linked navpoints and the ones
 // that are z-reachable, nextVisit-Time is required to be reached
 // should never return zero
@@ -213,24 +212,24 @@ PB_Navpoint* PB_MapGraph::getNearestRoamingNavpoint( EDICT *traveller, PB_Navpoi
 	int	  ignoreId = -1;
 	Vec3D *pos = &traveller->v.origin, dir;
 
-	if (ignore) ignoreId = ignore->id();
+	if (ignore) ignoreId = navpoint_id(ignore);
 	
 	for (int i = 0; i < numberOfNavpoints(); i++) 
-	if ((i != ignoreId) && (worldtime() >= graph[i].first.nextVisit(traveller))) {
-		vsub(pos, graph[i].first.pos(), &dir);
+	if ((i != ignoreId) && (worldtime() >= navpoint_nextvisit(&graph[i].first, traveller))) {
+		vsub(pos, navpoint_pos(&graph[i].first), &dir);
 		dist = dotproduct(&dir, &dir);
 		if (graph[i].second.size() > 0)
 			dist *= 0.5f;	// prefer linked navpoints
 		if (dist < minDist) {
-			if (pointcontents(graph[i].first.pos()) == CONTENTS_WATER)
+			if (pointcontents(navpoint_pos(&graph[i].first)) == CONTENTS_WATER)
 				continue; 
 			minDist = dist;
 			minId = i;
 		}
-		if ((graph[i].first.pos()->z < (pos->z + 45.0f)) && (graph[i].first.pos()->z > (pos->z - 50.0f))) {
+		if ((navpoint_pos(&graph[i].first)->z < (pos->z + 45.0f)) && (navpoint_pos(&graph[i].first)->z > (pos->z - 50.0f))) {
 			// this one is roaming reachable!
 			if (dist < minDistR) {
-				if (pointcontents(graph[i].first.pos()) == CONTENTS_WATER)
+				if (pointcontents(navpoint_pos(&graph[i].first)) == CONTENTS_WATER)
 					continue;
 				minDistR = dist;
 				minIdR = i;
@@ -238,23 +237,23 @@ PB_Navpoint* PB_MapGraph::getNearestRoamingNavpoint( EDICT *traveller, PB_Navpoi
 		}
 	}
 	if (minIdR >= 0)
-		return (PB_Navpoint*) &(graph[minIdR].first);
+		return &graph[minIdR].first;
 	else if (minId >= 0)
-		return (PB_Navpoint*) &(graph[minId].first);
+		return &graph[minId].first;
 
-	return (PB_Navpoint*) &(graph[0].first);	// fuck it, we *HAVE* to return something!
+	return &graph[0].first;	// fuck it, we *HAVE* to return something!
 }
 
 
-bool PB_MapGraph::addNavpoint( PB_Navpoint &navpoint )
+bool PB_MapGraph::addNavpoint(NAVPOINT *navpoint )
 // add a new navpoint to the graph
 {
-	navpoint.setId( nextId++ );
-	navpoint.initEntityPtr();
+	navpoint_setid(navpoint, nextId++);
+	navpoint_initentityptr(navpoint);
 	//int gs = graph.size();
-	Node x = Node(navpoint, AdjList());
+	Node x = Node(*navpoint, AdjList());
 	graph.push_back(x);
-	availableItems[navpoint.type()] = true;
+	availableItems[navpoint_type(navpoint)] = true;
 	return true;
 }
 
@@ -461,10 +460,10 @@ int PB_MapGraph::DijkstraToWish( std::vector<float>& dist, std::vector<int>& pat
 					queue.changeKeyAt(neighbor, dist[actualVertex] + d);
 					// actualVertex is predecessor of the neighbor
 					path[neighbor] = p.id();
-					if (graph[neighbor].first.nextVisit( traveller ) < worldtime() ) {
+					if (navpoint_nextvisit(&graph[neighbor].first, traveller) < worldtime() ) {
 						navWeight += 0.1;
 						score[neighbor] = score[actualVertex] + 
-						    (needs_desirefor(needs, graph[neighbor].first.type())
+						    (needs_desirefor(needs, navpoint_type(&graph[neighbor].first))
 						    / navWeight );
 					}
 				}
@@ -574,7 +573,7 @@ bool PB_MapGraph::load( char *mapname )
 	fread( &passCount, sizeof(int), 1, fp );
 
 	int i, numNpts, numPaths;
-	PB_Navpoint navpoint;
+	NAVPOINT navpoint;
 	PB_Path path;
 
 	clear();		// clear all data
@@ -585,8 +584,8 @@ bool PB_MapGraph::load( char *mapname )
 
 	for (i = 0; i < numNpts; i++) {
 		//printf( "n" );
-		navpoint.load( fp );
-		addNavpoint( navpoint );
+		navpoint_load(&navpoint, fp);
+		addNavpoint(&navpoint);
 	}
 
 	fread( &numPaths, sizeof(int), 1, fp );
@@ -637,8 +636,8 @@ bool PB_MapGraph::save( char *mapname )
 
 	for (i = 0; i < numNpts; i++) {
 		// save navpoint
-		//printf( "N%i", graph[i].first.id() );
-		graph[i].first.save( fp );
+		//printf( "N%i", navpoint_id(graph[i].first) );
+		navpoint_save(&graph[i].first, fp);
 	}
 
 	numPaths = numberOfPaths();

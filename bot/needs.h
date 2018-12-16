@@ -2,8 +2,6 @@
 #if !defined(PB_NEEDS_H)
 #define PB_NEEDS_H
 
-#include "pb_navpoint.h"
-
 typedef struct needs {
 	CParabot *bot;				// pointer to bot class
 	float	wish[MAX_NAV_TYPES];// wish-values for different items

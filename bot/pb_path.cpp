@@ -93,14 +93,14 @@ PB_Path::~PB_Path()
 }
 
 
-PB_Navpoint& PB_Path::startNav()
+NAVPOINT *PB_Path::startNav()
 // returns the start navpoint
 {
 	return getNavpoint( data.startId );
 }
 
 
-PB_Navpoint& PB_Path::endNav()
+NAVPOINT *PB_Path::endNav()
 // returns the end navpoint
 {
 	return getNavpoint( data.endId );
@@ -404,11 +404,11 @@ void PB_Path::startAttempt( float worldtime )
 
 	if (waypoint->size() > 1) {
 		WaypointList::iterator wpForw = waypoint->begin();
-		vsub(wpForw->pos(), startNav().pos(), &dir);
+		vsub(wpForw->pos(), navpoint_pos(startNav()), &dir);
 		float distForw = vlen(&dir);
 		WaypointList::iterator wpBackw = waypoint->end();
 		wpBackw--;
-		vsub(wpBackw->pos(), startNav().pos(), &dir);
+		vsub(wpBackw->pos(), navpoint_pos(startNav()), &dir);
 		float distBackw = vlen(&dir);
 		// path in forward direction ?
 		if (distForw <= distBackw) {
@@ -457,13 +457,13 @@ void PB_Path::reportTargetReached( EDICT *traveller, float worldtime )
 		return;
 	}
 	data.passTime = allTime / ((float)data.successful);		// set new passTime
-	endNav().reportVisit( traveller, worldtime ); //now in observer
+	navpoint_reportvisit(endNav(), traveller, worldtime ); //now in observer
 	if (ignoredPlat) {	// we ignored a plat but arrived nevertheless?
 		WaypointList::iterator wpi = waypoint->begin();
 		PlatformList::iterator pfi = platformPos->begin();
 		while (wpi!=waypoint->end()) {
 			if (wpi->isOnPlatform()) {
-				EDICT *plat = getNavpoint( pfi->data.navId ).entity();
+				EDICT *plat = navpoint_entity(getNavpoint(pfi->data.navId));
 				// delete the platform flag for these waypoints
 				if (plat==ignoredPlat) wpi->data.act &= (~WP_ON_PLATFORM);
 				pfi++;
@@ -521,7 +521,7 @@ void PB_Path::getViewPos( EDICT *traveller, int *prior, Vec3D *pos)
 		if (lastReachedWaypoint->action() == BOT_USE) {
 			assert( traveller != 0 );
 			// Vec3D t = traveller->v.origin;
-			vcopy(startNav().pos(), pos); //lastReachedWaypoint->pos();
+			vcopy(navpoint_pos(startNav()), pos); //lastReachedWaypoint->pos();
 			*prior = 2;	// UNDONE: ButtonUse uses AimDir, not ViewDir!!!
 			return;
 		}
@@ -571,7 +571,7 @@ bool PB_Path::finished( EDICT *traveller )
 {
 	// UNDONE for teleporter hintpoints!
 //	if (currentWaypoint == waypoint->end()) {	// no more waypoints to go...
-	if (endNav().reached( traveller )) return true;
+	if (navpoint_reached(endNav(), traveller)) return true;
 //	}
 	return false;
 }
@@ -599,7 +599,7 @@ bool PB_Path::waitForPlatform()
 
 	if ((currentWaypoint != waypoint->end()) && currentWaypoint->isOnPlatform()) {
 		if (currentPlat != platformPos->end()) {
-			EDICT *plat = getNavpoint( currentPlat->data.navId ).entity();
+			EDICT *plat = navpoint_entity(getNavpoint(currentPlat->data.navId));
 			assert (plat != 0);
 
 			if (plat != lastWaitingPlat) {
@@ -683,7 +683,7 @@ PB_Path_Waypoint PB_Path::getNextWaypoint()
 		return (*currentWaypoint);
 	} else {	// approaching the target navpoint
 		//PB_Navpoint n = getNavpoint( data.endId );
-		return PB_Path_Waypoint( endNav().pos(), WP_IS_NAVPOINT, 0 );
+		return PB_Path_Waypoint(navpoint_pos(endNav()), WP_IS_NAVPOINT, 0 );
 	}
 }
 
@@ -695,8 +695,8 @@ void PB_Path::getLastWaypointPos( EDICT *playerEnt, Vec3D *pos)
 	if (lastReachedWaypoint != waypoint->end()) { // at least one waypoint has been reached
 		vcopy(lastReachedWaypoint->pos(playerEnt), pos);
 	} else {	// nothing reached yet
-		PB_Navpoint n = getNavpoint( data.startId );
-		n.pos( playerEnt, pos);
+		NAVPOINT *n = getNavpoint( data.startId );
+		navpoint_pos(n, playerEnt, pos);
 	}
 }
 

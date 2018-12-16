@@ -20,7 +20,7 @@ typedef struct observer {
 	int		 leadwaypoint;		// latest waypoint and plat of observed
 	int		 lastplatid;			//   player, indices in waypoint-table
 	EDICT		*platform;
-	PB_Navpoint	*lastreachednav;
+	NAVPOINT	*lastreachednav;
 	Vec3D		 lastwppos;			// position where last waypoint was stored
 	float		 lastwptime;
 	float		 lastwpyaw;

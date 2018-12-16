@@ -10,7 +10,7 @@
 
 extern PB_MapGraph mapGraph;
 
-PB_Navpoint* getNearestNavpoint(EDICT *pEdict);
+NAVPOINT *getNearestNavpoint(EDICT *pEdict);
 
 void
 cell_construct(CELL *cell, EDICT *e) 
@@ -29,15 +29,15 @@ cell_construct(CELL *cell, EDICT *e)
 	cell->next = NO_CELL_REGISTERED;
 
 	// find navpoint:
-	PB_Navpoint *np = getNearestNavpoint(e);
+	NAVPOINT *np = getNearestNavpoint(e);
 	if ( np ) {
 		Vec3D dir;
 
-		vsub(np->pos(), &cell->data.position, &dir);
+		vsub(navpoint_pos(np), &cell->data.position, &dir);
 		if (vlen(&dir) <= CELL_SIZE
-		    && LOSExists( np->pos(), &cell->data.position)
-		    && (np->pos()->z - cell->data.position.z) <= 45) 
-			cell->data.navpoint = np->id();
+		    && LOSExists(navpoint_pos(np), &cell->data.position)
+		    && (navpoint_pos(np)->z - cell->data.position.z) <= 45) 
+			cell->data.navpoint = navpoint_id(np);
 	}
 	// find ground:
 	EDICT *ground = e->v.groundentity;
@@ -165,13 +165,13 @@ cell_issuitableroamingtarget(CELL *cell, EDICT *traveller)
 	if (cell->data.navpoint < 0)
 		return false;
 
-	if (worldtime() >= mapGraph[cell->data.navpoint].first.nextVisit(traveller))
+	if (worldtime() >= navpoint_nextvisit(&mapGraph[cell->data.navpoint].first, traveller))
 		return true;
 
 	return false;
 }
 
-PB_Navpoint *
+NAVPOINT *
 cell_getnavpoint(CELL *cell)
 {
 	if (cell->data.navpoint < 0)

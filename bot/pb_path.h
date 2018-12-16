@@ -5,7 +5,7 @@
 
 #include <list>
 #include <vector>
-#include "pb_navpoint.h"
+#include "navpoint.h"
 
 #define MAX_PATH_WEIGHT	1000000
 
@@ -45,7 +45,7 @@ void setJourneyMode( int mode );
 
 
 // extern method to get Navpoint data:
-extern PB_Navpoint& getNavpoint( int index );	
+extern NAVPOINT* getNavpoint( int index );	
 
 
 class PB_Path_Waypoint 
@@ -247,10 +247,10 @@ public:
 	int endId() { return data.endId; }
 	// returns the end(target) navpoint index
 
-	PB_Navpoint& startNav();
+	NAVPOINT *startNav();
 	// returns the start navpoint
 
-	PB_Navpoint& endNav();
+	NAVPOINT *endNav();
 	// returns the end(target) navpoint
 
 	void setId( int id ) { data.privateId = id; }

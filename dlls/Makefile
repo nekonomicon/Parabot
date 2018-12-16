@@ -121,7 +121,7 @@ SRC =		../bot/bot.cpp \
 		../bot/pb_mapcells.cpp \
 		../bot/pb_mapgraph.cpp \
 		../bot/pb_mapimport.cpp \
-		../bot/pb_navpoint.cpp \
+		../bot/navpoint.cpp \
 		../bot/needs.cpp \
 		../bot/observer.cpp \
 		../bot/pb_path.cpp \

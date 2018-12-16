@@ -49,15 +49,15 @@ EDICT* getEntity( const char *classname, Vec3D *pos )
 }
 
 
-PB_Navpoint& getNavpoint( int index )
+NAVPOINT* getNavpoint( int index )
 {
 	assert( index >= 0 );
 	assert( index < mapGraph.numberOfNavpoints() );
 	if ( index < 0 || index >= mapGraph.numberOfNavpoints() ) {
 		DEBUG_MSG("Navpoint-Index-ERROR!\n" );
-		return mapGraph[0].first;
+		return &mapGraph[0].first;
 	}
-	return mapGraph[index].first;
+	return &mapGraph[index].first;
 }
 
 
@@ -65,7 +65,7 @@ int getNavpointIndex( EDICT *entity )
 // returns the index of navpoint with given entity or -2 if not found
 {
 	for (int i=0; i<mapGraph.numberOfNavpoints(); i++)
-		if (mapGraph[i].first.entity() == entity) return i;
+		if (navpoint_entity(&mapGraph[i].first) == entity) return i;
 	return -2;
 }
 

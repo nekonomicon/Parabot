@@ -13,7 +13,7 @@
 #define GRAPH_BIDIRECTIONAL 1
 
 	typedef std::multimap<int, PB_Path> AdjList;		// key is target navpoint
-	typedef std::pair<PB_Navpoint, AdjList> Node;
+	typedef std::pair<NAVPOINT, AdjList> Node;
     typedef PBT_DynArray<Node> GraphType;
 
     //typedef GraphType::iterator Iterator;
@@ -45,7 +45,7 @@ public:
 	bool itemAvailable( int itemCode ) { return availableItems[itemCode]; }
 	// returns true if a navpoint of type itemCode exists in Graph
 
-	bool addNavpoint( PB_Navpoint &navpoint );
+	bool addNavpoint( NAVPOINT *navpoint );
 	// adds navpoint to graph
 
     bool addPath( PB_Path &path, int directed, bool idInit = true );
@@ -56,17 +56,17 @@ public:
 	// deleting existing (slower) path
 	// if path is not used, all path data get deleted!
 	
-	PB_Navpoint* getNearestNavpoint( const Vec3D *pos );
+	NAVPOINT* getNearestNavpoint( const Vec3D *pos );
 	// returns the nearest navpoint to pos existing in the graph, NULL if graph is empty
 	
-	PB_Navpoint* getNearestNavpoint( const Vec3D *pos, int type );
+	NAVPOINT* getNearestNavpoint( const Vec3D *pos, int type );
 	// returns the nearest navpoint with given type to pos existing in the graph, 
 	// NULL if graph doesn't contain navpoints of the given type
 
-	int linkedNavpointsFrom( PB_Navpoint *nav );
+	int linkedNavpointsFrom( NAVPOINT *nav );
 	// returns the number of other nodes linked to nav in the graph
 
-	PB_Navpoint* getNearestRoamingNavpoint( EDICT *traveller, PB_Navpoint *ignore=0 );
+	NAVPOINT *getNearestRoamingNavpoint( EDICT *traveller, NAVPOINT *ignore=0 );
 	// returns a navpoint to approach in roaming mode, prefers linked navpoints and the ones
 	// that are z-reachable, nextVisit-Time is required to be reached
 	// should never return zero

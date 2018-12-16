@@ -55,7 +55,7 @@ public:
 	JOURNEY		actualJourney;		// journey bot is traveling
 	PB_Path		*actualPath;		// path bot is currently on
 	PB_Path_Waypoint waypoint;		// waypoint bot is approaching
-	PB_Navpoint	*actualNavpoint;	// navpoint bot is on, 0 if not on any navpoint
+	NAVPOINT	*actualNavpoint;	// navpoint bot is on, 0 if not on any navpoint
 	NEEDS		needs;
 	bool		stoppedForPlat;
 	bool		mustShootObject;
@@ -65,7 +65,7 @@ public:
 
 	// used in ROAMING
 	ROAMING		pathfinder;			// old bot pathfinding
-	PB_Navpoint	*roamingTarget;		// navpoint bot tries to reach in roaming-mode
+	NAVPOINT	*roamingTarget;		// navpoint bot tries to reach in roaming-mode
 	int			roamingCount;		// time-out variable for updating roamingTarget
 	short		roamingRoute[128];	// contains cell indices to target
 	int			roamingIndex;		// current target index in route

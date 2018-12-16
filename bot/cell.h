@@ -3,7 +3,6 @@
 #define PB_CELL_H
 
 #include "pb_global.h"
-#include "pb_navpoint.h"
 
 #define NO_CELL_REGISTERED -1
 #define MAX_NBS		10
@@ -55,7 +54,7 @@ bool		 cell_addtraffic(CELL *cell, short nbId, float nbWeight);
 void		 cell_addenvdamage(CELL *cell, float dmg);
 float		 cell_getenvdamage(CELL *cell);
 bool		 cell_issuitableroamingtarget(CELL *cell, EDICT *traveller);
-PB_Navpoint	*cell_getnavpoint(CELL *cell);
+NAVPOINT	*cell_getnavpoint(CELL *cell);
 short		 cell_gettraffic(CELL *cell, short nbId);
 bool		 cell_delneighbour(CELL *cell, short nbId);
 short		 cell_getground(CELL *cell);

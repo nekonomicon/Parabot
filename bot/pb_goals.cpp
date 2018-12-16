@@ -195,27 +195,24 @@ void goalCollectItems( CParabot *pb, PB_Percept*item )
 	if (pb->actualPath)	{				// on path?
 		char buffer[256];
 		strcpy( buffer, "CollectItems (" );
-		strcat( buffer, pb->actualPath->endNav().classname() );
+		strcat( buffer, navpoint_classname(pb->actualPath->endNav()));
 		if (journey_continues(&pb->actualJourney)) {
 			strcat( buffer, ", " );
 			int pathId = pb->actualJourney.pathlist.back();
-			strcat( buffer, getPath( pathId )->endNav().classname() );
+			strcat( buffer, navpoint_classname(getPath(pathId)->endNav()));
 		}
 		strcat( buffer, ")" );
 		pb->setGoalMoveDescr( buffer );
 		pb->followActualPath();
-	}
-	else if (pb->roamingTarget)	{		// target chosen?
+	} else if (pb->roamingTarget) {		// target chosen?
 		pb->setGoalMoveDescr( "CollectItems (Roaming)" );
 		pb->approachRoamingTarget();
-	}
-	else {
+	} else {
 		pb->setGoalMoveDescr( "CollectItems (GetTarget)" );
 		if (mapGraph.linkedNavpointsFrom( pb->actualNavpoint )==0) {
 			// bot is not at navpoint or navpoint not linked:
 			pb->getRoamingTarget();		
-		}
-		else {
+		} else {
 			// bot is at linked navpoint:
 			if ( !pb->getJourneyTarget() )  // try to get a tour,
 				pb->getRoamingTarget();		// if not possible roaming			
@@ -228,15 +225,15 @@ float weightCollectItems( CParabot *pb, PB_Percept*item )
 {
 	float wish = needs_wishforitems(&pb->needs);
 	if (pb->actualNavpoint) {	// when getting to a navpoint is all we want...
-		if ( pb->actualNavpoint->offersHealth() &&
+		if (navpoint_offershealth(pb->actualNavpoint) &&
 			 (needs_wishforhealth(&pb->needs) > 0) ) wish = 0;
-		else if ( pb->actualNavpoint->offersArmor() &&
+		else if (navpoint_offersarmor(pb->actualNavpoint) &&
 			 (needs_wishforarmor(&pb->needs) > 0) ) wish = 0;
-		else if ( pb->actualNavpoint->offersCamping() &&
+		else if ( navpoint_offerscamping(pb->actualNavpoint) &&
 			 (needs_desirefor(&pb->needs, NAV_S_CAMPING) == wish) ) wish = 0;
-		else if ( pb->actualNavpoint->type()==NAV_F_TANKCONTROLS &&
+		else if (navpoint_type(pb->actualNavpoint)==NAV_F_TANKCONTROLS &&
 			 (needs_desirefor(&pb->needs, NAV_F_TANKCONTROLS) == wish) ) wish = 0;
-		else if ( pb->actualNavpoint->type()==NAV_S_USE_TRIPMINE &&
+		else if (navpoint_type(pb->actualNavpoint)==NAV_S_USE_TRIPMINE &&
 			 (needs_desirefor(&pb->needs, NAV_S_USE_TRIPMINE) > 0) ) wish *= 0.5f;
 	}
 	// DEBUG_MSG( "Items = %.1f\n", wish );
@@ -351,7 +348,7 @@ void goalLoadHealthOrArmor( CParabot *pb, PB_Percept*item )
 {
 	// DEBUG_MSG( "LoadHealthOrArmor\n" );
 	action_setspeed(&pb->action, 0);
-	action_setviewdir(&pb->action, pb->actualNavpoint->pos(), 2);
+	action_setviewdir(&pb->action, navpoint_pos(pb->actualNavpoint), 2);
 	action_add(&pb->action, BOT_USE, NULL);
 	pb->setGoalMoveDescr( "LoadHealthOrArmor" );
 }
@@ -362,8 +359,8 @@ float weightLoadHealthOrArmor( CParabot *pb, PB_Percept*item )
 	float weight = 0;
 
 	if ( pb->actualNavpoint && !pb->senses.underFire() ) {
-		if (pb->actualNavpoint->offersHealth()) weight = needs_wishforhealth(&pb->needs);
-		if (pb->actualNavpoint->offersArmor())  weight = needs_wishforarmor(&pb->needs);
+		if (navpoint_offershealth(pb->actualNavpoint)) weight = needs_wishforhealth(&pb->needs);
+		if (navpoint_offersarmor(pb->actualNavpoint))  weight = needs_wishforarmor(&pb->needs);
 		if ((weight > 0) && (pb->senses.numEnemies > 0)) {
 			weight = 0;
 			DEBUG_MSG( "No Loading - enemy around!\n" );
@@ -388,13 +385,13 @@ void goalLayTripmine( CParabot *pb, PB_Percept*item )
 	assert( pb->actualNavpoint != 0 );
 
 	// duck if necessary
-	if ( pb->actualNavpoint->pos()->z < (pb->ent->v.absmin.z + 40.0f) ) 
+	if (navpoint_pos(pb->actualNavpoint)->z < (pb->ent->v.absmin.z + 40.0f) ) 
 		action_add(&pb->action, BOT_DUCK, NULL);
 	// keep tripmine
 	weaponhandling_setpreferredweapon(&pb->combat.weapon, VALVE_WEAPON_TRIPMINE, 1);
 
-	weaponhandling_attack(&pb->combat.weapon, pb->actualNavpoint->pos(), 0.4f, NULL);
-	
+	weaponhandling_attack(&pb->combat.weapon, navpoint_pos(pb->actualNavpoint), 0.4f, NULL);
+
 	lastCall[b] = worldtime();
 	pb->setGoalMoveDescr( "LayTripmine" );
 }
@@ -410,10 +407,10 @@ float weightLayTripmine( CParabot *pb, PB_Percept*item )
 		float nextMine = 10000;
 		EDICT *mine = pb->senses.getNearestTripmine();
 		if (mine) {
-			vsub(&mine->v.origin, pb->actualNavpoint->pos(), &dir);
+			vsub(&mine->v.origin, navpoint_pos(pb->actualNavpoint), &dir);
 			nextMine = vlen(&dir);
 		}
-		if ( (pb->actualNavpoint->type()==NAV_S_USE_TRIPMINE) && (nextMine > 50) )
+		if ( (navpoint_type(pb->actualNavpoint)==NAV_S_USE_TRIPMINE) && (nextMine > 50) )
 			return 5;
 	}
 	return 0;
@@ -430,8 +427,8 @@ void goalCamp( CParabot *pb, PB_Percept *item )
 
 	if ((lastCall[b] + 0.5f) < worldtime()) {	// in first call init viewangle
 		pb->campTime = 0;
-		int angleX = pb->actualNavpoint->special();
-		int angleY = pb->actualNavpoint->special();
+		int angleX = navpoint_special(pb->actualNavpoint);
+		int angleY = navpoint_special(pb->actualNavpoint);
 		angleX &= 0xFFFF;
 		angleY >>= 16;
 		Vec3D campAngle;
@@ -458,7 +455,7 @@ float weightCamp( CParabot *pb, PB_Percept*item )
 	float weight = 0;
 
 	if (pb->actualNavpoint && !pb->senses.underFire()) {
-		if (pb->actualNavpoint->offersCamping() &&
+		if (navpoint_offerscamping(pb->actualNavpoint) &&
 		    weaponhandling_bestweaponusable(&pb->combat.weapon))
 			weight = needs_wishforsniping(&pb->needs, true);
 	}
@@ -482,7 +479,7 @@ void goalUseTank( CParabot *pb, PB_Percept*item )
 		 (pb->campTime>0 && pb->ent->v.viewmodel) ) {	// in first call press button
 		pb->campTime = -2;
 		Vec3D lookPos;
-		vadd(pb->actualNavpoint->pos(), &pb->ent->v.view_ofs, &lookPos);
+		vadd(navpoint_pos(pb->actualNavpoint), &pb->ent->v.view_ofs, &lookPos);
 		action_add(&pb->action, BOT_USE, &lookPos );
 		DEBUG_MSG( "Trying to use tank\n" );
 	} else {
@@ -517,7 +514,7 @@ float weightUseTank( CParabot *pb, PB_Percept*item )
 	float weight = 0;
 
 	if ( pb->actualNavpoint && !pb->senses.underFire() ) {
-		if ( pb->actualNavpoint->type() == NAV_F_TANKCONTROLS ) {
+		if (navpoint_type(pb->actualNavpoint) == NAV_F_TANKCONTROLS ) {
 			weight = needs_wishforsniping(&pb->needs, false);
 			if (item && item->isVisible() && item->distance > 300) weight += 10;
 		}
@@ -539,7 +536,7 @@ float weightWaitForHalo( CParabot *pb, PB_Percept*item )
 {
 	float weight = 0;
 	if ( pb->actualNavpoint ) {
-		if ( pb->actualNavpoint->type()==NAV_HW_HALOBASE && haloOnBase ) 
+		if (navpoint_type(pb->actualNavpoint)==NAV_HW_HALOBASE && haloOnBase ) 
 			weight = needs_wishforitems(&pb->needs) + 0.1;	// just a bit more than running to it...
 	}
 	return weight;

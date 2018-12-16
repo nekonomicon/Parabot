@@ -70,7 +70,7 @@ EDICT* getEntity( const char *classname, Vec3D *pos );
 // returns a pointer to edict at pos if it exists, else 0
 
 // methods based on mapgraph:
-PB_Navpoint& getNavpoint( int index );
+NAVPOINT *getNavpoint( int index );
 int getNavpointIndex( EDICT *entity );
 PB_Path* getPath( int pathId );
 int getTotalAttempts();

@@ -1,13 +1,10 @@
 #include "parabot.h"
 #include "sectors.h"
-#include "pb_navpoint.h"
+#include "navpoint.h"
 #include "pb_global.h"
 #include <stdio.h>
 
 extern int mod_id;
-
-
-
 
 static const char *navpointClasses[MAX_NAV_TYPES] = { "unknown",
 "weapon_crossbow",
@@ -232,25 +229,31 @@ static const char *navpointClasses[MAX_NAV_TYPES] = { "unknown",
 "item_dom_controlpoint"
 };
 
-
-
-void PB_Navpoint::init(Vec3D *pos, int type, int special )
+void
+navpoint_init(NAVPOINT *navpoint, Vec3D *pos, int type, int special)
 {
-	vcopy(pos, &data.pos);
-	data.type = type;
-	data.visits = 0;
-	data.special = special;
-	data.damageComp = 0;
-	ent = 0;
-	lastVisitor = 0;
-	lastVisitedAt = -100;
-	nextVisitAt = 0;
+	vcopy(pos, &navpoint->data.pos);
+	navpoint->data.type = type;
+	navpoint->data.visits = 0;
+	navpoint->data.special = special;
+	navpoint->data.damagecomp = 0;
+	navpoint->ent = 0;
+	navpoint->lastvisitor = 0;
+	navpoint->lastvisitedat = -100;
+	navpoint->nextvisitat = 0;
 }
 
-void PB_Navpoint::initEntityPtr()
+void
+navpoint_setid(NAVPOINT *navpoint, int id)
+{
+	navpoint->data.privateid = id;
+}
+
+void
+navpoint_initentityptr(NAVPOINT *navpoint)
 // gets a pointer to the corresponding t_edict if possible and stores it
 {
-	needsTrigger = false;
+	navpoint->needstrigger = false;
 /*	char name[40];
 	Nav2Classname( name, type() );
 	ent = getEntity( name, data.pos );
@@ -264,60 +267,78 @@ void PB_Navpoint::initEntityPtr()
 	{
 		 DEBUG_MSG( "initEntityPtr() failed for %i\n", type() );
 	}*/
-	if ( (type() == NAV_F_BREAKABLE)	 ||
-	     (type() == NAV_F_HEALTHCHARGER) || 
-		 (type() == NAV_F_RECHARGE)      || 
-		 (type() == NAV_F_BUTTON)		 || 
-		 (type() == NAV_F_PLAT)			 || 
-		 (type() == NAV_F_TRAIN)		 || 
-		 (type() == NAV_F_DOOR)             ) 
+	if ( (navpoint_type(navpoint) == NAV_F_BREAKABLE)	 ||
+	     (navpoint_type(navpoint) == NAV_F_HEALTHCHARGER) || 
+		 (navpoint_type(navpoint) == NAV_F_RECHARGE)      || 
+		 (navpoint_type(navpoint) == NAV_F_BUTTON)		 || 
+		 (navpoint_type(navpoint) == NAV_F_PLAT)			 || 
+		 (navpoint_type(navpoint) == NAV_F_TRAIN)		 || 
+		 (navpoint_type(navpoint) == NAV_F_DOOR)             ) 
 	{
-		const char *name = classname();
-		ent = getEntity( name, &data.pos );
-		if (ent==0) { 
+		const char *name = navpoint_classname(navpoint);
+		navpoint->ent = getEntity( name, &navpoint->data.pos );
+		if (navpoint->ent==0) { 
 			DEBUG_MSG( "initEntityPtr() failed for %i\n", type() );
 		} else {
-			if (ent->v.targetname) {
+			if (navpoint->ent->v.targetname) {
 				// we have a targetname, let's see if there are buttons for it...
 				EDICT *pButton = NULL;
 				while ((pButton = find_entitybyclassname(pButton, "func_button"))) {
-					if (buttontriggers( pButton, ent )) {
-						needsTrigger = true;
+					if (buttontriggers( pButton, navpoint->ent )) {
+						navpoint->needstrigger = true;
 						break;
 					}
 				}
 			}
-			if ((type() == NAV_F_PLAT)	|| 
-				(type() == NAV_F_TRAIN)	|| 
-				(type() == NAV_F_DOOR)  || 
-				(type() == NAV_F_BUTTON)) {
-				int toggle_state = *(int *)((char*)ent->pvPrivateData + 128);
-				normalState = toggle_state;
+			if ((navpoint_type(navpoint) == NAV_F_PLAT)	|| 
+				(navpoint_type(navpoint) == NAV_F_TRAIN)	|| 
+				(navpoint_type(navpoint) == NAV_F_DOOR)  || 
+				(navpoint_type(navpoint) == NAV_F_BUTTON)) {
+				int toggle_state = *(int *)((char*)navpoint->ent->pvPrivateData + 128);
+				navpoint->normalstate = toggle_state;
 			}
 		}
 	}
-	else ent = 0;
+	else navpoint->ent = 0;
 }
 
+int
+navpoint_id(NAVPOINT *navpoint)
+{
+	return navpoint->data.privateid;
+}
 
-void PB_Navpoint::pos( EDICT *player, Vec3D *pos)
+int
+navpoint_type(NAVPOINT *navpoint)
+{
+	return navpoint->data.type;
+}
+
+void
+navpoint_pos(NAVPOINT *navpoint, EDICT *player, Vec3D *pos)
 // adjusts positions if playerEnt is on ladder
 {
 	assert(player != 0);
-	vcopy(&data.pos, pos);
+	vcopy(&navpoint->data.pos, pos);
 	if (!is_onladder(player))
 		return; 
 
 	pos->z += 20.0f;
 }
 
-
-bool PB_Navpoint::isTriggerFor( PB_Navpoint &wp )
+bool
+navpoint_needstriggering(NAVPOINT *navpoint)
 {
-	EDICT *targetEnt = wp.entity();
-	EDICT *triggerEnt = ent;
+	return navpoint->needstrigger;
+}
 
-	if (type() == NAV_S_BUTTON_SHOT) triggerEnt = getNavpoint( data.special ).entity();
+bool
+navpoint_istriggerfor(NAVPOINT *navpoint, NAVPOINT *wp)
+{
+	EDICT *targetEnt = navpoint_entity(wp);
+	EDICT *triggerEnt = navpoint->ent;
+
+	if (navpoint_type(navpoint) == NAV_S_BUTTON_SHOT) triggerEnt = navpoint_entity(getNavpoint(navpoint->data.special));
 	if (!targetEnt || !triggerEnt) return false;
 	if (!(targetEnt->v.targetname) || !(triggerEnt->v.target)) return false;
 	if (buttontriggers( triggerEnt, targetEnt )) return true;
@@ -325,39 +346,39 @@ bool PB_Navpoint::isTriggerFor( PB_Navpoint &wp )
 	return false;
 }
 
-
-bool PB_Navpoint::isTriggered()
+bool
+navpoint_istriggered(NAVPOINT *navpoint)
 {
 	#define SF_PLAT_TOGGLE		0x0001
 	#define SF_DOOR_START_OPEN	0x0001
 
-	if (!needsTriggering()) return false;
-	assert( ent != 0 );
+	if (!navpoint_needstriggering(navpoint)) return false;
+	assert( navpoint->ent != 0 );
 
-	int toggle_state = *(int *)((char*)ent->pvPrivateData + 128);
+	int toggle_state = *(int *)((char*)navpoint->ent->pvPrivateData + 128);
 
 	if (mod_id != DMC_DLL) {
-		if (toggle_state == normalState) return false;
-		else return true;
+		if (toggle_state == navpoint->normalstate) return false;
+		return true;
 	}
 
 	// for DMC:
-	if (type()==NAV_F_DOOR) {
-		if (ent->v.spawnflags & SF_DOOR_START_OPEN) {
+	if (navpoint_type(navpoint)==NAV_F_DOOR) {
+		if (navpoint->ent->v.spawnflags & SF_DOOR_START_OPEN) {
 			if (toggle_state == STATE_BOTTOM) return false;
-			else return true;
+			return true;
 		} else {
 			if (toggle_state == STATE_TOP) return false;
-			else return true;
+			return true;
 		}
 	} else {
 		if (toggle_state == STATE_TOP) return false;
-		else return true;
+		return true;
 	}
 }
 
-
-bool PB_Navpoint::visible( EDICT *player )
+bool
+navpoint_visible(NAVPOINT *navpoint, EDICT *player)
 // may not work for ladders since ent is not initialized
 {
 	TRACERESULT tr;
@@ -366,14 +387,14 @@ bool PB_Navpoint::visible( EDICT *player )
 	Vec3D eyePos;
 
 	eyepos(player, &eyePos);
-	trace_line( pos(), &eyePos, false, true, ent, &tr);	
-	
+	trace_line(navpoint_pos(navpoint), &eyePos, false, true, navpoint->ent, &tr);
+
 	if ( tr.fraction != 1.0 ) {
 		if ( tr.hit == player) return true;
 
 		if (tr.hit) {	// maybe traceline hit object itself
 			const char *hitClass = STRING( tr.hit->v.classname );
-			if ( Q_STREQ( hitClass, classname() ) )
+			if ( Q_STREQ( hitClass, navpoint_classname(navpoint) ) )
 				return true;
 
 			return false;
@@ -382,8 +403,8 @@ bool PB_Navpoint::visible( EDICT *player )
 	return true;
 }
 
-
-bool PB_Navpoint::doorOpen( EDICT *playerEnt )
+bool
+navpoint_dooropen(NAVPOINT *navpoint, EDICT *playerEnt)
 // call only for NAV_F_DOOR and NAV_F_DOOR_ROTATING
 {
 	TRACERESULT tr;
@@ -391,7 +412,7 @@ bool PB_Navpoint::doorOpen( EDICT *playerEnt )
 	assert( playerEnt != 0 );
 
 	Vec3D passPos;
-	vcopy(pos(), &passPos);
+	vcopy(navpoint_pos(navpoint), &passPos);
 	passPos.z = playerEnt->v.origin.z;
 
 	trace_hull( &playerEnt->v.origin, &passPos, false, 3, playerEnt, &tr);	
@@ -404,155 +425,181 @@ bool PB_Navpoint::doorOpen( EDICT *playerEnt )
 		}*/
 		return false;
 	}
-	else return true;
+	return true;
 }
 
-
-bool PB_Navpoint::reached( EDICT *playerEnt )
+bool
+navpoint_reached(NAVPOINT *navpoint, EDICT *playerEnt)
 // maybe better because ignores bot entity?
 {
 	Vec3D _pos, dir;
 	#define SF_BUTTON_TOUCH_ONLY	256	// button only fires as a result of USE key.
 
 	assert( playerEnt != 0 );
-	pos(playerEnt, &_pos);
+	navpoint_pos(navpoint, playerEnt, &_pos);
 	vsub(&playerEnt->v.origin, &_pos, &dir);
 	if (vlen(&dir) < 55) {
-		if (type()==NAV_F_DOOR || type()==NAV_F_DOOR_ROTATING) {
+		if (navpoint_type(navpoint)==NAV_F_DOOR || navpoint_type(navpoint)==NAV_F_DOOR_ROTATING) {
 			// doors are only reached if they are open
-			return doorOpen( playerEnt );
-		} else if (type()==NAV_F_BUTTON) {
-			assert( ent != 0 );
-			if (ent->v.spawnflags & SF_BUTTON_TOUCH_ONLY) { // touchable button
+			return navpoint_dooropen(navpoint, playerEnt );
+		} else if (navpoint_type(navpoint)==NAV_F_BUTTON) {
+			assert( navpoint->ent != 0 );
+			if (navpoint->ent->v.spawnflags & SF_BUTTON_TOUCH_ONLY) { // touchable button
 				//CBaseToggle *toggleClass = (CBaseToggle*)GET_PRIVATE( ent );
-				//if (toggleClass->m_toggle_state == normalState) return false;	// not pressed
+				//if (toggleClass->m_toggle_state == normalstate) return false;	// not pressed
 				if (vlen(&playerEnt->v.velocity) > 20) return false;
 			}
-		} else if (type()==NAV_S_AIRSTRIKE_BUTTON) {
+		} else if (navpoint_type(navpoint)==NAV_S_AIRSTRIKE_BUTTON) {
 			if (vlen(&playerEnt->v.velocity) > 20) return false;
 		}
-		if (visible( playerEnt )) return true;
+		if (navpoint_visible(navpoint, playerEnt )) return true;
 	}
 	return false;
 }
 
-
-void PB_Navpoint::load( FILE *fp )
+void
+navpoint_load(NAVPOINT *navpoint, FILE *fp)
 {
-	fread( &data, sizeof(TSaveData), 1, fp );
-	lastVisitor = 0;
-	lastVisitedAt = -100;
-	nextVisitAt = 0;
+	fread( &navpoint->data, sizeof(NAVPOINT_SAVEDATA), 1, fp );
+	navpoint->lastvisitor = 0;
+	navpoint->lastvisitedat = -100;
+	navpoint->nextvisitat = 0;
 }
 
-
-void PB_Navpoint::save( FILE *fp )
+void
+navpoint_save(NAVPOINT *navpoint, FILE *fp)
 {
-	fwrite( &data, sizeof(TSaveData), 1, fp );
+	fwrite( &navpoint->data, sizeof(NAVPOINT_SAVEDATA), 1, fp );
 }
 
 #if _DEBUG
-void PB_Navpoint::print()
+void
+navpoint_print(NAVPOINT *navpoint)
 {
-	DEBUG_MSG( "%s (ID %i)", classname(), id() );
+	DEBUG_MSG( "%s (ID %i)", navpoint_classname(navpoint), navpoint_id(navpoint) );
 }
 
-
-void PB_Navpoint::printPos()
+void
+navpoint_printpos(NAVPOINT *navpoint)
 {
-	DEBUG_MSG( "%s (ID %i) at (%.f, %.f, %.f)", classname(), id(), pos().x, pos().y, pos().z );
+	DEBUG_MSG( "%s (ID %i) at (%.f, %.f, %.f)", navpoint_classname(navpoint), navpoint_id(navpoint), navpoint_pos(navpoint).x, navpoint_pos(navpoint).y, navpoint_pos(navpoint).z );
 }
 #endif
 
-void PB_Navpoint::reportVisit( EDICT *player, float time ) 
+void
+navpoint_reportvisit(NAVPOINT *navpoint, EDICT *player, float time) 
 // reports a visit to the navpoint
 {
-	if ( (time > (lastVisitedAt+0.2)) || (time < lastVisitedAt) ) 
-		data.visits++;	// don't count visits twice
-	lastVisitor = player;
-	lastVisitedAt = time;
+	if ( (time > (navpoint->lastvisitedat+0.2)) || (time < navpoint->lastvisitedat) ) 
+		navpoint->data.visits++;	// don't count visits twice
+	navpoint->lastvisitor = player;
+	navpoint->lastvisitedat = time;
 	switch( mod_id ) {
 	case AG_DLL:
 	case VALVE_DLL:	// weapons and ammo:
-					if (type() < NAV_F_BUTTON)	
-						nextVisitAt = (lastVisitedAt+20);	
+					if (navpoint_type(navpoint) < NAV_F_BUTTON)
+						navpoint->nextvisitat = (navpoint->lastvisitedat+20);	
 					// items:
-					else if ((type()>=NAV_I_HEALTHKIT) && (type()<NAV_INFO_TELEPORT_DEST)) 
-						nextVisitAt = (lastVisitedAt+20);	
+					else if ((navpoint_type(navpoint)>=NAV_I_HEALTHKIT) && (navpoint_type(navpoint)<NAV_INFO_TELEPORT_DEST)) 
+						navpoint->nextvisitat = (navpoint->lastvisitedat+20);	
 					// airstrike cover:
-					else if (type() == NAV_S_AIRSTRIKE_COVER) 
-						nextVisitAt = lastVisitedAt;
-					else nextVisitAt = lastVisitedAt+10;		// no respawn
+					else if (navpoint_type(navpoint) == NAV_S_AIRSTRIKE_COVER) 
+						navpoint->nextvisitat = navpoint->lastvisitedat;
+					else navpoint->nextvisitat = navpoint->lastvisitedat+10;		// no respawn
 					break;
 	case DMC_DLL:	// superhealth:
-					if (type() == NAV_DMCI_HEALTH_LARGE)
-						nextVisitAt = (lastVisitedAt+100);		
+					if (navpoint_type(navpoint) == NAV_DMCI_HEALTH_LARGE)
+						navpoint->nextvisitat = (navpoint->lastvisitedat+100);
 					// invisibility, invulnerability, superdamage:
-					else if (type()>=NAV_DMCI_INVISIBILITY && type()<=NAV_DMCI_SUPERDAMAGE)
-						nextVisitAt = (lastVisitedAt+60);	
+					else if (navpoint_type(navpoint)>=NAV_DMCI_INVISIBILITY && navpoint_type(navpoint)<=NAV_DMCI_SUPERDAMAGE)
+						navpoint->nextvisitat = (navpoint->lastvisitedat+60);	
 					// armor and health:
-					else if ( (type()>=NAV_DMCI_ARMOR1 && type()<=NAV_DMCI_ARMOR_INV) ||
-							  type()==NAV_DMCI_HEALTH_SMALL || type()==NAV_DMCI_HEALTH_NORM )
-						nextVisitAt = (lastVisitedAt+20);	
+					else if ( (navpoint_type(navpoint)>=NAV_DMCI_ARMOR1 && navpoint_type(navpoint)<=NAV_DMCI_ARMOR_INV) ||
+							  navpoint_type(navpoint)==NAV_DMCI_HEALTH_SMALL || navpoint_type(navpoint)==NAV_DMCI_HEALTH_NORM )
+						navpoint->nextvisitat = (navpoint->lastvisitedat+20);	
 					// ammo:
-					else if (type()>=NAV_DMCI_CELLS && type()<=NAV_DMCI_WEAPON)
-						nextVisitAt = (lastVisitedAt+30);	
+					else if (navpoint_type(navpoint)>=NAV_DMCI_CELLS && navpoint_type(navpoint)<=NAV_DMCI_WEAPON)
+						navpoint->nextvisitat = (navpoint->lastvisitedat+30);	
 					// default to tour:
-					else nextVisitAt = lastVisitedAt+10;	// no respawn
+					else navpoint->nextvisitat = navpoint->lastvisitedat+10;	// no respawn
 					break;
-	default:		nextVisitAt = lastVisitedAt+10;		// forced to tour...
+	default:		navpoint->nextvisitat = navpoint->lastvisitedat+10;		// forced to tour...
 					break;
 	}
 }
 
-
-void PB_Navpoint::doNotVisitBefore( EDICT *player, float time )
+void
+navpoint_donotvisitbefore(NAVPOINT *navpoint, EDICT *player, float time)
 // tells that player should not visit this navpoint before time
 {
-	lastVisitor = player;
-	nextVisitAt	= time; 
+	navpoint->lastvisitor = player;
+	navpoint->nextvisitat = time; 
 }
 
-
-float PB_Navpoint::nextVisit( EDICT *player )
+float
+navpoint_nextvisit(NAVPOINT *navpoint, EDICT *player)
 // returns the worldtime after which navpoint can be visited again by player
 {
-	if (lastVisitor!=player)		// only memorize own visits
+	if (navpoint->lastvisitor!=player)		// only memorize own visits
 		return 0;
 
-	return nextVisitAt;
+	return navpoint->nextvisitat;
 }
 
-
-bool PB_Navpoint::offersHealth() 
-{ 
-	if (data.type!=NAV_F_HEALTHCHARGER) return false; 
-	if (!ent) return false;		// instead of assert because of bug report
-	if (ent->v.frame==0) return true;
-	else return false;
-}
-
-
-bool PB_Navpoint::offersArmor() 
-{ 
-	if (data.type!=NAV_F_RECHARGE) return false; 
-	if (!ent) return false;		// instead of assert because of bug report
-	if (ent->v.frame==0) return true;
-	else return false;
-}
-
-
-const char* PB_Navpoint::classname()
+bool
+navpoint_offershealth(NAVPOINT *navpoint)
 {
-	assert( data.type >= 0 );
-	assert( data.type < MAX_NAV_TYPES );
-	return navpointClasses[data.type];
+	if (navpoint->data.type!=NAV_F_HEALTHCHARGER) return false; 
+	if (!navpoint->ent) return false;		// instead of assert because of bug report
+	if (navpoint->ent->v.frame==0) return true;
+	return false;
 }
 
+bool
+navpoint_offersarmor(NAVPOINT *navpoint)
+{ 
+	if (navpoint->data.type!=NAV_F_RECHARGE) return false; 
+	if (!navpoint->ent) return false;		// instead of assert because of bug report
+	if (navpoint->ent->v.frame==0) return true;
+	return false;
+}
 
-const char* PB_Navpoint::classname( int code )
+bool
+navpoint_offerscamping(NAVPOINT *navpoint)
 {
-	assert( code >= 0 );
-	assert( code < MAX_NAV_TYPES );
+	return (navpoint->data.type == NAV_S_CAMPING);
+}
+
+const char *
+navpoint_classname(NAVPOINT *navpoint)
+{
+	assert(navpoint->data.type >= 0 );
+	assert(navpoint->data.type < MAX_NAV_TYPES );
+	return navpointClasses[navpoint->data.type];
+}
+
+const char *
+navpoint_classname(int code)
+{
+	assert(code >= 0);
+	assert(code < MAX_NAV_TYPES);
 	return navpointClasses[code];
+}
+
+int
+navpoint_special(NAVPOINT *navpoint)
+{
+	return navpoint->data.special;
+}
+
+EDICT *
+navpoint_entity(NAVPOINT *navpoint)
+{
+	return navpoint->ent;
+}
+
+Vec3D *
+navpoint_pos(NAVPOINT *navpoint)
+{
+	return &navpoint->data.pos;
 }
