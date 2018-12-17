@@ -4,12 +4,11 @@
 #include "pb_mapgraph.h"
 #include "vistable.h"
 #include "cell.h"
-#include "pb_mapcells.h"
+#include "mapcells.h"
 #include "bot.h"
 
 
 extern PB_MapGraph mapGraph;
-extern PB_MapCells map;
 extern int mod_id;
 
 char actualMapname[100];
@@ -31,8 +30,7 @@ void saveLevelData()
 	fileName[strlen(fileName) - 4] = '\0'; // cut file extention
 	strcat( fileName, ".pcf" );
 	INFO_MSG( "\nSaving cell data to %s\n", fileName );
-	map.save( fileName );
-	return;
+	mapcells_save( fileName );
 }
 
 void importNav(int code, const char *modelName)
@@ -237,7 +235,7 @@ bool loadLevelData()
 		saveLevelData();
 	
 	mapGraph.clear();
-	map.clear();
+	mapcells_clear();
 	strcpy( actualMapname, STRING(com.globals->mapname) );
 	strcpy( fileName, com.modname );
 	strcat( fileName, "/addons/parabot/navpoints/" );
@@ -312,9 +310,9 @@ bool loadLevelData()
 	} else {
 		fileName[strlen( fileName ) - 4] = '\0'; // cut file extention
 		strcat( fileName, ".pcf" );
-		map.load( fileName );
+		mapcells_load( fileName );
 		INFO_MSG( "Loaded level data.\n" );
 	}
 	if (mapGraph.numberOfNavpoints() > 0 ) return true;
-	else return false;
+	return false;
 }

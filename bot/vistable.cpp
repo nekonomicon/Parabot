@@ -11,9 +11,7 @@
 #include "sectors.h"
 #include "vistable.h"
 #include "cell.h"
-#include "pb_mapcells.h"
-class PB_MapCells;
-extern PB_MapCells map;
+#include "mapcells.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -21,9 +19,9 @@ extern PB_MapCells map;
 
 void updateVisTable()
 {
-	int trCount = map.updateVisibility( 128 );
+	int trCount = mapcells_updatevisibility( 128 );
 	if (trCount > 0) {
-		pb2dMsg( 20, 100, "Tracing Visibility (%i/%i)...", map.lastVisUpdate(), map.numberOfCells() );
+		pb2dMsg( 20, 100, "Tracing Visibility (%i/%i)...", mapcells_lastvisupdate(), mapcells_numberofcells() );
 	}
 }
 /*

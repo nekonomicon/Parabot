@@ -15,7 +15,7 @@
 #include "sectors.h"
 #include "vistable.h"
 #include "cell.h"
-#include "pb_mapcells.h"
+#include "mapcells.h"
 #include "configuration.h"
 #include "personalities.h"
 #include "observer.h"

@@ -3,12 +3,11 @@
 #include "sectors.h"
 #include "vistable.h"
 #include "cell.h"
-#include "pb_mapcells.h"
+#include "mapcells.h"
 
 extern int mod_id;
 extern int botNr;
 extern PB_MapGraph mapGraph;
-extern PB_MapCells map;
 extern int clientWeapon[32];
 
 void goalHuntEnemy( CParabot *pb, PB_Percept*item )
@@ -21,14 +20,14 @@ void goalHuntEnemy( CParabot *pb, PB_Percept*item )
 		pb->setGoalMoveDescr( "HuntEnemy (FollowRoute)" );
 		pb->followActualRoute();
 	} else {
-		short start = map.getCellId(pb->ent);
-		short enemyId = map.getCellId(item->entity);
+		short start = mapcells_getcellid(pb->ent);
+		short enemyId = mapcells_getcellid(item->entity);
 		if (start >= 0 && enemyId >= 0 ) {
 			int pl;
-			if ((pl = map.getPathToAttack(start, enemyId, pb->roamingRoute)) > 0) {
+			if ((pl = mapcells_getpathtoattack(start, enemyId, pb->roamingRoute)) > 0) {
 				pb->setRoamingIndex(pl);
 				pb->huntingFor = item->entity;
-				// Vector startV = map.cell( start ).pos();
+				// Vector startV = mapcells_getcell( start ).pos();
 				// Vector endV;
 				DEBUG_MSG( "HuntLength = %i", pl );				
 			}
@@ -61,12 +60,12 @@ void goalFleeEnemy( CParabot *pb, PB_Percept*item )
 		pb->setGoalMoveDescr( "FleeEnemy (FollowRoute)" );
 		pb->followActualRoute();
 	} else {
-		short start = map.getCellId( pb->ent );
-		short enemyId = map.getCellId(item->entity);
+		short start = mapcells_getcellid( pb->ent );
+		short enemyId = mapcells_getcellid(item->entity);
 		if (start >= 0 && enemyId >= 0) {
-			if (map.lineOfSight(start, enemyId)) {
+			if (mapcells_lineofsight(start, enemyId)) {
 				// get fastest path out of sight
-				if ((pl = map.getPathToCover(start, enemyId, pb->roamingRoute)) > 0) {
+				if ((pl = mapcells_getpathtocover(start, enemyId, pb->roamingRoute)) > 0) {
 					pb->setRoamingIndex(pl);
 					if (pl > 4) pb->roamingBreak = pl - 4;
 					else pb->roamingBreak = 0;
@@ -74,7 +73,7 @@ void goalFleeEnemy( CParabot *pb, PB_Percept*item )
 				}
 			} else {
 				// stay covered and get away
-				if ((pl = map.getPathForSneakyEscape(start, enemyId, pb->roamingRoute)) > 0) {
+				if ((pl = mapcells_getpathforsneakyescape(start, enemyId, pb->roamingRoute)) > 0) {
 					pb->setRoamingIndex(pl);
 					if (pl > 4) pb->roamingBreak = pl - 4;
 					else pb->roamingBreak = 0;
@@ -104,14 +103,14 @@ void goalTakeCover( CParabot *pb, PB_Percept*item )
 		pb->setGoalMoveDescr("TakeCover (FollowRoute)");
 		pb->followActualRoute();
 	} else {
-		short start = map.getCellId(pb->ent);
-		short enemyId = map.getCellId(item->entity);
+		short start = mapcells_getcellid(pb->ent);
+		short enemyId = mapcells_getcellid(item->entity);
 		if (start >= 0 && enemyId >= 0) {
-			if (map.lineOfSight(start, enemyId)) {
+			if (mapcells_lineofsight(start, enemyId)) {
 				pb->setGoalMoveDescr("TakeCover (FindRoute)");
 				// get fastest path out of sight
 				int pl;
-				if ((pl = map.getPathToCover(start, enemyId, pb->roamingRoute)) > 0) {
+				if ((pl = mapcells_getpathtocover(start, enemyId, pb->roamingRoute)) > 0) {
 					pb->setRoamingIndex(pl);
 					pb->fleeingFrom = item->entity;
 				}
@@ -172,8 +171,8 @@ void goalCloseCombat( CParabot *pb, PB_Percept*item )
 		pb->setGoalMoveDescr("CloseCombat (FollowRoute)");
 		pb->followActualRoute();
 	} else {
-		short start = map.getCellId(pb->ent);
-		short enemyId = map.getCellId(item->entity);
+		short start = mapcells_getcellid(pb->ent);
+		short enemyId = mapcells_getcellid(item->entity);
 		if (start >= 0 && enemyId >= 0) {
 			int clientIndex = indexofedict(pb->ent) - 1;
 			assert((clientIndex >= 0) && (clientIndex < 32));
@@ -182,7 +181,7 @@ void goalCloseCombat( CParabot *pb, PB_Percept*item )
 			weapon_construct2(&w, wid);
 			float minDist = weapon_bestdistance(&w);
 			int pl;
-			if ((pl = map.getOffensivePath(start, enemyId, minDist, pb->roamingRoute)) > 0) {
+			if ((pl = mapcells_getoffensivepath(start, enemyId, minDist, pb->roamingRoute)) > 0) {
 				pb->setRoamingIndex(pl);
 				if (pl > 4) pb->roamingBreak = pl - 4;
 				else pb->roamingBreak = 0;
@@ -333,16 +332,16 @@ void goalShootAtEnemy( CParabot *pb, PB_Percept*item )
 		if ( item->hasJustDisappeared() ) {
 			// start debug
 /*			short path[128];
-			short start = map.getCellId( pb->ent );
-			short enemyId = map.getCellId( item->entity );
+			short start = mapcells_getcellid( pb->ent );
+			short enemyId = mapcells_getcellid( item->entity );
 			if ( start>=0 && enemyId>=0 ) {
 				int pl;
-				if ( pl = map.predictPlayerPos( enemyId, start, path ) ) {
-					Vector startV = map.cell( enemyId ).pos();
+				if ( pl = mapcells_predictplayerpos( enemyId, start, path ) ) {
+					Vector startV = mapcells_getcell( enemyId ).pos();
 					Vector endV;
 					if (pl != -1) {
 						for (int l=(pl-1); l>=0; l--) {
-							endV = map.cell( path[l] ).pos();
+							endV = mapcells_getcell( path[l] ).pos();
 							debugBeam( startV, endV, 50 );
 							startV = endV;
 						}

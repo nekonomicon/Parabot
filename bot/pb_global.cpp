@@ -4,12 +4,11 @@
 #include "pb_mapgraph.h"
 #include "vistable.h"
 #include "cell.h"
-#include "pb_mapcells.h"
+#include "mapcells.h"
 #include "bot.h"
 
 
 PB_MapGraph mapGraph;	// mapgraph for waypoints
-PB_MapCells map;
 
 int activeBot;			// bot that's thinking
 extern int botNr;		// bot that's getting debugged

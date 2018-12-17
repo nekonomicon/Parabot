@@ -6,7 +6,7 @@
 #include "cell.h"
 #include "vistable.h"
 #include "pb_mapgraph.h"
-#include "pb_mapcells.h"
+#include "mapcells.h"
 
 extern PB_MapGraph mapGraph;
 

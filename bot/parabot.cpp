@@ -8,11 +8,10 @@
 #include "kills.h"
 #include "vistable.h"
 #include "cell.h"
-#include "pb_mapcells.h"
+#include "mapcells.h"
 
 
 extern PB_MapGraph mapGraph;
-extern PB_MapCells map;
 int botNr;				// bot to debug
 extern int activeBot;			// bot that's thinking
 extern int botTarget;			// target nav id to approach (-1 = nothing)
@@ -139,9 +138,9 @@ void CParabot::registerDamage( int amount, Vec3D *origin, int type )
 	}
 
 	if (type & IGNORE_DAMAGE) {
-		int ci = map.getCellId( ent );
+		int ci = mapcells_getcellid(ent);
 		if ( ci != NO_CELL_FOUND) {
-			cell_addenvdamage(map.cell(ci), amount);
+			cell_addenvdamage(mapcells_getcell(ci), amount);
 			DEBUG_MSG( "ENV_DAMAGE!\n" );
 		}
 	}
@@ -228,13 +227,13 @@ void CParabot::registerDeath( EDICT *killer, const char *wpnName )
 {
 	// was it one of our fellow players? (not worldspawn)
 	if (killer && killer != this->ent && strlen(STRING(killer->v.netname)) > 0) {
-		int botCell = map.getCellId(ent);
-		int killerCell = map.getCellId(killer);
-		if (botCell >= 0 && killerCell >= 0 && map.lineOfSight(botCell, killerCell)) {
+		int botCell = mapcells_getcellid(ent);
+		int killerCell = mapcells_getcellid(killer);
+		if (botCell >= 0 && killerCell >= 0 && mapcells_lineofsight(botCell, killerCell)) {
 			Vec3D dir;
 
 			vadd(&killer->v.origin, botPos(), &dir);
-			kills_adddir(&dir, map.cell(botCell)->data.sectors);
+			kills_adddir(&dir, mapcells_getcell(botCell)->data.sectors);
 		}
 		chat_registergotkilled(ent, killer, wpnName);
 	}
@@ -354,11 +353,11 @@ void CParabot::getRoamingTarget()
 		if (!roamingTarget) {	// no linked navpoints found -> just get the nearest
 			roamingTarget = mapGraph.getNearestNavpoint( botPos() );
 		}*/
-		short start = map.getCellId(ent);
+		short start = mapcells_getcellid(ent);
 		if (start >= 0) {
-			setRoamingIndex(map.getPathToRoamingTarget(start, ent, roamingRoute));
+			setRoamingIndex(mapcells_getpathtoroamingtarget(start, ent, roamingRoute));
 			if (roamingIndex >= 0) {
-				roamingTarget = cell_getnavpoint(map.cell(roamingRoute[0]));
+				roamingTarget = cell_getnavpoint(mapcells_getcell(roamingRoute[0]));
 			} else {	// no path found:
 				roamingTarget = mapGraph.getNearestRoamingNavpoint(ent, actualNavpoint);
 				// DEBUG_MSG(" E!" );
@@ -712,7 +711,7 @@ void CParabot::followActualPath()
 
 void CParabot::followActualRoute()
 {
-	short botCell = map.getCellId( ent );
+	short botCell = mapcells_getcellid( ent );
 	if (botCell < 0 ) return;
 	short targetCell = roamingRoute[roamingIndex];
 	if (cellToReach != targetCell) {
@@ -721,17 +720,17 @@ void CParabot::followActualRoute()
 	}
 	Vec3D target;
 
-	cell_pos(map.cell(targetCell), &target);
+	cell_pos(mapcells_getcell(targetCell), &target);
 
 	// DEBUG_MSG( "." );
 	if (botCell == targetCell) {
 		// DEBUG_MSG( "Reached index %i\n", roamingIndex );
 		if ( roamingIndex > 0 ) {
 			roamingIndex--;
-			debugBeam( target, map.cell( roamingRoute[roamingIndex] ).pos(), 50, 2 );
+			debugBeam( target, mapcells_getcell( roamingRoute[roamingIndex] ).pos(), 50, 2 );
 		} else {
 			// DEBUG_MSG( "TARGET REACHED.\n" );
-			NAVPOINT *nav = cell_getnavpoint(map.cell(botCell));
+			NAVPOINT *nav = cell_getnavpoint(mapcells_getcell(botCell));
 			if ( nav && nav == roamingTarget ) {
 				navpoint_pos(nav, ent, &target);
 				if (navpoint_reached(nav, ent)) {
@@ -751,14 +750,14 @@ void CParabot::followActualRoute()
 		Vec3D dir;
 		float dist2target, normDist;
 
-		vsub(&target, cell_pos2(map.cell(botCell)), &dir);
+		vsub(&target, cell_pos2(mapcells_getcell(botCell)), &dir);
 		dist2target = vlen(&dir);
-		vsub(&target, cell_pos2(map.cell(roamingRoute[roamingIndex + 1])), &dir);
+		vsub(&target, cell_pos2(mapcells_getcell(roamingRoute[roamingIndex + 1])), &dir);
 		normDist = vlen(&dir);
 		if (dist2target > (normDist + 250)) {
 			//botNr = slot;
 			DEBUG_MSG( "ROUTE ERROR in %s!\n", goalMove );
-			debugBeam( target, cell_pos(map.cell(botCell)), 250, 0 );
+			debugBeam( target, cell_pos(mapcells_getcell(botCell)), 250, 0 );
 			setRoamingIndex( -1 );
 			return;
 		}
@@ -791,29 +790,29 @@ void CParabot::followActualRoute()
 			cellTimeOut = worldtime() + 1.0;
 		} else {
 			// bisherigen traffic auf Teilstrecke auswerten, falls <3 Verbindung löschen
-			if ( cell_gettraffic(map.cell(botCell), targetCell) < 3 ) {
-				if (cell_delneighbour(map.cell(botCell), targetCell)) {
+			if ( cell_gettraffic(mapcells_getcell(botCell), targetCell) < 3 ) {
+				if (cell_delneighbour(mapcells_getcell(botCell), targetCell)) {
 #if _DEBUG
 					DEBUG_MSG( "Deleted cell neighbour.\n" );
-					Vec3D c1 = cell_pos(map.cell(botCell)) + Vector(0,0,8);
-					Vec3D c2 = cell_pos(map.cell(targetCell));
+					Vec3D c1 = cell_pos(mapcells_getcell(botCell)) + Vector(0,0,8);
+					Vec3D c2 = cell_pos(mapcells_getcell(targetCell));
 					debugBeam( c1, c2, 250, 0 );
 					debugMarker( c2, 250 );
 #endif
 				} else {
 #if _DEBUG
 					DEBUG_MSG( "Could not delete cell neighbour.\n" );
-					Vec3D c0 = cell_pos(map.cell(botCell)) -Vector(0,0,8);
-					Vec3D c1 = cell_pos(map.cell(roamingRoute[roamingIndex + 1])) +Vector(0,0,8);
-					Vec3D c2 = cell_pos(map.cell(targetCell));
+					Vec3D c0 = cell_pos(mapcells_getcell(botCell)) -Vector(0,0,8);
+					Vec3D c1 = cell_pos(mapcells_getcell(roamingRoute[roamingIndex + 1])) +Vector(0,0,8);
+					Vec3D c2 = cell_pos(mapcells_getcell(targetCell));
 					debugBeam( c1, c2, 250, 0 );	// rot vom Vorgänger
 					debugBeam( c0, c2, 250, 1 );	// grün vom bot aus
 					debugMarker( c2, 250 );
 #endif
-					cell_delneighbour(map.cell(roamingRoute[roamingIndex + 1]), targetCell);
+					cell_delneighbour(mapcells_getcell(roamingRoute[roamingIndex + 1]), targetCell);
 				}
 			}
-			// PB_Cell tc = map.cell( botCell );
+			// PB_Cell tc = mapcells_getcell( botCell );
 			if (roamingTarget)
 				navpoint_donotvisitbefore(roamingTarget, ent, worldtime() + 10.0f);
 			lastJumpPos = zerovector;

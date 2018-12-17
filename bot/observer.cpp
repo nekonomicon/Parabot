@@ -6,7 +6,7 @@
 #include "pb_mapgraph.h"
 #include "vistable.h"
 #include "cell.h"
-#include "pb_mapcells.h"
+#include "mapcells.h"
 #include "bot.h"
 #include "sounds.h"
 
@@ -17,7 +17,6 @@
 
 
 extern PB_MapGraph mapGraph;	// mapgraph for waypoints
-extern PB_MapCells map;
 
 extern int mod_id;
 extern int clientWeapon[32];
@@ -671,7 +670,7 @@ observer_updatecellinfo(int i)
 	Vec3D obsPos, dir;
 	eyepos(obs[i].player, &obsPos);
 	// check if new cell has to be added:
-	short obsCell = map.getCellId(&obsPos);
+	short obsCell = mapcells_getcellid(&obsPos);
 	if (obsCell == NO_CELL_FOUND) {
 		if ((obs[i].player->v.waterlevel > 0)			// or in water
 		    || (is_onladder(obs[i].player)) 		// or on ladder
@@ -679,7 +678,7 @@ observer_updatecellinfo(int i)
 		    && (pointcontents(&obsPos) != CONTENTS_SOLID))) {	// Bugfix!!!
 			CELL cell;
 			cell_construct(&cell, obs[i].player);
-			obsCell = map.addCell(cell, true, obs[i].lastcell);
+			obsCell = mapcells_addcell(cell, true, obs[i].lastcell);
 		}
 	}
 
@@ -688,39 +687,39 @@ observer_updatecellinfo(int i)
 
 	// currentcell still holds value from last frame!
 	if (obs[i].currentcell != NO_CELL_FOUND) {
-		vsub(&obsPos, cell_pos2(map.cell(obs[i].currentcell)), &dir);
+		vsub(&obsPos, cell_pos2(mapcells_getcell(obs[i].currentcell)), &dir);
 		float distToCurrentCell = vlen(&dir);
-		vsub(&obsPos, cell_pos2(map.cell(obs[i].lastcell)), &dir);
+		vsub(&obsPos, cell_pos2(mapcells_getcell(obs[i].lastcell)), &dir);
 		float distToLastCell = vlen(&dir);
 		// client has reached a new cell
 		if ((obs[i].lastcell != obs[i].currentcell && distToCurrentCell < 25)
 		    || (distToLastCell >= 1.5 * CELL_SIZE) ) {
 			// transversal from one cell to another
 			float neededTime = worldtime() - obs[i].lastcelltime;
-			cell_addtraffic(map.cell(obs[i].lastcell), obs[i].currentcell, neededTime);
+			cell_addtraffic(mapcells_getcell(obs[i].lastcell), obs[i].currentcell, neededTime);
 
 			// set new viewdir for bots:
 			int bNr = getbotindex(obs[i].player);
 			if (bNr>=0) {
 				Vec3D moveDir, area = {1.0f, 0.0f, 0.0f};
 				action_getmovedir(&bots[bNr].parabot->action, &moveDir);
-				float fd1 = (focus_cellsfordir(&area, map.cell(obs[i].currentcell)->data.sectors)
-				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentcell)->data.sectors))
+				float fd1 = (focus_cellsfordir(&area, mapcells_getcell(obs[i].currentcell)->data.sectors)
+				    + 3.0f * kills_fordir(&area, mapcells_getcell(obs[i].currentcell)->data.sectors))
 				    * (1.5f + moveDir.x);
 				area.x = 0.0f;
 				area.y = 1.0f;
-				float fd2 = (focus_cellsfordir(&area, map.cell(obs[i].currentcell)->data.sectors)
-				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentcell)->data.sectors))
+				float fd2 = (focus_cellsfordir(&area, mapcells_getcell(obs[i].currentcell)->data.sectors)
+				    + 3.0f * kills_fordir(&area, mapcells_getcell(obs[i].currentcell)->data.sectors))
 				    * (1.5f + moveDir.y);
 				area.x = -1.0f;
 				area.y = 0.0f;
-				float fd3 = (focus_cellsfordir(&area, map.cell(obs[i].currentcell)->data.sectors)
-				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentcell)->data.sectors))
+				float fd3 = (focus_cellsfordir(&area, mapcells_getcell(obs[i].currentcell)->data.sectors)
+				    + 3.0f * kills_fordir(&area, mapcells_getcell(obs[i].currentcell)->data.sectors))
 				    * (1.5f - moveDir.x);
 				area.x = 0.0f;
 				area.y = -1.0f;
-				float fd4 = (focus_cellsfordir(&area, map.cell(obs[i].currentcell)->data.sectors)
-				    + 3.0f * kills_fordir(&area, map.cell(obs[i].currentcell)->data.sectors))
+				float fd4 = (focus_cellsfordir(&area, mapcells_getcell(obs[i].currentcell)->data.sectors)
+				    + 3.0f * kills_fordir(&area, mapcells_getcell(obs[i].currentcell)->data.sectors))
 				    * (1.5f - moveDir.y);
 
 				Vec3D bp = obs[i].player->v.origin;
@@ -750,18 +749,18 @@ observer_updatecellinfo(int i)
 				Vec3D start, end;
 
 				// draw traffic beam
-				vcopy(map.cell(obs[i].currentcell).pos(), &start);
-				vcopy(map.cell(obs[i].lastcell).pos(), &end);
+				vcopy(mapcells_getcell(obs[i].currentcell).pos(), &start);
+				vcopy(mapcells_getcell(obs[i].lastcell).pos(), &end);
 				start.z -= 30;
 				end.z -= 30;
 				debugBeam(&start, &end, 100, 0);
 				// draw beams to neighbours
 				if (obs[i].currentcell != NO_CELL_FOUND && obs[i].currentcell != obs[i].lastcell) {
 					for (int nb = 0; nb < 10; nb++) {
-						short nbId = map.cell(obs[i].currentcell).getNeighbour(nb);
+						short nbId = mapcells_getcell(obs[i].currentcell).getNeighbour(nb);
 						if (nbId == -1)
 							break;
-						vcopy(map.cell(nbId).pos(), &end);
+						vcopy(mapcells_getcell(nbId).pos(), &end);
 						start.z -= 2;
 						end.z -= 32;
 						debugBeam(&start, &end, 100);

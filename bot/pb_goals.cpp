@@ -4,11 +4,10 @@
 #include "sectors.h"
 #include "vistable.h"
 #include "cell.h"
-#include "pb_mapcells.h"
+#include "mapcells.h"
 
 extern int mod_id;
 extern PB_MapGraph mapGraph;
-extern PB_MapCells map;
 extern int botNr;
 extern EDICT *camPlayer;
 extern bool haloOnBase;

@@ -7,14 +7,13 @@
 #include "sectors.h"
 #include "vistable.h"
 #include "cell.h"
-#include "pb_mapcells.h"
+#include "mapcells.h"
 
 
 extern int mod_id;
 extern int clientWeapon[32];
 extern bool haloOnBase;
 // extern Sounds playerSounds;
-extern PB_MapCells map;
 
 int globalPerceptionId = 0;
 
@@ -117,26 +116,26 @@ Vec3D *PB_Percept::predictedAppearance( const Vec3D *botPos )
 
 	if (vcomp(&predAppearance, UNKNOWN_POS)) {
 		short predictedPath[128];	// contains cell indices to target
-		short origin = map.getCellId(&lastSeenPos);
-		short start = map.getCellId(&lastPos);
-		short target = map.getCellId(botPos);
+		short origin = mapcells_getcellid(&lastSeenPos);
+		short start = mapcells_getcellid(&lastPos);
+		short target = mapcells_getcellid(botPos);
 		if (start == NO_CELL_FOUND || target == NO_CELL_FOUND) return &predAppearance;
 
-		if (hasBeenVisible() && map.lineOfSight( origin, target )) {
+		if (hasBeenVisible() && mapcells_lineofsight( origin, target )) {
 			// bot is maintaining LOS -> probably enemy is searching cover!
 			// first check if he might run through...
-			if (map.getDirectedPathToAttack(start, target, &lastSeenVelocity, predictedPath) > 0)
-				cell_pos(map.cell(predictedPath[0]), &predAppearance);
+			if (mapcells_getdirectedpathtoattack(start, target, &lastSeenVelocity, predictedPath) > 0)
+				cell_pos(mapcells_getcell(predictedPath[0]), &predAppearance);
 			// if not, just pick shortest path
-			else if (map.getPathToAttack( start, target, predictedPath) > 0)
-				cell_pos(map.cell(predictedPath[0]), &predAppearance);
+			else if (mapcells_getpathtoattack( start, target, predictedPath) > 0)
+				cell_pos(mapcells_getcell(predictedPath[0]), &predAppearance);
 			else
 				vcopy(&lastPos, &predAppearance);
 		} else {
 			// either enemy was never visible or bot has moved and lost LOS...
 			// assume enemy is heading towards bot:
-			if (map.getPathToAttack(start, target, predictedPath) > 0 )
-				cell_pos(map.cell(predictedPath[0]), &predAppearance);
+			if (mapcells_getpathtoattack(start, target, predictedPath) > 0 )
+				cell_pos(mapcells_getcell(predictedPath[0]), &predAppearance);
 			else
 				vcopy(&lastPos, &predAppearance);
 		}
