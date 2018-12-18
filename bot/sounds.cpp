@@ -4,12 +4,9 @@
 #include "bot.h"
 #include "weapon.h"
 #include "chat.h"
-#include "pb_mapgraph.h"
-
 
 extern int mod_id;
 extern int clientWeapon[32];
-extern PB_MapGraph mapGraph;	// mapgraph for waypoints
 extern bool fatalParabotError;
 extern NAVPOINT* getNearestNavpoint( EDICT *pEdict );
 STEPSOUNDS players[32];

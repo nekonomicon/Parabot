@@ -1,10 +1,8 @@
 #include "parabot.h"
 #include "pb_global.h"
-#include "pb_mapgraph.h"
 #include "bot.h"
 
 extern int mod_id;
-extern PB_MapGraph mapGraph;
 extern bool haloOnBase;
 extern bool headToBunker;
 extern float nextAirstrikeTime;
@@ -227,7 +225,7 @@ needs_valvewishlist(NEEDS *needs)
 			needs->airstrikeknown = true;
 		}
 
-		if (mapGraph.getNearestNavpoint(&zerovector, NAV_S_AIRSTRIKE_COVER ))
+		if (mapgraph_getnearestnavpoint(&zerovector, NAV_S_AIRSTRIKE_COVER ))
 			return;	// only head for bunker if cover exists!
 	}
 	else if (needs->airstrikeknown) {
@@ -307,11 +305,11 @@ needs_valvewishlist(NEEDS *needs)
 
 	needs->maxwish = 0;
 	for (i = 0; i < MAX_NAV_TYPES; i++) 
-		if (mapGraph.itemAvailable(i) && (needs->wish[i] > needs->maxwish))
+		if (mapgraph_itemavailable(i) && (needs->wish[i] > needs->maxwish))
 			needs->maxwish = needs->wish[i];
 	needs->weaponwish = 0;
 	for (i = NAV_W_CROSSBOW; i <= NAV_A_GLOCKCLIP; i++) {
-		if (mapGraph.itemAvailable(i))
+		if (mapgraph_itemavailable(i))
 			needs->weaponwish += needs->wish[i];
 	}
 }
@@ -356,11 +354,11 @@ needs_hwwishlist(NEEDS *needs)
 
 	needs->maxwish = 0;
 	for (i = 0; i < MAX_NAV_TYPES; i++) 
-		if (mapGraph.itemAvailable(i) && (needs->wish[i] > needs->maxwish))
+		if (mapgraph_itemavailable(i) && (needs->wish[i] > needs->maxwish))
 			needs->maxwish = needs->wish[i];
 	needs->weaponwish = 0;
 	for (i = NAV_HWW_DOUBLESHOTGUN; i <= NAV_HWA_ROCKETLAUNCHER; i++) 
-		if (mapGraph.itemAvailable(i)) needs->weaponwish += needs->wish[i];
+		if (mapgraph_itemavailable(i)) needs->weaponwish += needs->wish[i];
 }
 
 static void
@@ -418,10 +416,10 @@ needs_dmcwishlist(NEEDS *needs)
 
 	needs->maxwish = 0;
 	for (i=0; i<MAX_NAV_TYPES; i++) 
-		if ( mapGraph.itemAvailable(i) && (needs->wish[i] > needs->maxwish) ) needs->maxwish = needs->wish[i];
+		if ( mapgraph_itemavailable(i) && (needs->wish[i] > needs->maxwish) ) needs->maxwish = needs->wish[i];
 	needs->weaponwish = 0;
 	for (i=NAV_DMCW_QUAKEGUN; i<=NAV_DMCW_LIGHTNING; i++) 
-		if ( mapGraph.itemAvailable(i) ) needs->weaponwish += needs->wish[i];
+		if ( mapgraph_itemavailable(i) ) needs->weaponwish += needs->wish[i];
 }
 
 static void
@@ -512,13 +510,13 @@ needs_gearboxwishlist(NEEDS *needs)
 
 	needs->maxwish = 0;
 	for (i=0; i<MAX_NAV_TYPES; i++) 
-		if ( mapGraph.itemAvailable(i) && (needs->wish[i] > needs->maxwish) )
+		if ( mapgraph_itemavailable(i) && (needs->wish[i] > needs->maxwish) )
 			needs->maxwish = needs->wish[i];
 	needs->weaponwish = 0;
 	for (i = NAV_W_CROSSBOW; i <= NAV_A_GLOCKCLIP; i++) 
-		if ( mapGraph.itemAvailable(i) ) needs->weaponwish += needs->wish[i];
+		if ( mapgraph_itemavailable(i) ) needs->weaponwish += needs->wish[i];
 	for (i=NAV_OFW_GRAPPLE; i<=NAV_OFA_SPORE; i++) 
-		if ( mapGraph.itemAvailable(i) ) needs->weaponwish += needs->wish[i];
+		if ( mapgraph_itemavailable(i) ) needs->weaponwish += needs->wish[i];
 
 }
 
@@ -600,13 +598,13 @@ needs_hungerwishlist(NEEDS *needs)
 
 	needs->maxwish = 0;
 	for (i=0; i<MAX_NAV_TYPES; i++) 
-		if ( mapGraph.itemAvailable(i) && (needs->wish[i]>needs->maxwish) )
+		if ( mapgraph_itemavailable(i) && (needs->wish[i]>needs->maxwish) )
 			needs->maxwish = needs->wish[i];
 	needs->weaponwish = 0;
 	for (i=NAV_W_CROSSBOW; i<=NAV_A_GLOCKCLIP; i++) 
-		if ( mapGraph.itemAvailable(i) ) needs->weaponwish += needs->wish[i];
+		if ( mapgraph_itemavailable(i) ) needs->weaponwish += needs->wish[i];
 	for (i=NAV_THW_AP9; i<=NAV_THA_TAURUS; i++)
-                if ( mapGraph.itemAvailable(i) ) needs->weaponwish += needs->wish[i];
+                if ( mapgraph_itemavailable(i) ) needs->weaponwish += needs->wish[i];
 }
 
 static void
@@ -622,7 +620,7 @@ needs_agwishlist(NEEDS *needs)
 			needs->newitempriorities = true;
 			needs->airstrikeknown = true;
 		}
-		if (mapGraph.getNearestNavpoint(&zerovector, NAV_S_AIRSTRIKE_COVER ))
+		if (mapgraph_getnearestnavpoint(&zerovector, NAV_S_AIRSTRIKE_COVER ))
 			return;	// only head for bunker if cover exists!
 	}
 	else if (needs->airstrikeknown) {
@@ -746,11 +744,11 @@ needs_agwishlist(NEEDS *needs)
 
 	needs->maxwish = 0;
 	for (i=0; i<MAX_NAV_TYPES; i++) 
-		if ( mapGraph.itemAvailable(i) && (needs->wish[i] > needs->maxwish) )
+		if ( mapgraph_itemavailable(i) && (needs->wish[i] > needs->maxwish) )
 			needs->maxwish = needs->wish[i];
 	needs->weaponwish = 0;
 	for (i=NAV_W_CROSSBOW; i<=NAV_A_GLOCKCLIP; i++) 
-		if ( mapGraph.itemAvailable(i) ) needs->weaponwish += needs->wish[i];
+		if ( mapgraph_itemavailable(i) ) needs->weaponwish += needs->wish[i];
 }
 
 void

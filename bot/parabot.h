@@ -12,7 +12,7 @@
 #include "utilityfuncs.h"
 #include "needs.h"
 #include "journey.h"
-#include "pb_mapgraph.h"
+#include "mapgraph.h"
 #include "roaming.h"
 #include "weapon.h"
 #include "weaponhandling.h"

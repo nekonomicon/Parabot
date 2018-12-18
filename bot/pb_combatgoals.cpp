@@ -7,7 +7,6 @@
 
 extern int mod_id;
 extern int botNr;
-extern PB_MapGraph mapGraph;
 extern int clientWeapon[32];
 
 void goalHuntEnemy( CParabot *pb, PB_Percept*item )

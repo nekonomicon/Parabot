@@ -119,7 +119,7 @@ SRC =		../bot/bot.cpp \
 		../bot/journey.cpp \
 		../bot/kills.cpp \
 		../bot/mapcells.cpp \
-		../bot/pb_mapgraph.cpp \
+		../bot/mapgraph.cpp \
 		../bot/pb_mapimport.cpp \
 		../bot/navpoint.cpp \
 		../bot/needs.cpp \

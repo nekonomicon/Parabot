@@ -24,9 +24,6 @@ extern float roundStartTime;
 //extern PB_Personality personality[MAX_PERS];	// stores different bot personalities
 //extern bool personalityUsed[MAX_PERS];			// true if bot exists using this personality
 extern int numberOfClients;
-class PB_MapCells;
-extern PB_MapGraph mapGraph;	// mapgraph for waypoints
-extern PB_MapCells map;
 // extern Sounds playerSounds;
 float observerUpdate;
 bool fatalParabotError = false;
@@ -1066,7 +1063,7 @@ void checkForAirStrike()
 
 		Vec3D pos;
 		vcopy(&pPlayer->v.origin, &pos);
-		NAVPOINT *nearest = mapGraph.getNearestNavpoint(&pos, NAV_S_AIRSTRIKE_COVER);
+		NAVPOINT *nearest = mapgraph_getnearestnavpoint(&pos, NAV_S_AIRSTRIKE_COVER);
 		if (nearest) {
 #if _DEBUG
 			vsub(nearest->pos(), &pos, &dir);
@@ -1076,7 +1073,7 @@ void checkForAirStrike()
 			}
 #endif
 		} else {
-			nearest = mapGraph.getNearestNavpoint(&pos, NAV_INFO_PLAYER_DM);
+			nearest = mapgraph_getnearestnavpoint(&pos, NAV_INFO_PLAYER_DM);
 			if(nearest) {
 				vsub(navpoint_pos(nearest), &pos, &dir);
 				dist = vlen(&dir);
@@ -1085,7 +1082,7 @@ void checkForAirStrike()
 				DEBUG_MSG("Adding airstrike cover!\n");
 				NAVPOINT coverNav;
 				navpoint_init(&coverNav, &pos, NAV_S_AIRSTRIKE_COVER, 0);
-				mapGraph.addNavpoint(&coverNav);
+				mapgraph_addnavpoint(&coverNav);
 			}
 		}
 	}

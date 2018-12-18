@@ -1,14 +1,11 @@
 #include "parabot.h"
 #include "pb_global.h"
 #include "sectors.h"
-#include "pb_mapgraph.h"
 #include "vistable.h"
 #include "cell.h"
 #include "mapcells.h"
 #include "bot.h"
 
-
-extern PB_MapGraph mapGraph;
 extern int mod_id;
 
 char actualMapname[100];
@@ -25,7 +22,7 @@ void saveLevelData()
 	strcat( fileName, actualMapname );
 	strcat( fileName, ".pnf" );
 	INFO_MSG( "\nSaving level data to %s\n", fileName );
-	mapGraph.save( fileName );
+	mapgraph_save( fileName );
 
 	fileName[strlen(fileName) - 4] = '\0'; // cut file extention
 	strcat( fileName, ".pcf" );
@@ -47,7 +44,7 @@ void importNav(int code, const char *modelName)
 
 		boxcenter(pOther, &pos);
 		navpoint_init(&n, &pos, code, 0);
-		mapGraph.addNavpoint(&n);
+		mapgraph_addnavpoint(&n);
 	}
 }
 
@@ -231,17 +228,17 @@ bool loadLevelData()
 	if (Q_STREQ(STRING(com.globals->mapname), actualMapname))
 		return true;
 
-	if (!Q_STREQ(actualMapname, "") && mapGraph.numberOfNavpoints() > 0)
+	if (!Q_STREQ(actualMapname, "") && mapgraph_numberofnavpoints() > 0)
 		saveLevelData();
 	
-	mapGraph.clear();
+	mapgraph_clear();
 	mapcells_clear();
 	strcpy( actualMapname, STRING(com.globals->mapname) );
 	strcpy( fileName, com.modname );
 	strcat( fileName, "/addons/parabot/navpoints/" );
 	strcat( fileName, STRING(com.globals->mapname) );
 	strcat( fileName, ".pnf" );
-	if (!mapGraph.load( fileName ))	{
+	if (!mapgraph_load( fileName ))	{
 		INFO_MSG( "Importing level data...\n" );
 
 	// import funcs
@@ -283,9 +280,9 @@ bool loadLevelData()
 			posUp.z += 36;
 			posDown.z += 36;
 			navpoint_init(&n, &posUp, NAV_F_LADDER_TOP, 0 );
-			mapGraph.addNavpoint(&n);
+			mapgraph_addnavpoint(&n);
 			navpoint_init(&n, &posDown, NAV_F_LADDER_BOTTOM, 0 );
-			mapGraph.addNavpoint(&n);
+			mapgraph_addnavpoint(&n);
 		}
 
 		// import MOD-specifics
@@ -305,7 +302,7 @@ bool loadLevelData()
 		if ((mod_id==VALVE_DLL || mod_id==AG_DLL) && Q_STREQ( STRING(com.globals->mapname), "crossfire" ) ) {
 			Vec3D v = { 0,-2236,-1852 };
 			navpoint_init(&n, &v, NAV_S_AIRSTRIKE_BUTTON, 0 );
-			mapGraph.addNavpoint(&n);
+			mapgraph_addnavpoint(&n);
 		}
 	} else {
 		fileName[strlen( fileName ) - 4] = '\0'; // cut file extention
@@ -313,6 +310,6 @@ bool loadLevelData()
 		mapcells_load( fileName );
 		INFO_MSG( "Loaded level data.\n" );
 	}
-	if (mapGraph.numberOfNavpoints() > 0 ) return true;
+	if (mapgraph_numberofnavpoints() > 0 ) return true;
 	return false;
 }

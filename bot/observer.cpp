@@ -3,7 +3,6 @@
 #include "sectors.h"
 #include "kills.h"
 #include "focus.h"
-#include "pb_mapgraph.h"
 #include "vistable.h"
 #include "cell.h"
 #include "mapcells.h"
@@ -14,9 +13,6 @@
 #define MIN_WAYPOINT_DIST		 64		// distance between waypoints
 #define CRITICAL_FALL_VELOCITY	550		// more velocity causes damage
 #define MIN_CAMP_TIME			5.0		// seconds to be idle for camping
-
-
-extern PB_MapGraph mapGraph;	// mapgraph for waypoints
 
 extern int mod_id;
 extern int clientWeapon[32];
@@ -195,7 +191,7 @@ observer_checkground(int oId, EDICT **plat)
 #if _DEBUG
 						debugsound((obs[oId].player), "weapons/mine_activate.wav");
 						DEBUG_MSG("Plat needs triggering by ");
-						for (int ni = 0; ni < mapGraph.numberOfNavpoints(); ni++) {
+						for (int ni = 0; ni < mapgraph_numberofnavpoints(); ni++) {
 							NAVPOINT t = getNavpoint( ni );
 							if (t.isTriggerFor(platNav)) {
 								t.print();
@@ -295,7 +291,7 @@ observer_getstartindex(int oId, NAVPOINT *endNav)
 		int dbgCnt2 = 0;
 		while (!obs[oId].waypoint[currentIndex].isNavpoint() && currentIndex != lastIndex && dbgCnt2++ < 1000) {
 			if (obs[oId].waypoint[currentIndex].needsTriggerForPlat()) {
-				//NAVPOINT *plat = &mapGraph[obs[oId].platinfo[currentIndex].data.navId].first;
+				//NAVPOINT *plat = &mapgraph[obs[oId].platinfo[currentIndex].data.navId].first;
 				NAVPOINT *plat = getNavpoint(obs[oId].platinfo[currentIndex].data.navId);
 				bool platRegistered = false;
 				for (int i = (triggerCount - 1); i >= 0; i--) {
@@ -315,7 +311,7 @@ observer_getstartindex(int oId, NAVPOINT *endNav)
 				currentIndex = MAX_WPTS - 1;
 		}
 		if (obs[oId].waypoint[currentIndex].isNavpoint()) {
-			NAVPOINT *currentNav = mapGraph.getNearestNavpoint(&obs[oId].waypoint[currentIndex].data.pos);
+			NAVPOINT *currentNav = mapgraph_getnearestnavpoint(&obs[oId].waypoint[currentIndex].data.pos);
 			bool allTriggersOk = true;
 			for (int i = 0; i < triggerCount; i++) {
 				if (navpoint_istriggerfor(currentNav, trigger[i]))
@@ -368,7 +364,7 @@ observer_newnavpointreached(int oId, Vec3D *pos, NAVPOINT *endNav)
 		int startIndex = observer_getstartindex( oId, endNav );
 		if (startIndex != -1) {	// beginning of this path was recorded
 			int pathMode = PATH_NORMAL;
-			NAVPOINT *startNav = mapGraph.getNearestNavpoint(&obs[oId].waypoint[startIndex].data.pos);
+			NAVPOINT *startNav = mapgraph_getnearestnavpoint(&obs[oId].waypoint[startIndex].data.pos);
 			newPath.startRecord( navpoint_id(startNav), obs[oId].waypoint[startIndex].data.arrival );
 			int currentIndex = startIndex;
 			int dbgCnt = 0;
@@ -399,9 +395,9 @@ observer_newnavpointreached(int oId, Vec3D *pos, NAVPOINT *endNav)
 			newPath.stopRecord(navpoint_id(endNav), worldtime(), pathMode );
 			// don't add return paths for teleporters and platforms
 			if (passingPlatform || passingTeleporter) 
-				mapGraph.addIfImprovement( newPath, false );
+				mapgraph_addifimprovement( newPath, false );
 			else
-				mapGraph.addIfImprovement( newPath );
+				mapgraph_addifimprovement( newPath );
 		}
 
 		// bots report visits in their movement-code, so this is for players only:
@@ -465,9 +461,9 @@ observer_checkforuse(int oId, Vec3D *pos)
 			// assume that player has used a button
 			NAVPOINT *nearestButton;
 			if (navType == NAV_F_BUTTON)
-				nearestButton = mapGraph.getNearestNavpoint( pos, NAV_F_BUTTON );
+				nearestButton = mapgraph_getnearestnavpoint( pos, NAV_F_BUTTON );
 			else
-				nearestButton = mapGraph.getNearestNavpoint( pos, NAV_F_ROT_BUTTON );
+				nearestButton = mapgraph_getnearestnavpoint( pos, NAV_F_ROT_BUTTON );
 			if (nearestButton) {	// TODO: check if looking at button!!!
 				Vec3D usedItemPos;
 				vcopy(navpoint_pos(nearestButton), &usedItemPos);
@@ -511,8 +507,8 @@ observer_checkforcamping(int oId, Vec3D *pos)
 			// player has a frag more than before...
 			if ((worldtime() - obs[oId].lastwptime) > MIN_CAMP_TIME) {
 				// ... and he seems to be camping
-				NAVPOINT *nearestCamp = mapGraph.getNearestNavpoint( pos, NAV_S_CAMPING );
-				NAVPOINT *nearestTank = mapGraph.getNearestNavpoint( pos, NAV_F_TANKCONTROLS );
+				NAVPOINT *nearestCamp = mapgraph_getnearestnavpoint( pos, NAV_S_CAMPING );
+				NAVPOINT *nearestTank = mapgraph_getnearestnavpoint( pos, NAV_F_TANKCONTROLS );
 				vsub(navpoint_pos(nearestCamp), pos, &dircamp);
 				vsub(navpoint_pos(nearestTank), pos, &dirtank);
 				// check if we know the location:
@@ -529,7 +525,7 @@ observer_checkforcamping(int oId, Vec3D *pos)
 					angleY <<= 16;
 					int campAngle = angleY | angleX;
 					navpoint_init(&campNav, pos, NAV_S_CAMPING, campAngle );
-					mapGraph.addNavpoint(&campNav);
+					mapgraph_addnavpoint(&campNav);
 				}
 				DEBUG_MSG( "Player is a camper!\n" );
 			}
@@ -568,7 +564,7 @@ observer_checkfortripmines(int oId, Vec3D *pos)
 				// ...yes -> check if we know this spot: 
 				Vec3D minePos = tr.endpos;
 				vcopy(&tr.endpos, &minePos);
-				NAVPOINT *nearest = mapGraph.getNearestNavpoint(&minePos, NAV_S_USE_TRIPMINE);
+				NAVPOINT *nearest = mapgraph_getnearestnavpoint(&minePos, NAV_S_USE_TRIPMINE);
 				vsub(navpoint_pos(nearest), &minePos, &dir);
 				if (nearest && (vlen(&dir) < 128) ) {
 					DEBUG_MSG( "Tripmine usage stored nearby!\n" );
@@ -577,7 +573,7 @@ observer_checkfortripmines(int oId, Vec3D *pos)
 					DEBUG_MSG( "Adding tripmine hint!\n" );
 					NAVPOINT mineNav;
 					navpoint_init(&mineNav, &minePos, NAV_S_USE_TRIPMINE, 0);
-					mapGraph.addNavpoint(&mineNav);
+					mapgraph_addnavpoint(&mineNav);
 				}
 			} else
 				DEBUG_MSG( "No wall in front!\n" );
@@ -610,7 +606,7 @@ observer_checkforbuttonshot(int oId, Vec3D *pos)
 				const char *hitClass = STRING( tr.hit->v.classname );
 				if (tr.hit->v.health > 0 && Q_STREQ(hitClass, "func_button")) {
 					// player shot at button, check if navpoint is already stored nearby
-					NAVPOINT *nearest = mapGraph.getNearestNavpoint( pos, NAV_S_BUTTON_SHOT );
+					NAVPOINT *nearest = mapgraph_getnearestnavpoint( pos, NAV_S_BUTTON_SHOT );
 					vsub(navpoint_pos(nearest), pos, &dir);
 					if (nearest && (vlen(&dir)) < 128) {
 						DEBUG_MSG( "Buttonshot stored nearby!\n" );
@@ -620,11 +616,11 @@ observer_checkforbuttonshot(int oId, Vec3D *pos)
 					} else {
 						// ...no -> add new navpoint
 						DEBUG_MSG( "Adding Buttonshot!\n" );
-						NAVPOINT *button = mapGraph.getNearestNavpoint(&tr.endpos, NAV_F_BUTTON);
+						NAVPOINT *button = mapgraph_getnearestnavpoint(&tr.endpos, NAV_F_BUTTON);
 						assert( button != 0 );
 						NAVPOINT shotNav;
 						navpoint_init(&shotNav, pos, NAV_S_BUTTON_SHOT, navpoint_id(button) );
-						mapGraph.addNavpoint( &shotNav );
+						mapgraph_addnavpoint( &shotNav );
 					}
 				}
 			}

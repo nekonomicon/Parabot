@@ -5,10 +5,7 @@
 #include "kills.h"
 #include "cell.h"
 #include "vistable.h"
-#include "pb_mapgraph.h"
 #include "mapcells.h"
-
-extern PB_MapGraph mapGraph;
 
 NAVPOINT *getNearestNavpoint(EDICT *pEdict);
 
@@ -165,7 +162,7 @@ cell_issuitableroamingtarget(CELL *cell, EDICT *traveller)
 	if (cell->data.navpoint < 0)
 		return false;
 
-	if (worldtime() >= navpoint_nextvisit(&mapGraph[cell->data.navpoint].first, traveller))
+	if (worldtime() >= navpoint_nextvisit(&mapgraph_getnode(cell->data.navpoint)->first, traveller))
 		return true;
 
 	return false;
@@ -177,7 +174,7 @@ cell_getnavpoint(CELL *cell)
 	if (cell->data.navpoint < 0)
 		return 0;
 
-	return &(mapGraph[cell->data.navpoint].first);
+	return &(mapgraph_getnode(cell->data.navpoint)->first);
 }
 
 short

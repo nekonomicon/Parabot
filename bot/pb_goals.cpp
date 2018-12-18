@@ -7,7 +7,6 @@
 #include "mapcells.h"
 
 extern int mod_id;
-extern PB_MapGraph mapGraph;
 extern int botNr;
 extern EDICT *camPlayer;
 extern bool haloOnBase;
@@ -208,7 +207,7 @@ void goalCollectItems( CParabot *pb, PB_Percept*item )
 		pb->approachRoamingTarget();
 	} else {
 		pb->setGoalMoveDescr( "CollectItems (GetTarget)" );
-		if (mapGraph.linkedNavpointsFrom( pb->actualNavpoint )==0) {
+		if (mapgraph_linkednavpointsfrom( pb->actualNavpoint )==0) {
 			// bot is not at navpoint or navpoint not linked:
 			pb->getRoamingTarget();		
 		} else {

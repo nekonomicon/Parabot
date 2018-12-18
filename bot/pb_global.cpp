@@ -1,14 +1,10 @@
 #include "parabot.h"
 #include "pb_global.h"
 #include "sectors.h"
-#include "pb_mapgraph.h"
 #include "vistable.h"
 #include "cell.h"
 #include "mapcells.h"
 #include "bot.h"
-
-
-PB_MapGraph mapGraph;	// mapgraph for waypoints
 
 int activeBot;			// bot that's thinking
 extern int botNr;		// bot that's getting debugged
@@ -51,39 +47,39 @@ EDICT* getEntity( const char *classname, Vec3D *pos )
 NAVPOINT* getNavpoint( int index )
 {
 	assert( index >= 0 );
-	assert( index < mapGraph.numberOfNavpoints() );
-	if ( index < 0 || index >= mapGraph.numberOfNavpoints() ) {
+	assert( index < mapgraph_numberofnavpoints() );
+	if ( index < 0 || index >= mapgraph_numberofnavpoints() ) {
 		DEBUG_MSG("Navpoint-Index-ERROR!\n" );
-		return &mapGraph[0].first;
+		return &mapgraph_getnode(0)->first;
 	}
-	return &mapGraph[index].first;
+	return &mapgraph_getnode(index)->first;
 }
 
 
 int getNavpointIndex( EDICT *entity )
 // returns the index of navpoint with given entity or -2 if not found
 {
-	for (int i=0; i<mapGraph.numberOfNavpoints(); i++)
-		if (navpoint_entity(&mapGraph[i].first) == entity) return i;
+	for (int i = 0; i < mapgraph_numberofnavpoints(); i++)
+		if (navpoint_entity(&mapgraph_getnode(i)->first) == entity) return i;
 	return -2;
 }
 
 
 PB_Path* getPath( int pathId )
 {
-	return mapGraph.findPath( pathId );
+	return mapgraph_findpath( pathId );
 }
 
 
 int getTotalAttempts()
 {
-	return mapGraph.getPassCount();
+	return mapgraph_getpasscount();
 }
 
 
 void incTotalAttempts()
 {
-	mapGraph.incPasses();
+	mapgraph_incpasses();
 }
 
 #if _DEBUG

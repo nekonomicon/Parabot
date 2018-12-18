@@ -1,48 +1,52 @@
 #pragma warning( disable : 4786 )	// disable 29 graph warnings
 
 #include "parabot.h"
-#include "pb_mapgraph.h"
+// #include "mapgraph.h"
 #include "dynpq.h"
 #include "pb_global.h"
 #include <stdio.h>
 
-extern PB_MapGraph mapGraph;
+static MAPGRAPH mapgraph;
 
 // id used in waypoint files
-const char *PNFidString = "Parabot Waypoint File 0.8      ";
+static const char *PNFidString = "Parabot Waypoint File 0.8      ";
 
 NAVPOINT* cashedNavpoint[32+1];
 
-void invalidateMapGraphCash()
+void
+invalidateMapGraphCash()
 {
 	for (int i = 0; i <= 32; i++)
 		cashedNavpoint[i] = 0;
 }
 
-void cachePlayerData()
+void
+cachePlayerData()
 {
 	for (int i = 1; i <= com.globals->maxclients; i++) {
 		EDICT *player = edictofindex( i );
 		if (playerexists(player)) {
-			cashedNavpoint[i] = mapGraph.getNearestNavpoint(&player->v.origin);
+			cashedNavpoint[i] = mapgraph_getnearestnavpoint(&player->v.origin);
 		}
 	}
 }
 
-NAVPOINT *getNearestNavpoint( EDICT *pEdict )
+NAVPOINT *
+getNearestNavpoint( EDICT *pEdict )
 {
 	int i = indexofedict(pEdict);
 	if (i < 0 || i > 32) return 0;
 	return cashedNavpoint[i];
 }
 
+/*
 PB_MapGraph::PB_MapGraph() : 
 	graph( 1024, 64 )
 {
-	nextId = 0;
-	nextPathId = 0;	// Path ID
-	passCount = 0;
-	memset( &availableItems, false, sizeof availableItems );
+	nextid = 0;
+	nextpathid = 0;	// Path ID
+	passcount = 0;
+	memset( &mapgraph.availableitems, false, sizeof mapgraph.availableitems );
 }
 
 
@@ -50,39 +54,58 @@ PB_MapGraph::~PB_MapGraph()
 {
 	clear();
 }
+*/
 
-
-void PB_MapGraph::clear()
+void
+mapgraph_clear()
 // delete all data
 {
 	//int numPaths;
 
-	for (int i=0; i<graph.size(); i++) {
-		//numPaths = graph[i].second.size();
-		
+	for (int i=0; i< 1024/*graph.size()*/; i++) {
+		//numPaths = mapgraph.graph[i].second.size();
+
 		// clear each path that has own data
-    	AdjList::iterator adj = graph[i].second.begin();
-		while (adj != graph[i].second.end()) {
+    	AdjList::iterator adj = mapgraph.graph[i].second.begin();
+		while (adj != mapgraph.graph[i].second.end()) {
 			if (adj->second.hasData()) adj->second.clear();
 			adj++;
 		}
-		graph[i].second.clear();
+		mapgraph.graph[i].second.clear();
 	}
-	graph.clear();
-	nextId = 0;
-	nextPathId = 0;
+	//graph.clear();
+	mapgraph.nextid = 0;
+	mapgraph.nextpathid = 0;
 	invalidateMapGraphCash();
 }
 
+void
+mapgraph_incpasses()
+{
+	mapgraph.passcount++;
+}
 
-int PB_MapGraph::numberOfPaths()
+int
+mapgraph_getpasscount()
+{
+	return mapgraph.passcount;
+}
+
+int
+mapgraph_numberofnavpoints()
+{
+	return 1024; //graph.size();
+}
+
+int
+mapgraph_numberofpaths()
 // returns the number of paths
 {
 	int count = 0;
-    for (int i=0; i<graph.size(); i++) {
+    for (int i = 0; i < 1024/*graph.size()*/; i++) {
 		// count each path that is not deleted
-    	AdjList::iterator adj = graph[i].second.begin();
-		while (adj != graph[i].second.end()) {
+    	AdjList::iterator adj = mapgraph.graph[i].second.begin();
+		while (adj != mapgraph.graph[i].second.end()) {
 			if (!adj->second.deleted()) count++;
 			adj++;
 		}
@@ -90,18 +113,30 @@ int PB_MapGraph::numberOfPaths()
     return count;
 }
 
+Node *
+mapgraph_getnode(int i)
+{
+	return &mapgraph.graph[i];
+}
 
-AdjPtr PB_MapGraph::findPath( int id, int startId, bool &found )
+bool
+mapgraph_itemavailable(int itemCode)
+{
+	return mapgraph.availableitems[itemCode];
+}
+
+static AdjPtr
+mapgraph_findpath(int id, int startId, bool &found)
 // find path with id beginning at navpoint startId
 {
 	found = false;
 //  vielleicht schneller:
-//	GraphType::Successor::iterator si =graph[startId].second.find(...);
+//	GraphType::Successor::iterator si = mapgraph.graph[startId].second.find(...);
 //	(*si).second.init( 0, 0 );
 
-	AdjPtr adj = graph[startId].second.begin();
+	AdjPtr adj = mapgraph.graph[startId].second.begin();
 
-	while (adj != graph[startId].second.end() && !found) {
+	while (adj != mapgraph.graph[startId].second.end() && !found) {
 		if ((*adj).second.id()==id) {
 			found = true;
 			return adj;
@@ -111,29 +146,30 @@ AdjPtr PB_MapGraph::findPath( int id, int startId, bool &found )
 	return adj;
 }
 
-
-PB_Path* PB_MapGraph::findPath( int id )
+PB_Path *
+mapgraph_findpath(int id)
 // find path with id
 {
 	bool found = false;
 	int  start = 0;
 	AdjPtr adj;
 
-	while ( !found && start<numberOfNavpoints() ) {
-		adj = findPath( id, start, found );
+	while ( !found && start<mapgraph_numberofnavpoints() ) {
+		adj = mapgraph_findpath( id, start, found );
 		start++;
 	}
 	if (found) return &(adj->second);
-	else return 0;
+	return 0;
 }
 
-AdjPtr PB_MapGraph::findLinkedPath( int dataId, int startId, bool &found )
+static AdjPtr
+mapgraph_findlinkedpath(int dataId, int startId, bool &found)
 // find path with id beginning at navpoint startId
 {
 	found = false;
-	AdjPtr adj = graph[startId].second.begin();
+	AdjPtr adj = mapgraph.graph[startId].second.begin();
 
-	while (adj != graph[startId].second.end() && !found) {
+	while (adj != mapgraph.graph[startId].second.end() && !found) {
 		if (adj->second.dataId()==dataId) {
 			found = true;
 			return adj;
@@ -143,26 +179,28 @@ AdjPtr PB_MapGraph::findLinkedPath( int dataId, int startId, bool &found )
 	return adj;
 }
 
-NAVPOINT *PB_MapGraph::getNearestNavpoint(const Vec3D *pos)
+NAVPOINT *
+mapgraph_getnearestnavpoint(const Vec3D *pos)
 // returns the nearest navpoint to pos existing in the graph, NULL if graph is empty
 {
 	float dist, minDist = 999999;
 	int   minId = -1;
 	Vec3D dir;
 
-	for (int i = 0; i < numberOfNavpoints(); i++) {
-		vsub(pos, navpoint_pos(&graph[i].first), &dir);
+	for (int i = 0; i < mapgraph_numberofnavpoints(); i++) {
+		vsub(pos, navpoint_pos(&mapgraph.graph[i].first), &dir);
 		dist = dotproduct(&dir, &dir);
 		if (dist < minDist) {
 			minDist = dist;
 			minId = i;
 		}
 	}
-	if (minId >= 0) return &graph[minId].first;
+	if (minId >= 0) return &mapgraph.graph[minId].first;
 	return 0;
 }
 
-NAVPOINT *PB_MapGraph::getNearestNavpoint(const Vec3D *pos, int type)
+NAVPOINT *
+mapgraph_getnearestnavpoint(const Vec3D *pos, int type)
 // returns the nearest navpoint with given type to pos existing in the graph, 
 // NULL if graph doesn't contain navpoints of the given type
 {
@@ -170,9 +208,9 @@ NAVPOINT *PB_MapGraph::getNearestNavpoint(const Vec3D *pos, int type)
 	int   minId = -1;
 	Vec3D dir;
 
-	for (int i = 0; i < numberOfNavpoints(); i++) {
-		if (navpoint_type(&graph[i].first)==type) {
-			vsub(pos, navpoint_pos(&graph[i].first), &dir);
+	for (int i = 0; i < mapgraph_numberofnavpoints(); i++) {
+		if (navpoint_type(&mapgraph.graph[i].first)==type) {
+			vsub(pos, navpoint_pos(&mapgraph.graph[i].first), &dir);
 			dist = dotproduct(&dir, &dir);
 			if (dist < minDist) {
 				minDist = dist;
@@ -180,20 +218,20 @@ NAVPOINT *PB_MapGraph::getNearestNavpoint(const Vec3D *pos, int type)
 			}
 		}
 	}
-	if (minId >= 0) return &graph[minId].first;
+	if (minId >= 0) return &mapgraph.graph[minId].first;
 
 	return 0;
 }
 
-
-int PB_MapGraph::linkedNavpointsFrom(NAVPOINT *nav)
+int
+mapgraph_linkednavpointsfrom(NAVPOINT *nav)
 // returns the number of other nodes linked to nav in the graph
 {
 	if (!nav) return 0;
 	else { 
 		int count = 0;
-		AdjPtr adj = graph[navpoint_id(nav)].second.begin();
-		while (adj != graph[navpoint_id(nav)].second.end()) {
+		AdjPtr adj = mapgraph.graph[navpoint_id(nav)].second.begin();
+		while (adj != mapgraph.graph[navpoint_id(nav)].second.end()) {
 			if ( !(adj->second.deleted()) ) count++;	// only count valid paths
 			adj++;
 		}
@@ -202,7 +240,8 @@ int PB_MapGraph::linkedNavpointsFrom(NAVPOINT *nav)
 }
 
 
-NAVPOINT *PB_MapGraph::getNearestRoamingNavpoint( EDICT *traveller, NAVPOINT *ignore )
+NAVPOINT *
+mapgraph_getnearestroamingnavpoint(EDICT *traveller, NAVPOINT *ignore)
 // returns a navpoint to approach in roaming mode, prefers linked navpoints and the ones
 // that are z-reachable, nextVisit-Time is required to be reached
 // should never return zero
@@ -213,23 +252,23 @@ NAVPOINT *PB_MapGraph::getNearestRoamingNavpoint( EDICT *traveller, NAVPOINT *ig
 	Vec3D *pos = &traveller->v.origin, dir;
 
 	if (ignore) ignoreId = navpoint_id(ignore);
-	
-	for (int i = 0; i < numberOfNavpoints(); i++) 
-	if ((i != ignoreId) && (worldtime() >= navpoint_nextvisit(&graph[i].first, traveller))) {
-		vsub(pos, navpoint_pos(&graph[i].first), &dir);
+
+	for (int i = 0; i < mapgraph_numberofnavpoints(); i++) 
+	if ((i != ignoreId) && (worldtime() >= navpoint_nextvisit(&mapgraph.graph[i].first, traveller))) {
+		vsub(pos, navpoint_pos(&mapgraph.graph[i].first), &dir);
 		dist = dotproduct(&dir, &dir);
-		if (graph[i].second.size() > 0)
+		if (mapgraph.graph[i].second.size() > 0)
 			dist *= 0.5f;	// prefer linked navpoints
 		if (dist < minDist) {
-			if (pointcontents(navpoint_pos(&graph[i].first)) == CONTENTS_WATER)
+			if (pointcontents(navpoint_pos(&mapgraph.graph[i].first)) == CONTENTS_WATER)
 				continue; 
 			minDist = dist;
 			minId = i;
 		}
-		if ((navpoint_pos(&graph[i].first)->z < (pos->z + 45.0f)) && (navpoint_pos(&graph[i].first)->z > (pos->z - 50.0f))) {
+		if ((navpoint_pos(&mapgraph.graph[i].first)->z < (pos->z + 45.0f)) && (navpoint_pos(&mapgraph.graph[i].first)->z > (pos->z - 50.0f))) {
 			// this one is roaming reachable!
 			if (dist < minDistR) {
-				if (pointcontents(navpoint_pos(&graph[i].first)) == CONTENTS_WATER)
+				if (pointcontents(navpoint_pos(&mapgraph.graph[i].first)) == CONTENTS_WATER)
 					continue;
 				minDistR = dist;
 				minIdR = i;
@@ -237,46 +276,48 @@ NAVPOINT *PB_MapGraph::getNearestRoamingNavpoint( EDICT *traveller, NAVPOINT *ig
 		}
 	}
 	if (minIdR >= 0)
-		return &graph[minIdR].first;
+		return &mapgraph.graph[minIdR].first;
 	else if (minId >= 0)
-		return &graph[minId].first;
+		return &mapgraph.graph[minId].first;
 
-	return &graph[0].first;	// fuck it, we *HAVE* to return something!
+	return &mapgraph.graph[0].first;	// fuck it, we *HAVE* to return something!
 }
 
-
-bool PB_MapGraph::addNavpoint(NAVPOINT *navpoint )
+bool
+mapgraph_addnavpoint(NAVPOINT *navpoint)
 // add a new navpoint to the graph
 {
-	navpoint_setid(navpoint, nextId++);
+	navpoint_setid(navpoint, mapgraph.nextid++);
 	navpoint_initentityptr(navpoint);
 	//int gs = graph.size();
 	Node x = Node(*navpoint, AdjList());
-	graph.push_back(x);
-	availableItems[navpoint_type(navpoint)] = true;
+	// graph.push_back(x);
+	mapgraph.availableitems[navpoint_type(navpoint)] = true;
 	return true;
 }
 
-bool PB_MapGraph::addPath( PB_Path &path, int directed, bool idInit )
+bool
+mapgraph_addpath(PB_Path &path, int directed, bool idInit)
 // add a new path to the graph
 {
 	if (idInit) {
-		path.setId( nextPathId++ );
+		path.setId( mapgraph.nextpathid++ );
 		if (path.dataId() < 0) path.makeIndependant();
 	}
-	(graph[path.startId()].second).insert( std::make_pair(path.endId(), path) );
+	(mapgraph.graph[path.startId()].second).insert( std::make_pair(path.endId(), path) );
 
 	if (directed==GRAPH_BIDIRECTIONAL) {
 		PB_Path rp;
 		rp.initReturnOf(path);
 		if (idInit)
-			rp.setId(nextId++);
-		(graph[rp.startId()].second).insert(std::make_pair(rp.endId(), rp));
+			rp.setId(mapgraph.nextid++);
+		(mapgraph.graph[rp.startId()].second).insert(std::make_pair(rp.endId(), rp));
 	}
 	return true;
 }
 
-void PB_MapGraph::addIfImprovement( PB_Path &path, bool addReturn )
+void
+mapgraph_addifimprovement(PB_Path &path, bool addReturn)
 // checks if any of the directions is improvement to graph, any improvement is added
 // deleting existing (slower) path
 // if path is not used, all path data get deleted!
@@ -284,9 +325,9 @@ void PB_MapGraph::addIfImprovement( PB_Path &path, bool addReturn )
 	//char *cname = path.endNav().classname();
 	bool used = false;
 	std::deque<int> journey;
-	float oldWeight = shortestJourney( path.startId(), path.endId(), path.mode(), journey ) - 0.1;
+	float oldWeight = mapgraph_shortestjourney( path.startId(), path.endId(), path.mode(), journey ) - 0.1;
 	if (path.weight() < oldWeight) {
-		addPath( path, GRAPH_ONEWAY );
+		mapgraph_addpath( path, GRAPH_ONEWAY );
 		used = true;
 /*		DEBUG_MSG( "Added path %i from ", path.id() );
 		path.startNav().print();
@@ -300,12 +341,12 @@ void PB_MapGraph::addIfImprovement( PB_Path &path, bool addReturn )
 		PB_Path rp;
 		rp.initReturnOf(path);
 		//journey.clear();	now in function
-		//oldWeight = shortestJourney(rp.startId(), rp.endId(), rp.mode(), journey) - 0.1;
-		shortestJourney(rp.startId(), rp.endId(), rp.mode(), journey);
+		//oldWeight = mapgraph_shortestjourney(rp.startId(), rp.endId(), rp.mode(), journey) - 0.1;
+		mapgraph_shortestjourney(rp.startId(), rp.endId(), rp.mode(), journey);
 		//if (rp.weight() < oldWeight) {		// insert return as well?
 		
 		if (journey.size() == 0) {	// only insert return if no alternative path
-			addPath(rp, GRAPH_ONEWAY);	// don't delete anything: return is uncertain...
+			mapgraph_addpath(rp, GRAPH_ONEWAY);	// don't delete anything: return is uncertain...
 			used = true;
 			// DEBUG_MSG( ", added return path %i", rp.id() );
 		} 
@@ -315,14 +356,15 @@ void PB_MapGraph::addIfImprovement( PB_Path &path, bool addReturn )
 }
 
 /*
-bool PB_MapGraph::deletePath( int id, int startId )
+bool
+mapgraph_deletepath(int id, int startId)
 {
 	bool found;
-	AdjPtr adj = findPath( id, startId, found );
+	AdjPtr adj = mapgraph_findpath( id, startId, found );
 
 	if (!found) return false;	
 	if (adj->second.hasData()) {					// look if other path shares data...
-		AdjPtr back = findLinkedPath( id, adj->second.endId(), found );
+		AdjPtr back = mapgraph_findlinkedpath( id, adj->second.endId(), found );
 		if (found) {
 			back->second.makeIndependant();						// ...yes -> swap sharing!
 			adj->second.makeDependantOf( back->second.id() );	// only 1 reference to data!
@@ -333,17 +375,17 @@ bool PB_MapGraph::deletePath( int id, int startId )
 }
 */
 
-void PB_MapGraph::Dijkstra( std::vector<float>& dist, std::vector<int>& path, 
-						    int start, int searchMode )
+static void
+mapgraph_dijkstra(std::vector<float>& dist, std::vector<int>& path, int start, int searchMode)
 {
 	int actualVertex;
 
 	// init distances
-	dist = std::vector<float>(graph.size(), MAX_PATH_WEIGHT);
+	dist = std::vector<float>(1024/*graph.size()*/, MAX_PATH_WEIGHT);
 	dist[start] = 0;
 
 	// init paths
-	path = std::vector<int>(graph.size(), -1);
+	path = std::vector<int>(1024/*graph.size()*/, -1);
 
 	// init priority queue
 	dynamic_priority_queue<float> queue(dist);
@@ -358,9 +400,9 @@ void PB_MapGraph::Dijkstra( std::vector<float>& dist, std::vector<int>& path,
 		queue.pop();
           
 		// improve estimates for all neighbors of u
-		AdjList::iterator I = graph[actualVertex].second.begin();	// I cycles through paths
+		AdjList::iterator I = mapgraph.graph[actualVertex].second.begin();	// I cycles through paths
 
-		while(I != graph[actualVertex].second.end()) {
+		while(I != mapgraph.graph[actualVertex].second.end()) {
 			PB_Path p = (*I).second;
 			if (p.valid(searchMode)) {
 				int Neighbor = (*I).first;
@@ -379,8 +421,8 @@ void PB_MapGraph::Dijkstra( std::vector<float>& dist, std::vector<int>& path,
 	}
 }
 
-
-float PB_MapGraph::shortestJourney( int start, int target, int mode, std::deque<int> &journey )
+float
+mapgraph_shortestjourney(int start, int target, int mode, std::deque<int> &journey)
 {
 	std::vector<float> dist;
 	std::vector<int> lastPath;
@@ -388,43 +430,42 @@ float PB_MapGraph::shortestJourney( int start, int target, int mode, std::deque<
 
 	if (!journey.empty())
 		journey.clear();	// delete journey 
-	Dijkstra( dist, lastPath, start, mode );
+	mapgraph_dijkstra( dist, lastPath, start, mode );
 	float d = dist[target];
 
 	while (lastPath[target] >= 0) {
 		journey.push_back( lastPath[target] );
-		path = findPath( lastPath[target] );
+		path = mapgraph_findpath( lastPath[target] );
 		if (path) target = path->startId();
 		else break;
 	}
 	return d;
 }
 
-
-bool PB_MapGraph::getJourney( int start, int target, int mode, JOURNEY *journey )
+bool
+mapgraph_getjourney(int start, int target, int mode, JOURNEY *journey)
 // returns a journey from start to target or false if none available in mode
 {
 	//journey.pathList.clear();	now in function
-	shortestJourney( start, target, mode, journey->pathlist );
+	mapgraph_shortestjourney( start, target, mode, journey->pathlist );
 	if (journey->pathlist.empty())
 		return false;
 	return true;
 }
 
-
-int PB_MapGraph::DijkstraToWish( std::vector<float>& dist, std::vector<int>& path, 
-						    int start, NEEDS *needs, int searchMode, EDICT *traveller )
+static int
+mapgraph_dijkstratowish(std::vector<float>& dist, std::vector<int>& path, int start, NEEDS *needs, int searchMode, EDICT *traveller)
 {
 	// init distances
-	dist = std::vector<float>(graph.size(), MAX_PATH_WEIGHT);
+	dist = std::vector<float>(1024/*graph.size()*/, MAX_PATH_WEIGHT);
 	dist[start] = 0;
 
 	// init scores
-	std::vector<float> score = std::vector<float>(graph.size(), -1);
+	std::vector<float> score = std::vector<float>(1024/*graph.size()*/, -1);
 	score[start] = 0;
 
 	// init paths
-	path = std::vector<int>(graph.size(), -1);
+	path = std::vector<int>(1024/*graph.size()*/, -1);
 
 	// init priority queue
 	dynamic_priority_queue<float> queue(dist);
@@ -445,10 +486,10 @@ int PB_MapGraph::DijkstraToWish( std::vector<float>& dist, std::vector<int>& pat
 		}
 
 		// improve estimates for all neighbors of actualVertex
-		AdjList::iterator adj = graph[actualVertex].second.begin();	
+		AdjList::iterator adj = mapgraph.graph[actualVertex].second.begin();	
 
 		// I cycles through paths		
-		while(adj != graph[actualVertex].second.end()) {
+		while(adj != mapgraph.graph[actualVertex].second.end()) {
 			PB_Path p = adj->second;
 			if ( p.valid(searchMode) ) {
 				int neighbor = adj->first;
@@ -460,10 +501,10 @@ int PB_MapGraph::DijkstraToWish( std::vector<float>& dist, std::vector<int>& pat
 					queue.changeKeyAt(neighbor, dist[actualVertex] + d);
 					// actualVertex is predecessor of the neighbor
 					path[neighbor] = p.id();
-					if (navpoint_nextvisit(&graph[neighbor].first, traveller) < worldtime() ) {
+					if (navpoint_nextvisit(&mapgraph.graph[neighbor].first, traveller) < worldtime() ) {
 						navWeight += 0.1;
 						score[neighbor] = score[actualVertex] + 
-						    (needs_desirefor(needs, navpoint_type(&graph[neighbor].first))
+						    (needs_desirefor(needs, navpoint_type(&mapgraph.graph[neighbor].first))
 						    / navWeight );
 					}
 				}
@@ -480,7 +521,8 @@ int PB_MapGraph::DijkstraToWish( std::vector<float>& dist, std::vector<int>& pat
 	return targetNav;
 }
 
-int PB_MapGraph::getWishJourney( int start, NEEDS *needs, int mode, JOURNEY *journey, EDICT *traveller)
+int
+mapgraph_getwishjourney(int start, NEEDS *needs, int mode, JOURNEY *journey, EDICT *traveller)
 // returns the nav-id that according to wishList is the best to head for and the best
 // journey to get there if possible in mode, if not returns -1 and an empty journey
 {
@@ -490,13 +532,13 @@ int PB_MapGraph::getWishJourney( int start, NEEDS *needs, int mode, JOURNEY *jou
 	std::vector<int> lastPath;
 	PB_Path *path;
 
-	int bestTarget = DijkstraToWish( dist, lastPath, start, needs, mode, traveller );
+	int bestTarget = mapgraph_dijkstratowish( dist, lastPath, start, needs, mode, traveller );
 	if (bestTarget == start) return -1;
 
 	int target = bestTarget;
 	while (lastPath[target] >= 0) {
 		journey->pathlist.push_back(lastPath[target]);
-		path = findPath(lastPath[target]);
+		path = mapgraph_findpath(lastPath[target]);
 		if (path)
 			target = path->startId();
 		else
@@ -506,7 +548,8 @@ int PB_MapGraph::getWishJourney( int start, NEEDS *needs, int mode, JOURNEY *jou
 	return bestTarget;
 }
 
-void PB_MapGraph::initBackwardPaths()
+static void
+mapgraph_initbackwardpaths()
 // called after load(), initializes data structures of backward paths
 {
 	// int numPaths;
@@ -514,13 +557,13 @@ void PB_MapGraph::initBackwardPaths()
 	AdjPtr rp;
 	bool ok;
 
-	for (int i = 0; i < numberOfNavpoints(); i++) {
-		//numPaths = graph[i].second.size();
-		AdjList::iterator adj = graph[i].second.begin();
-		while (adj != graph[i].second.end()) {
+	for (int i = 0; i < mapgraph_numberofnavpoints(); i++) {
+		//numPaths = mapgraph.graph[i].second.size();
+		AdjList::iterator adj = mapgraph.graph[i].second.begin();
+		while (adj != mapgraph.graph[i].second.end()) {
 			p = adj->second;
 			if (!p.hasData()) {
-				rp = findPath(p.dataId(), p.endId(), ok);	// return path starts at end
+				rp = mapgraph_findpath(p.dataId(), p.endId(), ok);	// return path starts at end
 				if (ok) {
 					adj->second.waypoint = rp->second.waypoint;
 					adj->second.hiddenAttack = rp->second.hiddenAttack;
@@ -534,17 +577,18 @@ void PB_MapGraph::initBackwardPaths()
 	}
 }
 
-void PB_MapGraph::prepareBackwardPaths()
+static void
+mapgraph_preparebackwardpaths()
 // called before save(), copies data structures of deleted paths to backward paths
 {
 	AdjPtr	adj, back;
 	bool	found;
 
-	for (int startId = 0; startId < numberOfNavpoints(); startId++) {
-		adj = graph[startId].second.begin();
-		while (adj != graph[startId].second.end()) {
+	for (int startId = 0; startId < mapgraph_numberofnavpoints(); startId++) {
+		adj = mapgraph.graph[startId].second.begin();
+		while (adj != mapgraph.graph[startId].second.end()) {
 			if ((adj->second.deleted()) && (adj->second.hasData())) {	// if path deleted
-				back = findLinkedPath(adj->second.id(), adj->second.endId(), found);
+				back = mapgraph_findlinkedpath(adj->second.id(), adj->second.endId(), found);
 				if (found) {
 					back->second.makeIndependant();						// ...yes -> swap sharing!
 					adj->second.makeDependantOf(back->second.id());	// only 1 reference to data!
@@ -555,8 +599,8 @@ void PB_MapGraph::prepareBackwardPaths()
 	}
 }
 
-
-bool PB_MapGraph::load( char *mapname )
+bool
+mapgraph_load(const char *mapname)
 {
 	FILE *fp;
 
@@ -570,22 +614,22 @@ bool PB_MapGraph::load( char *mapname )
 		return false;
 	}
 
-	fread( &passCount, sizeof(int), 1, fp );
+	fread( &mapgraph.passcount, sizeof(int), 1, fp );
 
 	int i, numNpts, numPaths;
 	NAVPOINT navpoint;
 	PB_Path path;
 
-	clear();		// clear all data
-	nextId = 0;
-	nextPathId = 0;
+	mapgraph_clear();		// clear all data
+	mapgraph.nextid = 0;
+	mapgraph.nextpathid = 0;
 
 	fread( &numNpts, sizeof(int), 1, fp );
 
 	for (i = 0; i < numNpts; i++) {
 		//printf( "n" );
 		navpoint_load(&navpoint, fp);
-		addNavpoint(&navpoint);
+		mapgraph_addnavpoint(&navpoint);
 	}
 
 	fread( &numPaths, sizeof(int), 1, fp );
@@ -593,19 +637,19 @@ bool PB_MapGraph::load( char *mapname )
 	for (int j = 0; j < numPaths; j++) {
 		//printf( "p" );
 		path.load( fp );
-		if (path.id() > nextPathId)
-			nextPathId = path.id();
-		addPath( path, GRAPH_ONEWAY, false );
+		if (path.id() > mapgraph.nextpathid)
+			mapgraph.nextpathid = path.id();
+		mapgraph_addpath( path, GRAPH_ONEWAY, false );
 	}
 	fclose( fp );
-	nextPathId++;	// largest ID + 1
-	initBackwardPaths();
+	mapgraph.nextpathid++;	// largest ID + 1
+	mapgraph_initbackwardpaths();
 
 	return true;
 }
 
-
-bool PB_MapGraph::save( char *mapname )
+bool
+mapgraph_save(const char *mapname)
 {
 	FILE *fp;
 	int i, numNpts, numPaths;
@@ -613,41 +657,41 @@ bool PB_MapGraph::save( char *mapname )
 	if ((fp = fopen(mapname, "wb")) == NULL) return false;
 
 	// sort out unused paths
-	int maxNotUsed = 40 * numberOfNavpoints();	// maximum unused time after which 
+	int maxNotUsed = 40 * mapgraph_numberofnavpoints();	// maximum unused time after which 
 	int notUsed;								// pathes are deleted
-	for (i = 0; i < graph.size(); i++) {
-		AdjList::iterator adj = graph[i].second.begin();
-		while (adj != graph[i].second.end()) {
-			notUsed = passCount - adj->second.data.lastAttempt;
+	for (i = 0; i < 1024/*graph.size()*/; i++) {
+		AdjList::iterator adj = mapgraph.graph[i].second.begin();
+		while (adj != mapgraph.graph[i].second.end()) {
+			notUsed = mapgraph.passcount - adj->second.data.lastAttempt;
 			if (notUsed > maxNotUsed) adj->second.markForDelete();
 			adj++;
 		}
 	}
-	prepareBackwardPaths();
+	mapgraph_preparebackwardpaths();
 
 	fwrite( PNFidString, 32, 1, fp );
 
 	// save number of passes
-	fwrite( &passCount, sizeof(int), 1, fp );
+	fwrite( &mapgraph.passcount, sizeof(int), 1, fp );
 
 	// save number of navpoints
-	numNpts = numberOfNavpoints();
+	numNpts = mapgraph_numberofnavpoints();
 	fwrite( &numNpts, sizeof(int), 1, fp );
 
 	for (i = 0; i < numNpts; i++) {
 		// save navpoint
-		//printf( "N%i", navpoint_id(graph[i].first) );
-		navpoint_save(&graph[i].first, fp);
+		//printf( "N%i", navpoint_id(mapgraph.graph[i].first) );
+		navpoint_save(&mapgraph.graph[i].first, fp);
 	}
 
-	numPaths = numberOfPaths();
+	numPaths = mapgraph_numberofpaths();
 	fwrite( &numPaths, sizeof(int), 1, fp );
 	//printf( "%i ", numPaths );
 
 	for (i = 0; i < numNpts; i++) {
 		// save each path
-    	AdjList::iterator adj = graph[i].second.begin();
-		while (adj != graph[i].second.end()) {
+    	AdjList::iterator adj = mapgraph.graph[i].second.begin();
+		while (adj != mapgraph.graph[i].second.end()) {
 			PB_Path p = adj->second;
 			p.save( fp );
 			adj++;

@@ -11,7 +11,6 @@
 #include "mapcells.h"
 
 
-extern PB_MapGraph mapGraph;
 int botNr;				// bot to debug
 extern int activeBot;			// bot that's thinking
 extern int botTarget;			// target nav id to approach (-1 = nothing)
@@ -312,13 +311,13 @@ bool CParabot::getJourneyTarget()
 	// check if this bot has been assigned a reachable target
 	if ((botNr == slot)
 	    && (botTarget >= 0)
-	    && (mapGraph.getJourney(navpoint_id(actualNavpoint), botTarget, pathMask, &actualJourney))) {
+	    && (mapgraph_getjourney(navpoint_id(actualNavpoint), botTarget, pathMask, &actualJourney))) {
 		DEBUG_MSG("Trying to reach assigned target:\n");
 		targetNav = botTarget;
 		botTarget = -1;
 	} else { // if not, find a wish target
 		//initWishList();	// not necessary, but more accurate
-		targetNav = mapGraph.getWishJourney(navpoint_id(actualNavpoint), &needs, pathMask, &actualJourney, ent );
+		targetNav = mapgraph_getwishjourney(navpoint_id(actualNavpoint), &needs, pathMask, &actualJourney, ent );
 	}
 
 	if (targetNav >= 0) {	// found a journey
@@ -349,9 +348,9 @@ void CParabot::getRoamingTarget()
 		botTarget = -1;
 		DEBUG_MSG( "Trying to reach assigned target:\n" );
 	} else { // if not, find a roaming navpoint
-		/*roamingTarget = mapGraph.getNearestRoamingNavpoint( ent, actualNavpoint );
+		/*roamingTarget = mapgraph_getnearestroamingnavpoint( ent, actualNavpoint );
 		if (!roamingTarget) {	// no linked navpoints found -> just get the nearest
-			roamingTarget = mapGraph.getNearestNavpoint( botPos() );
+			roamingTarget = mapgraph_getnearestnavpoint( botPos() );
 		}*/
 		short start = mapcells_getcellid(ent);
 		if (start >= 0) {
@@ -359,11 +358,11 @@ void CParabot::getRoamingTarget()
 			if (roamingIndex >= 0) {
 				roamingTarget = cell_getnavpoint(mapcells_getcell(roamingRoute[0]));
 			} else {	// no path found:
-				roamingTarget = mapGraph.getNearestRoamingNavpoint(ent, actualNavpoint);
+				roamingTarget = mapgraph_getnearestroamingnavpoint(ent, actualNavpoint);
 				// DEBUG_MSG(" E!" );
 			}
 		} else {
-			roamingTarget = mapGraph.getNearestRoamingNavpoint(ent, actualNavpoint);
+			roamingTarget = mapgraph_getnearestroamingnavpoint(ent, actualNavpoint);
 			setRoamingIndex(-1);
 		}
 	}
