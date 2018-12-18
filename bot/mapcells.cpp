@@ -1,8 +1,10 @@
+#include <float.h>
 #include "parabot.h"
 #include "sectors.h"
 #include "focus.h"
 #include "vistable.h"
 #include "cell.h"
+#include "priorityqueue.h"
 #include "mapcells.h"
 #include <algorithm>
 
@@ -359,14 +361,14 @@ mapcells_getpath(short startId, short targetId, short pathNodes[])
 	memset( pre, NO_CELL_REGISTERED, sizeof pre);
 	pre[startId] = startId;
 
-	PBT_PriorityQueue queue;
-	queue.addOrUpdate(startId, 0);
+	PRIORITY_QUEUE queue = {.weight[EMPTY_KEY] = FLT_MAX};
+	priorityqueue_addorupdate(&queue, startId, 0);
 
 	int searchedNodes = 0;
 	short currentCell;
-	while (!queue.empty()) {
+	while (!priorityqueue_empty(&queue)) {
 		searchedNodes++;
-		currentCell = queue.getFirst();
+		currentCell = priorityqueue_getfirst(&queue);
 		if (currentCell == targetId) {
 			int pathLength = 0;
 
@@ -389,14 +391,14 @@ mapcells_getpath(short startId, short targetId, short pathNodes[])
 			    && navpoint_needstriggering(getNavpoint(nbg))
 			    && !navpoint_istriggered(getNavpoint(nbg))))
 				continue;
-			float value = queue.getValue(currentCell) + cell_getweight(&map.cellArray[currentCell], n);
+			float value = priorityqueue_getvalue(&queue, currentCell) + cell_getweight(&map.cellArray[currentCell], n);
 			vsub(cell_pos2(&map.cellArray[targetId]), cell_pos2(&map.cellArray[nb]), &dir);
 			float heuristic = vlen(&dir);
 			float estimate = value + heuristic;
-			if (queue.neverContained(nb)
-			    || estimate < queue.getWeight(nb)) {
+			if (priorityqueue_nevercontained(&queue, nb)
+			    || estimate < priorityqueue_getweight(&queue, nb)) {
 				pre[nb] = currentCell;
-				queue.addOrUpdate(nb, estimate, value);
+				priorityqueue_addorupdate(&queue, nb, estimate, value);
 			}
 		}
 	}
@@ -414,14 +416,14 @@ mapcells_getpathtocover(short startId, short enemyId, short pathNodes[])
 	memset(pre, NO_CELL_REGISTERED, sizeof pre);
 	pre[startId] = startId;
 
-	PBT_PriorityQueue queue;
-	queue.addOrUpdate(startId, 0);
+	PRIORITY_QUEUE queue = {.weight[EMPTY_KEY] = FLT_MAX};
+	priorityqueue_addorupdate(&queue, startId, 0);
 
 	int searchedNodes = 0;
 	short currentCell;
-	while (!queue.empty()) {
+	while (!priorityqueue_empty(&queue)) {
 		searchedNodes++;
-		currentCell = queue.getFirst();
+		currentCell = priorityqueue_getfirst(&queue);
 		if (!mapcells_lineofsight(currentCell, enemyId)
 		    && !mapcells_lineofsight(pre[currentCell], enemyId)) {
 			int pathLength = 0;
@@ -448,11 +450,11 @@ mapcells_getpathtocover(short startId, short enemyId, short pathNodes[])
 				continue;
 			vsub(cell_pos2(&map.cellArray[enemyId]), cell_pos2(&map.cellArray[nb]), &dir);
 			float penalty = 15000 - vlen(&dir);
-			float value = queue.getValue(currentCell) + cell_getweight(&map.cellArray[currentCell], n) + penalty;
+			float value = priorityqueue_getvalue(&queue, currentCell) + cell_getweight(&map.cellArray[currentCell], n) + penalty;
 			float estimate = value;
-			if (queue.neverContained(nb) || estimate < queue.getWeight(nb)) {
+			if (priorityqueue_nevercontained(&queue, nb) || estimate < priorityqueue_getweight(&queue, nb)) {
 				pre[nb] = currentCell;
-				queue.addOrUpdate( nb, estimate, value );
+				priorityqueue_addorupdate(&queue, nb, estimate, value);
 			}
 		}
 	}
@@ -469,14 +471,14 @@ mapcells_getpathforsneakyescape(short startId, short enemyId, short pathNodes[])
 	memset( pre, NO_CELL_REGISTERED, sizeof pre );
 	pre[startId] = startId;
 
-	PBT_PriorityQueue queue;
-	queue.addOrUpdate( startId, 0 );
+	PRIORITY_QUEUE queue = {.weight[EMPTY_KEY] = FLT_MAX};
+	priorityqueue_addorupdate(&queue, startId, 0);
 
 	int searchedNodes = 0;
 	short currentCell;
-	while (!queue.empty()) {
+	while (!priorityqueue_empty(&queue)) {
 		searchedNodes++;
-		currentCell = queue.getFirst();
+		currentCell = priorityqueue_getfirst(&queue);
 		vsub(cell_pos2(&map.cellArray[currentCell]), cell_pos2(&map.cellArray[enemyId]), &dir);
 		if (vlen(&dir) > 2000) {
 			int pathLength = 0;
@@ -500,11 +502,11 @@ mapcells_getpathforsneakyescape(short startId, short enemyId, short pathNodes[])
 			    && !navpoint_istriggered(getNavpoint(nbg))))
 				continue;
 			float penalty = (100 * ((int)mapcells_lineofsight(nb, enemyId)));
-			float value = queue.getValue(currentCell) + cell_getweight(&map.cellArray[currentCell], n) + penalty;
+			float value = priorityqueue_getvalue(&queue, currentCell) + cell_getweight(&map.cellArray[currentCell], n) + penalty;
 			float estimate = value;
-			if (queue.neverContained(nb) || estimate < queue.getWeight(nb)) {
+			if (priorityqueue_nevercontained(&queue, nb) || estimate < priorityqueue_getweight(&queue, nb)) {
 				pre[nb] = currentCell;
-				queue.addOrUpdate(nb, estimate, value);
+				priorityqueue_addorupdate(&queue, nb, estimate, value);
 			}
 		}
 	}
@@ -520,14 +522,14 @@ mapcells_getpathtoattack(short startId, short enemyId, short pathNodes[])
 	memset( pre, NO_CELL_REGISTERED, sizeof pre );
 	pre[startId] = startId;
 
-	PBT_PriorityQueue queue;
-	queue.addOrUpdate( startId, 0 );
+	PRIORITY_QUEUE queue = {.weight[EMPTY_KEY] = FLT_MAX};
+	priorityqueue_addorupdate(&queue, startId, 0);
 
 	int searchedNodes = 0;
 	short currentCell;
-	while (!queue.empty()) {
+	while (!priorityqueue_empty(&queue)) {
 		searchedNodes++;
-		currentCell = queue.getFirst();
+		currentCell = priorityqueue_getfirst(&queue);
 		if (mapcells_lineofsight(currentCell, enemyId)) {
 			int pathLength = 0;
 
@@ -550,11 +552,11 @@ mapcells_getpathtoattack(short startId, short enemyId, short pathNodes[])
 			    && navpoint_needstriggering(getNavpoint(nbg))
 			    && !navpoint_istriggered(getNavpoint(nbg))))
 				continue;
-			float value = queue.getValue(currentCell) + cell_getweight(&map.cellArray[currentCell], n);
+			float value = priorityqueue_getvalue(&queue, currentCell) + cell_getweight(&map.cellArray[currentCell], n);
 			float estimate = value;
-			if (queue.neverContained(nb) || estimate < queue.getWeight(nb)) {
+			if (priorityqueue_nevercontained(&queue, nb) || estimate < priorityqueue_getweight(&queue, nb)) {
 				pre[nb] = currentCell;
-				queue.addOrUpdate(nb, estimate, value);
+				priorityqueue_addorupdate(&queue, nb, estimate, value);
 			}
 		}
 	}
@@ -573,14 +575,14 @@ mapcells_getdirectedpathtoattack(short startId, short enemyId, Vec3D *dir, short
 	memset( pre, NO_CELL_REGISTERED, sizeof pre );
 	pre[startId] = startId;
 
-	PBT_PriorityQueue queue;
-	queue.addOrUpdate(startId, 0);
+	PRIORITY_QUEUE queue = {.weight[EMPTY_KEY] = FLT_MAX};
+	priorityqueue_addorupdate(&queue, startId, 0);
 
 	int searchedNodes = 0;
 	short currentCell;
-	while (!queue.empty()) {
+	while (!priorityqueue_empty(&queue)) {
 		searchedNodes++;
-		currentCell = queue.getFirst();
+		currentCell = priorityqueue_getfirst(&queue);
 		if (mapcells_lineofsight(currentCell, enemyId)) {
 			int pathLength = 0;
 
@@ -607,11 +609,11 @@ mapcells_getdirectedpathtoattack(short startId, short enemyId, Vec3D *dir, short
 			    && !navpoint_istriggered(getNavpoint(nbg)))
 			    || dotproduct(&opdir, dir) < 0.7f)
 				continue;
-			float value = queue.getValue(currentCell) + cell_getweight(&map.cellArray[currentCell], n);
+			float value = priorityqueue_getvalue(&queue, currentCell) + cell_getweight(&map.cellArray[currentCell], n);
 			float estimate = value;
-			if (queue.neverContained(nb) || estimate < queue.getWeight(nb)) {
+			if (priorityqueue_nevercontained(&queue, nb) || estimate < priorityqueue_getweight(&queue, nb)) {
 				pre[nb] = currentCell;
-				queue.addOrUpdate( nb, estimate, value );
+				priorityqueue_addorupdate(&queue, nb, estimate, value);
 			}
 		}
 	}
@@ -636,14 +638,14 @@ mapcells_getoffensivepath(short startId, short enemyId, float minDist, short pat
 	memset(pre, NO_CELL_REGISTERED, sizeof pre);
 	pre[startId] = startId;
 
-	PBT_PriorityQueue queue;
-	queue.addOrUpdate(startId, 0);
+	PRIORITY_QUEUE queue = {.weight[EMPTY_KEY] = FLT_MAX};
+	priorityqueue_addorupdate(&queue, startId, 0);
 
 	int searchedNodes = 0;
 	short currentCell;
-	while (!queue.empty()) {
+	while (!priorityqueue_empty(&queue)) {
 		searchedNodes++;
-		currentCell = queue.getFirst();
+		currentCell = priorityqueue_getfirst(&queue);
 		vsub(cell_pos2(&map.cellArray[currentCell]), &enemyPos, &dir);
 		if (mapcells_lineofsight( currentCell, enemyTarget ) && vlen(&dir) > minDist) {
 			int pathLength = 0;
@@ -669,11 +671,11 @@ mapcells_getoffensivepath(short startId, short enemyId, float minDist, short pat
 			    && !navpoint_istriggered(getNavpoint(nbg))))
 				continue;
 			float penalty = 0.5f * ((int)(!mapcells_lineofsight( nb, enemyId)));
-			float value = queue.getValue(currentCell) + cell_getweight(&map.cellArray[currentCell], n) + penalty;
+			float value = priorityqueue_getvalue(&queue, currentCell) + cell_getweight(&map.cellArray[currentCell], n) + penalty;
 			float estimate = value;
-			if (queue.neverContained(nb) || estimate < queue.getWeight(nb)) {
+			if (priorityqueue_nevercontained(&queue, nb) || estimate < priorityqueue_getweight(&queue, nb)) {
 				pre[nb] = currentCell;
-				queue.addOrUpdate(nb, estimate, value);
+				priorityqueue_addorupdate(&queue, nb, estimate, value);
 			}
 		}
 	}
@@ -688,15 +690,15 @@ mapcells_predictplayerpos(short startId, short ownId, short pathNodes[])
 	memset(pre, NO_CELL_REGISTERED, sizeof pre);
 	pre[startId] = startId;
 
-	PBT_PriorityQueue queue;
-	queue.addOrUpdate(startId, 0);
+	PRIORITY_QUEUE queue = {.weight[EMPTY_KEY] = FLT_MAX};
+	priorityqueue_addorupdate(&queue, startId, 0);
 
 	int searchedNodes = 0;
 	short currentCell;
-	while (!queue.empty()) {
+	while (!priorityqueue_empty(&queue)) {
 		searchedNodes++;
-		currentCell = queue.getFirst();
-		if (queue.size() > 5.0f) {
+		currentCell = priorityqueue_getfirst(&queue);
+		if (priorityqueue_size(&queue) > 5.0f) {
 			int pathLength = 0;
 
 			while (pre[currentCell] != currentCell) {
@@ -718,12 +720,12 @@ mapcells_predictplayerpos(short startId, short ownId, short pathNodes[])
 			    && !navpoint_istriggered(getNavpoint(nbg)))
 			    || mapcells_lineofsight(ownId, nb))
 				continue;
-			float value = queue.getValue(currentCell) + cell_getweight(&map.cellArray[currentCell], n);
+			float value = priorityqueue_getvalue(&queue, currentCell) + cell_getweight(&map.cellArray[currentCell], n);
 			float estimate = value;
-			if (queue.neverContained(nb)
-			    || estimate < queue.getWeight(nb)) {
+			if (priorityqueue_nevercontained(&queue, nb)
+			    || estimate < priorityqueue_getweight(&queue, nb)) {
 				pre[nb] = currentCell;
-				queue.addOrUpdate(nb, estimate, value);
+				priorityqueue_addorupdate(&queue, nb, estimate, value);
 			}
 		}
 	}
@@ -739,14 +741,14 @@ mapcells_getpathtoroamingtarget(short startId, EDICT *botEnt, short pathNodes[])
 	memset( pre, NO_CELL_REGISTERED, sizeof pre );
 	pre[startId] = startId;
 
-	PBT_PriorityQueue queue;
-	queue.addOrUpdate(startId, 0);
+	PRIORITY_QUEUE queue = {.weight[EMPTY_KEY] = FLT_MAX};
+	priorityqueue_addorupdate(&queue, startId, 0);
 
 	int searchedNodes = 0;
 	short currentCell;
-	while (!queue.empty()) {
+	while (!priorityqueue_empty(&queue)) {
 		searchedNodes++;
-		currentCell = queue.getFirst();
+		currentCell = priorityqueue_getfirst(&queue);
 		if (cell_issuitableroamingtarget(&map.cellArray[currentCell], botEnt)) {
 			int pathLength = 0;
 
@@ -768,11 +770,11 @@ mapcells_getpathtoroamingtarget(short startId, EDICT *botEnt, short pathNodes[])
 			    && navpoint_needstriggering(getNavpoint(nbg))
 			    && !navpoint_istriggered(getNavpoint(nbg))))
 				continue;
-			float value = queue.getValue(currentCell) + cell_getweight(&map.cellArray[currentCell], n);
+			float value = priorityqueue_getvalue(&queue, currentCell) + cell_getweight(&map.cellArray[currentCell], n);
 			float estimate = value;
-			if (queue.neverContained( nb ) || estimate < queue.getWeight(nb)) {
+			if (priorityqueue_nevercontained(&queue,  nb) || estimate < priorityqueue_getweight(&queue, nb)) {
 				pre[nb] = currentCell;
-				queue.addOrUpdate( nb, estimate, value );
+				priorityqueue_addorupdate(&queue, nb, estimate, value );
 			}
 		}
 	}

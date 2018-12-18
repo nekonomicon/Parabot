@@ -2,7 +2,6 @@
 #if !defined( PB_MapCells_H )
 #define PB_MapCells_H
 
-#include "pbt_priorityqueue.h"
 #include "pbt_dynarray.h"
 
 #define MAX_CELLS 8192

@@ -132,7 +132,7 @@ SRC =		../bot/bot.cpp \
 		../bot/vistable.cpp \
 		../bot/weapon.cpp \
 		../bot/weaponhandling.cpp \
-		../bot/pbt_priorityqueue.cpp \
+		../utils/priorityqueue.cpp \
 		../bot/sounds.cpp \
 		../bot/utilityfuncs.cpp \
 		../metamod/meta_api.cpp
