@@ -1,4 +1,4 @@
-#include "pb_goals.h"
+#include "goals.h"
 #include "parabot.h"
 #include "sectors.h"
 #include "vistable.h"
@@ -9,7 +9,8 @@ extern int mod_id;
 extern int botNr;
 extern int clientWeapon[32];
 
-void goalHuntEnemy( CParabot *pb, PB_Percept*item )
+void
+goal_huntenemy(CParabot *pb, PERCEPT *item)
 // hunt enemy that is trackable but currently not seen
 {
 	pb->reportEnemySpotted();	// not fully correct since not spotted yet...
@@ -38,16 +39,18 @@ void goalHuntEnemy( CParabot *pb, PB_Percept*item )
 	//botNr = pb->slot;	// film this!
 }
 
-float weightHuntEnemy( CParabot *pb, PB_Percept*item )
+float
+weight_huntenemy(CParabot *pb, PERCEPT *item)
 {
 	assert( item != 0 );
 	// only hunt players that haven't been seen yet and are trackable
-	if (item->hasBeenSpotted() || !(item->isTrackable())) return 0;
+	if (percept_hasbeenspotted(item) || !(percept_istrackable(item))) return 0;
 
 	return needs_wishforcombat(&pb->needs);
 }
 
-void goalFleeEnemy( CParabot *pb, PB_Percept*item )
+void
+goal_fleeenemy(CParabot *pb, PERCEPT *item)
 // flee taking cover
 {
 	int pl;
@@ -84,7 +87,8 @@ void goalFleeEnemy( CParabot *pb, PB_Percept*item )
 	}
 }
 
-float weightFleeEnemy(CParabot *pb, PB_Percept *item)
+float
+weight_fleeenemy(CParabot *pb, PERCEPT *item)
 {
 	if (item->distance > 150 && item->rating < 0) {
 		return (item->rating * item->rating);
@@ -92,7 +96,8 @@ float weightFleeEnemy(CParabot *pb, PB_Percept *item)
 	return 0;
 }
 
-void goalTakeCover( CParabot *pb, PB_Percept*item )
+void
+goal_takecover(CParabot *pb, PERCEPT *item)
 // move to next cover from enemy position
 {
 	pb->reportEnemySpotted();
@@ -120,50 +125,52 @@ void goalTakeCover( CParabot *pb, PB_Percept*item )
 	}
 }
 
-float weightTakeCover( CParabot *pb, PB_Percept*item )
+float
+weight_takecover(CParabot *pb, PERCEPT *item)
 {
 	assert(item != 0);
 
-	if ((worldtime() - item->lastSeenTime) > 1) return 0;	// not seen for too long
-	if (!item->hasBeenSpotted()) return 0;				// we haven't seen anything yet
+	if ((worldtime() - item->lastseentime) > 1) return 0;	// not seen for too long
+	if (!percept_hasbeenspotted(item)) return 0;				// we haven't seen anything yet
 	if (item->distance < 150) return 0;						// too close
 	if (item->rating > 0) return 0;							// we have advantage
 
 	float weight = needs_wishforcombat(&pb->needs) - item->rating;
 
 	// are we already in a combat? -> keep on to it!
-	if (item->isHurtingBot() || item->isAlert()) weight += 3;
+	if (percept_ishurtingbot(item) || percept_isalert(item)) weight += 3;
 
-	if (item->hasHighPriority()) {
+	if (percept_hashighpriority(item)) {
 		weight -= 2;
 	}
-	if (item->hasFocus()) weight += 1;	// stick to current enemy
+	if (percept_hasfocus(item)) weight += 1;	// stick to current enemy
 
 	return weight;
 }
 
-void goalCloseCombat( CParabot *pb, PB_Percept*item )
+void
+goal_closecombat(CParabot *pb, PERCEPT *item)
 // combat movements for short range
 {
 	assert( item != 0 );
 	pb->reportEnemySpotted();
 /*
 	float dist = vlen(pb->botPos() - item->entity->v.origin);
-	if ((dist < 800) && item->isVisible()) {
+	if ((dist < 800) && percept_isvisible(item)) {
 		pb->combat.closeCombatMovement( *item );
 		pb->setGoalMoveDescr( "CloseCombat" );
 	} else {
-		if (!item->isUnderPreemptiveFire()) {
-			pb->pathfinder.checkWay(item->lastSeenPos);
+		if (!percept_isunderpreemptivefire(item)) {
+			pb->pathfinder.checkWay(item->lastseenpos);
 			pb->setGoalMoveDescr("CloseCombat (Follow)");
 		} else {
 			pb->setGoalMoveDescr("CloseCombat (Preemptive)");
 		}
 	}
 	*/
-	if (item->distance < 100 && item->isVisible()) {
+	if (item->distance < 100 && percept_isvisible(item)) {
 		pb->setGoalMoveDescr("CloseCombat (vaBanque)");
-		action_setmovedir(&pb->action, &item->lastSeenPos, 0);
+		action_setmovedir(&pb->action, &item->lastseenpos, 0);
 		action_setmaxspeed(&pb->action);
 	} else if (pb->roamingIndex >= pb->roamingBreak && pb->huntingFor==item->entity ) {
 		// already hunting
@@ -189,49 +196,53 @@ void goalCloseCombat( CParabot *pb, PB_Percept*item )
 		}
 		pb->setGoalMoveDescr("CloseCombat (FindRoute)");
 	}
-	goalShootAtEnemy(pb, item);
+	goal_shootatenemy(pb, item);
 }
 
-float weightCloseCombat(CParabot *pb, PB_Percept *item)
+float
+weight_closecombat(CParabot *pb, PERCEPT *item)
 {
 	assert(item != 0);
 
-	if ((worldtime() - item->lastSeenTime) > 5) return 0;	// not seen for too long
+	if ((worldtime() - item->lastseentime) > 5) return 0;	// not seen for too long
 	//if (!pb->combat.weapon.bestWeaponUsable()) return 0;
-	if (!item->hasBeenSpotted()) return 0;				// we haven't seen anything yet
+	if (!percept_hasbeenspotted(item)) return 0;				// we haven't seen anything yet
 	if (item->distance < 100) return 15 + (item->rating / 5);	// va banque
 	if (item->rating < -3) return 0;						// too bad, better don't try that...
 
 	float weight = needs_wishforcombat(&pb->needs) + item->rating;
 
 	// are we already in a combat? -> keep on to it!
-	if (item->isHurtingBot() || item->isAlert()) weight += 3;
+	if (percept_ishurtingbot(item) || percept_isalert(item)) weight += 3;
 	// check if enemy is vulnerable near charger
-	if (!item->isMoving() && (item->entity->v.button & ACTION_USE)) {
+	if (!percept_ismoving(item) && (item->entity->v.button & ACTION_USE)) {
 		DEBUG_MSG( "ENEMY CHARGING...\n" );
 		weight += 2;
 	}
-	if (item->hasHighPriority()) {
+	if (percept_hashighpriority(item)) {
 		weight += 5;
 		//DEBUG_MSG( "Hunting the Saint!\n" );
 	}
-	if (item->hasFocus()) weight += 1;	// stick to current enemy
+	if (percept_hasfocus(item)) weight += 1;	// stick to current enemy
 
 	return weight;
 }
 
-void goalRangeAttack( CParabot *pb, PB_Percept*item )
+void
+goal_rangeattack(CParabot *pb, PERCEPT *item)
 // combat movements for medium to long range
 {
 }
 
-float weightRangeAttack( CParabot *pb, PB_Percept*item )
+float
+weight_rangeattack(CParabot *pb, PERCEPT *item)
 {
 	if (item->distance < 800) return 0;
 	return 0;
 }
 
-void goalSilentAttack( CParabot *pb, PB_Percept*item )
+void
+goal_silentattack(CParabot *pb, PERCEPT *item)
 // prepared fatal attack
 {
 //	botNr = pb->slot;
@@ -240,8 +251,8 @@ void goalSilentAttack( CParabot *pb, PB_Percept*item )
 
 	if (item->distance > 500) {		// too far to approach, just fire from current position
 		action_add(&pb->action, BOT_DUCK, NULL);
-		if (item->canBeAttackedBest()) {
-			combat_shootatenemy(&pb->combat, &item->lastSeenPos, 0.8);
+		if (percept_canbeattackedbest(item)) {
+			combat_shootatenemy(&pb->combat, &item->lastseenpos, 0.8);
 			pb->setGoalMoveDescr("SilentAttack (ShootDistance)");
 		} else {
 			pb->setGoalMoveDescr("SilentAttack (SwitchingWpn)");
@@ -259,13 +270,13 @@ void goalSilentAttack( CParabot *pb, PB_Percept*item )
 								break;
 		}
 		if (item->distance > 50) {
-			roaming_checkway(&pb->pathfinder, &item->lastSeenPos);	// get near...
+			roaming_checkway(&pb->pathfinder, &item->lastseenpos);	// get near...
 			pb->setGoalMoveDescr( "SilentAttack (Approaching)" );
 		} else {
 			action_add(&pb->action, BOT_DUCK, NULL);
-			if (item->canBeAttackedBest()) {	// ...and attack from there
-				//bool shot = pb->combat.shootAtEnemy(item->lastSeenPos, weaponhandling_currenthighaimprob(&pb->combat.weapon));
-				combat_shootatenemy(&pb->combat, &item->lastSeenPos, weaponhandling_currenthighaimprob(&pb->combat.weapon));
+			if (percept_canbeattackedbest(item)) {	// ...and attack from there
+				//bool shot = pb->combat.shootAtEnemy(item->lastseenpos, weaponhandling_currenthighaimprob(&pb->combat.weapon));
+				combat_shootatenemy(&pb->combat, &item->lastseenpos, weaponhandling_currenthighaimprob(&pb->combat.weapon));
 				pb->setGoalMoveDescr("SilentAttack (ShootClose)");
 			} else {
 				pb->setGoalMoveDescr("SilentAttack (SwitchingWpn)");
@@ -275,60 +286,62 @@ void goalSilentAttack( CParabot *pb, PB_Percept*item )
 	item->flags |= PI_FOCUS1;
 }
 
-float weightSilentAttack( CParabot *pb, PB_Percept*item )
+float
+weight_silentattack(CParabot *pb, PERCEPT *item)
 {
 	assert( item != 0 );
 	float weight = 0;
 
-	if (pb->senses.underFire() || !weaponhandling_bestweaponusable(&pb->combat.weapon)) return 0;
-	if (item->isVisible() && !item->isFacingBot() && !item->isMoving()) {
+	if (perception_underfire(&pb->senses) || !weaponhandling_bestweaponusable(&pb->combat.weapon)) return 0;
+	if (percept_isvisible(item) && !percept_isfacingbot(item) && !percept_ismoving(item)) {
 		weight = 15;
-		if (item->hasHighPriority()) weight += 5;
+		if (percept_hashighpriority(item)) weight += 5;
 	}
 	return weight;
 }
 
 #if 0
-void goalPrepareAmbush( CParabot *pb, PB_Percept*item )
+void
+goalprepareambush(CParabot *pb, PERCEPT *item)
 // move to ambush position and wait
 {
 }
 
-
-float weightPrepareAmbush( CParabot *pb, PB_Percept*item )
+float
+weight_prepareambush(CParabot *pb, PERCEPT *item)
 {
 	return 0;
 }
 #endif
 
-void goalShootAtEnemy( CParabot *pb, PB_Percept*item )
+void
+goal_shootatenemy(CParabot *pb, PERCEPT *item)
 // shooting
 {
 	bool fired = false;
 
 	assert( item != 0 );
 	//debugFile("ShootAtEnemy" );
-	if (item->isVisible()) {
-		if (item->isAimingAtBot() || item->isAlert())	{
+	if (percept_isvisible(item)) {
+		if (percept_isaimingatbot(item) || percept_isalert(item))	{
 		// enemy is aiming or alert: shoot with low accuracy
 			fired = combat_shootatenemy2(&pb->combat, item->entity, (weaponhandling_currenthighaimprob(&pb->combat.weapon) - 0.2f) / 2.0f );
 			pb->setGoalViewDescr( "ShootAtEnemy (LowAcc)" );
 		} else {
 		// else take time to aim well
-			if (item->canBeAttackedBest()) {
+			if (percept_canbeattackedbest(item)) {
 				fired = combat_shootatenemy2(&pb->combat, item->entity, weaponhandling_currenthighaimprob(&pb->combat.weapon));
 				pb->setGoalViewDescr("ShootAtEnemy (HighAcc)");
 			} else {
 				pb->setGoalViewDescr("ShootAtEnemy (SwitchingWpn)");
 			}
-			if (!pb->senses.underFire()) {
+			if (!perception_underfire(&pb->senses)) {
 				action_setspeed(&pb->action, 0);
 			}
 		}
 		if (fired) item->flags |= PI_ALERT;
-	}
-	else {			// enemy is not visible:
-		if ( item->hasJustDisappeared() ) {
+	} else {			// enemy is not visible:
+		if (percept_hasjustdisappeared(item)) {
 			// start debug
 /*			short path[128];
 			short start = mapcells_getcellid( pb->ent );
@@ -351,7 +364,7 @@ void goalShootAtEnemy( CParabot *pb, PB_Percept*item )
 			makevectors(&pb->ent->v.v_angle);
 			Vec3D botpos, pos, dir, prePos;
 			eyepos(pb->ent, &botpos);
-			vadd(&item->lastSeenPos, &item->entity->v.view_ofs, &pos);
+			vadd(&item->lastseenpos, &item->entity->v.view_ofs, &pos);
 			vsub(&pos, &botpos, &dir);
 			normalize(&dir);
 			float dot = dotproduct(&com.globals->fwd, &dir);
@@ -361,7 +374,7 @@ void goalShootAtEnemy( CParabot *pb, PB_Percept*item )
 				if (pb->ent->v.waterlevel == 3) flags |= WF_UNDERWATER;
 				int bestWeapon = weaponhandling_getbestweapon(&pb->combat.weapon, item->distance, action_targetaccuracy(&pb->action), flags );
 				float bestScore = weaponhandling_getweaponscore(&pb->combat.weapon, bestWeapon, item->distance, action_targetaccuracy(&pb->action), flags, true );
-				vma(&item->lastSeenPos, -0.05f, &item->lastSeenVelocity, &prePos);
+				vma(&item->lastseenpos, -0.05f, &item->lastseenvelocity, &prePos);
 				if ((bestScore > 0) && canshootat(pb->ent, &prePos)) {
 					//botNr = pb->slot;
 					//if ( !camPlayer ) startBotCam( edictofindex( 1 ) );
@@ -382,14 +395,14 @@ void goalShootAtEnemy( CParabot *pb, PB_Percept*item )
 			else DEBUG_MSG("Bot turned round or too near!\n");
 			pb->setGoalViewDescr("ShootAtEnemy (JustDisappeared)");
 		}
-		if (item->isUnderPreemptiveFire()) {
-			if (!pb->senses.underFire()) {
+		if (percept_isunderpreemptivefire(item)) {
+			if (!perception_underfire(&pb->senses)) {
 				//pb->action.setSpeed( 0 );
 			}
 			weaponhandling_setpreferredweapon(&pb->combat.weapon, pb->preemptiveWeapon, pb->preemptiveMode);
 			Vec3D prePos;
-			vma(&item->lastSeenPos, -0.05f, &item->lastSeenVelocity, &prePos);
-			if (item->canBeAttackedBest()) {
+			vma(&item->lastseenpos, -0.05f, &item->lastseenvelocity, &prePos);
+			if (percept_canbeattackedbest(item)) {
 				fired = combat_shootatenemy(&pb->combat, &prePos, 0.5f);
 				if (fired) pb->preemptiveFire = false;	// shoot only once
 				pb->setGoalViewDescr("ShootAtEnemy (Preemptive:Shoot)");
@@ -399,11 +412,11 @@ void goalShootAtEnemy( CParabot *pb, PB_Percept*item )
 				pb->setGoalViewDescr("ShootAtEnemy (Preemptive:SwitchingWpn)");
 			}
 		} else {
-			if (item->isTrackable()) {
-				action_setaimdir(&pb->action, item->predictedAppearance(pb->botPos()), NULL);
+			if (percept_istrackable(item)) {
+				action_setaimdir(&pb->action, percept_predictedappearance(item, pb->botPos()), NULL);
 				pb->setGoalViewDescr("ShootAtEnemy (Disappeared:PredictiveAiming)");
 			} else {
-				goalLookAround(pb, item);
+				goal_lookaround(pb, item);
 				pb->setGoalViewDescr("ShootAtEnemy (Disappeared:LookAround)");
 			}
 		}
@@ -412,39 +425,41 @@ void goalShootAtEnemy( CParabot *pb, PB_Percept*item )
 	item->flags |= PI_FOCUS1;	// focus on this one (arm weapons...)
 }
 
-
-float weightShootAtEnemy( CParabot *pb, PB_Percept*item )
+float
+weight_shootatenemy(CParabot *pb, PERCEPT *item)
 {
 	assert(item != 0);
 	float weight;
 
 	if (!weaponhandling_bestweaponusable(&pb->combat.weapon)) return 0;
 
-	if (!item->isTrackable()) {	// try to look at it:
-		if (item->isHurtingBot()) weight = 5;		// hidden attacker -> dangerous!
-		else weight = weightReactToUnidentified(pb, item);
+	if (!percept_istrackable(item)) {	// try to look at it:
+		if (percept_ishurtingbot(item)) weight = 5;		// hidden attacker -> dangerous!
+		else weight = weight_reacttounidentified(pb, item);
 	} else {	// we see or saw this one:
-		if (item->isHurtingBot() || item->isAimingAtBot()) weight = 5;	// shoot if he attacks us
-		else if (item->rating < -3 && !item->isFacingBot()) weight = 0;	// too bad, don't evoke attention
+		if (percept_ishurtingbot(item) || percept_isaimingatbot(item)) weight = 5;	// shoot if he attacks us
+		else if (item->rating < -3 && !percept_isfacingbot(item)) weight = 0;	// too bad, don't evoke attention
 		else weight = 2;							// default
 
-		if (!item->isVisible() && !item->isUnderPreemptiveFire()) weight *= 0.5f;	// still look in direction if no other enemy around
-		if (item->hasHighPriority() ) weight += 5;
+		if (!percept_isvisible(item) && !percept_isunderpreemptivefire(item)) weight *= 0.5f;	// still look in direction if no other enemy around
+		if (percept_hashighpriority(item) ) weight += 5;
 	}
-	if (weight > 0 && item->hasFocus()) weight += 1;	// stick to current enemy
+	if (weight > 0 && percept_hasfocus(item)) weight += 1;	// stick to current enemy
 
 	return weight;
 }
 
-float weightShootAtSnark( CParabot *pb, PB_Percept*item )
+float
+weight_shootatsnark(CParabot *pb, PERCEPT *item)
 {
 	float weight = 0.0f;
-	if (item->isVisible()) weight = (500 / item->distance);
+	if (percept_isvisible(item)) weight = (500 / item->distance);
 	if (weight>3) weight = 3;
 	return weight;
 }
 
-void goalBunnyHop( CParabot *pb, PB_Percept*item )
+void
+goal_bunnyhop(CParabot *pb, PERCEPT *item)
 {
 	static float nextHop[32];
 
@@ -459,24 +474,26 @@ void goalBunnyHop( CParabot *pb, PB_Percept*item )
 	pb->setGoalActDescr( "BunnyHop" );
 }
 
-float weightBunnyHop( CParabot *pb, PB_Percept*item )
+float
+weight_bunnyhop(CParabot *pb, PERCEPT *item)
 {
-	if (item->inflictorKnown()) return 1;
+	if (percept_inflictorknown(item)) return 1;
 	return 5;
 }
 
-void goalArmBestWeapon( CParabot *pb, PB_Percept*item )
+void
+goal_armbestweapon(CParabot *pb, PERCEPT *item)
 // chose best weapon
 {
 	float dist; 
 	float hitProb;
 	int botFlags = 0;
 
-	if (item && item->isTrackable()) {
+	if (item && percept_istrackable(item)) {
 		dist = item->distance;
 		hitProb = action_targetaccuracy(&pb->action);
-		if (item->isFacingBot()) {
-			if ( hitProb > 0.2f && item->targetAccuracy() > 0.2f ) 
+		if (percept_isfacingbot(item)) {
+			if ( hitProb > 0.2f && percept_targetaccuracy(item) > 0.2f ) 
 				botFlags |= WF_IMMEDIATE_ATTACK;	// both can shoot
 			else
 				botFlags |= WF_FAST_ATTACK;			// hurry up
@@ -485,8 +502,8 @@ void goalArmBestWeapon( CParabot *pb, PB_Percept*item )
 		}
 		Vec3D botPos;
 		vcopy(pb->botPos(), &botPos);
-		if (item->predictedAppearance(&botPos)->z > (botPos.z + 20)) botFlags |= WF_ENEMY_ABOVE;
-		else if (item->predictedAppearance(&botPos)->z < (botPos.z - 80)) botFlags |= WF_ENEMY_ABOVE;
+		if (percept_predictedappearance(item, &botPos)->z > (botPos.z + 20)) botFlags |= WF_ENEMY_ABOVE;
+		else if (percept_predictedappearance(item, &botPos)->z < (botPos.z - 80)) botFlags |= WF_ENEMY_ABOVE;
 		pb->combat.nextweaponcheck = worldtime() + CHECK_WEAPON_COMBAT;
 	} else {
 		dist = 250;		// expect medium distance
@@ -504,15 +521,16 @@ void goalArmBestWeapon( CParabot *pb, PB_Percept*item )
 	pb->setGoalActDescr( "ArmBestWeapon" );
 }
 
-float weightArmBestWeapon( CParabot *pb, PB_Percept*item )
+float
+weight_armbestweapon(CParabot *pb, PERCEPT *item)
 {
 	float weight = 0;
 
-	if (item && item->isTrackable() &&
-		 (worldtime() - item->firstDetection > 0.5f)) {	// aim a while before decision
+	if (item && percept_istrackable(item) &&
+		 (worldtime() - item->firstdetection > 0.5f)) {	// aim a while before decision
 		if (((worldtime() + CHECK_WEAPON_COMBAT) < pb->combat.nextweaponcheck) ||
 		     (worldtime() > pb->combat.nextweaponcheck ) ) weight = 5;
-		if (item->hasFocus()) weight = 10;
+		if (percept_hasfocus(item)) weight = 10;
 	} else {
 		if (worldtime() > pb->combat.nextweaponcheck) weight = 5;
 	}

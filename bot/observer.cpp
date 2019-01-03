@@ -718,27 +718,31 @@ observer_updatecellinfo(int i)
 				    + 3.0f * kills_fordir(&area, mapcells_getcell(obs[i].currentcell)->data.sectors))
 				    * (1.5f - moveDir.y);
 
+				bool newareafound = false;
 				Vec3D bp = obs[i].player->v.origin;
 				vcopy(&obs[i].player->v.origin, &bp);
 				if (fd1 > fd2 && fd1 > fd3 && fd1 > fd4) {
 					area.x = 1000.0f;
 					area.y = 0.0f;
-					bots[bNr].parabot->senses.addNewArea(&area);
+					newareafound = true;
 					//DEBUG_MSG("  VD=1  ");
 				} else if (fd2 > fd1 && fd2 > fd3 && fd2 > fd4) {
 					area.y = 1000.0f;
-					bots[bNr].parabot->senses.addNewArea(&area);
+					newareafound = true;
 					//DEBUG_MSG("  VD=2  ");
 				} else if (fd3 > fd1 && fd3 > fd2 && fd3 > fd4) {
 					area.x = -1000.0f;
 					area.y = 0.0f;
-					bots[bNr].parabot->senses.addNewArea(&area);
+					newareafound = true;
 					//DEBUG_MSG("  VD=3  ");
 				} else if (fd4 > fd1 && fd4 > fd2 && fd4 > fd3) {
 					area.y = -1000.0f;
-					bots[bNr].parabot->senses.addNewArea(&area);
+					newareafound = true;
 					// DEBUG_MSG("  VD=4  ");
 				}
+
+				if(newareafound)
+					perception_addnewarea(&bots[bNr].parabot->senses, &area);
 			}
 #if _DEBUG
 			if (visualizeCellConnections) {

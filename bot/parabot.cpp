@@ -41,7 +41,7 @@ CParabot::CParabot( EDICT *botEnt, int botSlot )
 CParabot::~CParabot()
 {
 	journey_cancel(&actualJourney);
-	senses.init( ent );
+	perception_init(&senses, ent);
 }
 
 
@@ -67,7 +67,7 @@ void CParabot::initAfterRespawn()
 	action_init(&action, ent);
 	roaming_init(&pathfinder, ent, &action );
 	combat_init(&combat, slot, ent, &action, &pathfinder );
-	senses.init( ent );
+	perception_init(&senses, ent);
 	needs_init(&needs, this);
 	
 	mustShootObject = false;
@@ -207,17 +207,18 @@ void CParabot::registerDamage( int amount, Vec3D *origin, int type )
 	player = ent->v.dmg_inflictor;
 	if ( player && strlen(STRING(player->v.netname)) > 0) found = true;
 */
+
 	if (found) {
 #if _DEBUG
 		const char *botName = STRING(ent->v.netname);
 		const char *inflictorName = STRING(player->v.netname);
 		DEBUG_MSG( "%s hurt by %s\n", botName, inflictorName );
 #endif
-		senses.addAttack( player, amount );
 	} else {
 		// DEBUG_MSG( "No damage inflictor found!\n" );
-		senses.addAttack( 0, amount );
+		player = NULL;
 	}
+	perception_addattack(&senses, player, amount);
 }
 
 
@@ -572,7 +573,7 @@ void CParabot::checkForTripmines()
 {
 	// TODO: only check when beam visible
 	TRACERESULT trAll, trHalf;
-	EDICT *mine = senses.getNearestTripmine();
+	EDICT *mine = perception_getnearesttripmine(&senses);
 	
 	if (!mine)
 		return;
@@ -825,7 +826,7 @@ void CParabot::followActualRoute()
 void CParabot::executeGoals()
 {
 	tGoalFunc	goalFunction;
-	PB_Percept	*trigger;
+	PERCEPT		*trigger;
 
 	goalfinder_check(&goalFinder);
 	goalfinder_synchronize(&goalFinder);
@@ -875,10 +876,10 @@ void CParabot::botThink()
 
 	action_reset(&action);		// initializes action flag and other variables
 
-	senses.collectData();
+	perception_collectdata(&senses);
 	goalfinder_init(&goalFinder, this);
 	goalfinder_analyzeunconditionalgoals(&goalFinder);
-	goalfinder_analyze(&goalFinder, senses);
+	goalfinder_analyze(&goalFinder, &senses);
 	//goalfinder_analyze(&goalFinder, tactics);
 
 	executeGoals();

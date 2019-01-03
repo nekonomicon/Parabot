@@ -16,7 +16,7 @@
 #include "roaming.h"
 #include "weapon.h"
 #include "weaponhandling.h"
-#include "pb_perception.h"
+#include "perception.h"
 #include "combat.h"
 #include "goalfinder.h"
 
@@ -81,7 +81,7 @@ public:
 	COMBAT	combat;
 	
 	// Perception module
-	PB_Perception senses;
+	PERCEPTION senses;
 
 	// GoalFinder module
 	GOALFINDER goalFinder;

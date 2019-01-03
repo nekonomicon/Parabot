@@ -57,7 +57,7 @@ static tWeaponRec valveWeapon[MAX_VALVE_WEAPONS] = {
 
 
 // Holywars Weaponlist
-static tWeaponRec holywarsWeapon[MAX_HW_WEAPONS] = { 
+static tWeaponRec holywarsWeapon[MAX_HW_WEAPONS]/* = { 
 	{ "",0,0.0,false,WV_NONE,WV_NONE,WF_NONE,WF_NONE,0.0 }, { "",0,0.0,false,WV_NONE,WV_NONE,WF_NONE,WF_NONE,0.0 },
 	{ "",0,0.0,false,WV_NONE,WV_NONE,WF_NONE,WF_NONE,0.0 }, { "",0,0.0,false,WV_NONE,WV_NONE,WF_NONE,WF_NONE,0.0 },
 	{ "",0,0.0,false,WV_NONE,WV_NONE,WF_NONE,WF_NONE,0.0 }, { "",0,0.0,false,WV_NONE,WV_NONE,WF_NONE,WF_NONE,0.0 },
@@ -73,7 +73,7 @@ static tWeaponRec holywarsWeapon[MAX_HW_WEAPONS] = {
 	{ "weapon_rocketlauncher", 400,		0.342,	0.4,		false,	WV_LOUD,	WV_NONE,	WF_BRIGHT,	WF_NONE,	0.0,	"rocketlauncher"},
 	{ "",						 0,		0.0,	0.0,		false,	WV_NONE,	WV_NONE,	WF_NONE,	WF_NONE,	0.0,	""				},	//   doesn't exist!
 	{ "weapon_railgun",		   600,		0.017,	0.5,		false,	WV_FLASH,	WV_NONE,	WF_NORMAL,	WF_NONE,	0.0,	"railgun"		},
-};
+}*/;
 
 
 // DMC Weaponlist

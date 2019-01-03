@@ -10,7 +10,8 @@
 #include "bot.h"
 #include "bot_func.h"
 #include "bot_weapons.h"
-#include "pb_goals.h"
+#include "mapimport.h"
+#include "goals.h"
 #include "chat.h"
 #include "observer.h"
 #include "configuration.h"
@@ -45,8 +46,6 @@ extern bool				g_GameRules;
 extern bool				pb_pause;
 extern int				numberOfClients;
 extern float airStrikeTime;
-void saveLevelData();
-bool loadLevelData();
 
 extern int debug_engine;
 static FILE *fp;
@@ -228,61 +227,61 @@ void BotCreate( int fixedPersNr )
 	pBot->parabot = ::new CParabot( botEnt, slot );
 	action_setaimskill(&pBot->parabot->action, personalities_get( persNr ).aimskill );
 	pBot->parabot->setAggression( personalities_get( persNr ).aggression );
-	pBot->parabot->senses.setSensitivity( personalities_get( persNr ).sensitivity );
+	perception_setsensitivity(&pBot->parabot->senses, personalities_get(persNr).sensitivity);
 	pBot->parabot->setCommunication( personalities_get( persNr ).communication );
 	
 	pBot->personality = persNr;
 
 	// add goals:
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_ACTION, GOAL_UNCONDITIONAL, goalArmBestWeapon, weightArmBestWeapon);
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, GOAL_UNCONDITIONAL, goalCollectItems, weightCollectItems);
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, GOAL_UNCONDITIONAL, goalCamp, weightCamp);
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, GOAL_UNCONDITIONAL, goalUseTank, weightUseTank);
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE | G_VIEW, GOAL_UNCONDITIONAL, goalLoadHealthOrArmor, weightLoadHealthOrArmor);
-	// goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, GOAL_UNCONDITIONAL, goalPause, weightPause);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_ACTION, GOAL_UNCONDITIONAL, goal_armbestweapon, weight_armbestweapon);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, GOAL_UNCONDITIONAL, goal_collectitems, weight_collectitems);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, GOAL_UNCONDITIONAL, goal_camp, weight_camp);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, GOAL_UNCONDITIONAL, goal_usetank, weight_usetank);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE | G_VIEW, GOAL_UNCONDITIONAL, goal_loadhealthorarmor, weight_loadhealthorarmor);
+	// goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, GOAL_UNCONDITIONAL, goal_pause, weight_pause);
 
 	if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) {
-		goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE | G_VIEW, GOAL_UNCONDITIONAL, goalLayTripmine, weightLayTripmine);
+		goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE | G_VIEW, GOAL_UNCONDITIONAL, goal_laytripmine, weight_laytripmine);
 	} else if (mod_id == HOLYWARS_DLL) {
-		goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, GOAL_UNCONDITIONAL, goalWaitAtNavpoint, weightWaitForHalo);
+		goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, GOAL_UNCONDITIONAL, goal_waitatnavpoint, weight_waitforhalo);
 	}
 
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_VIEW, PI_DAMAGE, goalLookAround, weightLookAroundDamage);
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_ACTION, PI_DAMAGE, goalBunnyHop, weightBunnyHop);
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_VIEW, PI_PLAYER, goalReactToUnidentified, weightReactToUnidentified);
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_VIEW, PI_NEWAREA, goalLookAtNewArea, weightLookAtNewArea);
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, PI_FRIEND, goalMakeRoom, weightMakeRoom);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_VIEW, PI_DAMAGE, goal_lookaround, weight_lookarounddamage);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_ACTION, PI_DAMAGE, goal_bunnyhop, weight_bunnyhop);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_VIEW, PI_PLAYER, goal_reacttounidentified, weight_reacttounidentified);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_VIEW, PI_NEWAREA, goal_lookatnewarea, weight_lookatnewarea);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, PI_FRIEND, goal_makeroom, weight_makeroom);
 
 	if (com.gamedll_flags & GAMEDLL_TEAMPLAY) {
-		goalfinder_addgoal(&pBot->parabot->goalFinder, G_ACTION, PI_FRIEND, goalAssistFire, weightAssistFire);
-		goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, PI_FRIEND, goalFollow, weightFollowLeader);
+		goalfinder_addgoal(&pBot->parabot->goalFinder, G_ACTION, PI_FRIEND, goal_assistfire, weight_assistfire);
+		goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, PI_FRIEND, goal_follow, weight_followleader);
 	}
 
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_VIEW, PI_FOE, goalLookAround, weightLookAroundPlayerSound);
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_ACTION, PI_FOE, goalArmBestWeapon, weightArmBestWeapon);
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_VIEW, PI_FOE, goalShootAtEnemy, weightShootAtEnemy);
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE | G_VIEW, PI_FOE, goalCloseCombat, weightCloseCombat);
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE | G_VIEW, PI_FOE, goalSilentAttack, weightSilentAttack);
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE | G_VIEW, PI_FOE, goalUseTank, weightUseTank);
-//	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE | G_VIEW, PI_FOE, goalRangeAttack, weightRangeAttack);
-//	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE | G_VIEW, PI_FOE, goalPrepareAmbush, weightPrepareAmbush);
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, PI_FOE, goalHuntEnemy, weightHuntEnemy);
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, PI_FOE, goalFleeEnemy, weightFleeEnemy);
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, PI_FOE, goalTakeCover, weightTakeCover);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_VIEW, PI_FOE, goal_lookaround, weight_lookaroundplayersound);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_ACTION, PI_FOE, goal_armbestweapon, weight_armbestweapon);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_VIEW, PI_FOE, goal_shootatenemy, weight_shootatenemy);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE | G_VIEW, PI_FOE, goal_closecombat, weight_closecombat);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE | G_VIEW, PI_FOE, goal_silentattack, weight_silentattack);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE | G_VIEW, PI_FOE, goal_usetank, weight_usetank);
+//	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE | G_VIEW, PI_FOE, goal_rangeattack, weight_rangeattack);
+//	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE | G_VIEW, PI_FOE, goal_prepareambush, weight_prepareambush);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, PI_FOE, goal_huntenemy, weight_huntenemy);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, PI_FOE, goal_fleeenemy, weight_fleeenemy);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, PI_FOE, goal_takecover, weight_takecover);
 
 	if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL) {
-		goalfinder_addgoal(&pBot->parabot->goalFinder, G_VIEW, PI_LASERDOT, goalLookAround, weightLookAroundLaserdot);
-		goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, PI_LASERDOT, goalGetAway, weightGetAwayLaserdot);
-		goalfinder_addgoal(&pBot->parabot->goalFinder, G_VIEW, PI_SNARK, goalShootAtEnemy, weightShootAtSnark);
-		goalfinder_addgoal(&pBot->parabot->goalFinder, G_ACTION, PI_SNARK, goalArmBestWeapon, weightArmBestWeapon);
+		goalfinder_addgoal(&pBot->parabot->goalFinder, G_VIEW, PI_LASERDOT, goal_lookaround, weight_lookaroundlaserdot);
+		goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, PI_LASERDOT, goal_getaway, weight_getawaylaserdot);
+		goalfinder_addgoal(&pBot->parabot->goalFinder, G_VIEW, PI_SNARK, goal_shootatenemy, weight_shootatsnark);
+		goalfinder_addgoal(&pBot->parabot->goalFinder, G_ACTION, PI_SNARK, goal_armbestweapon, weight_armbestweapon);
 	}
 
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, PI_WEAPONBOX, goalGetItem, weightGetWeaponbox);
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_VIEW, PI_EXPLOSIVE, goalLookAround, weightLookAroundDangerousSound);
-	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, PI_EXPLOSIVE, goalGetAway, weightGetAwayExplosive);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, PI_WEAPONBOX, goal_getitem, weight_getweaponbox);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_VIEW, PI_EXPLOSIVE, goal_lookaround, weight_lookarounddangeroussound);
+	goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, PI_EXPLOSIVE, goal_getaway, weight_getawayexplosive);
 
 	if (mod_id == HOLYWARS_DLL) {
-		goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, PI_HALO, goalGetItem, weightGetHalo);
+		goalfinder_addgoal(&pBot->parabot->goalFinder, G_MOVE, PI_HALO, goal_getitem, weight_gethalo);
 	}
 
 	DEBUG_MSG( "BOT CREATE.\n" );
@@ -858,7 +857,7 @@ void checkForMapChange()
 #if _DEBUG
 		glMarker.deleteAll();
 #endif
-		fatalParabotError = !loadLevelData();
+		fatalParabotError = !loadleveldata();
 		if (fatalParabotError) {
 			ERROR_MSG( "The map %s is corrupt and cannot be played with bots!\nPlease exit and pick another one.", STRING(com.globals->mapname) );
 		}

@@ -3,7 +3,7 @@
 #define PB_GOALFINDER_H
 
 #include "pb_global.h"
-#include "pb_perception.h"
+#include "perception.h"
 #include <list>
 #include <map>
 
@@ -17,8 +17,8 @@
 #define MAX_GOALS 4	// combinations!
 
 class CParabot;
-typedef void (*tGoalFunc)( CParabot*, PB_Percept* );
-typedef float (*tWeightFunc)( CParabot*, PB_Percept* );
+typedef void (*tGoalFunc)(CParabot*, PERCEPT*);
+typedef float (*tWeightFunc)(CParabot*, PERCEPT*);
 
 typedef struct {
 	int		type;			// goal class (parallism!)
@@ -31,7 +31,7 @@ typedef struct goalfinder {
 	tGoalList	 knowngoals;
 	CParabot	*bot;
 	tGoalFunc	 bestgoalfunction[MAX_GOALS];		// for each class
-	PB_Percept	*responsiblepercept[MAX_GOALS];
+	PERCEPT		*responsiblepercept[MAX_GOALS];
 	float		 bestweight[MAX_GOALS];
 } GOALFINDER;
 
@@ -39,7 +39,7 @@ void		 goalfinder_init(GOALFINDER *goalfinder, CParabot *pb);
 // initializes all necessary variables
 
 void		 goalfinder_addgoal(GOALFINDER *goalfinder, int goalClass, int triggerId, tGoalFunc gf, tWeightFunc wf);
-void		 goalfinder_analyze(GOALFINDER *goalfinder, PB_Perception &senses);
+void		 goalfinder_analyze(GOALFINDER *goalfinder, PERCEPTION *senses);
 void		 goalfinder_analyzeunconditionalgoals(GOALFINDER *goalfinder);
 void		 goalfinder_check(GOALFINDER *goalfinder);
 void		 goalfinder_synchronize(GOALFINDER *goalfinder);
@@ -48,7 +48,7 @@ void		 goalfinder_synchronize(GOALFINDER *goalfinder);
 tGoalFunc	 goalfinder_bestgoal(GOALFINDER *goalfinder, int nr);
 // returns a pointer to the best goal function
 
-PB_Percept	*goalfinder_trigger(GOALFINDER *goalfinder, int nr);
+PERCEPT		*goalfinder_trigger(GOALFINDER *goalfinder, int nr);
 // returns a pointer to the perception that caused the selection
 
 #endif

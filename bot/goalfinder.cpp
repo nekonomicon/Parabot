@@ -33,21 +33,21 @@ goalfinder_addgoal(GOALFINDER *goalfinder, int goalClass, int triggerId, tGoalFu
 }
 
 void
-goalfinder_analyze(GOALFINDER *goalfinder, PB_Perception &senses)
+goalfinder_analyze(GOALFINDER *goalfinder, PERCEPTION *senses)
 {
 	float weight;
 	int   type;
-	tPerceptionList *perception = senses.perceptionList();
+	tPerceptionList *perception = perception_list(senses);
 	tPerceptionList::iterator pli = perception->begin();
 
 	while ( pli != perception->end() ) {
 		/*PB_Percept dmgp = *pli;
-		if ( pli->pClass == PI_DAMAGE ) {
+		if ( pli->pclass == PI_DAMAGE ) {
 			DEBUG_MSG( "damage sensed\n" );
 		}*/
 		if ( worldtime() >= pli->update ) {
 			// rating only necessary for enemies:
-			if (pli->pClass == PI_FOE) {
+			if (pli->pclass == PI_FOE) {
 				assert (pli->entity != 0);
 				// check if enemy can see the bot
 				makevectors(&pli->entity->v.v_angle);
@@ -56,8 +56,8 @@ goalfinder_analyze(GOALFINDER *goalfinder, PB_Perception &senses)
 				normalize(&dir);
 				pli->orientation = dotproduct(&com.globals->fwd, &dir);
 				// weapon rating ( -5 .. +5 )
-				if (pli->hasBeenSpotted())
-					pli->rating = combat_getrating(&goalfinder->bot->combat, (*pli)); 
+				if (percept_hasbeenspotted(&(*pli)))
+					pli->rating = combat_getrating(&goalfinder->bot->combat, &(*pli));
 				else
 					pli->rating = 0;
 				
@@ -66,10 +66,10 @@ goalfinder_analyze(GOALFINDER *goalfinder, PB_Perception &senses)
 				//float hp = bot->action.targetAccuracy();
 				// DEBUG_MSG("HitProb = %.2f\n", hp );
 			}	
-			tGoalList::iterator gli = goalfinder->knowngoals.find(pli->pClass);
+			tGoalList::iterator gli = goalfinder->knowngoals.find(pli->pclass);
 			while (gli != goalfinder->knowngoals.end()) {
 				// DEBUG_MSG( "." );
-				assert(gli->first == pli->pClass);
+				assert(gli->first == pli->pclass);
 				type = gli->second.type;
 				tWeightFunc wf = gli->second.weight;
 				if (wf)
@@ -80,13 +80,13 @@ goalfinder_analyze(GOALFINDER *goalfinder, PB_Perception &senses)
 				if (weight > goalfinder->bestweight[type]) {
 					goalfinder->bestgoalfunction[type] = gli->second.goal;
 					goalfinder->responsiblepercept[type] = &(*pli);
-					assert(responsiblepercept[type]->pClass > 0 && goalfinder->responsiblepercept[type]->pClass <= MAX_PERCEPTION);
+					assert(responsiblepercept[type]->pclass > 0 && goalfinder->responsiblepercept[type]->pclass <= MAX_PERCEPTION);
 					goalfinder->bestweight[type] = weight;
 				}
 				// next goal for this perception:
 				do{
 					gli++;
-				} while ((gli != goalfinder->knowngoals.end()) && (gli->first != pli->pClass));
+				} while ((gli != goalfinder->knowngoals.end()) && (gli->first != pli->pclass));
 			}
 			// DEBUG_MSG( "\n" );
 		}
@@ -142,7 +142,7 @@ goalfinder_check(GOALFINDER *goalfinder)
 {
 	for (int i = 0; i < MAX_GOALS; i++) {
 		if (goalfinder->responsiblepercept[i] != 0) {
-			assert(goalfinder->responsiblepercept[i]->pClass > 0 && goalfinder->responsiblepercept[i]->pClass <= MAX_PERCEPTION);
+			assert(goalfinder->responsiblepercept[i]->pclass > 0 && goalfinder->responsiblepercept[i]->pclass <= MAX_PERCEPTION);
 		}
 	}
 }
@@ -153,7 +153,7 @@ goalfinder_bestgoal(GOALFINDER *goalfinder, int nr)
 	return goalfinder->bestgoalfunction[nr];
 }
 
-PB_Percept *
+PERCEPT *
 goalfinder_trigger(GOALFINDER *goalfinder, int nr)
 {
 	return goalfinder->responsiblepercept[nr];

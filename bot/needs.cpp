@@ -237,10 +237,10 @@ needs_valvewishlist(NEEDS *needs)
 
 	needs->wish[NAV_I_HEALTHKIT]     = needs_wishforhealth(needs);
 	needs->wish[NAV_F_HEALTHCHARGER] = needs_wishforhealth(needs);
-	if (needs->bot->senses.numEnemies > 0) needs->wish[NAV_F_HEALTHCHARGER] = 0;
+	if (needs->bot->senses.numenemies > 0) needs->wish[NAV_F_HEALTHCHARGER] = 0;
 	needs->wish[NAV_I_BATTERY]		  = needs_wishforarmor(needs);
 	needs->wish[NAV_F_RECHARGE]	  = needs_wishforarmor(needs);
-	if (needs->bot->senses.numEnemies > 0) needs->wish[NAV_F_RECHARGE] = 0;
+	if (needs->bot->senses.numenemies > 0) needs->wish[NAV_F_RECHARGE] = 0;
 
 	needs->wish[NAV_S_CAMPING] = needs_wishforsniping(needs, true) - 0.5;
 	needs->wish[NAV_F_TANKCONTROLS] = needs_wishforsniping(needs, false) - 0.5;
@@ -323,20 +323,20 @@ needs_hwwishlist(NEEDS *needs)
 		needs->wish[NAV_HW_HALOBASE] = 20;
 		needs->maxwish = needs->wish[NAV_HW_HALOBASE];
 		if (!needs->haloknownonbase) {
-			needs->bot->senses.resetPlayerClassifications();
+			perception_resetplayerclassifications(&needs->bot->senses);
 			needs->newitempriorities = true;
 			needs->haloknownonbase = true;
 		}
 		return;	// no other targets...
 	} else if (needs->haloknownonbase) {
-		needs->bot->senses.resetPlayerClassifications();
+		perception_resetplayerclassifications(&needs->bot->senses);
 		needs->newitempriorities = true;
 		needs->haloknownonbase = false;
 	}
 
 	needs->wish[NAV_I_HEALTHKIT]     = needs_wishforhealth(needs);
 	needs->wish[NAV_F_HEALTHCHARGER] = needs_wishforhealth(needs);
-	if (needs->bot->senses.numEnemies > 0) needs->wish[NAV_F_HEALTHCHARGER] = 0;
+	if (needs->bot->senses.numenemies > 0) needs->wish[NAV_F_HEALTHCHARGER] = 0;
 	needs->wish[NAV_I_BATTERY]		  = needs_wishforarmor(needs);
 
 	needs->wish[NAV_S_CAMPING] = needs_wishforsniping(needs, true)-0.5;
@@ -429,10 +429,10 @@ needs_gearboxwishlist(NEEDS *needs)
 
 	needs->wish[NAV_I_HEALTHKIT]     = needs_wishforhealth(needs);
 	needs->wish[NAV_F_HEALTHCHARGER] = needs_wishforhealth(needs);
-	if (needs->bot->senses.numEnemies > 0) needs->wish[NAV_F_HEALTHCHARGER] = 0;
+	if (needs->bot->senses.numenemies > 0) needs->wish[NAV_F_HEALTHCHARGER] = 0;
 	needs->wish[NAV_I_BATTERY]		  = needs_wishforarmor(needs);
 	needs->wish[NAV_F_RECHARGE]	  = needs_wishforarmor(needs);
-	if (needs->bot->senses.numEnemies > 0) needs->wish[NAV_F_RECHARGE] = 0;
+	if (needs->bot->senses.numenemies > 0) needs->wish[NAV_F_RECHARGE] = 0;
 
 	needs->wish[NAV_S_CAMPING] = needs_wishforsniping(needs, true) - 0.5;	
 	needs->wish[NAV_F_TANKCONTROLS] = needs_wishforsniping(needs, false) - 0.5;	
@@ -527,7 +527,7 @@ needs_hungerwishlist(NEEDS *needs)
 
 	needs->wish[NAV_I_HEALTHKIT]     = needs_wishforhealth(needs);
 	needs->wish[NAV_F_HEALTHCHARGER] = needs_wishforhealth(needs);
-	if (needs->bot->senses.numEnemies > 0) needs->wish[NAV_F_HEALTHCHARGER] = 0;
+	if (needs->bot->senses.numenemies > 0) needs->wish[NAV_F_HEALTHCHARGER] = 0;
 
 	needs->wish[NAV_S_CAMPING] = needs_wishforsniping(needs, true)-0.5;
 	needs->wish[NAV_F_TANKCONTROLS] = needs_wishforsniping(needs, false)-0.5;
@@ -632,10 +632,10 @@ needs_agwishlist(NEEDS *needs)
 
 	needs->wish[NAV_I_HEALTHKIT]     = needs_wishforhealth(needs);
 	needs->wish[NAV_F_HEALTHCHARGER] = needs_wishforhealth(needs);
-	if (needs->bot->senses.numEnemies > 0) needs->wish[NAV_F_HEALTHCHARGER] = 0;
+	if (needs->bot->senses.numenemies > 0) needs->wish[NAV_F_HEALTHCHARGER] = 0;
 	needs->wish[NAV_I_BATTERY]		  = needs_wishforarmor(needs);
 	needs->wish[NAV_F_RECHARGE]	  = needs_wishforarmor(needs);
-	if (needs->bot->senses.numEnemies > 0) needs->wish[NAV_F_RECHARGE] = 0;
+	if (needs->bot->senses.numenemies > 0) needs->wish[NAV_F_RECHARGE] = 0;
 
 	needs->wish[NAV_S_CAMPING] = needs_wishforsniping(needs, true)-0.5;	
 	needs->wish[NAV_F_TANKCONTROLS] = needs_wishforsniping(needs, false)-0.5;	

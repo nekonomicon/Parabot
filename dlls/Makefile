@@ -13,7 +13,7 @@ MODULE =	parabot
 ifneq ($(PB_64BIT),1)
 ifneq (, $(findstring x86_64, $(SYS)))
 CFLAGS +=	-m32
-LDFLAGS +=	-m32
+LDFLAGS +=	-m32 -Wl,-z,notext
 endif
 else
 ifneq (, $(findstring x86_64, $(SYS)))
@@ -110,22 +110,22 @@ SRC =		../bot/bot.cpp \
 		../bot/menu.cpp \
 		../bot/chat.cpp \
 		../bot/combat.cpp \
-		../bot/pb_combatgoals.cpp \
+		../bot/combatgoals.cpp \
 		../bot/configuration.cpp \
 		../bot/focus.cpp \
 		../bot/pb_global.cpp \
 		../bot/goalfinder.cpp \
-		../bot/pb_goals.cpp \
+		../bot/goals.cpp \
 		../bot/journey.cpp \
 		../bot/kills.cpp \
 		../bot/mapcells.cpp \
 		../bot/mapgraph.cpp \
-		../bot/pb_mapimport.cpp \
+		../bot/mapimport.cpp \
 		../bot/navpoint.cpp \
 		../bot/needs.cpp \
 		../bot/observer.cpp \
 		../bot/pb_path.cpp \
-		../bot/pb_perception.cpp \
+		../bot/perception.cpp \
 		../bot/personalities.cpp \
 		../bot/roaming.cpp \
 		../bot/sectors.cpp \
@@ -146,10 +146,10 @@ OBJ = $(SRC:%.cpp=%.o)
 all: $(LIBNAME)
 
 $(LIBNAME): $(OBJ)
-	$(CXX) $(OBJ) $(LDFLAGS) -o $(LIBNAME)
+	$(CXX) $(OBJ) $(LDFLAGS) -s -o $(LIBNAME)
 
 .cpp.o:
-	$(CXX) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
+	$(CXX) $(CFLAGS) $(CPPFLAGS) $(INCLUDES)  -c $< -o $@
 
 .PHONY: all clean
 

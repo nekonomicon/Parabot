@@ -28,7 +28,7 @@ typedef struct combat {
 void	combat_init(COMBAT *combat, int slot, EDICT *ent, ACTION *act, ROAMING *pFinder);
 // initializes all necessary variables
 
-float	combat_getrating(COMBAT *combat, PB_Percept &perceipt);
+float	combat_getrating(COMBAT *combat, PERCEPT *perceipt);
 // rates importance of enemy
 
 bool	combat_shootatenemy(COMBAT *combat, Vec3D *enemyOrigin, float accuracy);
@@ -37,9 +37,9 @@ bool	combat_shootatenemy(COMBAT *combat, Vec3D *enemyOrigin, float accuracy);
 bool	combat_shootatenemy2(COMBAT *combat, EDICT *enemy, float accuracy);
 // picks best place to shoot at and fires
 
-// void	combat_closecombatmovement(COMBAT *combat, PB_Percept &perceipt);
+// void	combat_closecombatmovement(COMBAT *combat, PERCEPT *perceipt);
 
-// void	combat_evade(COMBAT *combat, PB_Percept &perceipt, Vec3D *right);
+// void	combat_evade(COMBAT *combat, PERCEPT *perceipt, Vec3D *right);
 
 // void	combat_retreat(COMBAT *combat, EDICT *enemy);
 // flees from the enemy

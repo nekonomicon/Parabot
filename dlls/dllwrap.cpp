@@ -15,6 +15,7 @@
 #include "sectors.h"
 #include "vistable.h"
 #include "cell.h"
+#include "mapimport.h"
 #include "mapcells.h"
 #include "configuration.h"
 #include "personalities.h"
@@ -67,8 +68,6 @@ const CVAR *maxspeed;
 const CVAR *bm_cbar;
 const CVAR *bm_gluon;
 const CVAR *bm_trip;
-
-void saveLevelData();	// in pb_mapimport.cpp
 
 static void
 gameinit_wrap()
@@ -297,7 +296,7 @@ serverdeactivate_wrap()
 	if (!(com.gamedll_flags & GAMEDLL_METAMOD))
 		serverdeactivate();
 
-	saveLevelData();		// save last level's data
+	saveleveldata();		// save last level's data
 
 	if (com.gamedll_flags & GAMEDLL_METAMOD)
 		RETURN_META(MRES_IGNORED);

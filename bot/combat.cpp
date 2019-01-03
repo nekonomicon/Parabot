@@ -27,7 +27,7 @@ combat_classifydistance(float dist)
 }
 
 static void
-combat_evade(COMBAT *combat, PB_Percept &perceipt, Vec3D *right)
+combat_evade(COMBAT *combat, PERCEPT *perceipt, Vec3D *right)
 {
 	Vec3D dir;
 	float speed;
@@ -44,13 +44,13 @@ combat_evade(COMBAT *combat, PB_Percept &perceipt, Vec3D *right)
 		combat->nextstrafe = worldtime() + randomfloat(0.1f, 1.0f);
 	}
 
-	vsub(&perceipt.lastPos, &combat->botent->v.origin, &dir);
+	vsub(&perceipt->lastpos, &combat->botent->v.origin, &dir);
 	getright(&dir, right);
 
-	if (perceipt.distance > 300)
+	if (perceipt->distance > 300)
 		speed = 300;
 	else
-		speed = perceipt.distance;
+		speed = perceipt->distance;
 
 	if (combat->strafestate == 0) {
 		vscale(right, speed, right);
@@ -62,18 +62,18 @@ combat_evade(COMBAT *combat, PB_Percept &perceipt, Vec3D *right)
 }
 
 float
-combat_getrating(COMBAT *combat,  PB_Percept &perceipt)
+combat_getrating(COMBAT *combat,  PERCEPT *perceipt)
 // returns a value between -5 (dangerous, ignore) and +5 (easy victim, attack)
 {
-	EDICT *enemy = perceipt.entity;
+	EDICT *enemy = perceipt->entity;
 	assert(enemy != 0);
 	float adv = 0;
-	float enemyDist = perceipt.distance;
+	float enemyDist = perceipt->distance;
 	int botWeapon = weaponhandling_currentweapon(&combat->weapon);
 
-	if (is_invulnerable(perceipt.entity)) return -5;	// don't mess with this one!
+	if (is_invulnerable(perceipt->entity)) return -5;	// don't mess with this one!
 
-	if (perceipt.isFacingBot()) {
+	if (percept_isfacingbot(perceipt)) {
 		int clientIndex = indexofedict(enemy) - 1;
 		assert((clientIndex >= 0) && (clientIndex < 32));
 		int enemyWeapon = clientWeapon[clientIndex];
@@ -86,7 +86,7 @@ combat_getrating(COMBAT *combat,  PB_Percept &perceipt)
 			// enemy variables
 			int enemyFlags = 0;
 			if ( enemy->v.waterlevel == 3 ) enemyFlags |= WF_UNDERWATER;
-			float enemyHitProb = perceipt.targetAccuracy();
+			float enemyHitProb = percept_targetaccuracy(perceipt);
 			adv = weaponhandling_getweaponscore(&combat->weapon, botWeapon, enemyDist, botHitProb, botFlags, true )
 			    - weaponhandling_getweaponscore(&combat->weapon, enemyWeapon, enemyDist, enemyHitProb, enemyFlags, false );
 		}
@@ -199,16 +199,16 @@ combat_shootatenemy2(COMBAT *combat, EDICT *enemy, float accuracy)
 }
 
 static void
-combat_closecombatmovement(COMBAT *combat, PB_Percept &perceipt)
+combat_closecombatmovement(COMBAT *combat, PERCEPT *perceipt)
 // decides which reaction is most appropiate and calls either engage() or retreat()
 {
-	EDICT *enemy = perceipt.entity;
+	EDICT *enemy = perceipt->entity;
 	assert( enemy != 0 );
 	if (enemy==0) debugFile( " ENEMY=0 " );
 	if (combat->botent==0) debugFile( " BOT=0 " );
 	
 	// init distance to enemy
-	float enemyDist = perceipt.distance;
+	float enemyDist = perceipt->distance;
 		
 	// init bot variables
 	int botWeapon = weaponhandling_currentweapon(&combat->weapon);
@@ -226,7 +226,7 @@ combat_closecombatmovement(COMBAT *combat, PB_Percept &perceipt)
 	int enemyWeapon = clientWeapon[clientIndex];
 	int enemyFlags = WF_FAST_ATTACK;
 	if ( enemy->v.waterlevel == 3 ) enemyFlags |= WF_UNDERWATER;
-	float enemyHitProb = perceipt.targetAccuracy();
+	float enemyHitProb = percept_targetaccuracy(perceipt);
 
 	// chose move direction
 	combat->closeup=false; combat->gaindistance=false;
@@ -263,7 +263,7 @@ combat_closecombatmovement(COMBAT *combat, PB_Percept &perceipt)
 		case DMC_DLL:		closeDistanceWeapon = DMC_WEAPON_CROWBAR;
 							break;
 	}
-	if (perceipt.isVisible() && perceipt.isAimingAtBot()
+	if (percept_isvisible(perceipt) && percept_isaimingatbot(perceipt)
 	    && (botWeapon != closeDistanceWeapon))	// don't evade with this
 		combat_evade(combat, perceipt, &evadeMove);
 	if (combat->gaindistance) {	// bigger distance better
