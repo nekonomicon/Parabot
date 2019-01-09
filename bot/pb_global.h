@@ -3,7 +3,7 @@
 #define PB_GLOBAL_H
 
 #include "meta_api.h"
-#include "pb_path.h"
+#include "path.h"
 #include "assert.h"
 
 // define constants used to identify the MOD we are playing...
@@ -72,7 +72,7 @@ EDICT* getEntity( const char *classname, Vec3D *pos );
 // methods based on mapgraph:
 NAVPOINT *getNavpoint( int index );
 int getNavpointIndex( EDICT *entity );
-PB_Path* getPath( int pathId );
+PATH* getPath( int pathId );
 int getTotalAttempts();
 void incTotalAttempts();
 

@@ -65,7 +65,7 @@ int getNavpointIndex( EDICT *entity )
 }
 
 
-PB_Path* getPath( int pathId )
+PATH *getPath( int pathId )
 {
 	return mapgraph_findpath( pathId );
 }

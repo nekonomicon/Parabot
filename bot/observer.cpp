@@ -45,7 +45,7 @@ observer_clear(int oId)
 	obs[oId].active = false;
 	
 	for (int i = 0; i < MAX_WPTS; i++) {
-		obs[oId].waypoint[i].reset();
+		path_waypoint_reset(&obs[oId].waypoint[i]);
 	}
 #if _DEBUG
 	trail[oId].deleteAll();
@@ -289,10 +289,10 @@ observer_getstartindex(int oId, NAVPOINT *endNav)
 	int dbgCnt1 = 0;
 	while (foundIndex < 0 && currentIndex != lastIndex && dbgCnt1++ < 1000) {
 		int dbgCnt2 = 0;
-		while (!obs[oId].waypoint[currentIndex].isNavpoint() && currentIndex != lastIndex && dbgCnt2++ < 1000) {
-			if (obs[oId].waypoint[currentIndex].needsTriggerForPlat()) {
-				//NAVPOINT *plat = &mapgraph[obs[oId].platinfo[currentIndex].data.navId].first;
-				NAVPOINT *plat = getNavpoint(obs[oId].platinfo[currentIndex].data.navId);
+		while (!path_waypoint_isnavpoint(&obs[oId].waypoint[currentIndex]) && currentIndex != lastIndex && dbgCnt2++ < 1000) {
+			if (path_waypoint_needstriggerforplat(&obs[oId].waypoint[currentIndex])) {
+				//NAVPOINT *plat = &mapgraph[obs[oId].platinfo[currentIndex].navid].first;
+				NAVPOINT *plat = getNavpoint(obs[oId].platinfo[currentIndex].navid);
 				bool platRegistered = false;
 				for (int i = (triggerCount - 1); i >= 0; i--) {
 					if (trigger[i] == plat) {
@@ -310,8 +310,8 @@ observer_getstartindex(int oId, NAVPOINT *endNav)
 			if (currentIndex < 0)
 				currentIndex = MAX_WPTS - 1;
 		}
-		if (obs[oId].waypoint[currentIndex].isNavpoint()) {
-			NAVPOINT *currentNav = mapgraph_getnearestnavpoint(&obs[oId].waypoint[currentIndex].data.pos);
+		if (path_waypoint_isnavpoint(&obs[oId].waypoint[currentIndex])) {
+			NAVPOINT *currentNav = mapgraph_getnearestnavpoint(&obs[oId].waypoint[currentIndex].pos);
 			bool allTriggersOk = true;
 			for (int i = 0; i < triggerCount; i++) {
 				if (navpoint_istriggerfor(currentNav, trigger[i]))
@@ -341,7 +341,7 @@ static void
 observer_newnavpointreached(int oId, Vec3D *pos, NAVPOINT *endNav)
 {
 	Vec3D dir;
-	PB_Path newPath;
+	PATH newPath;
 	bool passingPlatform = false;
 	bool passingTeleporter = false;
 
@@ -364,25 +364,25 @@ observer_newnavpointreached(int oId, Vec3D *pos, NAVPOINT *endNav)
 		int startIndex = observer_getstartindex( oId, endNav );
 		if (startIndex != -1) {	// beginning of this path was recorded
 			int pathMode = PATH_NORMAL;
-			NAVPOINT *startNav = mapgraph_getnearestnavpoint(&obs[oId].waypoint[startIndex].data.pos);
-			newPath.startRecord( navpoint_id(startNav), obs[oId].waypoint[startIndex].data.arrival );
+			NAVPOINT *startNav = mapgraph_getnearestnavpoint(&obs[oId].waypoint[startIndex].pos);
+			path_startrecord(&newPath, navpoint_id(startNav), obs[oId].waypoint[startIndex].arrival );
 			int currentIndex = startIndex;
 			int dbgCnt = 0;
 			while (currentIndex != obs[oId].leadwaypoint && dbgCnt++ < 1000) {
 				currentIndex++;
 				if (currentIndex == MAX_WPTS)
 					currentIndex = 0;
-				newPath.addWaypoint(&obs[oId].waypoint[currentIndex].data.pos, 
-									 obs[oId].waypoint[currentIndex].data.act, 
-									 obs[oId].waypoint[currentIndex].data.arrival );
-				if (obs[oId].waypoint[currentIndex].isOnPlatform()) {
+				path_addwaypoint(&newPath, &obs[oId].waypoint[currentIndex].pos, 
+									 obs[oId].waypoint[currentIndex].act, 
+									 obs[oId].waypoint[currentIndex].arrival );
+				if (path_waypoint_isonplatform(&obs[oId].waypoint[currentIndex])) {
 					passingPlatform = true;
-					newPath.addPlatformInfo(obs[oId].platinfo[currentIndex].data.navId,
-					&obs[oId].platinfo[currentIndex].data.pos);
+					path_addplatforminfo(&newPath, obs[oId].platinfo[currentIndex].navid,
+					&obs[oId].platinfo[currentIndex].pos);
 				}
-				if (obs[oId].waypoint[currentIndex].action() == BOT_LONGJUMP) 
+				if (path_waypoint_action(&obs[oId].waypoint[currentIndex]) == BOT_LONGJUMP) 
 					pathMode |= PATH_NEED_LONGJUMP;
-				if (obs[oId].waypoint[currentIndex].causedDamage() )
+				if (path_waypoint_causeddamage(&obs[oId].waypoint[currentIndex]) )
 					pathMode |= PATH_CAUSES_DAMAGE;
 			}
 			/*if (dbgCnt == 1000) {
@@ -392,12 +392,12 @@ observer_newnavpointreached(int oId, Vec3D *pos, NAVPOINT *endNav)
 			}*/
 			if (pathMode & PATH_NEED_LONGJUMP) DEBUG_MSG( "PATH NEEDS LONGJUMP!\n" );
 			if (pathMode & PATH_CAUSES_DAMAGE) DEBUG_MSG( "PATH CAUSES DAMAGE!\n" );
-			newPath.stopRecord(navpoint_id(endNav), worldtime(), pathMode );
+			path_stoprecord(&newPath, navpoint_id(endNav), worldtime(), pathMode );
 			// don't add return paths for teleporters and platforms
 			if (passingPlatform || passingTeleporter) 
-				mapgraph_addifimprovement( newPath, false );
+				mapgraph_addifimprovement( &newPath, false );
 			else
-				mapgraph_addifimprovement( newPath );
+				mapgraph_addifimprovement( &newPath );
 		}
 
 		// bots report visits in their movement-code, so this is for players only:
@@ -640,12 +640,12 @@ observer_checkplayerhealth(int oId)
 	}
 	if (obs[oId].player->v.dmg_take > 0) {
 		if ((worldtime() - obs[oId].falltime) < 0.3f) {
-			obs[oId].waypoint[obs[oId].leadwaypoint].data.act |= WP_DMG_OCURRED;
+			obs[oId].waypoint[obs[oId].leadwaypoint].act |= WP_DMG_OCURRED;
 			//observedPathMode[oId] |= PATH_CAUSES_DAMAGE;
 			//DEBUG_MSG( "Fall " );
 		} else if ((obs[oId].player->v.watertype == CONTENTS_LAVA) ||
 			(obs[oId].player->v.watertype == CONTENTS_SLIME)) {
-			obs[oId].waypoint[obs[oId].leadwaypoint].data.act |= WP_DMG_OCURRED;
+			obs[oId].waypoint[obs[oId].leadwaypoint].act |= WP_DMG_OCURRED;
 			//observedPathMode[oId] |= PATH_CAUSES_DAMAGE;
 			//DEBUG_MSG( "Slime/Lava " );
 		}
@@ -849,14 +849,15 @@ observer_addwaypoint(int oId, Vec3D *pos, int action, int col)
 {
 	EDICT *plat;
 	int flags = observer_checkground(oId, &plat);
-	PB_Path_Waypoint wp( pos, (action | flags), worldtime() );
+	PATH_WAYPOINT wp = {.pos = *pos, .act = (action | flags), .arrival = worldtime()};
+
 	obs[oId].leadwaypoint++;
 	if (obs[oId].leadwaypoint==MAX_WPTS) obs[oId].leadwaypoint = 0;
 	// DEBUG_MSG( "Added WP %i at (%.f, %.f)\n", obs[oId].leadwaypoint, pos.x, pos.y );
 	obs[oId].waypoint[obs[oId].leadwaypoint] = wp;
-	if( wp.isOnPlatform() && plat )
+	if( path_waypoint_isonplatform(&wp) && plat )
 	{
-		PB_Path_Platform pf(obs[oId].lastplatid, &plat->v.absmin );
+		PATH_PLATFORM pf = {.navid = obs[oId].lastplatid, .pos = plat->v.absmin};
 		obs[oId].platinfo[obs[oId].leadwaypoint] = pf;
 	}
 	obs[oId].lastwptime = worldtime();
@@ -867,7 +868,7 @@ observer_addwaypoint(int oId, Vec3D *pos, int action, int col)
 	else col = 2;
 	int mid = trail[oId].newMarker( pos, col );
 	markerId[oId].push( mid );
-	
+
 	if (markerId[oId].size() > MAX_WPTS) {
 		int	mid = markerId[oId].front();
 		trail[oId].deleteMarker( mid );
@@ -876,7 +877,7 @@ observer_addwaypoint(int oId, Vec3D *pos, int action, int col)
 	*/
 }
 
-PB_Path_Waypoint
+PATH_WAYPOINT *
 observer_getnextwaypoint(int botId)
 // returns the next waypoint to follow player with observer id
 {
@@ -887,7 +888,7 @@ observer_getnextwaypoint(int botId)
 		DEBUG_MSG( " NoWP " );
 		return PB_Path_Waypoint( observedPlayer[nr]->pev->origin, WP_NOT_REACHABLE );
 	}*/
-	return obs[nr].waypoint[obs[botId].currentwaypoint];
+	return &obs[nr].waypoint[obs[botId].currentwaypoint];
 }
 
 void
@@ -916,7 +917,7 @@ observer_shouldfollow(int botId, EDICT *bot)
 
 	// always execute jump to avoid slow-downs
 	assert(bot != 0);
-	if ((observer_getnextwaypoint(botId).action() == BOT_JUMP) ||
+	if ((path_waypoint_action(observer_getnextwaypoint(botId)) == BOT_JUMP) ||
 	    !(bot->v.flags & FL_ONGROUND))
 		return true;
 

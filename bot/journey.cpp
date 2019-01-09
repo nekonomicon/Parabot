@@ -18,7 +18,7 @@ journey_continues(JOURNEY *journey)
 	return (!journey->pathlist.empty());
 }
 
-PB_Path *
+PATH *
 journey_getnextpath(JOURNEY *journey)
 // returns the next path of the journey
 { 

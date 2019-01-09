@@ -10,7 +10,7 @@
 #define GRAPH_ONEWAY		0
 #define GRAPH_BIDIRECTIONAL	1
 
-typedef std::multimap<int, PB_Path> AdjList;		// key is target navpoint
+typedef std::multimap<int, PATH> AdjList;		// key is target navpoint
 typedef std::pair<NAVPOINT, AdjList> Node;
 typedef PBT_DynArray<Node> GraphType;
 
@@ -38,7 +38,7 @@ int		 mapgraph_numberofpaths();
 //Node& operator[](int i)  { return graph[i]; }	// access to node i
 Node		*mapgraph_getnode(int i);
 
-PB_Path		*mapgraph_findpath( int id );
+PATH		*mapgraph_findpath( int id );
 // returns a pointer to path id or 0 if it doesn't exist
 
 bool		 mapgraph_itemavailable(int itemCode);
@@ -47,10 +47,10 @@ bool		 mapgraph_itemavailable(int itemCode);
 bool		 mapgraph_addnavpoint(NAVPOINT *navpoint);
 // adds navpoint to graph
 
-bool		 mapgraph_addpath(PB_Path &path, int directed, bool idInit = true);
+bool		 mapgraph_addpath(PATH *path, int directed, bool idInit = true);
 // adds path to graph, if idInit is true path.id gets initialized
 
-void		 mapgraph_addifimprovement(PB_Path &path, bool addReturn = true);
+void		 mapgraph_addifimprovement(PATH *path, bool addReturn = true);
 // checks if any of the directions is improvement to graph, any improvement is added
 // deleting existing (slower) path
 // if path is not used, all path data get deleted!

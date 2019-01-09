@@ -202,11 +202,11 @@ goal_collectitems(CParabot *pb, PERCEPT *item)
 	if (pb->actualPath)	{				// on path?
 		char buffer[256];
 		strcpy( buffer, "CollectItems (" );
-		strcat( buffer, navpoint_classname(pb->actualPath->endNav()));
+		strcat( buffer, navpoint_classname(path_endnav(pb->actualPath)));
 		if (journey_continues(&pb->actualJourney)) {
 			strcat( buffer, ", " );
 			int pathId = pb->actualJourney.pathlist.back();
-			strcat( buffer, navpoint_classname(getPath(pathId)->endNav()));
+			strcat( buffer, navpoint_classname(path_endnav(getPath(pathId))));
 		}
 		strcat( buffer, ")" );
 		pb->setGoalMoveDescr( buffer );
@@ -578,15 +578,15 @@ goal_follow(CParabot *pb, PERCEPT *item)
 	}
 	
 	if ( observer_shouldfollow( pb->slot, pb->ent ) ) {
-		PB_Path_Waypoint wp = observer_getnextwaypoint( pb->slot );
-		if (wp.reached( pb->ent )) {
+		PATH_WAYPOINT *wp = observer_getnextwaypoint( pb->slot );
+		if (path_waypoint_reached(wp, pb->ent)) {
 			// DEBUG_MSG( "WP reached, act=%i\n", wp.action() );
-			action_add(&pb->action, wp.action(), wp.pos() );	// if there's something to do...
+			action_add(&pb->action, path_waypoint_action(wp), path_waypoint_pos(wp));	// if there's something to do...
 			observer_reportwaypointreached( pb->slot );		// confirm waypoint
 		}
 		
 		action_setviewdir(&pb->action, &pb->partner->v.origin, 0);		// set viewAngle
-		action_setmovedir(&pb->action, wp.pos(pb->ent), 0);				// set moveAngle and speed
+		action_setmovedir(&pb->action, path_waypoint_pos(wp, pb->ent), 0);				// set moveAngle and speed
 		action_setmaxspeed(&pb->action);
 		pb->pathCheckWay();	
 		if (observer_cannotfollow( pb->slot )) {
@@ -642,7 +642,7 @@ goal_makeroom(CParabot *pb, PERCEPT *item)
 		Vec3D forward, right;
 
 		if (pb->actualPath)
-			vsub(pb->waypoint.pos(pb->ent), pb->botPos(), &forward);
+			vsub(path_waypoint_pos(&pb->waypoint, pb->ent), pb->botPos(), &forward);
 		else
 			action_getmovedir(&pb->action, &forward);
 		normalize(&forward);

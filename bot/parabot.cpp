@@ -73,7 +73,7 @@ void CParabot::initAfterRespawn()
 	mustShootObject = false;
 	stoppedForPlat = false;
 	if (actualPath) {
-		actualPath->reportTargetFailed();
+		path_reporttargetfailed(actualPath);
 		journey_savepathdata(&actualJourney);
 		actualPath = 0;
 	}
@@ -265,8 +265,8 @@ bool CParabot::hasLongJump()
 void CParabot::reportEnemySpotted()
 {
 	if (actualPath) {
-		actualPath->reportEnemySpotted();
-		actualPath->cancelAttempt();
+		path_reportenemyspotted(actualPath);
+		path_cancelattempt(actualPath);
 		journey_savepathdata(&actualJourney);
 		journey_cancel(&actualJourney);
 		actualPath = 0;
@@ -325,8 +325,8 @@ bool CParabot::getJourneyTarget()
 		// NAVPOINT *nav = getNavpoint( targetNav );
 		actualPath = journey_getnextpath(&actualJourney);
 		assert( actualPath != 0 );
-		actualPath->startAttempt( worldtime() );
-		waypoint = actualPath->getNextWaypoint();
+		path_startattempt(actualPath, worldtime());
+		path_getnextwaypoint(actualPath, &waypoint);
 		botState = PB_ON_TOUR;
 		// DEBUG_MSG( "Switched to ON_TOUR, approach ");  
 		//nav.print();  DEBUG_MSG( "\n" );
@@ -418,9 +418,9 @@ void CParabot::pathFinished()
 {
 	// DEBUG_MSG( "Path finished\n" );
 	assert(actualPath != 0);
-	actualPath->reportTargetReached( ent, worldtime() );
+	path_reporttargetreached(actualPath, ent, worldtime());
 	journey_savepathdata(&actualJourney);
-	actualNavpoint = actualPath->endNav();
+	actualNavpoint = path_endnav(actualPath);
 	if (needs_newpriorities(&needs)) {
 		journey_cancel(&actualJourney);		// cancel current journey
 		actualPath = 0;				// set actualPath to 0 to invoke new journey
@@ -429,12 +429,12 @@ void CParabot::pathFinished()
 	} else if (journey_continues(&actualJourney)) {
 		actualPath = journey_getnextpath(&actualJourney);
 		assert(actualPath != 0);
-		actualPath->startAttempt(worldtime());
-		waypoint = actualPath->getNextWaypoint();
-		if (navpoint_type(actualPath->startNav()) == NAV_S_BUTTON_SHOT) {
-			if (navpoint_istriggerfor(actualPath->startNav(), actualPath->endNav())) {
+		path_startattempt(actualPath, worldtime());
+		path_getnextwaypoint(actualPath, &waypoint);
+		if (navpoint_type(path_startnav(actualPath)) == NAV_S_BUTTON_SHOT) {
+			if (navpoint_istriggerfor(path_startnav(actualPath), path_endnav(actualPath))) {
 				// bot must shoot this button!
-				vcopy(navpoint_pos(getNavpoint(navpoint_special(actualPath->startNav()))), &shootObjectPos);
+				vcopy(navpoint_pos(getNavpoint(navpoint_special(path_startnav(actualPath)))), &shootObjectPos);
 				mustShootObject = true;
 			}
 		}
@@ -453,7 +453,7 @@ void CParabot::pathFailed()
 	actualPath->print();
 	DEBUG_MSG( " failed\n" );
 #endif
-	actualPath->reportTargetFailed();
+	path_reporttargetfailed(actualPath);
 	journey_savepathdata(&actualJourney);
 	actualNavpoint = 0;
 	actualPath = 0;
@@ -527,7 +527,7 @@ void CParabot::pathCheckWay()
 
 	if ( actualPath ) {
 		// check if some breakable object needs to be destroyed
-		NAVPOINT *target = actualPath->endNav();
+		NAVPOINT *target = path_endnav(actualPath);
 		assert( target != 0 );
 		if (navpoint_type(target) == NAV_F_BREAKABLE ) {
 			if (!navpoint_entity(target)) {
@@ -542,10 +542,10 @@ void CParabot::pathCheckWay()
 			}
 		}
 		// check if bot needs to wait for platform
-		if (actualPath->waitForPlatform() ) {
+		if (path_waitforplatform(actualPath)) {
 			Vec3D lastPos, platPos, dir, size = {2.0f, 2.0f, 2.0f};
-			actualPath->getLastWaypointPos(ent, &lastPos);
-			actualPath->nextPlatformPos(&platPos);
+			path_getlastwaypointpos(actualPath, ent, &lastPos);
+			path_nextplatformpos(actualPath, &platPos);
 			vsub(&platPos, &lastPos, &dir);
 
 			if (vlen(&dir) < 50  &&
@@ -610,12 +610,12 @@ void CParabot::checkForTripmines()
 	}
 
 	if (actualPath) {	// check if tripmine pathtarget
-		if (navpoint_type(actualPath->endNav()) == NAV_S_USE_TRIPMINE) {
+		if (navpoint_type(path_endnav(actualPath)) == NAV_S_USE_TRIPMINE) {
 			Vec3D dir;
 			float mineDist, botDist;
-			vsub(navpoint_pos(actualPath->endNav()), &mine->v.origin, &dir);
+			vsub(navpoint_pos(path_endnav(actualPath)), &mine->v.origin, &dir);
 			mineDist = vlen(&dir);
-			vsub(navpoint_pos(actualPath->endNav()), &ent->v.origin, &dir);
+			vsub(navpoint_pos(path_endnav(actualPath)), &ent->v.origin, &dir);
 			botDist = vlen(&dir);
 			if ( (mineDist < 50) && (botDist < 100) ) {
 				DEBUG_MSG( "Canceling path - tripmine found at end!\n" );
@@ -625,12 +625,11 @@ void CParabot::checkForTripmines()
 	}
 }
 
-
 void CParabot::followActualPath()
 {
 	assert( actualPath != 0 );
 
-	if (actualPath->finished(ent)) {
+	if (path_finished(actualPath, ent)) {
 		pathFinished();
 	} else {
 		if (mustShootObject) {
@@ -655,15 +654,15 @@ void CParabot::followActualPath()
 			} else
 				return;	// don't do anything else...
 		}
-		if (waypoint.reached( ent )) {
+		if (path_waypoint_reached(&waypoint, ent)) {
 			Vec3D wpos;
-			vcopy(waypoint.pos(ent), &wpos);
-			action_add(&action, actualPath->getNextAction(), &wpos);	// if there's something to do...
-			actualPath->reportWaypointReached();		// confirm waypoint
+			vcopy(path_waypoint_pos(&waypoint, ent), &wpos);
+			action_add(&action, path_getnextaction(actualPath), &wpos);	// if there's something to do...
+			path_reportwaypointreached(actualPath);		// confirm waypoint
 #if _DEBUG
 			Vec3D oldWP = waypoint.pos( ent );
 #endif
-			waypoint = actualPath->getNextWaypoint();	// get next one
+			path_getnextwaypoint(actualPath, &waypoint);	// get next one
 #if _DEBUG
 			debugBeam( waypoint.pos( ent ), oldWP, 50, 1 );
 			float wpd = vlen(vsub(waypoint.pos(ent), oldWP));
@@ -672,15 +671,15 @@ void CParabot::followActualPath()
 		}
 		int prior;
 		Vec3D proposedViewPos;
-		actualPath->getViewPos(ent, &prior, &proposedViewPos);
+		path_getviewpos(actualPath, ent, &prior, &proposedViewPos);
 		action_setviewdir(&action, &proposedViewPos, prior);	// set viewAngle
-		action_setmovedir(&action, waypoint.pos(ent), 0);		// set moveAngle and speed
+		action_setmovedir(&action, path_waypoint_pos(&waypoint, ent), 0);		// set moveAngle and speed
 
-		if (!(is_underwater(ent) || waypoint.isOnLadder())) {
+		if (!(is_underwater(ent) || path_waypoint_isonladder(&waypoint))) {
 			Vec3D dir;
 			float dist2d, dist;
 			
-			vsub(waypoint.pos(ent), botPos(), &dir);
+			vsub(path_waypoint_pos(&waypoint, ent), botPos(), &dir);
 
 			dist2d = vlen2d((Vec2D *)&dir);
 			dist = vlen(&dir);
@@ -689,15 +688,14 @@ void CParabot::followActualPath()
 				action_setspeed(&action, 8 * dist2d);
 			else
 				action_setmaxspeed(&action);
-		}
-		else
+		} else
 			action_setmaxspeed(&action);
 		pathCheckWay();
 		if (mod_id == VALVE_DLL || mod_id == AG_DLL || mod_id == HUNGER_DLL || mod_id == GEARBOX_DLL)
 			checkForTripmines();
 		if (!actualPath) return;	// maybe tripmine canceled path
 
-		if (actualPath->cannotBeContinued( ent )) {
+		if (path_cannotbecontinued(actualPath, ent)) {
 			DEBUG_MSG( "Path failed.\n" );
 			pathFailed();
 		} else if (action_gotstuck(&action)) {

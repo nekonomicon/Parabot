@@ -124,7 +124,7 @@ SRC =		../bot/bot.cpp \
 		../bot/navpoint.cpp \
 		../bot/needs.cpp \
 		../bot/observer.cpp \
-		../bot/pb_path.cpp \
+		../bot/path.cpp \
 		../bot/perception.cpp \
 		../bot/personalities.cpp \
 		../bot/roaming.cpp \

@@ -14,8 +14,8 @@
 #define MAX_WPTS	128
 
 typedef struct observer {
-	PB_Path_Waypoint waypoint[MAX_WPTS];
-	PB_Path_Platform platinfo[MAX_WPTS];
+	PATH_WAYPOINT	 waypoint[MAX_WPTS];
+	PATH_PLATFORM	 platinfo[MAX_WPTS];
 	EDICT		*player;				// pointer to observed players
 	int		 leadwaypoint;		// latest waypoint and plat of observed
 	int		 lastplatid;			//   player, indices in waypoint-table
@@ -44,37 +44,37 @@ typedef struct observer {
         bool		 incombat;
 } OBSERVER;
 
-void			observer_init();
+void			 observer_init();
 // initializes the observer before mapstart
 
-void			observer_registerclients();
+void			 observer_registerclients();
 // registers all human clients currently connected and valid
 
-void			observer_observeall();
+void			 observer_observeall();
 // observes all human clients currently registered
 
-int			observer_playerid(EDICT *player);
+int			 observer_playerid(EDICT *player);
 // returns the observer id of player
-void			observer_reportpartner(int botId, int observerId);
+void			 observer_reportpartner(int botId, int observerId);
 // links botId with observerId
 
-void			observer_addwaypoint(int observerId, Vec3D *pos, int action = 0, int col = 1);
+void			 observer_addwaypoint(int observerId, Vec3D *pos, int action = 0, int col = 1);
 // adds a waypoint for followers
 
-PB_Path_Waypoint	observer_getnextwaypoint(int botId);
+PATH_WAYPOINT		*observer_getnextwaypoint(int botId);
 // returns the next waypoint to follow player for bot with id
 
-void			observer_reportwaypointreached(int botId);
+void			 observer_reportwaypointreached(int botId);
 
-bool			observer_shouldfollow(int botId, EDICT *bot);
+bool			 observer_shouldfollow(int botId, EDICT *bot);
 // returns true if bot should move towards partner
 
-bool			observer_cannotfollow(int botId);
+bool			 observer_cannotfollow(int botId);
 // if bot isn't succesful in following frees waypoints and returns true
 
-bool			observer_partnerincombat(int botId);
+bool			 observer_partnerincombat(int botId);
 // returns true if bots registered partner is involved in a combat
 
-bool			observer_partnervalid(int botId);
+bool			 observer_partnervalid(int botId);
 
 #endif

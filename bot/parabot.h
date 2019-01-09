@@ -53,8 +53,8 @@ public:
 
 	// used in ON_TOUR
 	JOURNEY		actualJourney;		// journey bot is traveling
-	PB_Path		*actualPath;		// path bot is currently on
-	PB_Path_Waypoint waypoint;		// waypoint bot is approaching
+	PATH		*actualPath;		// path bot is currently on
+	PATH_WAYPOINT	waypoint;		// waypoint bot is approaching
 	NAVPOINT	*actualNavpoint;	// navpoint bot is on, 0 if not on any navpoint
 	NEEDS		needs;
 	bool		stoppedForPlat;

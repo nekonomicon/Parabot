@@ -2,20 +2,20 @@
 #if !defined(PB_JOURNEY_H)
 #define PB_JOURNEY_H
 
-#include "pb_path.h"
+#include "path.h"
 #include <stack>
 
 typedef struct journey {
 	// DATA:
 	std::deque<int>	 pathlist; // need access from mapGraph
-	PB_Path		*currentoriginal;
-	PB_Path		 currentcopy;
+	PATH		*currentoriginal;
+	PATH		 currentcopy;
 } JOURNEY;
 
 bool	 journey_continues(JOURNEY *journey);
 // returns true if there are more paths to go
 
-PB_Path	*journey_getnextpath(JOURNEY *journey);
+PATH	*journey_getnextpath(JOURNEY *journey);
 // returns the next path of the journey
 
 void	 journey_savepathdata(JOURNEY *journey);
