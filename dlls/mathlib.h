@@ -70,7 +70,6 @@ float	dotproduct(const Vec3D *v1, const Vec3D *v2);
 float	dotproduct2D(const Vec2D *v1, const Vec2D *v2);
 void	vsub(const Vec3D *veca, const Vec3D *vecb, Vec3D *out);
 void	vadd(const Vec3D *veca, const Vec3D *vecb, Vec3D *out);
-void	vcopy(const Vec3D *in, Vec3D *out);
 void	crossproduct(Vec3D *v1, Vec3D *v2, Vec3D *cross);
 float	vlen(Vec3D *v);
 float	vlen2d(Vec2D *v);

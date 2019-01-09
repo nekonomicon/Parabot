@@ -15,15 +15,15 @@ action_init(ACTION *action, EDICT *bot)
 	action->duckendtime = 0;
 	action->stopendtime = 0;
 	action->nextviewupdate = 0;
-	vcopy(&zerovector, &action->deltaview);
+	action->deltaview = zerovector;
 	action->turncount = 1;
 	action->maxturn = 0;
 	action->finejump = false;
 	action->longjumpstate = 0;
 	action->maxspeed = servermaxspeed();
-	vcopy(&zerovector, &action->viewangle);
-	vcopy(&zerovector, &action->currentview);
-	vcopy(&zerovector, &action->targetpos);
+	action->viewangle = zerovector;
+	action->currentview = zerovector;
+	action->targetpos = zerovector;
 	action->hitprob = 0;
 	action->targetdist = 0;
 	action->lastmove = worldtime();
@@ -45,7 +45,7 @@ action_reset(ACTION *action)
 	action->viewprior = 0;
 	action->moveprior = 0;
 	action->notstucking = false;
-	vcopy(&zerovector, &action->targetvel);
+	action->targetvel = zerovector;
 }
 
 void
@@ -62,7 +62,7 @@ action_add(ACTION *action, int code, Vec3D *exactPos)
 	case BOT_DELAYED_JUMP:
 		if (exactPos) {
 			action->finejump = true;
-			vcopy(exactPos, &action->finejumppos);
+			action->finejumppos = *exactPos;
 		}
 		action->nextjumptime = worldtime() + 1.0;
 		break;
@@ -130,7 +130,7 @@ void
 action_setmoveangle(ACTION *action, Vec3D *angle) 
 { 
 	fixangle(angle);
-	vcopy(angle, &action->moveangle); 
+	action->moveangle = *angle;
 	//DEBUG_MSG("setMove  ");
 }
 
@@ -139,7 +139,7 @@ action_setmoveangleyaw(ACTION *action, float angle)
 {
 	Vec3D ma = {0, angle, 0};
 	fixangle(&ma);
-	vcopy(&ma, &action->moveangle);
+	action->moveangle = ma;
 	//DEBUG_MSG("setMoveYaw  ");
 }
 
@@ -188,16 +188,16 @@ action_getmovedir(ACTION *action, Vec3D *movedir)
 {
 	fixangle(&action->moveangle);
 	makevectors(&action->moveangle);
-	vcopy(&com.globals->fwd, movedir);
+	*movedir = com.globals->fwd;
 }
 
 void
 action_setviewangle(ACTION *action, Vec3D *angle, int prior)
 { 
 	if (prior >= action->viewprior) {
-		vcopy(angle, &action->viewangle);
+		action->viewangle = *angle;
 		action->viewprior = prior;
-		vcopy(&zerovector, &action->targetvel);	// must be set != 0 afterwards!
+		action->targetvel = zerovector; // must be set != 0 afterwards!
 	}
 }
 
@@ -253,7 +253,7 @@ action_setaimdir(ACTION *action, Vec3D *currentPos, Vec3D *relVelocity)
 	if (action->viewprior <= 2) {
 		Vec3D tVec, angle;
 
-		vcopy(currentPos, &action->targetpos);
+		action->targetpos = *currentPos;
 		eyepos(action->e, &tVec);
 		vsub(&action->targetpos, &tVec, &tVec);
 		action->targetdist = vlen(&tVec);
@@ -261,7 +261,7 @@ action_setaimdir(ACTION *action, Vec3D *currentPos, Vec3D *relVelocity)
 		fixangle(&angle);
 		angle.x = -angle.x;
 		action_setviewangle(action, &angle, 2);
-		vcopy(relVelocity, &action->targetvel);
+		action->targetvel = *relVelocity;
 		action->hitprob = action_estimatehitprob(action);
 	} else {
 		DEBUG_MSG("Aiming priority too low!\n");
@@ -325,7 +325,7 @@ action_calcviewangle(ACTION *action, Vec3D *v_angle)
 			angle.x = -angle.x;
 			vsub(&angle, &action->currentview, &action->deltaview);
 		} else {
-			vcopy(&currentDiff, &action->deltaview);
+			action->deltaview = currentDiff;
 		}
 
 		// take accuracy into account:
@@ -342,7 +342,7 @@ action_calcviewangle(ACTION *action, Vec3D *v_angle)
 		action->turncount = 0;
 	}
 
-	vcopy(&action->deltaview, &toAdd);
+	toAdd = action->deltaview;
 	if (toAdd.x > action->maxturn)
 		toAdd.x = action->maxturn;
 	else if (toAdd.x < -action->maxturn)
@@ -358,7 +358,7 @@ action_calcviewangle(ACTION *action, Vec3D *v_angle)
 	++action->turncount;
 
 	fixangle(&action->currentview);
-	vcopy(&action->currentview, v_angle);
+	*v_angle = action->currentview;
 }
 
 bool
@@ -386,7 +386,7 @@ action_dontgetstuck(ACTION *action)
 void
 action_getviewangle(ACTION *action, Vec3D *viewangle)
 {
-	vcopy(&action->viewangle, viewangle);
+	*viewangle = action->viewangle;
 }
 
 int
@@ -508,8 +508,7 @@ action_perform(ACTION *action)
 	if (action->notstucking) {	// bot is waiting, everything ok
 		action->lastmove = worldtime();
 	} else {
-		Vec3D currentVel;
-		vcopy(&action->e->v.velocity, &currentVel);
+		Vec3D currentVel = action->e->v.velocity;
 		if (action_jumping(action))
 			currentVel.z = 0;	// jumping doesn't count as movement
 		if (vlen(&currentVel) > (action->maxspeed * 0.25f))

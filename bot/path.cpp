@@ -34,7 +34,7 @@ path_waypoint_reached(PATH_WAYPOINT *wp, EDICT *ent)
 	if (dist > 40.0)
 		return false;
 
-	vcopy(&ent->v.velocity, &vdir);
+	vdir = ent->v.velocity;
 	vscale(&wpDir, 1.0f / dist, &wpDir);
 	normalize(&vdir);
 	float dres = dotproduct(&vdir, &wpDir);
@@ -643,9 +643,7 @@ path_addattack(PATH *path, Vec3D *origin)
 {
 	assert( path->hiddenattack != 0 );
 
-	PATH_ATTACK att;
-	vcopy(origin, &att.pos);
-	att.time = path->currentwaypoint->arrival;
+	PATH_ATTACK att = {.pos = *origin, .time = path->currentwaypoint->arrival};
 
 	path->hiddenattack->push_back( att );
 }
@@ -665,7 +663,7 @@ path_getviewpos(PATH *path, EDICT *traveller, int *prior, Vec3D *pos)
 		if (path_waypoint_action(&(*path->lastreachedwaypoint)) == BOT_USE) {
 			assert( traveller != 0 );
 			// Vec3D t = traveller->v.origin;
-			vcopy(navpoint_pos(path_startnav(path)), pos); //lastreachedwaypoint->pos();
+			*pos = *navpoint_pos(path_startnav(path));
 			*prior = 2;	// UNDONE: ButtonUse uses AimDir, not ViewDir!!!
 			return;
 		}
@@ -761,7 +759,7 @@ path_waitforplatform(PATH *path)
 			Vec3D tDir, vDir;
 			vsub(&path->currentplat->pos, &plat->v.absmin, &tDir);
 			float tLen = vlen(&tDir);
-			vcopy(&plat->v.velocity, &vDir);
+			vDir = plat->v.velocity;
 			float vLen = vlen(&vDir);
 			if (vLen > 0) path->waitplatendtime = worldtime() + MAX_PLAT_WAIT;
 
@@ -799,30 +797,30 @@ path_nextplatformpos(PATH *path, Vec3D *pos)
 	Vec3D wpPlatPos;
 	assert( path->platformpos != 0 );
 	if (path->platformpos->size() == 0) {	// no platform on path
-		vcopy(&zerovector, pos);
+		*pos = zerovector;
 		return;
 	}
 	if ((path->currentwaypoint != path->waypoint->end()) && path_waypoint_isonplatform(&(*path->currentwaypoint))) {
-		vcopy(path_waypoint_pos(&(*path->currentwaypoint)), &wpPlatPos);
+		wpPlatPos = *path_waypoint_pos(&(*path->currentwaypoint));
 	} else {
 		WaypointList::iterator storeWP = path->currentwaypoint;
 		PlatformList::iterator storePF = path->currentplat;
 		// simulate next WP
 		path_reportwaypointreached(path);
 		if ((path->currentwaypoint != path->waypoint->end()) && path_waypoint_isonplatform(&(*path->currentwaypoint))) {
-			vcopy(path_waypoint_pos(&(*path->currentwaypoint)), &wpPlatPos);
+			wpPlatPos = *path_waypoint_pos(&(*path->currentwaypoint));
 		} else {	// alright this if-else is bad style :-(
 			// simulate next WP
 			path_reportwaypointreached(path);
 			if ((path->currentwaypoint != path->waypoint->end()) && path_waypoint_isonplatform(&(*path->currentwaypoint))) {
-				vcopy(path_waypoint_pos(&(*path->currentwaypoint)), &wpPlatPos);
+				wpPlatPos = *path_waypoint_pos(&(*path->currentwaypoint));
 			}
 		}
 		// restore values
 		path->currentwaypoint = storeWP;
 		path->currentplat = storePF;
 	}
-	vcopy(&wpPlatPos, pos);
+	*pos = wpPlatPos;
 }
 
 void
@@ -844,7 +842,7 @@ path_getlastwaypointpos(PATH *path, EDICT *playerEnt, Vec3D *pos)
 {
 	assert( path->waypoint != 0 );
 	if (path->lastreachedwaypoint != path->waypoint->end()) { // at least one waypoint has been reached
-		vcopy(path_waypoint_pos(&(*path->lastreachedwaypoint), playerEnt), pos);
+		*pos = *path_waypoint_pos(&(*path->lastreachedwaypoint), playerEnt);
 	} else {	// nothing reached yet
 		NAVPOINT *n = getNavpoint( path->data.startid );
 		navpoint_pos(n, playerEnt, pos);

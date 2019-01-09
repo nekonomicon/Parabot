@@ -500,8 +500,8 @@ goal_armbestweapon(CParabot *pb, PERCEPT *item)
 		} else {
 			botFlags |= WF_SINGLE_SHOT_KILL;	// so that enemy gets no chance to see us
 		}
-		Vec3D botPos;
-		vcopy(pb->botPos(), &botPos);
+		Vec3D botPos = *pb->botPos();
+
 		if (percept_predictedappearance(item, &botPos)->z > (botPos.z + 20)) botFlags |= WF_ENEMY_ABOVE;
 		else if (percept_predictedappearance(item, &botPos)->z < (botPos.z - 80)) botFlags |= WF_ENEMY_ABOVE;
 		pb->combat.nextweaponcheck = worldtime() + CHECK_WEAPON_COMBAT;

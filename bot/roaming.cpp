@@ -147,8 +147,7 @@ roaming_checkjump(ROAMING *pathfinder, Vec3D *origin, Vec3D *_dir, checkWayRes *
 		// We have: floor and material at our landing pos
 		vsub(&jumppos, &pathfinder->pev->v.origin, &dist);
 		float d = vlen2d((Vec2D *)&dist);
-		Vec3D dirNorm;
-		vcopy(&dir, &dirNorm);
+		Vec3D dirNorm = dir;
 		normalize(&dirNorm);
 		float dot = dotproduct(&pathfinder->pev->v.velocity, &dirNorm);
 		float minJumpSpeed = 0.9f * action_getmaxspeed(pathfinder->action);
@@ -280,7 +279,7 @@ roaming_checkfront(ROAMING *pathfinder, float sideOfs, Vec3D *angle, checkWayRes
 			res->blocked = true;
 			if (!needJump)
 				vectoangles(&tr.planenormal, &planeAngle); // not calculated yet...
-			vcopy(&planeAngle, &res->wallangle);
+			res->wallangle = planeAngle;
 			return;		// no gap check if blocked
 		}
 	}
@@ -288,7 +287,7 @@ roaming_checkfront(ROAMING *pathfinder, float sideOfs, Vec3D *angle, checkWayRes
 		res->blocked = true;
 		if (!needJump)
 			vectoangles(&tr.planenormal, &planeAngle); // not calculated yet...
-		vcopy(&planeAngle, &res->wallangle);
+		res->wallangle = planeAngle;
 		return;		// no gap check if blocked
 	}
 		// needjump ||
@@ -344,9 +343,9 @@ roaming_checkside(ROAMING *pathfinder, int side, float frontOfs, checkWayRes *re
 				res->ontouch = true;
 				res->walldistance = tr.fraction * MAX_WALL_DISTANCE;
 				if (tr.fraction < 1.0f) {
-					vcopy(&tr.planenormal, &res->wallangle);
+					res->wallangle = tr.planenormal;
 				} else {
-					vcopy(&vDir, &res->wallangle);
+					res->wallangle = vDir;
 				}
 				vinv(&res->wallangle);
 				vectoangles(&res->wallangle, &res->wallangle);
@@ -385,13 +384,13 @@ float   TRACE_DEPTH = 20 + MAX_SPEED/5;
 	wallangle->z = 0;
 	makevectors(wallangle);
 
-	vcopy(&com.globals->right, &vWallDir);	// vDir = Vector to wall-right
+	vWallDir = com.globals->right;	// vDir = Vector to wall-right
 	vinv(&vWallDir);
-	vcopy(&com.globals->fwd, &vForw);	// vForw = Vector towards wall
+	vForw = com.globals->fwd;	// vForw = Vector towards wall
         vinv(&vForw);
 
-	vcopy(&pathfinder->pev->v.origin, &vLeftFrom);
-	vcopy(&pathfinder->pev->v.origin, &vRightFrom);
+	vLeftFrom = pathfinder->pev->v.origin;
+	vRightFrom = pathfinder->pev->v.origin;
 	int dbgCnt = 0;
 	do {
 		if (traceLeft) {
@@ -399,7 +398,7 @@ float   TRACE_DEPTH = 20 + MAX_SPEED/5;
 			vma(&vLeftFrom, -TRACE_STEP, &vWallDir, &dir);
 			trace_line(&vLeftFrom, &dir, true, false, NULL, &tr);
 			if (tr.fraction == 1.0f) { // didn't hit anything
-				vcopy(&tr.endpos, &vLeftFrom);
+				vLeftFrom = tr.endpos;
 				vma(&vLeftFrom, TRACE_DEPTH, &vForw, &dir);
 				trace_line(&vLeftFrom, &dir, true, false, NULL, &tr);
 				if (tr.fraction == 1.0f) {
@@ -415,7 +414,7 @@ float   TRACE_DEPTH = 20 + MAX_SPEED/5;
 			vma(&vRightFrom, TRACE_STEP, &vWallDir, &dir);
 			trace_line(&vRightFrom, &dir, true, false, NULL, &tr);
 			if (tr.fraction == 1.0f) { // didn't hit anything
-				vcopy(&tr.endpos, &vRightFrom);
+				vRightFrom = tr.endpos;
 				vma(&vRightFrom, TRACE_DEPTH, &vForw, &dir);
 				trace_line(&vRightFrom, &dir, true, false, NULL, &tr);
 				if (tr.fraction == 1.0f) {
@@ -451,7 +450,7 @@ roaming_checkway(ROAMING *pathfinder, const Vec3D *targetPos)
 	assert( pathfinder->pev != 0 );
 
 	if (action_jumping(pathfinder->action)) {
-		vcopy(&pathfinder->jumptarget, &pathfinder->target);
+		pathfinder->target = pathfinder->jumptarget;
 		vsub(&pathfinder->target, &pathfinder->pev->v.origin, &tDir);
 		vectoangles(&tDir, &targetAngle);
 		fixangle(&targetAngle);
@@ -464,7 +463,7 @@ roaming_checkway(ROAMING *pathfinder, const Vec3D *targetPos)
 		return;	// air control!
 	}
 
-	vcopy(targetPos, &pathfinder->target);
+	pathfinder->target = *targetPos;
 	vsub(&pathfinder->target, &pathfinder->pev->v.origin, &tDir);
 	vectoangles(&tDir, &targetAngle);
 	fixangle(&targetAngle);
@@ -494,7 +493,7 @@ roaming_checkway(ROAMING *pathfinder, const Vec3D *targetPos)
 				} else {
 					action_setmoveangleyaw(pathfinder->action, action_moveangleyaw(pathfinder->action) + 90);  // turn left
 					pathfinder->checkifpassage = true;
-					vcopy(&pathfinder->pev->v.origin, &pathfinder->passageorigin);
+					pathfinder->passageorigin = pathfinder->pev->v.origin;
 					pathfinder->passagetries = 0;
 					if (pathfinder->debugway)
 						DEBUG_MSG( "Searching passage at the left... " );

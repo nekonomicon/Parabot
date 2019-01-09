@@ -65,7 +65,7 @@ cell_save(CELL *cell, FILE *fp)
 void
 cell_pos(CELL *cell, Vec3D *pos)
 {
-	vcopy(&cell->data.position, pos);
+	*pos = cell->data.position;
 }
 
 Vec3D *

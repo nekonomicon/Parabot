@@ -76,8 +76,8 @@ observer_startobservation(int oId)
 	obs[oId].lastreachednav = 0;
 
 	assert(obs[oId].player != 0);
-	vcopy(&obs[oId].player->v.origin, &obs[oId].lastframepos);
-	vcopy(&obs[oId].player->v.velocity, &obs[oId].lastframevel);
+	obs[oId].lastframepos = obs[oId].player->v.origin;
+	obs[oId].lastframevel = obs[oId].player->v.velocity;
 	obs[oId].frags = obs[oId].player->v.frags;
 	obs[oId].health = obs[oId].player->v.health;
 
@@ -465,8 +465,7 @@ observer_checkforuse(int oId, Vec3D *pos)
 			else
 				nearestButton = mapgraph_getnearestnavpoint( pos, NAV_F_ROT_BUTTON );
 			if (nearestButton) {	// TODO: check if looking at button!!!
-				Vec3D usedItemPos;
-				vcopy(navpoint_pos(nearestButton), &usedItemPos);
+				Vec3D usedItemPos = *navpoint_pos(nearestButton);
 				observer_addwaypoint( oId, &usedItemPos, BOT_USE );
 			}
 		}
@@ -563,7 +562,6 @@ observer_checkfortripmines(int oId, Vec3D *pos)
 			if (tr.fraction < 1.0) {
 				// ...yes -> check if we know this spot: 
 				Vec3D minePos = tr.endpos;
-				vcopy(&tr.endpos, &minePos);
 				NAVPOINT *nearest = mapgraph_getnearestnavpoint(&minePos, NAV_S_USE_TRIPMINE);
 				vsub(navpoint_pos(nearest), &minePos, &dir);
 				if (nearest && (vlen(&dir) < 128) ) {
@@ -720,7 +718,6 @@ observer_updatecellinfo(int i)
 
 				bool newareafound = false;
 				Vec3D bp = obs[i].player->v.origin;
-				vcopy(&obs[i].player->v.origin, &bp);
 				if (fd1 > fd2 && fd1 > fd3 && fd1 > fd4) {
 					area.x = 1000.0f;
 					area.y = 0.0f;
@@ -749,8 +746,8 @@ observer_updatecellinfo(int i)
 				Vec3D start, end;
 
 				// draw traffic beam
-				vcopy(mapcells_getcell(obs[i].currentcell).pos(), &start);
-				vcopy(mapcells_getcell(obs[i].lastcell).pos(), &end);
+				start = *mapcells_getcell(obs[i].currentcell).pos();
+				end = mapcells_getcell(obs[i].lastcell).pos();
 				start.z -= 30;
 				end.z -= 30;
 				debugBeam(&start, &end, 100, 0);
@@ -760,7 +757,7 @@ observer_updatecellinfo(int i)
 						short nbId = mapcells_getcell(obs[i].currentcell).getNeighbour(nb);
 						if (nbId == -1)
 							break;
-						vcopy(mapcells_getcell(nbId).pos(), &end);
+						end = *mapcells_getcell(nbId).pos();
 						start.z -= 2;
 						end.z -= 32;
 						debugBeam(&start, &end, 100);

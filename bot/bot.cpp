@@ -1060,8 +1060,7 @@ void checkForAirStrike()
 
 		DEBUG_MSG( "%s was save at airstrike!\n", STRING( pPlayer->v.netname ) );
 
-		Vec3D pos;
-		vcopy(&pPlayer->v.origin, &pos);
+		Vec3D pos = pPlayer->v.origin;
 		NAVPOINT *nearest = mapgraph_getnearestnavpoint(&pos, NAV_S_AIRSTRIKE_COVER);
 		if (nearest) {
 #if _DEBUG

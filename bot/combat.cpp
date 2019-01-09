@@ -57,7 +57,7 @@ combat_evade(COMBAT *combat, PERCEPT *perceipt, Vec3D *right)
 	} else if (combat->strafestate == 2) {
 		vscale(right, speed, right);
 	} else {
-		vcopy(&zerovector, right);
+		*right = zerovector;
 	}
 }
 
@@ -108,9 +108,7 @@ bool
 combat_shootatenemy(COMBAT *combat, Vec3D *enemyOrigin, float accuracy)
 // picks best place to shoot at and fires
 {
-	Vec3D firePos, feetPos = {0.0f, 0.0f, -31.0f}, headpos = {0.0f, 0.0f, 28.0f};
-
-	vcopy(enemyOrigin, &firePos);
+	Vec3D firePos = *enemyOrigin, feetPos = {0.0f, 0.0f, -31.0f}, headpos = {0.0f, 0.0f, 28.0f};
 
 	if ((action_getaimskill(combat->action) > 6) && (accuracy >= 0.5f)) {
 		vadd(&firePos, &headpos, &firePos);	// aim at head
@@ -125,7 +123,7 @@ combat_shootatenemy(COMBAT *combat, Vec3D *enemyOrigin, float accuracy)
 			// aim at feet if possible
 			vadd(&firePos, &feetPos, &feetPos);
 			if (canshootat(combat->botent, &feetPos)) 
-				vcopy(&feetPos, &firePos);
+				firePos = feetPos;
 			break;
 	}
 	return weaponhandling_attack(&combat->weapon, &firePos, accuracy, NULL);
@@ -140,7 +138,7 @@ combat_shootatenemy2(COMBAT *combat, EDICT *enemy, float accuracy)
 
 	assert(enemy != 0);
 
-	vcopy(&enemy->v.origin, &firePos);
+	firePos = enemy->v.origin;
 	if ((action_getaimskill(combat->action) > 6) && (accuracy >= 0.5f)) {
 		vadd(&firePos, &enemy->v.view_ofs, &firePos); // aim at head
 	}
@@ -150,36 +148,36 @@ combat_shootatenemy2(COMBAT *combat, EDICT *enemy, float accuracy)
 	default:
 		if (weaponhandling_currentweapon(&combat->weapon) == VALVE_WEAPON_RPG) {		
 			// aim at feet if possible
-			vcopy(&firePos, &feetPos);
+			feetPos = firePos;
 			feetPos.z = enemy->v.absmin.z + 1.0f;
 			if (canshootat(combat->botent, &feetPos)) 
-				vcopy(&feetPos, &firePos);
+				firePos = feetPos;
 		}
 		break;
 	case HOLYWARS_DLL:
 		if (weaponhandling_currentweapon(&combat->weapon) == HW_WEAPON_ROCKETLAUNCHER) {	
 			// aim at feet and predict movement
-			vcopy(&firePos, &feetPos);
+			feetPos = firePos;
 			feetPos.z = enemy->v.absmin.z + 1.0f;
 			vsub(&combat->botent->v.origin, &enemy->v.origin, &dir);
 			dist = vlen(&dir);
 			vscale(&enemy->v.velocity, dist / 1600.0f, &predictedMove);
 			vadd(&feetPos, &predictedMove, &testPos);
 			if (canshootat(combat->botent, &testPos))
-				vcopy(&testPos, &firePos);
+				firePos = testPos;
 		}
 		break;
 	case DMC_DLL:
 		if (weaponhandling_currentweapon(&combat->weapon) == DMC_WEAPON_ROCKETLAUNCHER) {	
 			// aim at feet and predict movement
-			vcopy(&firePos, &feetPos);
+			feetPos = firePos;
 			feetPos.z = enemy->v.absmin.z + 1.0f;
 			vsub(&combat->botent->v.origin, &enemy->v.origin, &dir);
 			dist = vlen(&dir);
 			vscale(&enemy->v.velocity, dist / 1200.0f, &predictedMove);
 			vadd(&feetPos, &predictedMove, &testPos);
 			if (canshootat(combat->botent, &testPos))
-				vcopy(&testPos, &firePos);
+				firePos = testPos;
 		} else if (weaponhandling_currentweapon(&combat->weapon) == DMC_WEAPON_NAILGUN ||
 			    weaponhandling_currentweapon(&combat->weapon) == DMC_WEAPON_SUPERNAILGUN) {
 			// predict movement
@@ -188,7 +186,7 @@ combat_shootatenemy2(COMBAT *combat, EDICT *enemy, float accuracy)
 			vscale(&enemy->v.velocity, dist / 1200.0f, &predictedMove);
 			vadd(&firePos, &predictedMove, &testPos);
 			if (canshootat(combat->botent, &testPos))
-				vcopy(&testPos, &firePos);
+				firePos = testPos;
 		}
 		break;
 	}

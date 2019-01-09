@@ -146,8 +146,8 @@ void sounds_calcStepSound( int clientIndex, EDICT *player, bool writeResult )
 		fWalking = speed < velrun;		
 
 		boxcenter(player, &feet);
-		vcopy(&feet, &knee);
-		vcopy(&feet, &center);
+		knee = feet;
+		center = feet;
 		height = player->v.absmax.z - player->v.absmin.z;
 
 		knee.z = player->v.absmin.z + height * 0.2f;
@@ -178,8 +178,8 @@ void sounds_calcStepSound( int clientIndex, EDICT *player, bool writeResult )
 				// find texture under player, if different from current texture, 
 				// get material type
 
-				vcopy(&center, &start);
-				vcopy(&center, &end);
+				start = center;
+				end = center;
 				start.z = end.z = player->v.absmin.z;				// copy zmin
 				start.z += 4.0;									// extend start up
 				end.z -= 24.0;									// extend end down

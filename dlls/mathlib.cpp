@@ -122,14 +122,6 @@ vadd(const Vec3D *veca, const Vec3D *vecb, Vec3D *out)
 }
 
 void
-vcopy(const Vec3D *in, Vec3D *out)
-{
-	out->x = in->x;
-	out->y = in->y;
-	out->z = in->z;
-}
-
-void
 crossproduct(Vec3D *v1, Vec3D *v2, Vec3D *cross)
 {
 	cross->x = (v1->x * v2->x) - (v1->x * v2->x);

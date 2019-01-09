@@ -1384,7 +1384,7 @@ weapon_attackvalvehandgrenade(WEAPON *weapon, Vec3D *target)
 		// DEBUG_MSG( "Arming HG!\n" );
 		weapon->grenadeprepared = true;
 		weapon->grenadelaunchtime = worldtime() + 2.0;
-		vcopy(target, &weapon->grenadetarget);
+		weapon->grenadetarget = *target;
 		weapon->grenadewid = VALVE_WEAPON_HANDGRENADE;
 	}
 	if (worldtime() < weapon->grenadelaunchtime) {

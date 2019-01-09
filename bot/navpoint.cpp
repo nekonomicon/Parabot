@@ -232,7 +232,7 @@ static const char *navpointClasses[MAX_NAV_TYPES] = { "unknown",
 void
 navpoint_init(NAVPOINT *navpoint, Vec3D *pos, int type, int special)
 {
-	vcopy(pos, &navpoint->data.pos);
+	navpoint->data.pos = *pos;
 	navpoint->data.type = type;
 	navpoint->data.visits = 0;
 	navpoint->data.special = special;
@@ -319,7 +319,7 @@ navpoint_pos(NAVPOINT *navpoint, EDICT *player, Vec3D *pos)
 // adjusts positions if playerEnt is on ladder
 {
 	assert(player != 0);
-	vcopy(&navpoint->data.pos, pos);
+	*pos = navpoint->data.pos;
 	if (!is_onladder(player))
 		return; 
 
@@ -411,8 +411,7 @@ navpoint_dooropen(NAVPOINT *navpoint, EDICT *playerEnt)
 
 	assert( playerEnt != 0 );
 
-	Vec3D passPos;
-	vcopy(navpoint_pos(navpoint), &passPos);
+	Vec3D passPos = *navpoint_pos(navpoint);
 	passPos.z = playerEnt->v.origin.z;
 
 	trace_hull( &playerEnt->v.origin, &passPos, false, 3, playerEnt, &tr);	

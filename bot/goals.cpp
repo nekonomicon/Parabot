@@ -300,7 +300,7 @@ goal_getaway(CParabot *pb, PERCEPT *item)
 	assert(item != 0);
 	item->update = worldtime();
 
-	vcopy(pb->botPos(), &botPos);
+	botPos = *pb->botPos();
 	percept_predictedposition(item, &botPos, &tDir);
 	vsub(&tDir, &botPos, &tDir);
 	vsub(&botPos, &tDir, &tDir);

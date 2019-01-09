@@ -50,7 +50,7 @@ enum { // flags
 #define MAX_DIST_VPR	 800	// max. visible player recognition distance
 #define MAX_DIST_VI		1200	// max. visible item detection distance
 
-#define UNKNOWN_POS		&zerovector
+#define UNKNOWN_POS		zerovector
 
 typedef struct percept {	
 	int	 id;

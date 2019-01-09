@@ -51,10 +51,10 @@ laserdotowner(EDICT *laser)
 	
 		makevectors(&player->v.v_angle);
 		eyepos(player, &vecSrc);
-		vcopy(&com.globals->fwd, &vecAiming);
+		vecAiming = com.globals->fwd;
 		vma(&vecSrc, 8192.0f, &vecAiming, &aimingPos);
 		trace_line(&vecSrc, &aimingPos, false, false, player, &tr);
-		vcopy(&tr.endpos, &aimingPos);
+		aimingPos = tr.endpos;
 		if (vcomp(&laser->v.origin, &aimingPos))
 			return player;
 	}

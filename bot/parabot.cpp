@@ -434,7 +434,7 @@ void CParabot::pathFinished()
 		if (navpoint_type(path_startnav(actualPath)) == NAV_S_BUTTON_SHOT) {
 			if (navpoint_istriggerfor(path_startnav(actualPath), path_endnav(actualPath))) {
 				// bot must shoot this button!
-				vcopy(navpoint_pos(getNavpoint(navpoint_special(path_startnav(actualPath)))), &shootObjectPos);
+				shootObjectPos = *navpoint_pos(getNavpoint(navpoint_special(path_startnav(actualPath))));
 				mustShootObject = true;
 			}
 		}
@@ -578,11 +578,10 @@ void CParabot::checkForTripmines()
 	if (!mine)
 		return;
 	
-	Vec3D mine_vecDir, moveDir, fakeStart, fakeEnd;
-	vcopy(&mine->v.angles, &mine_vecDir);
+	Vec3D mine_vecDir = mine->v.angles, moveDir, fakeStart, fakeEnd;
 	fixangle(&mine_vecDir);
 	makevectors(&mine_vecDir);
-	vcopy(&com.globals->fwd, &mine_vecDir);
+	mine_vecDir = com.globals->fwd;
 	action_getmovedir(&action, &moveDir);
 	vma(&mine->v.origin, -64.0f, &moveDir, &fakeStart);
 	vma(&fakeStart, 512.0f, &mine_vecDir, &fakeEnd);
@@ -655,8 +654,7 @@ void CParabot::followActualPath()
 				return;	// don't do anything else...
 		}
 		if (path_waypoint_reached(&waypoint, ent)) {
-			Vec3D wpos;
-			vcopy(path_waypoint_pos(&waypoint, ent), &wpos);
+			Vec3D wpos = *path_waypoint_pos(&waypoint, ent);
 			action_add(&action, path_getnextaction(actualPath), &wpos);	// if there's something to do...
 			path_reportwaypointreached(actualPath);		// confirm waypoint
 #if _DEBUG
@@ -784,7 +782,7 @@ void CParabot::followActualRoute()
 		vsub(&lastJumpPos, botPos(), &dir);
 		if (vlen(&dir) > 50) {
 			action_add(&action, BOT_JUMP, NULL);
-			vcopy(botPos(), &lastJumpPos);
+			lastJumpPos = *botPos();
 			cellTimeOut = worldtime() + 1.0;
 		} else {
 			// bisherigen traffic auf Teilstrecke auswerten, falls <3 Verbindung löschen

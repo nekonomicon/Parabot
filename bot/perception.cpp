@@ -74,9 +74,9 @@ percept_construct(PERCEPT *percept, float botSens, EDICT *ent, short state, shor
 	if (ent) {
 		percept->lastpos = ent->v.origin;
 		if (state == PI_VISIBLE) {
-			vcopy(&ent->v.origin, &percept->lastseenpos);	// if visible, store position
+			percept->lastseenpos = ent->v.origin;			// if visible, store position
 			percept->lastseentime = worldtime();			// ...time
-			vcopy(&ent->v.velocity, &percept->lastseenvelocity);	// ...velocity
+			percept->lastseenvelocity = ent->v.velocity;		// ...velocity
 			percept->model = ent->v.modelindex;			// ...and model
 		}
 	}
@@ -87,7 +87,7 @@ percept_predictedposition(PERCEPT *percept, const Vec3D *botPos, Vec3D *lastpos)
 // returns a predicted position for an enemy that is not perceived anymore
 {
 	// not implemented yet!
-	vcopy(botPos, lastpos);
+	*lastpos = *botPos;
 }
 
 Vec3D *
@@ -100,9 +100,9 @@ percept_predictedappearance(PERCEPT *percept, const Vec3D *botPos)
 
 	// update prediction every second:
 	if (worldtime() - percept->lastcalcappearance > 1)
-		vcopy(UNKNOWN_POS, &percept->predappearance);
+		percept->predappearance = UNKNOWN_POS;
 
-	if (vcomp(&percept->predappearance, UNKNOWN_POS)) {
+	if (vcomp(&percept->predappearance, &UNKNOWN_POS)) {
 		short predictedPath[128];	// contains cell indices to target
 		short origin = mapcells_getcellid(&percept->lastseenpos);
 		short start = mapcells_getcellid(&percept->lastpos);
@@ -118,14 +118,14 @@ percept_predictedappearance(PERCEPT *percept, const Vec3D *botPos)
 			else if (mapcells_getpathtoattack(start, target, predictedPath) > 0)
 				cell_pos(mapcells_getcell(predictedPath[0]), &percept->predappearance);
 			else
-				vcopy(&percept->lastpos, &percept->predappearance);
+				percept->predappearance = percept->lastpos;
 		} else {
 			// either enemy was never visible or bot has moved and lost LOS...
 			// assume enemy is heading towards bot:
 			if (mapcells_getpathtoattack(start, target, predictedPath) > 0 )
 				cell_pos(mapcells_getcell(predictedPath[0]), &percept->predappearance);
 			else
-				vcopy(&percept->lastpos, &percept->predappearance);
+				percept->predappearance = percept->lastpos;
 		}
 
 		percept->lastcalcappearance = worldtime();
@@ -321,7 +321,7 @@ perception_addnewarea(PERCEPTION *perception, Vec3D *viewDir)
 {
 	PERCEPT newArea = {};
 	percept_construct(&newArea, perception->sensitivity, NULL, PI_PREDICTED, PI_NEWAREA, 0);
-	vcopy(viewDir, &newArea.lastpos);
+	newArea.lastpos = *viewDir;
 	perception->detections[perception->cdet].push_back(newArea);
 }
 

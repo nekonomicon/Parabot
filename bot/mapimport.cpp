@@ -275,7 +275,7 @@ loadleveldata()
 		while ((pOther = find_entitybyclassname(pOther, "func_ladder"))) {
 			boxcenter(pOther, &posUp);
 			posUp.z = pOther->v.absmax.z;
-			vcopy(&posUp, &posDown);
+			posDown = posUp;
 			posDown.z = pOther->v.absmin.z;
 		/*	Vec3D dir = pOther->v.absmax - pOther->v.absmin;
 			dir.z = 0;
