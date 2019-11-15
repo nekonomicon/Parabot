@@ -122,6 +122,10 @@ extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 	{
 		mod_id = GEARBOX_DLL;
 	}
+	else if (!strcmp(mod_name, "tfc"))
+	{
+		mod_id = TFC_DLL;
+	}
 
 	sprintf( filePath, "%s/addons/parabot/config/", mod_name );
 #if defined(__ANDROID__)
@@ -184,6 +188,9 @@ extern "C" void WINAPI DLLEXPORT GiveFnptrsToDll( enginefuncs_t* pengfuncsFromEn
 				break;
 			case HUNGER_DLL:
                                 strcat( filePath, "/dlls/einar"ARCH_SUFFIX"."OS_LIB_EXT );
+                                break;
+			case TFC_DLL:
+                                strcat( filePath, "/dlls/tfc."OS_LIB_EXT );
                                 break;
 			default:
 				break;
